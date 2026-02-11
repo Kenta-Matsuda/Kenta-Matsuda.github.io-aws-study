@@ -324,18 +324,14 @@
             const apiKey = getApiKey();
             
             if (!apiKey) {
-                // Prompt user to enter key
                 openSettingsModal();
                 const msg = document.getElementById('settingsMessage');
                 msg.textContent = "AI機能を使用するにはAPIキーが必要です。";
                 msg.className = "text-sm mb-4 text-orange-500 font-bold";
                 msg.classList.remove('hidden');
-                return null; // Stop execution
+                return null;
             }
 
-            // Show loading in AI modal
-            // Note: The caller function handles showing the modal container
-            
             const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
             
             const payload = {
@@ -381,7 +377,7 @@
             
             const response = await callGemini(userPrompt, systemPrompt);
             if (response) updateAiModalContent(response);
-            else closeModal('aiModal'); // If user cancelled or error handled elsewhere
+            else closeModal('aiModal');
         }
 
         async function generateQuiz(taskTitle) {
@@ -397,7 +393,7 @@
             else closeModal('aiModal');
         }
 
-        // --- DATA SOURCE ---
+        // --- DATA SOURCE WITH FIXED URLs & JAPANESE TITLES ---
         const examData = {
             domains: [
                 {
@@ -419,9 +415,9 @@
                                 "Lambda@Edge functions"
                             ],
                             blogs: [
-                                { title: "Global Accelerator vs CloudFront: Which one to use?", url: "#", note: "Search: 'aws blog global accelerator cloudfront comparison'" },
-                                { title: "Building a Multi-Region Active-Active Architecture", url: "#", note: "Search: 'aws blog multi region active active global accelerator'" },
-                                { title: "Secure Content Delivery with CloudFront and WAF", url: "#", note: "Search: 'aws blog cloudfront waf security'" }
+                                { title: "Global Acceleratorでアプリケーションの可用性とパフォーマンスを向上させる", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/improving-application-availability-and-performance-with-aws-global-accelerator/", note: "Official Blog: Availability & Performance" },
+                                { title: "複数のリージョンにまたがるアクティブ/アクティブなアーキテクチャの構築", url: "https://aws.amazon.com/blogs/storage/building-an-active-active-latency-based-application-across-multiple-regions/", note: "Official Blog: Multi-Region Architecture" },
+                                { title: "CloudFrontとWAFを使用してウェブサイトを高速化および保護する", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/accelerate-and-protect-your-websites-using-amazon-cloudfront-and-aws-waf/", note: "Official Blog: Security & Acceleration" }
                             ]
                         },
                         {
@@ -435,8 +431,8 @@
                                 "Hybrid DNS architectures"
                             ],
                             blogs: [
-                                { title: "Hybrid DNS with AWS Route 53 Resolver", url: "#", note: "Search: 'aws blog route 53 resolver hybrid dns'" },
-                                { title: "Centralized DNS Management for Multi-Account Environments", url: "#", note: "Search: 'aws blog centralized dns multi account'" }
+                                { title: "Route 53 Resolverエンドポイントを使用したDNS高可用性の実現", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/how-to-achieve-dns-high-availability-with-route-53-resolver-endpoints/", note: "Official Blog: DNS High Availability" },
+                                { title: "Route 53とTransit Gatewayを使用したハイブリッドクラウドのDNS一元管理", url: "https://aws.amazon.com/blogs/security/centralized-dns-management-of-hybrid-cloud-with-amazon-route-53-and-aws-transit-gateway/", note: "Official Blog: Centralized Management" }
                             ]
                         },
                         {
@@ -450,8 +446,8 @@
                                 "Direct Connect MACsec"
                             ],
                             blogs: [
-                                { title: "Creating Active/Active VPN Connections with AWS Transit Gateway", url: "#", note: "Search: 'aws blog active active vpn transit gateway'" },
-                                { title: "AWS Direct Connect Redundancy Recommendations", url: "#", note: "Search: 'aws blog direct connect redundancy'" }
+                                { title: "Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/", note: "Official Blog: VPN Architecture" },
+                                { title: "AWS Direct Connect の耐障害性に関する推奨事項", url: "https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html", note: "Official Guide: DX Resiliency" }
                             ]
                         }
                     ]
@@ -475,8 +471,8 @@
                                 "IPv6 implementation"
                             ],
                             blogs: [
-                                { title: "Inspecting Traffic with Transit Gateway & Gateway Load Balancer", url: "#", note: "Search: 'aws blog transit gateway gateway load balancer inspection'" },
-                                { title: "Prioritizing traffic on AWS Direct Connect with BGP communities", url: "#", note: "Search: 'aws blog direct connect bgp communities'" }
+                                { title: "Gateway Load BalancerとTransit Gatewayを使用した集中型検査アーキテクチャ", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/centralized-inspection-architecture-with-aws-gateway-load-balancer-and-aws-transit-gateway/", note: "Official Blog: Traffic Inspection" },
+                                { title: "ルーティングポリシーを使用してDirect Connect経由のトラフィックを制御する方法", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/how-to-control-traffic-over-aws-direct-connect-using-routing-policies/", note: "Official Blog: Routing Policies" }
                             ]
                         },
                         {
@@ -490,8 +486,8 @@
                                 "EKS CNI networking"
                             ],
                             blogs: [
-                                { title: "Securely Accessing Services via AWS PrivateLink", url: "#", note: "Search: 'aws blog privatelink secure access'" },
-                                { title: "Amazon EKS Networking: VPC CNI Plugin", url: "#", note: "Search: 'aws blog eks vpc cni networking'" }
+                                { title: "マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ", url: "https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/", note: "Official Blog: PrivateLink Security" },
+                                { title: "Amazon EKS ベストプラクティスガイド: VPC CNI", url: "https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html", note: "Official Docs: EKS VPC CNI" }
                             ]
                         }
                     ]
@@ -514,8 +510,8 @@
                                 "CloudWatch Metrics/Alarms for network"
                             ],
                             blogs: [
-                                { title: "Analyzing VPC Flow Logs using Amazon Athena", url: "#", note: "Search: 'aws blog analyze vpc flow logs athena'" },
-                                { title: "Using VPC Traffic Mirroring for Intrusion Detection", url: "#", note: "Search: 'aws blog traffic mirroring ids'" }
+                                { title: "Amazon Athena統合を使用してVPCフローログを分析する", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/analyze-vpc-flow-logs-with-point-and-click-amazon-athena-integration/", note: "Official Blog: Flow Logs Analysis" },
+                                { title: "VPCトラフィックミラーリングを使用してAWSインフラストラクチャを監視および保護する", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/", note: "Official Blog: Traffic Mirroring" }
                             ]
                         },
                         {
@@ -528,7 +524,7 @@
                                 "Enhanced Networking (ENA, EFA)"
                             ],
                             blogs: [
-                                { title: "Overview of Data Transfer Costs for Common Architectures", url: "#", note: "Search: 'aws blog data transfer costs architecture'" }
+                                { title: "一般的なアーキテクチャのデータ転送コストの概要", url: "https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/", note: "Official Blog: Cost Optimization" }
                             ]
                         }
                     ]
@@ -552,8 +548,8 @@
                                 "Encryption in transit (TLS, VPN, MACsec)"
                             ],
                             blogs: [
-                                { title: "Deployment Models for AWS Network Firewall", url: "#", note: "Search: 'aws blog network firewall deployment models'" },
-                                { title: "How to use AWS WAF to mitigate DDoS attacks", url: "#", note: "Search: 'aws blog waf ddos mitigation'" }
+                                { title: "AWS Network Firewallのデプロイモデル", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/", note: "Official Blog: Firewall Deployment" },
+                                { title: "AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃", url: "https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html", note: "Official Whitepaper: DDoS Mitigation" }
                             ]
                         }
                     ]
@@ -722,12 +718,12 @@
                         <div class="space-y-3">
                             ${task.blogs.map(blog => `
                                 <div class="bg-white p-3 rounded shadow-sm border border-gray-100">
-                                    <div class="text-sm font-medium text-blue-700 hover:underline cursor-pointer flex items-start justify-between group">
+                                    <a href="${blog.url}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 hover:underline flex items-start justify-between group">
                                         <span>${highlightTerm(blog.title, term)}</span>
                                         <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
-                                    </div>
+                                    </a>
                                     <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                        <i class="fab fa-google text-gray-400"></i> 
+                                        <i class="fas fa-info-circle text-gray-400"></i> 
                                         <span>${blog.note}</span>
                                     </div>
                                 </div>
