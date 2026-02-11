@@ -60,21 +60,55 @@
         .aws-gradient {
             background: linear-gradient(135deg, #232f3e 0%, #374151 100%);
         }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 10% auto;
+            padding: 0;
+            border-radius: 12px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .ai-response-area {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+        
+        .sparkle-btn {
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            background-size: 200% 200%;
+            animation: gradientBG 3s ease infinite;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
     </style>
-    <!-- Chosen Palette: AWS Professional (White, Light Slate, Deep Navy #232F3E, Accent Orange #EA580C) -->
-    <!-- Application Structure Plan: 
-         1. Dashboard Header: High-level exam summary and domain weightings visualization.
-         2. Domain Navigator (Main Interaction): A tabbed or grid-based selection to choose one of the 4 Exam Domains.
-         3. Task Detail View (Dynamic Content): Upon selecting a domain, list the Task Statements. 
-         4. Resource Integration (The "Research"): When a Task is expanded, show the "Knowledge" from the guide AND the mapped AWS Blog resources.
-         5. Global Search: Allow finding tasks by keywords like "Direct Connect" or "IPv6".
-    -->
-    <!-- Visualization & Content Choices:
-         1. Domain Weighting -> Donut Chart -> To visualize the relative importance of each section for study prioritization. -> Chart.js
-         2. Task Structure -> Accordion/Cards -> To handle the hierarchical text (Domain > Task > Knowledge > Blogs) without overwhelming the page. -> HTML/Tailwind/JS
-         3. Resource Linking -> List with Icons -> To clearly distinguish between "Official Guide Text" and "Recommended Blogs". -> FontAwesome/HTML
-         4. Confidence: NO SVG, NO Mermaid. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
 </head>
 <body class="min-h-screen flex flex-col">
 
@@ -86,15 +120,16 @@
                     <h1 class="text-2xl md:text-3xl font-bold tracking-tight">AWS ANS-C01 Exam Guide & Resources</h1>
                     <p class="text-gray-300 mt-2 text-sm md:text-base">Advanced Networking - Specialty 試験ガイドに基づく学習リソースナビゲーター</p>
                 </div>
-                <div class="mt-4 md:mt-0 flex gap-3">
+                <div class="mt-4 md:mt-0 flex gap-3 items-center">
                     <div class="bg-gray-700 bg-opacity-50 rounded-lg px-4 py-2 text-center">
                         <span class="block text-xs text-gray-400">Exam Code</span>
                         <span class="font-mono font-bold">ANS-C01</span>
                     </div>
-                    <div class="bg-gray-700 bg-opacity-50 rounded-lg px-4 py-2 text-center">
-                        <span class="block text-xs text-gray-400">Total Domains</span>
-                        <span class="font-mono font-bold">4</span>
-                    </div>
+                    <!-- Settings Button -->
+                    <button onclick="openSettingsModal()" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="API Key Settings">
+                        <span class="block text-xs text-gray-400 group-hover:text-white">API Key</span>
+                        <i class="fas fa-cog text-gray-300 group-hover:text-white"></i>
+                    </button>
                 </div>
             </div>
         </div>
@@ -108,7 +143,6 @@
             <!-- Domain Weight Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">ドメイン別出題比率</h3>
-                <p class="text-xs text-gray-500 mb-4">ANS-C01 試験ガイドに基づく重み付け</p>
                 <div class="chart-container">
                     <canvas id="examWeightChart"></canvas>
                 </div>
@@ -120,9 +154,6 @@
             <!-- Quick Stats -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h3 class="text-lg font-bold text-gray-800 mb-2">学習ガイド</h3>
-                <p class="text-sm text-gray-600 mb-4">
-                    このアプリは、公式試験ガイドの各タスクステートメントに関連性の深いAWS公式ブログ記事をマッピングしています。
-                </p>
                 <div class="space-y-3">
                     <div class="flex items-center text-sm text-gray-700">
                         <i class="fas fa-book-open w-6 text-orange-500"></i>
@@ -130,12 +161,16 @@
                     </div>
                     <div class="flex items-center text-sm text-gray-700">
                         <i class="fas fa-link w-6 text-blue-500"></i>
-                        <span>推奨ブログ記事を読む (別タブ)</span>
+                        <span>推奨ブログ記事を読む</span>
                     </div>
                     <div class="flex items-center text-sm text-gray-700">
-                        <i class="fas fa-flask w-6 text-green-500"></i>
-                        <span>ハンズオンで実践する</span>
+                        <i class="fas fa-magic w-6 text-purple-500"></i>
+                        <span>AIで用語解説・問題作成 ✨</span>
                     </div>
+                </div>
+                <div class="mt-4 p-3 bg-blue-50 text-blue-800 text-xs rounded border border-blue-100">
+                    <i class="fas fa-info-circle mr-1"></i>
+                    AI機能を使用するには、右上の設定ボタン(⚙️)からGemini APIキーを設定してください。
                 </div>
             </div>
         </aside>
@@ -147,7 +182,7 @@
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <h2 class="text-xl font-bold text-gray-900 mb-2">ドメイン・タスク エクスプローラー</h2>
                 <p class="text-gray-600 text-sm">
-                    以下のドメインを選択して、詳細なタスクステートメントと、それぞれのタスクを習得するために推奨されるAWSブログ記事（リソース）を確認してください。各リソースは、試験ガイドで求められるスキルセットに基づいて選定されています。
+                    ドメインを選択してタスク詳細を確認してください。「✨」ボタンでAI機能（解説・問題作成）を利用できます。
                 </p>
                 
                 <!-- Search/Filter -->
@@ -173,13 +208,196 @@
 
     <footer class="bg-gray-800 text-gray-400 py-6 mt-8">
         <div class="container mx-auto px-4 text-center text-sm">
-            <p>&copy; 2024 AWS Study Navigator. Based on AWS Certified Advanced Networking - Specialty (ANS-C01) Exam Guide.</p>
+            <p>&copy; 2024 AWS Study Navigator. Powered by Gemini API.</p>
         </div>
     </footer>
 
+    <!-- AI Modal -->
+    <div id="aiModal" class="modal">
+        <div class="modal-content">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-robot text-purple-500"></i> <span id="modalTitle">AI Response</span>
+                </h3>
+                <button onclick="closeModal('aiModal')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div id="modalLoading" class="hidden flex flex-col items-center justify-center py-8">
+                    <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mb-4"></div>
+                    <p class="text-gray-500 text-sm animate-pulse">Gemini is thinking...</p>
+                </div>
+                <div id="modalContent" class="text-gray-700 ai-response-area text-sm md:text-base"></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end">
+                <button onclick="closeModal('aiModal')" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                    閉じる
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-cog text-gray-600"></i> 設定
+                </h3>
+                <button onclick="closeModal('settingsModal')" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="apiKeyInput">
+                        Google Gemini API Key
+                    </label>
+                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="apiKeyInput" type="password" placeholder="AIzaSy...">
+                    <p class="text-gray-500 text-xs mt-2">
+                        APIキーはブラウザのローカルストレージにのみ保存され、外部サーバーには送信されません。<br>
+                        キーをお持ちでない場合は <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-500 underline">Google AI Studio</a> から取得してください。
+                    </p>
+                </div>
+                <div id="settingsMessage" class="text-sm mb-4 hidden"></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+                <button onclick="clearApiKey()" class="px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors">
+                    削除
+                </button>
+                <button onclick="saveApiKey()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // --- API KEY MANAGEMENT ---
+        const API_KEY_STORAGE_KEY = 'gemini_api_key';
+
+        function getApiKey() {
+            return localStorage.getItem(API_KEY_STORAGE_KEY);
+        }
+
+        function saveApiKey() {
+            const input = document.getElementById('apiKeyInput');
+            const key = input.value.trim();
+            const msg = document.getElementById('settingsMessage');
+
+            if (!key) {
+                msg.textContent = "APIキーを入力してください。";
+                msg.className = "text-sm mb-4 text-red-500";
+                msg.classList.remove('hidden');
+                return;
+            }
+
+            localStorage.setItem(API_KEY_STORAGE_KEY, key);
+            msg.textContent = "APIキーを保存しました。";
+            msg.className = "text-sm mb-4 text-green-500";
+            msg.classList.remove('hidden');
+            setTimeout(() => closeModal('settingsModal'), 1000);
+        }
+
+        function clearApiKey() {
+            localStorage.removeItem(API_KEY_STORAGE_KEY);
+            document.getElementById('apiKeyInput').value = '';
+            const msg = document.getElementById('settingsMessage');
+            msg.textContent = "APIキーを削除しました。";
+            msg.className = "text-sm mb-4 text-gray-500";
+            msg.classList.remove('hidden');
+        }
+
+        function openSettingsModal() {
+            const key = getApiKey();
+            if (key) {
+                document.getElementById('apiKeyInput').value = key;
+            }
+            document.getElementById('settingsMessage').classList.add('hidden');
+            document.getElementById('settingsModal').style.display = "block";
+        }
+
+        // --- GEMINI API CALL ---
+        
+        async function callGemini(userPrompt, systemPrompt) {
+            const apiKey = getApiKey();
+            
+            if (!apiKey) {
+                // Prompt user to enter key
+                openSettingsModal();
+                const msg = document.getElementById('settingsMessage');
+                msg.textContent = "AI機能を使用するにはAPIキーが必要です。";
+                msg.className = "text-sm mb-4 text-orange-500 font-bold";
+                msg.classList.remove('hidden');
+                return null; // Stop execution
+            }
+
+            // Show loading in AI modal
+            // Note: The caller function handles showing the modal container
+            
+            const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+            
+            const payload = {
+                contents: [{ parts: [{ text: userPrompt }] }],
+                systemInstruction: { parts: [{ text: systemPrompt }] }
+            };
+
+            const delays = [1000, 2000, 4000];
+            
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        if (response.status === 400 || response.status === 403) {
+                            throw new Error("APIキーが無効であるか、権限がありません。設定を確認してください。");
+                        }
+                        throw new Error(`Server Error: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    return data.candidates?.[0]?.content?.parts?.[0]?.text || "回答を生成できませんでした。";
+                    
+                } catch (e) {
+                    if (i === 2) return `エラーが発生しました: ${e.message}`;
+                    await new Promise(resolve => setTimeout(resolve, delays[i]));
+                }
+            }
+        }
+
+        async function explainTerm(term) {
+            const apiKey = getApiKey();
+            if (!apiKey) { openSettingsModal(); return; }
+
+            showAiModal("用語解説: " + term, true);
+            const systemPrompt = "あなたはAWS認定インストラクターです。AWS Advanced Networking Specialty (ANS-C01) の受験者に向けて、指定されたネットワーキング用語を簡潔に、かつ試験に関連する重要なポイントを押さえて解説してください。日本語で回答してください。";
+            const userPrompt = `用語: 「${term}」について、AWSの文脈で150文字以内で解説してください。`;
+            
+            const response = await callGemini(userPrompt, systemPrompt);
+            if (response) updateAiModalContent(response);
+            else closeModal('aiModal'); // If user cancelled or error handled elsewhere
+        }
+
+        async function generateQuiz(taskTitle) {
+            const apiKey = getApiKey();
+            if (!apiKey) { openSettingsModal(); return; }
+
+            showAiModal("模擬問題作成: " + taskTitle, true);
+            const systemPrompt = "あなたはAWS認定試験のエキスパートです。ANS-C01レベルの難易度の高い4択問題を作成してください。";
+            const userPrompt = `タスク: 「${taskTitle}」に関連する、実践的なシナリオベースの選択問題（ANS-C01レベル）を1問作成してください。\n\nフォーマット:\n【問題文】\n[シナリオと質問]\n\n【選択肢】\nA. [選択肢]\nB. [選択肢]\nC. [選択肢]\nD. [選択肢]\n\n【正解と解説】\n正解: [記号]\n解説: [なぜその答えが正解なのか、他の選択肢がなぜ間違いなのかを簡潔に]`;
+            
+            const response = await callGemini(userPrompt, systemPrompt);
+            if (response) updateAiModalContent(response);
+            else closeModal('aiModal');
+        }
+
         // --- DATA SOURCE ---
-        // Based on the ANS-C01 Exam Guide and mapping relevant AWS Blog topics.
         const examData = {
             domains: [
                 {
@@ -187,7 +405,7 @@
                     title: "Network Design",
                     jpTitle: "第1分野: ネットワークデザイン",
                     weight: 30,
-                    color: "#3b82f6", // Blue
+                    color: "#3b82f6",
                     description: "エッジサービス、DNS、ハイブリッド接続を含む全体的なネットワークアーキテクチャの設計。",
                     tasks: [
                         {
@@ -195,15 +413,15 @@
                             title: "Design a solution for edge network services",
                             jpTitle: "エッジネットワークサービスのソリューション設計",
                             knowledge: [
-                                "CloudFront distributions (origins, behavior, signing)",
-                                "AWS Global Accelerator (listeners, endpoints, traffic dials)",
+                                "CloudFront distributions",
+                                "AWS Global Accelerator",
                                 "Edge security (WAF, Shield)",
                                 "Lambda@Edge functions"
                             ],
                             blogs: [
-                                { title: "Global Accelerator vs CloudFront: Which one to use?", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/global-accelerator-vs-amazon-cloudfront-which-one-should-i-choose/", note: "比較・使い分けのベストプラクティス" },
-                                { title: "Building a Multi-Region Active-Active Architecture", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/building-a-multi-region-active-active-architecture/", note: "マルチリージョン構成の実装" },
-                                { title: "Secure Content Delivery with CloudFront and WAF", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/secure-content-delivery-with-amazon-cloudfront/", note: "CDNセキュリティの基礎" }
+                                { title: "Global Accelerator vs CloudFront: Which one to use?", url: "#", note: "Search: 'aws blog global accelerator cloudfront comparison'" },
+                                { title: "Building a Multi-Region Active-Active Architecture", url: "#", note: "Search: 'aws blog multi region active active global accelerator'" },
+                                { title: "Secure Content Delivery with CloudFront and WAF", url: "#", note: "Search: 'aws blog cloudfront waf security'" }
                             ]
                         },
                         {
@@ -212,14 +430,13 @@
                             jpTitle: "DNSソリューションの設計",
                             knowledge: [
                                 "Route 53 public/private hosted zones",
-                                "Route 53 Resolver (inbound/outbound endpoints)",
+                                "Route 53 Resolver (inbound/outbound)",
                                 "DNSSEC, TTL, Aliases",
                                 "Hybrid DNS architectures"
                             ],
                             blogs: [
-                                { title: "Hybrid DNS with AWS Route 53 Resolver", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-dns-with-aws-route-53-resolver/", note: "ハイブリッドDNSの完全ガイド" },
-                                { title: "Centralized DNS Management for Multi-Account Environments", url: "https://aws.amazon.com/blogs/security/centralized-dns-management-of-hybrid-cloud-with-amazon-route-53-and-aws-transit-gateway/", note: "マルチアカウントDNS管理" },
-                                { title: "Route 53 Resolver DNS Firewall Deployment Models", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/secure-your-amazon-vpc-dns-resolution-with-amazon-route-53-resolver-dns-firewall/", note: "DNSセキュリティの実装" }
+                                { title: "Hybrid DNS with AWS Route 53 Resolver", url: "#", note: "Search: 'aws blog route 53 resolver hybrid dns'" },
+                                { title: "Centralized DNS Management for Multi-Account Environments", url: "#", note: "Search: 'aws blog centralized dns multi account'" }
                             ]
                         },
                         {
@@ -227,15 +444,14 @@
                             title: "Design a solution for hybrid connectivity",
                             jpTitle: "ハイブリッド接続のソリューション設計",
                             knowledge: [
-                                "Direct Connect (DX) gateway, virtual interfaces (VIFs)",
-                                "Site-to-Site VPN (acceleration, HA)",
+                                "Direct Connect (DX) gateway",
+                                "Site-to-Site VPN",
                                 "Transit Gateway connect attachments",
                                 "Direct Connect MACsec"
                             ],
                             blogs: [
-                                { title: "Creating Active/Active VPN Connections with AWS Transit Gateway", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/", note: "高可用性VPN設計" },
-                                { title: "AWS Direct Connect Redundancy Recommendations", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/aws-direct-connect-redundancy-recommendations/", note: "Direct Connect 冗長化" },
-                                { title: "MACsec security for AWS Direct Connect", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/adding-macsec-security-to-aws-direct-connect-connections/", note: "専用線セキュリティ(MACsec)" }
+                                { title: "Creating Active/Active VPN Connections with AWS Transit Gateway", url: "#", note: "Search: 'aws blog active active vpn transit gateway'" },
+                                { title: "AWS Direct Connect Redundancy Recommendations", url: "#", note: "Search: 'aws blog direct connect redundancy'" }
                             ]
                         }
                     ]
@@ -245,7 +461,7 @@
                     title: "Network Implementation",
                     jpTitle: "第2分野: ネットワークの実装",
                     weight: 26,
-                    color: "#10b981", // Emerald
+                    color: "#10b981",
                     description: "ルーティングプロトコル、接続性、およびオートメーションの実装。",
                     tasks: [
                         {
@@ -254,14 +470,13 @@
                             jpTitle: "ルーティングと接続性の実装",
                             knowledge: [
                                 "BGP routing (ASN, prefixes, MED, AS_PATH)",
-                                "TGW Route Tables (static/dynamic, propagation)",
+                                "TGW Route Tables",
                                 "VPC Peering vs TGW",
                                 "IPv6 implementation"
                             ],
                             blogs: [
-                                { title: "Inspecting Traffic with Transit Gateway & Gateway Load Balancer", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/inspecting-traffic-with-aws-gateway-load-balancer/", note: "トラフィック検査パターン" },
-                                { title: "Prioritizing traffic on AWS Direct Connect with BGP communities", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/prioritizing-traffic-on-aws-direct-connect-with-bgp-communities/", note: "BGPコミュニティによる制御" },
-                                { title: "Dual-stack IPv6 Architectures for AWS", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/dual-stack-ipv6-architectures-for-aws-and-hybrid-networks/", note: "IPv6導入ガイド" }
+                                { title: "Inspecting Traffic with Transit Gateway & Gateway Load Balancer", url: "#", note: "Search: 'aws blog transit gateway gateway load balancer inspection'" },
+                                { title: "Prioritizing traffic on AWS Direct Connect with BGP communities", url: "#", note: "Search: 'aws blog direct connect bgp communities'" }
                             ]
                         },
                         {
@@ -275,9 +490,8 @@
                                 "EKS CNI networking"
                             ],
                             blogs: [
-                                { title: "Securely Accessing Services via AWS PrivateLink", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/securely-accessing-services-over-aws-privatelink/", note: "PrivateLink詳細解説" },
-                                { title: "Choosing the Right Load Balancer for Your Application", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/choose-the-right-load-balancer-for-your-aws-workloads/", note: "LB選択ガイド" },
-                                { title: "Amazon EKS Networking: VPC CNI Plugin", url: "https://aws.amazon.com/blogs/containers/amazon-eks-networking-vpc-cni/", note: "コンテナネットワーキング" }
+                                { title: "Securely Accessing Services via AWS PrivateLink", url: "#", note: "Search: 'aws blog privatelink secure access'" },
+                                { title: "Amazon EKS Networking: VPC CNI Plugin", url: "#", note: "Search: 'aws blog eks vpc cni networking'" }
                             ]
                         }
                     ]
@@ -287,7 +501,7 @@
                     title: "Network Management & Ops",
                     jpTitle: "第3分野: ネットワークの管理と運用",
                     weight: 20,
-                    color: "#f59e0b", // Amber
+                    color: "#f59e0b",
                     description: "ネットワークの監視、トラブルシューティング、最適化。",
                     tasks: [
                         {
@@ -295,13 +509,13 @@
                             title: "Monitor and analyze network traffic",
                             jpTitle: "ネットワークトラフィックの監視と分析",
                             knowledge: [
-                                "VPC Flow Logs (format, Athena analysis)",
+                                "VPC Flow Logs",
                                 "VPC Traffic Mirroring",
                                 "CloudWatch Metrics/Alarms for network"
                             ],
                             blogs: [
-                                { title: "Analyzing VPC Flow Logs using Amazon Athena", url: "https://aws.amazon.com/blogs/big-data/analyzing-vpc-flow-logs-using-amazon-athena-and-amazon-quicksight/", note: "フローログ分析の実践" },
-                                { title: "Using VPC Traffic Mirroring for Intrusion Detection", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-for-intrusion-detection/", note: "トラフィックミラーリング活用" }
+                                { title: "Analyzing VPC Flow Logs using Amazon Athena", url: "#", note: "Search: 'aws blog analyze vpc flow logs athena'" },
+                                { title: "Using VPC Traffic Mirroring for Intrusion Detection", url: "#", note: "Search: 'aws blog traffic mirroring ids'" }
                             ]
                         },
                         {
@@ -314,8 +528,7 @@
                                 "Enhanced Networking (ENA, EFA)"
                             ],
                             blogs: [
-                                { title: "Overview of Data Transfer Costs for Common Architectures", url: "https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/", note: "データ転送コストの全貌" },
-                                { title: "Optimizing Network Performance for EC2 Instances", url: "https://aws.amazon.com/blogs/compute/optimizing-network-performance-for-amazon-ec2-instances/", note: "EC2ネットワーク最適化" }
+                                { title: "Overview of Data Transfer Costs for Common Architectures", url: "#", note: "Search: 'aws blog data transfer costs architecture'" }
                             ]
                         }
                     ]
@@ -325,7 +538,7 @@
                     title: "Network Security",
                     jpTitle: "第4分野: ネットワークセキュリティとコンプライアンス",
                     weight: 24,
-                    color: "#ef4444", // Red
+                    color: "#ef4444",
                     description: "セキュリティコントロールの実装、脅威からの保護。",
                     tasks: [
                         {
@@ -339,9 +552,8 @@
                                 "Encryption in transit (TLS, VPN, MACsec)"
                             ],
                             blogs: [
-                                { title: "Deployment Models for AWS Network Firewall", url: "https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/", note: "Network Firewall 展開パターン" },
-                                { title: "How to use AWS WAF to mitigate DDoS attacks", url: "https://aws.amazon.com/blogs/security/how-to-use-aws-waf-to-mitigate-ddos-attacks/", note: "DDoS対策ガイド" },
-                                { title: "Security Group Reference Patterns", url: "https://aws.amazon.com/blogs/security/simplify-your-security-group-administration/", note: "セキュリティグループ管理" }
+                                { title: "Deployment Models for AWS Network Firewall", url: "#", note: "Search: 'aws blog network firewall deployment models'" },
+                                { title: "How to use AWS WAF to mitigate DDoS attacks", url: "#", note: "Search: 'aws blog waf ddos mitigation'" }
                             ]
                         }
                     ]
@@ -377,9 +589,7 @@
                     maintainAspectRatio: false,
                     cutout: '65%',
                     plugins: {
-                        legend: {
-                            display: false // Custom legend used
-                        },
+                        legend: { display: false },
                         tooltip: {
                             callbacks: {
                                 label: function(context) {
@@ -391,7 +601,6 @@
                 }
             });
 
-            // Build Custom Legend
             const legendContainer = document.getElementById('domainLegend');
             examData.domains.forEach(domain => {
                 const item = document.createElement('div');
@@ -416,7 +625,6 @@
                 btn.className = `whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 
                     ${isActive ? `border-${getColorName(domain.color)} text-${getColorName(domain.color)}` : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}`;
                 
-                // Manual active style override due to dynamic color class complexity
                 if (isActive) {
                     btn.style.borderColor = domain.color;
                     btn.style.color = domain.color;
@@ -432,33 +640,23 @@
             const contentArea = document.getElementById('contentArea');
             contentArea.innerHTML = '';
 
-            // Filter logic
             const term = appState.searchTerm.toLowerCase();
-            
             let targetDomains = examData.domains;
             
-            // If searching, we might show tasks from multiple domains
-            if (term.length > 0) {
-                // Flatten and filter
-                // However, preserving domain structure is better for context.
-                // We will render only domains that have matching tasks, or the current domain if no search.
-            } else {
+            if (term.length === 0) {
                 targetDomains = targetDomains.filter(d => d.id === appState.currentDomainId);
             }
 
             targetDomains.forEach(domain => {
-                // Filter tasks inside domain
                 const visibleTasks = domain.tasks.filter(task => {
                     if (!term) return true;
                     return task.title.toLowerCase().includes(term) || 
                            task.jpTitle.toLowerCase().includes(term) ||
-                           task.knowledge.some(k => k.toLowerCase().includes(term)) ||
-                           task.blogs.some(b => b.title.toLowerCase().includes(term));
+                           task.knowledge.some(k => k.toLowerCase().includes(term));
                 });
 
-                if (visibleTasks.length === 0 && term) return; // Skip empty domains in search
+                if (visibleTasks.length === 0 && term) return;
 
-                // Domain Header (Only show if searching or simple view)
                 const domainHeader = document.createElement('div');
                 domainHeader.innerHTML = `
                     <div class="flex items-center gap-2 mb-4">
@@ -471,44 +669,50 @@
                 `;
                 contentArea.appendChild(domainHeader);
 
-                // Tasks
                 visibleTasks.forEach(task => {
                     const taskCard = document.createElement('div');
                     taskCard.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
                     
-                    // Task Header
+                    // Task Header with AI Quiz Button
                     const header = document.createElement('div');
-                    header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex justify-between items-start';
+                    header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4';
                     header.innerHTML = `
                         <div>
                             <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Task Statement ${task.id}</div>
                             <h3 class="text-lg font-bold text-gray-900">${task.jpTitle}</h3>
                             <p class="text-sm text-gray-500 mt-1">${task.title}</p>
                         </div>
+                        <button onclick="generateQuiz('${task.jpTitle.replace(/'/g, "\\'")}')" 
+                                class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-magic"></i> ✨ 模擬問題を作成
+                        </button>
                     `;
                     taskCard.appendChild(header);
 
-                    // Body
                     const body = document.createElement('div');
                     body.className = 'p-5 grid md:grid-cols-2 gap-6';
 
-                    // Knowledge Section
+                    // Knowledge Section with AI Explain Button
                     const knowledgeCol = document.createElement('div');
                     knowledgeCol.innerHTML = `
                         <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
                             <i class="fas fa-check-circle text-green-500"></i> 必要な知識・スキル
                         </h4>
-                        <ul class="space-y-2">
+                        <ul class="space-y-3">
                             ${task.knowledge.map(k => `
-                                <li class="text-sm text-gray-600 flex items-start gap-2">
-                                    <span class="mt-1.5 w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
-                                    <span>${highlightTerm(k, term)}</span>
+                                <li class="text-sm text-gray-600 flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-2 rounded hover:bg-gray-50 transition">
+                                    <div class="flex items-start gap-2">
+                                        <span class="mt-1.5 w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
+                                        <span>${highlightTerm(k, term)}</span>
+                                    </div>
+                                    <button onclick="explainTerm('${k.replace(/'/g, "\\'")}')" class="text-xs text-purple-600 border border-purple-200 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded flex items-center gap-1 whitespace-nowrap transition">
+                                        <i class="fas fa-sparkles"></i> ✨ 解説
+                                    </button>
                                 </li>
                             `).join('')}
                         </ul>
                     `;
 
-                    // Resources Section (The "Research")
                     const resourceCol = document.createElement('div');
                     resourceCol.className = "bg-orange-50 rounded-lg p-4 border border-orange-100";
                     resourceCol.innerHTML = `
@@ -517,18 +721,16 @@
                         </h4>
                         <div class="space-y-3">
                             ${task.blogs.map(blog => `
-                                <a href="${blog.url}" target="_blank" rel="noopener noreferrer" class="block">
-                                    <div class="bg-white p-3 rounded shadow-sm border border-gray-100 hover:border-orange-300 transition-colors group">
-                                        <div class="text-sm font-medium text-blue-700 group-hover:underline flex items-start justify-between">
-                                            <span>${highlightTerm(blog.title, term)}</span>
-                                            <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
-                                        </div>
-                                        <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                                            <i class="fab fa-aws text-orange-400"></i> 
-                                            <span>${blog.note}</span>
-                                        </div>
+                                <div class="bg-white p-3 rounded shadow-sm border border-gray-100">
+                                    <div class="text-sm font-medium text-blue-700 hover:underline cursor-pointer flex items-start justify-between group">
+                                        <span>${highlightTerm(blog.title, term)}</span>
+                                        <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
                                     </div>
-                                </a>
+                                    <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                                        <i class="fab fa-google text-gray-400"></i> 
+                                        <span>${blog.note}</span>
+                                    </div>
+                                </div>
                             `).join('')}
                         </div>
                     `;
@@ -550,11 +752,41 @@
             }
         }
 
-        // --- UTILS ---
+        // --- MODAL UTILS ---
+        const aiModal = document.getElementById("aiModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalContent = document.getElementById("modalContent");
+        const modalLoading = document.getElementById("modalLoading");
 
+        function showAiModal(title, isLoading) {
+            aiModal.style.display = "block";
+            modalTitle.innerText = title;
+            if (isLoading) {
+                modalLoading.classList.remove("hidden");
+                modalContent.innerHTML = "";
+            }
+        }
+
+        function updateAiModalContent(text) {
+            modalLoading.classList.add("hidden");
+            modalContent.innerText = text;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        // Close when clicking outside
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        }
+
+        // --- UTILS ---
         function switchDomain(id) {
             appState.currentDomainId = id;
-            appState.searchTerm = ""; // Clear search on explicit tab switch
+            appState.searchTerm = "";
             document.getElementById('searchInput').value = "";
             renderTabs();
             renderContent();
@@ -574,14 +806,11 @@
             return text.replace(regex, '<span class="bg-yellow-200 font-semibold">$1</span>');
         }
 
-        // --- EVENT LISTENERS ---
-
         document.getElementById('searchInput').addEventListener('input', (e) => {
             appState.searchTerm = e.target.value;
             renderContent();
         });
 
-        // --- INIT ---
         window.onload = () => {
             initChart();
             renderTabs();
