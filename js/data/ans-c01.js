@@ -2,13 +2,13 @@ export const ANS_C01 = {
   id: 'ans-c01',
   code: 'ANS-C01',
   shortLabel: 'ANS',
-  title: 'AWS ANS-C01 Exam Guide & Resources',
-  subtitle: 'Advanced Networking - Specialty 試験ガイドに基づく学習リソースナビゲーター',
+  title: 'AWS Certified Advanced Networking - Specialty',
+  subtitle: '試験ガイド完全準拠の合格ナビゲーター',
   domains: [
     {
       id: 1,
       title: 'Network Design',
-      jpTitle: '第1分野: ネットワークデザイン',
+      jpTitle: 'ネットワーク設計',
       weight: 30,
       color: '#3b82f6',
       description: 'エッジサービス、DNS、ハイブリッド接続を含む全体的なネットワークアーキテクチャの設計。',
@@ -87,12 +87,81 @@ export const ANS_C01 = {
             },
           ],
         },
+                {
+          id: '1.4',
+          title: 'Design a solution for hybrid connectivity',
+          jpTitle: 'ハイブリッド接続のソリューション設計',
+          knowledge: [
+            'Direct Connect (DX) gateway',
+            'Site-to-Site VPN',
+            'Transit Gateway connect attachments',
+            'Direct Connect MACsec',
+          ],
+          blogs: [
+            {
+              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
+              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
+              note: 'Official Blog: VPN Architecture',
+            },
+            {
+              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
+              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
+              note: 'Official Guide: DX Resiliency',
+            },
+          ],
+        },
+                {
+          id: '1.5',
+          title: 'Design a solution for hybrid connectivity',
+          jpTitle: 'ハイブリッド接続のソリューション設計',
+          knowledge: [
+            'Direct Connect (DX) gateway',
+            'Site-to-Site VPN',
+            'Transit Gateway connect attachments',
+            'Direct Connect MACsec',
+          ],
+          blogs: [
+            {
+              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
+              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
+              note: 'Official Blog: VPN Architecture',
+            },
+            {
+              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
+              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
+              note: 'Official Guide: DX Resiliency',
+            },
+          ],
+        },
+                {
+          id: '1.6',
+          title: 'Design a solution for hybrid connectivity',
+          jpTitle: 'ハイブリッド接続のソリューション設計',
+          knowledge: [
+            'Direct Connect (DX) gateway',
+            'Site-to-Site VPN',
+            'Transit Gateway connect attachments',
+            'Direct Connect MACsec',
+          ],
+          blogs: [
+            {
+              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
+              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
+              note: 'Official Blog: VPN Architecture',
+            },
+            {
+              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
+              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
+              note: 'Official Guide: DX Resiliency',
+            },
+          ],
+        },
       ],
     },
     {
       id: 2,
       title: 'Network Implementation',
-      jpTitle: '第2分野: ネットワークの実装',
+      jpTitle: 'ネットワーク実装',
       weight: 26,
       color: '#10b981',
       description: 'ルーティングプロトコル、接続性、およびオートメーションの実装。',
@@ -147,8 +216,8 @@ export const ANS_C01 = {
     },
     {
       id: 3,
-      title: 'Network Management & Ops',
-      jpTitle: '第3分野: ネットワークの管理と運用',
+      title: 'Network Management and Operation',
+      jpTitle: 'ネットワークの管理と運用',
       weight: 20,
       color: '#f59e0b',
       description: 'ネットワークの監視、トラブルシューティング、最適化。',
@@ -196,8 +265,8 @@ export const ANS_C01 = {
     },
     {
       id: 4,
-      title: 'Network Security',
-      jpTitle: '第4分野: ネットワークセキュリティとコンプライアンス',
+      title: 'Network Security, Compliance, and Governance',
+      jpTitle: 'ネットワークのセキュリティ、コンプライアンス、ガバナンス',
       weight: 24,
       color: '#ef4444',
       description: 'セキュリティコントロールの実装、脅威からの保護。',

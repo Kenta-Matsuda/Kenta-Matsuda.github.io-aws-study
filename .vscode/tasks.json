@@ -1,0 +1,16 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "serve (static)",
+			"type": "shell",
+			"command": "node",
+			"args": [
+				"-e",
+				"const http=require('http'); const fs=require('fs'); const path=require('path'); const root=process.cwd(); const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.svg':'image/svg+xml'}; http.createServer((req,res)=>{ let url=req.url.split('?')[0]; if(url==='/'||url==='') url='/index.html'; const filePath=path.join(root, decodeURIComponent(url)); if(!filePath.startsWith(root)) {res.writeHead(403); return res.end('Forbidden');} fs.readFile(filePath,(err,data)=>{ if(err){res.writeHead(404); return res.end('Not Found');} const ext=path.extname(filePath); res.writeHead(200,{'Content-Type': mime[ext]||'application/octet-stream'}); res.end(data);});}).listen(8000,()=>console.log('server http://localhost:8000')); setInterval(()=>{},1<<30);"
+			],
+			"isBackground": true,
+			"problemMatcher": []
+		}
+	]
+}
