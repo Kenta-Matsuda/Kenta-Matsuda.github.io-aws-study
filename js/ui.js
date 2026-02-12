@@ -346,22 +346,25 @@ function renderContent({ els, exam, state }) {
       card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
       const header = document.createElement('div');
-      header.className =
-        'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex flex-col md:flex-row justify-between items-start md:items-center gap-4';
+      header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white';
       header.innerHTML = `
-        <div>
-          <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Task Statement ${escapeHtml(task.id)}</div>
-          <h3 class="text-lg font-bold text-gray-900">${escapeHtml(task.jpTitle)}</h3>
-          <p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>
+        <div class="flex flex-col gap-3">
+          <div>
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Task Statement ${escapeHtml(task.id)}</div>
+            <h3 class="text-lg font-bold text-gray-900">${escapeHtml(task.jpTitle)}</h3>
+            <p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>
+          </div>
+          <div class="flex justify-end">
+            <button
+              type="button"
+              data-action="quiz"
+              data-task-title="${escapeHtml(task.jpTitle)}"
+              class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap"
+            >
+            <i class="fas fa-magic"></i> 模擬問題を作成
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          data-action="quiz"
-          data-task-title="${escapeHtml(task.jpTitle)}"
-          class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap"
-        >
-          <i class="fas fa-magic"></i> ✨ 模擬問題を作成
-        </button>
       `;
       card.appendChild(header);
 
@@ -421,7 +424,7 @@ function renderKnowledgeRow({ knowledge, term }) {
         data-term="${safe}"
         class="text-xs text-purple-600 border border-purple-200 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded flex items-center gap-1 whitespace-nowrap transition"
       >
-        <i class="fas fa-sparkles"></i> ✨ 解説
+        <i class="fas fa-sparkles"></i> 解説
       </button>
     </li>
   `;

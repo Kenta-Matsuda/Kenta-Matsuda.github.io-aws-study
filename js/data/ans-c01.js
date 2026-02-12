@@ -15,8 +15,8 @@ export const ANS_C01 = {
       tasks: [
         {
           id: '1.1',
-          title: 'Design a solution for edge network services',
-          jpTitle: 'エッジネットワークサービスのソリューション設計',
+          title: 'Design a solution that incorporates edge network services to optimize user performance and traffic management for global architectures.',
+          jpTitle: 'グローバルアーキテクチャ向けにユーザーパフォーマンスとトラフィック管理を最適化するために、エッジネットワークサービスを組み込んだソリューションを設計する。',
           knowledge: [
             'CloudFront distributions',
             'AWS Global Accelerator',
@@ -43,8 +43,8 @@ export const ANS_C01 = {
         },
         {
           id: '1.2',
-          title: 'Design a DNS solution',
-          jpTitle: 'DNSソリューションの設計',
+          title: 'Design DNS solutions that meet public, private, and hybrid requirements.',
+          jpTitle: 'パブリック、プライベート、ハイブリッドの要件を満たすDNS ソリューションを設計する。',
           knowledge: [
             'Route 53 public/private hosted zones',
             'Route 53 Resolver (inbound/outbound)',
@@ -66,8 +66,8 @@ export const ANS_C01 = {
         },
         {
           id: '1.3',
-          title: 'Design a solution for hybrid connectivity',
-          jpTitle: 'ハイブリッド接続のソリューション設計',
+          title: 'Design solutions that integrate load balancing to meet high availability, scalability, and security requirements.',
+          jpTitle: '高可用性、スケーラビリティ、セキュリティ要件を満たすようにロードバランシングを統合するソリューションを設計する。',
           knowledge: [
             'Direct Connect (DX) gateway',
             'Site-to-Site VPN',
@@ -89,8 +89,8 @@ export const ANS_C01 = {
         },
                 {
           id: '1.4',
-          title: 'Design a solution for hybrid connectivity',
-          jpTitle: 'ハイブリッド接続のソリューション設計',
+          title: ' Define logging and monitoring requirements across AWS and hybrid networks.',
+          jpTitle: 'AWS とハイブリッドネットワーク全体でログ記録とモニタリングの要件を定義する。',
           knowledge: [
             'Direct Connect (DX) gateway',
             'Site-to-Site VPN',
@@ -112,8 +112,8 @@ export const ANS_C01 = {
         },
                 {
           id: '1.5',
-          title: 'Design a solution for hybrid connectivity',
-          jpTitle: 'ハイブリッド接続のソリューション設計',
+          title: 'Design a routing strategy and connectivity architecture between on-premises networks and the AWS Cloud.',
+          jpTitle: ' オンプレミスネットワークと AWS クラウド間のルーティング戦略と接続アーキテクチャを設計する。',
           knowledge: [
             'Direct Connect (DX) gateway',
             'Site-to-Site VPN',
@@ -135,8 +135,8 @@ export const ANS_C01 = {
         },
                 {
           id: '1.6',
-          title: 'Design a solution for hybrid connectivity',
-          jpTitle: 'ハイブリッド接続のソリューション設計',
+          title: 'Design a routing strategy and connectivity architecture that include multiple AWS accounts, AWS Regions, and VPCs to support different connectivity patterns.',
+          jpTitle: 'さまざまな接続パターンをサポートするために、複数の AWS アカウントや AWS リージョン、VPC を含むルーティング戦略と接続アーキテクチャを設計する。',
           knowledge: [
             'Direct Connect (DX) gateway',
             'Site-to-Site VPN',
@@ -168,8 +168,8 @@ export const ANS_C01 = {
       tasks: [
         {
           id: '2.1',
-          title: 'Implement routing and connectivity',
-          jpTitle: 'ルーティングと接続性の実装',
+          title: 'Implement routing and connectivity between on-premises networks and the AWS Cloud.',
+          jpTitle: 'オンプレミスネットワークと AWS クラウド間にルーティングと接続を実装する。',
           knowledge: [
             'BGP routing (ASN, prefixes, MED, AS_PATH)',
             'TGW Route Tables',
@@ -191,8 +191,54 @@ export const ANS_C01 = {
         },
         {
           id: '2.2',
-          title: 'Configure network integration with application services',
-          jpTitle: 'アプリケーションサービスとのネットワーク統合設定',
+          title: 'Implement routing and connectivity across multiple AWS accounts, Regions, and VPCs to support different connectivity patterns.',
+          jpTitle: 'さまざまな接続パターンをサポートするために、複数のAWS アカウント、リージョン、VPC にルーティングと接続を実装する。',
+          knowledge: [
+            'VPC Endpoints (Interface vs Gateway)',
+            'PrivateLink provider/consumer',
+            'Load Balancers (NLB, ALB, GWLB)',
+            'EKS CNI networking',
+          ],
+          blogs: [
+            {
+              title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
+              url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
+              note: 'Official Blog: PrivateLink Security',
+            },
+            {
+              title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
+              url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
+              note: 'Official Docs: EKS VPC CNI',
+            },
+          ],
+        },
+        {
+          id: '2.3',
+          title: 'Implement complex hybrid and multi-account DNS architectures.',
+          jpTitle: '複雑なハイブリッドおよびマルチアカウント DNS アーキテクチャを実装する。',
+          knowledge: [
+            'VPC Endpoints (Interface vs Gateway)',
+            'PrivateLink provider/consumer',
+            'Load Balancers (NLB, ALB, GWLB)',
+            'EKS CNI networking',
+          ],
+          blogs: [
+            {
+              title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
+              url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
+              note: 'Official Blog: PrivateLink Security',
+            },
+            {
+              title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
+              url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
+              note: 'Official Docs: EKS VPC CNI',
+            },
+          ],
+        },
+        {
+          id: '2.4',
+          title: 'Automate and configure network infrastructure.',
+          jpTitle: 'ネットワークインフラストラクチャを自動化して構成する。',
           knowledge: [
             'VPC Endpoints (Interface vs Gateway)',
             'PrivateLink provider/consumer',
@@ -224,8 +270,8 @@ export const ANS_C01 = {
       tasks: [
         {
           id: '3.1',
-          title: 'Monitor and analyze network traffic',
-          jpTitle: 'ネットワークトラフィックの監視と分析',
+          title: 'Maintain routing and connectivity on AWS and hybrid networks.',
+          jpTitle: 'AWS とハイブリッドネットワークでルーティングと接続性を維持する。',
           knowledge: [
             'VPC Flow Logs',
             'VPC Traffic Mirroring',
@@ -246,8 +292,25 @@ export const ANS_C01 = {
         },
         {
           id: '3.2',
-          title: 'Optimize network performance and cost',
-          jpTitle: 'ネットワークパフォーマンスとコストの最適化',
+          title: 'Monitor and analyze network traffic to troubleshoot and optimize connectivity patterns.',
+          jpTitle: 'ネットワークトラフィックをモニタリングおよび分析して、接続パターンのトラブルシューティングと最適化を行う。',
+          knowledge: [
+            'Data transfer cost reduction',
+            'Jumbo frames (MTU)',
+            'Enhanced Networking (ENA, EFA)',
+          ],
+          blogs: [
+            {
+              title: '一般的なアーキテクチャのデータ転送コストの概要',
+              url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
+              note: 'Official Blog: Cost Optimization',
+            },
+          ],
+        },
+        {
+          id: '3.3',
+          title: 'Optimize AWS networks for performance, reliability, and costeffectiveness.',
+          jpTitle: 'AWS ネットワークを最適化して、パフォーマンス、信頼性、費用対効果を高める。',
           knowledge: [
             'Data transfer cost reduction',
             'Jumbo frames (MTU)',
@@ -273,8 +336,54 @@ export const ANS_C01 = {
       tasks: [
         {
           id: '4.1',
-          title: 'Implement and maintain network security',
-          jpTitle: 'ネットワークセキュリティの実装と維持',
+          title: 'Implement and maintain network features to meet security and compliance needs and requirements.',
+          jpTitle: 'セキュリティとコンプライアンスのニーズと要件を満たすために、ネットワーク機能を実装し、保守する。',
+          knowledge: [
+            'Security Groups vs NACLs',
+            'AWS Network Firewall',
+            'WAF & Shield Advanced',
+            'Encryption in transit (TLS, VPN, MACsec)',
+          ],
+          blogs: [
+            {
+              title: 'AWS Network Firewallのデプロイモデル',
+              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
+              note: 'Official Blog: Firewall Deployment',
+            },
+            {
+              title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
+              url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
+              note: 'Official Whitepaper: DDoS Mitigation',
+            },
+          ],
+        },
+        {
+          id: '4.2',
+          title: 'Validate and audit security by using network monitoring and logging services.',
+          jpTitle: 'ネットワークのモニタリングおよびログ記録サービスを使用してセキュリティを検証し、監査する。',
+          knowledge: [
+            'Security Groups vs NACLs',
+            'AWS Network Firewall',
+            'WAF & Shield Advanced',
+            'Encryption in transit (TLS, VPN, MACsec)',
+          ],
+          blogs: [
+            {
+              title: 'AWS Network Firewallのデプロイモデル',
+              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
+              note: 'Official Blog: Firewall Deployment',
+            },
+            {
+              title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
+              url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
+              note: 'Official Whitepaper: DDoS Mitigation',
+            },
+          ],
+        },
+        {
+          id: '4.3',
+          title: 'Implement and maintain confidentiality of data and communications of the network.',
+          jpTitle: ' ネットワークのデータと通信の機密性を実装し、保守する。',
           knowledge: [
             'Security Groups vs NACLs',
             'AWS Network Firewall',
