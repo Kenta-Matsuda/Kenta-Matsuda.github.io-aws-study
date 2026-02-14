@@ -85,10 +85,21 @@ export const ANS_C01 = {
           title: 'Design solutions that integrate load balancing to meet high availability, scalability, and security requirements.',
           jpTitle: '高可用性、スケーラビリティ、セキュリティ要件を満たすようにロードバランシングを統合するソリューションを設計する。',
           knowledge: [
-            'Direct Connect (DX) gateway',
-            'Site-to-Site VPN',
-            'Transit Gateway connect attachments',
-            'Direct Connect MACsec',
+            'OSI参照モデル',
+            'レイヤー３、レイヤー４、レイヤー７のロードバランシング',
+            'AWS Global Accelerator',
+            'Amazon CloudFront',
+            'AWS WAF',
+            'AWS Route 53',
+            'Amazon Elastic Kubernetes Service (EKS) ',
+            'AWS Certificate Manager (ACM)',
+            'ロードバランサーの設定オプション: プロキシプロトコル',
+            'ロードバランサーの設定オプション: クロスゾーンロードバランシング',
+            'ロードバランサーの設定オプション: スティッキーセッション',
+            'ロードバランサーの設定オプション: ルーティングアルゴリズム',
+            'GENEVE（Generic Network Virtualization Encapsulation）',
+            'AWS Load Balancer Controller',
+            'TLS 終端、TLS パススルー',
           ],
           resources: [
             {
@@ -98,9 +109,42 @@ export const ANS_C01 = {
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-                  note: 'Official Blog: VPN Architecture',
+                  title: 'Elastic Load Balancing のスケーリング戦略',
+                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/scaling-strategies-for-elastic-load-balancing/',
+                  note: 'Networking: Advanced (Level 300)',
+                  recommend: true,
+                },
+                {
+                  title: 'Network Load Balancer における QUIC プロトコルのサポートの導入',
+                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/introducing-quic-protocol-support-for-network-load-balancer-accelerating-mobile-first-applications/',
+                  note: 'Networking: Introductory (Level 100)',
+                },
+                {
+                  title: 'Gateway Load Balancer を使用したネットワークトラフィック検査のスケーリング',
+                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/scaling-network-traffic-inspection-using-aws-gateway-load-balancer/',
+                  note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'Gateway Load Balancerのデプロイに関するベストプラクティス',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/best-practices-for-deploying-gateway-load-balancer/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Amazon EKS 上での AWS Load Balancer Controller のデプロイ',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/deploying-aws-load-balancer-controller-on-amazon-eks/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'CloudFront と AWS Global Accelerator を使用してオンラインアプリケーションを適切に設計する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/well-architecting-online-applications-with-cloudfront-and-aws-global-accelerator/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
+                },
+                {
+                    title: 'AWS Global Accelerator を使用してアプリケーションの回復力を最大化する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/maximising-application-resiliency-with-aws-global-accelerator/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
                 },
               ],
             },
@@ -111,15 +155,31 @@ export const ANS_C01 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-                  url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-                  note: 'Official Guide: DX Resiliency',
+                    title: 'ALB のターゲットグループ',
+                    url: 'https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/application/load-balancer-target-groups.html',
+                    note: 'Elastic Load Balancing: Target Groups',
                 },
+                {
+                    title: 'NLB のターゲットグループ',
+                    url: 'https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/network/load-balancer-target-groups.html',
+                    note: 'Elastic Load Balancing: Target Groups',
+                },
+                {
+                    title: 'GWLB のターゲットグループ',
+                    url: 'https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/gateway/target-groups.html',
+                    note: 'Elastic Load Balancing: Target Groups',
+                },
+                {
+                    title: 'ALB、NLB、GWLB の違い',
+                    url: 'https://aws.amazon.com/jp/compare/the-difference-between-the-difference-between-application-network-and-gateway-load-balancing/',
+                    note: 'Official Docs: Load Balancing Comparison',
+                    recommend: true,
+                }
               ],
             },
           ],
         },
-                {
+        {
           id: '1.4',
           title: ' Define logging and monitoring requirements across AWS and hybrid networks.',
           jpTitle: 'AWS とハイブリッドネットワーク全体でログ記録とモニタリングの要件を定義する。',

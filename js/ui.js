@@ -1,5 +1,4 @@
 import { callGemini } from './gemini.js';
-import { RESOURCE_SECTION_CONFIG } from './config.js';
 import { getApiKey, saveApiKeyFromInput, clearApiKey } from './storage.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 
@@ -383,8 +382,7 @@ function renderContent({ els, exam, state }) {
       card.appendChild(header);
 
       const body = document.createElement('div');
-      const sectionConfig = exam.resourceSectionConfig || RESOURCE_SECTION_CONFIG;
-      const resourceSections = buildResourceSections({ task, sectionConfig });
+      const resourceSections = buildResourceSections(task);
       const hasResources = resourceSections.length > 0;
       body.className = hasResources ? 'p-5 grid md:grid-cols-2 gap-6' : 'p-5';
 
@@ -511,162 +509,27 @@ function renderResourceSection({ title, iconClass, iconColorClass, items, term }
   `;
 }
 
-function buildResourceSections({ task, sectionConfig }) {
-  const { itemsByKey, metaByKey, explicitUrlsByKey } = collectResourcesByKey(task);
+function buildResourceSections(task) {
+  const nested = task?.resources;
+  if (!Array.isArray(nested) || nested.length === 0) return [];
 
-  const config = sectionConfig && typeof sectionConfig === 'object' ? sectionConfig : {};
-  const defs = config.sections && typeof config.sections === 'object' ? config.sections : {};
-  const order = Array.isArray(config.order) ? config.order : Object.keys(defs);
-  const showUnknownKeys = config.showUnknownKeys !== false;
-  const unknownDefaults = config.unknownDefaults && typeof config.unknownDefaults === 'object' ? config.unknownDefaults : {};
-
-  const consumedUrls = new Set();
   const sections = [];
+  for (const group of nested) {
+    if (!group || typeof group !== 'object') continue;
 
-  for (const key of order) {
-    const def = defs[key] || {};
-    const meta = metaByKey[key] || {};
-    const items = collectSectionItems({
-      sectionKey: key,
-      sectionDef: def,
-      resourcesByKey: itemsByKey,
-      explicitUrlsByKey,
-      consumedUrls,
-    });
+    const key = String(group.key || group.id || group.type || '').trim();
+    const title = String(group.label || group.title || '').trim() || (key ? humanizeKey(key) : 'Resources');
+    const iconClass = typeof group.iconClass === 'string' ? group.iconClass : '';
+    const iconColorClass = typeof group.iconColorClass === 'string' ? group.iconColorClass : '';
+
+    const rawItems = group.items || group.links || group.resources || [];
+    const items = uniqByUrl(normalizeResourceItems(rawItems));
     if (!items.length) continue;
-    sections.push({
-      key,
-      title: meta.label || def.label || humanizeKey(key),
-      iconClass: meta.iconClass ?? def.iconClass ?? '',
-      iconColorClass: meta.iconColorClass ?? def.iconColorClass ?? '',
-      items,
-    });
-  }
 
-  if (showUnknownKeys) {
-    for (const [key, items] of Object.entries(itemsByKey)) {
-      if (order.includes(key)) continue;
-      const remaining = items.filter((item) => !consumedUrls.has(item.url));
-      if (!remaining.length) continue;
-      const def = defs[key] || {};
-      const meta = metaByKey[key] || {};
-      remaining.forEach((item) => consumedUrls.add(item.url));
-      sections.push({
-        key,
-        title: meta.label || def.label || humanizeKey(key),
-        iconClass: meta.iconClass ?? def.iconClass ?? unknownDefaults.iconClass ?? '',
-        iconColorClass: meta.iconColorClass ?? def.iconColorClass ?? unknownDefaults.iconColorClass ?? '',
-        items: remaining,
-      });
-    }
+    sections.push({ key, title, iconClass, iconColorClass, items });
   }
 
   return sections;
-}
-
-function collectSectionItems({ sectionKey, sectionDef, resourcesByKey, explicitUrlsByKey, consumedUrls }) {
-  const sources = Array.isArray(sectionDef.sources) && sectionDef.sources.length ? sectionDef.sources : [sectionKey];
-  let items = [];
-
-  for (const sourceKey of sources) {
-    items = items.concat(resourcesByKey[sourceKey] || []);
-  }
-
-  if (Array.isArray(sectionDef.pickFrom)) {
-    for (const rule of sectionDef.pickFrom) {
-      if (!rule || typeof rule !== 'object') continue;
-      const fromKey = rule.key;
-      if (!fromKey) continue;
-      let candidates = resourcesByKey[fromKey] || [];
-
-      // 明示グループ（task.resources 配列）からは、勝手に別セクションへ吸い上げない。
-      // 必要なら rule.allowPickFromExplicit = true を設定する。
-      if (!rule.allowPickFromExplicit) {
-        const explicit = explicitUrlsByKey && explicitUrlsByKey[fromKey];
-        if (explicit && explicit.size) {
-          candidates = candidates.filter((c) => !explicit.has(c.url));
-        }
-      }
-      items = items.concat(filterByPatterns(candidates, rule));
-    }
-  }
-
-  items = uniqByUrl(items);
-
-  // task.resources 配列で明示的に所属が決められているアイテムは、
-  // UI都合の excludePatterns/includePatterns で除外しない（データを優先）。
-  // 例外的に適用したい場合は sectionDef.applyPatternsToExplicit = true
-  const explicitSet = explicitUrlsByKey && explicitUrlsByKey[sectionKey];
-  if (explicitSet && explicitSet.size && !sectionDef.applyPatternsToExplicit) {
-    const explicitItems = items.filter((i) => explicitSet.has(i.url));
-    const implicitItems = items.filter((i) => !explicitSet.has(i.url));
-    items = explicitItems.concat(filterByPatterns(implicitItems, sectionDef));
-  } else {
-    items = filterByPatterns(items, sectionDef);
-  }
-
-  items = items.filter((item) => !consumedUrls.has(item.url));
-  items.forEach((item) => consumedUrls.add(item.url));
-  return items;
-}
-
-function collectResourcesByKey(task) {
-  const itemsByKey = {};
-  const metaByKey = {};
-  const explicitUrlsByKey = {};
-
-  if (task && typeof task === 'object') {
-    const nested = task.resources;
-    // 新形式: resources が配列（画面のセクション単位）
-    // 例: resources: [{ key: 'blogs', label: 'ブログ', iconClass: '', iconColorClass: '', items: [...] }, ...]
-    if (Array.isArray(nested)) {
-      for (const group of nested) {
-        if (!group || typeof group !== 'object') continue;
-
-        const key = String(group.key || group.id || group.type || '').trim();
-        if (!key) continue;
-
-        const rawItems = group.items || group.links || group.resources || [];
-        if (!looksLikeResourceArray(rawItems)) continue;
-
-        const normalized = normalizeResourceItems(rawItems);
-        if (!normalized.length) continue;
-
-        itemsByKey[key] = (itemsByKey[key] || []).concat(normalized);
-
-        // 明示グループに属するURLを記録（再分類を抑止するため）
-        if (!explicitUrlsByKey[key]) explicitUrlsByKey[key] = new Set();
-        for (const item of normalized) explicitUrlsByKey[key].add(item.url);
-
-        // 見た目の上書き（任意）
-        const meta = metaByKey[key] || {};
-        if (typeof group.label === 'string' && group.label.trim()) meta.label = group.label.trim();
-        if (typeof group.iconClass === 'string') meta.iconClass = group.iconClass;
-        if (typeof group.iconColorClass === 'string') meta.iconColorClass = group.iconColorClass;
-        metaByKey[key] = meta;
-      }
-    }
-
-    // 旧形式: resources がオブジェクト（key -> items[]）
-    if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
-      for (const [key, value] of Object.entries(nested)) {
-        if (looksLikeResourceArray(value)) {
-          itemsByKey[key] = (itemsByKey[key] || []).concat(normalizeResourceItems(value));
-        }
-      }
-    }
-  }
-
-  for (const key of Object.keys(itemsByKey)) {
-    itemsByKey[key] = uniqByUrl(itemsByKey[key]);
-  }
-
-  return { itemsByKey, metaByKey, explicitUrlsByKey };
-}
-
-function looksLikeResourceArray(value) {
-  if (!Array.isArray(value) || value.length === 0) return false;
-  return value.every((item) => item && typeof item === 'object' && typeof item.title === 'string' && typeof item.url === 'string');
 }
 
 function normalizeResourceItems(items) {
@@ -691,30 +554,6 @@ function uniqByUrl(items) {
     out.push(item);
   }
   return out;
-}
-
-function filterByPatterns(items, def) {
-  const include = Array.isArray(def.includePatterns) ? def.includePatterns : [];
-  const exclude = Array.isArray(def.excludePatterns) ? def.excludePatterns : [];
-
-  return (items || []).filter((item) => {
-    const hay = `${item.title}\n${item.url}\n${item.note || ''}`;
-    if (include.length && !matchAnyPattern(hay, include)) return false;
-    if (exclude.length && matchAnyPattern(hay, exclude)) return false;
-    return true;
-  });
-}
-
-function matchAnyPattern(text, patterns) {
-  for (const p of patterns) {
-    try {
-      const re = p instanceof RegExp ? p : new RegExp(String(p), 'i');
-      if (re.test(text)) return true;
-    } catch {
-      // ignore invalid patterns
-    }
-  }
-  return false;
 }
 
 function humanizeKey(key) {
