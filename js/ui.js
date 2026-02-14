@@ -1,4 +1,5 @@
 import { callGemini } from './gemini.js';
+import { RESOURCE_SECTION_CONFIG } from './config.js';
 import { getApiKey, saveApiKeyFromInput, clearApiKey } from './storage.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 
@@ -369,7 +370,10 @@ function renderContent({ els, exam, state }) {
       card.appendChild(header);
 
       const body = document.createElement('div');
-      body.className = 'p-5 grid md:grid-cols-2 gap-6';
+      const sectionConfig = exam.resourceSectionConfig || RESOURCE_SECTION_CONFIG;
+      const resourceSections = buildResourceSections({ task, sectionConfig });
+      const hasResources = resourceSections.length > 0;
+      body.className = hasResources ? 'p-5 grid md:grid-cols-2 gap-6' : 'p-5';
 
       const knowledgeCol = document.createElement('div');
       knowledgeCol.innerHTML = `
@@ -381,19 +385,28 @@ function renderContent({ els, exam, state }) {
         </ul>
       `;
 
-      const resourceCol = document.createElement('div');
-      resourceCol.className = 'bg-orange-50 rounded-lg p-4 border border-orange-100';
-      resourceCol.innerHTML = `
-        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <i class="fas fa-book text-orange-500"></i> 推奨AWSブログ記事
-        </h4>
-        <div class="space-y-3">
-          ${(task.blogs || []).map((blog) => renderBlogCard({ blog, term })).join('')}
-        </div>
-      `;
-
       body.appendChild(knowledgeCol);
-      body.appendChild(resourceCol);
+
+      if (hasResources) {
+        const resourceCol = document.createElement('div');
+        resourceCol.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200';
+        resourceCol.innerHTML = `
+          <div class="space-y-5">
+            ${resourceSections
+              .map((section) =>
+                renderResourceSection({
+                  title: section.title,
+                  iconClass: section.iconClass,
+                  iconColorClass: section.iconColorClass,
+                  items: section.items,
+                  term,
+                })
+              )
+              .join('')}
+          </div>
+        `;
+        body.appendChild(resourceCol);
+      }
       card.appendChild(body);
       els.contentArea.appendChild(card);
     }
@@ -448,6 +461,236 @@ function renderBlogCard({ blog, term }) {
       </div>
     </div>
   `;
+}
+
+function renderResourceSection({ title, iconClass, iconColorClass, items, term }) {
+  if (!items || items.length === 0) return '';
+  const safeTitle = escapeHtml(title);
+  const rows = (items || []).map((blog) => renderBlogCard({ blog, term })).join('');
+  const icon = iconClass
+    ? `<i class="${escapeHtml(iconClass)} ${escapeHtml(iconColorClass || '')}"></i>`
+    : '';
+  return `
+    <section>
+      <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+        ${icon} ${safeTitle}
+      </h4>
+      <div class="space-y-3">
+        ${rows}
+      </div>
+    </section>
+  `;
+}
+
+function buildResourceSections({ task, sectionConfig }) {
+  const { itemsByKey, metaByKey, explicitUrlsByKey } = collectResourcesByKey(task);
+
+  const config = sectionConfig && typeof sectionConfig === 'object' ? sectionConfig : {};
+  const defs = config.sections && typeof config.sections === 'object' ? config.sections : {};
+  const order = Array.isArray(config.order) ? config.order : Object.keys(defs);
+  const showUnknownKeys = config.showUnknownKeys !== false;
+  const unknownDefaults = config.unknownDefaults && typeof config.unknownDefaults === 'object' ? config.unknownDefaults : {};
+
+  const consumedUrls = new Set();
+  const sections = [];
+
+  for (const key of order) {
+    const def = defs[key] || {};
+    const meta = metaByKey[key] || {};
+    const items = collectSectionItems({
+      sectionKey: key,
+      sectionDef: def,
+      resourcesByKey: itemsByKey,
+      explicitUrlsByKey,
+      consumedUrls,
+    });
+    if (!items.length) continue;
+    sections.push({
+      key,
+      title: meta.label || def.label || humanizeKey(key),
+      iconClass: meta.iconClass ?? def.iconClass ?? '',
+      iconColorClass: meta.iconColorClass ?? def.iconColorClass ?? '',
+      items,
+    });
+  }
+
+  if (showUnknownKeys) {
+    for (const [key, items] of Object.entries(itemsByKey)) {
+      if (order.includes(key)) continue;
+      const remaining = items.filter((item) => !consumedUrls.has(item.url));
+      if (!remaining.length) continue;
+      const def = defs[key] || {};
+      const meta = metaByKey[key] || {};
+      remaining.forEach((item) => consumedUrls.add(item.url));
+      sections.push({
+        key,
+        title: meta.label || def.label || humanizeKey(key),
+        iconClass: meta.iconClass ?? def.iconClass ?? unknownDefaults.iconClass ?? '',
+        iconColorClass: meta.iconColorClass ?? def.iconColorClass ?? unknownDefaults.iconColorClass ?? '',
+        items: remaining,
+      });
+    }
+  }
+
+  return sections;
+}
+
+function collectSectionItems({ sectionKey, sectionDef, resourcesByKey, explicitUrlsByKey, consumedUrls }) {
+  const sources = Array.isArray(sectionDef.sources) && sectionDef.sources.length ? sectionDef.sources : [sectionKey];
+  let items = [];
+
+  for (const sourceKey of sources) {
+    items = items.concat(resourcesByKey[sourceKey] || []);
+  }
+
+  if (Array.isArray(sectionDef.pickFrom)) {
+    for (const rule of sectionDef.pickFrom) {
+      if (!rule || typeof rule !== 'object') continue;
+      const fromKey = rule.key;
+      if (!fromKey) continue;
+      let candidates = resourcesByKey[fromKey] || [];
+
+      // 明示グループ（task.resources 配列）からは、勝手に別セクションへ吸い上げない。
+      // 必要なら rule.allowPickFromExplicit = true を設定する。
+      if (!rule.allowPickFromExplicit) {
+        const explicit = explicitUrlsByKey && explicitUrlsByKey[fromKey];
+        if (explicit && explicit.size) {
+          candidates = candidates.filter((c) => !explicit.has(c.url));
+        }
+      }
+      items = items.concat(filterByPatterns(candidates, rule));
+    }
+  }
+
+  items = uniqByUrl(items);
+
+  // task.resources 配列で明示的に所属が決められているアイテムは、
+  // UI都合の excludePatterns/includePatterns で除外しない（データを優先）。
+  // 例外的に適用したい場合は sectionDef.applyPatternsToExplicit = true
+  const explicitSet = explicitUrlsByKey && explicitUrlsByKey[sectionKey];
+  if (explicitSet && explicitSet.size && !sectionDef.applyPatternsToExplicit) {
+    const explicitItems = items.filter((i) => explicitSet.has(i.url));
+    const implicitItems = items.filter((i) => !explicitSet.has(i.url));
+    items = explicitItems.concat(filterByPatterns(implicitItems, sectionDef));
+  } else {
+    items = filterByPatterns(items, sectionDef);
+  }
+
+  items = items.filter((item) => !consumedUrls.has(item.url));
+  items.forEach((item) => consumedUrls.add(item.url));
+  return items;
+}
+
+function collectResourcesByKey(task) {
+  const itemsByKey = {};
+  const metaByKey = {};
+  const explicitUrlsByKey = {};
+
+  if (task && typeof task === 'object') {
+    const nested = task.resources;
+    // 新形式: resources が配列（画面のセクション単位）
+    // 例: resources: [{ key: 'blogs', label: 'ブログ', iconClass: '', iconColorClass: '', items: [...] }, ...]
+    if (Array.isArray(nested)) {
+      for (const group of nested) {
+        if (!group || typeof group !== 'object') continue;
+
+        const key = String(group.key || group.id || group.type || '').trim();
+        if (!key) continue;
+
+        const rawItems = group.items || group.links || group.resources || [];
+        if (!looksLikeResourceArray(rawItems)) continue;
+
+        const normalized = normalizeResourceItems(rawItems);
+        if (!normalized.length) continue;
+
+        itemsByKey[key] = (itemsByKey[key] || []).concat(normalized);
+
+        // 明示グループに属するURLを記録（再分類を抑止するため）
+        if (!explicitUrlsByKey[key]) explicitUrlsByKey[key] = new Set();
+        for (const item of normalized) explicitUrlsByKey[key].add(item.url);
+
+        // 見た目の上書き（任意）
+        const meta = metaByKey[key] || {};
+        if (typeof group.label === 'string' && group.label.trim()) meta.label = group.label.trim();
+        if (typeof group.iconClass === 'string') meta.iconClass = group.iconClass;
+        if (typeof group.iconColorClass === 'string') meta.iconColorClass = group.iconColorClass;
+        metaByKey[key] = meta;
+      }
+    }
+
+    // 旧形式: resources がオブジェクト（key -> items[]）
+    if (nested && typeof nested === 'object' && !Array.isArray(nested)) {
+      for (const [key, value] of Object.entries(nested)) {
+        if (looksLikeResourceArray(value)) {
+          itemsByKey[key] = (itemsByKey[key] || []).concat(normalizeResourceItems(value));
+        }
+      }
+    }
+  }
+
+  for (const key of Object.keys(itemsByKey)) {
+    itemsByKey[key] = uniqByUrl(itemsByKey[key]);
+  }
+
+  return { itemsByKey, metaByKey, explicitUrlsByKey };
+}
+
+function looksLikeResourceArray(value) {
+  if (!Array.isArray(value) || value.length === 0) return false;
+  return value.every((item) => item && typeof item === 'object' && typeof item.title === 'string' && typeof item.url === 'string');
+}
+
+function normalizeResourceItems(items) {
+  return (items || [])
+    .filter((item) => item && typeof item === 'object')
+    .map((item) => ({
+      title: String(item.title || ''),
+      url: String(item.url || ''),
+      note: String(item.note || ''),
+    }))
+    .filter((item) => item.title && item.url);
+}
+
+function uniqByUrl(items) {
+  const seen = new Set();
+  const out = [];
+  for (const item of items || []) {
+    if (!item || !item.url) continue;
+    if (seen.has(item.url)) continue;
+    seen.add(item.url);
+    out.push(item);
+  }
+  return out;
+}
+
+function filterByPatterns(items, def) {
+  const include = Array.isArray(def.includePatterns) ? def.includePatterns : [];
+  const exclude = Array.isArray(def.excludePatterns) ? def.excludePatterns : [];
+
+  return (items || []).filter((item) => {
+    const hay = `${item.title}\n${item.url}\n${item.note || ''}`;
+    if (include.length && !matchAnyPattern(hay, include)) return false;
+    if (exclude.length && matchAnyPattern(hay, exclude)) return false;
+    return true;
+  });
+}
+
+function matchAnyPattern(text, patterns) {
+  for (const p of patterns) {
+    try {
+      const re = p instanceof RegExp ? p : new RegExp(String(p), 'i');
+      if (re.test(text)) return true;
+    } catch {
+      // ignore invalid patterns
+    }
+  }
+  return false;
+}
+
+function humanizeKey(key) {
+  return String(key)
+    .replace(/[-_]+/g, ' ')
+    .replace(/\b\w/g, (m) => m.toUpperCase());
 }
 
 function highlightHtml(escapedText, termLower) {
