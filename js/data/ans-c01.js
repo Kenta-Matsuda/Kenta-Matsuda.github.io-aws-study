@@ -142,6 +142,7 @@ export const ANS_C01 = {
                   title: 'VPC トラフィックミラーリングを使用して AWS インフラストラクチャを監視および保護する',
                   url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
                   note: 'VPC Traffic Mirroring: Intermediate (Level 200)',
+                  recommend: true,
                 },
                 {
                   title: 'Amazon CloudWatch Internet Monitorを使用して、アプリケーションのインターネットパフォーマンスに対するエンドツーエンドの可視性を実現する',
@@ -237,6 +238,7 @@ export const ANS_C01 = {
                     title: 'Direct Connect を使用したアクティブ/パッシブな BGP 接続の作成',
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
                     note: 'Networking: Intermediate (Level 200)',
+                    recommend: true,
                 },
                 {
                     title: 'Direct Connect 接続への MACsec セキュリティの追加',
@@ -247,11 +249,13 @@ export const ANS_C01 = {
                     title: 'データセンターからクラウド接続までの AWS Direct Connect レイヤー 1 の説明',
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/aws-direct-connect-layer-1-explained-from-data-centers-to-cloud-connectivity/',
                     note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
                 },
                 {
                     title: 'AWS Direct Connect Gateway を使用したハイブリッドクラウドアーキテクチャ',
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
                     note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
                 },
                 {
                     title: 'Citrix SD-WAN と AWS Transit Gateway Connect を使用してハイブリッドクラウドを導入する',
@@ -313,6 +317,7 @@ export const ANS_C01 = {
                     title: 'Direct Connect ルーティングポリシーと BGP コミュニティ',
                     url: 'https://docs.aws.amazon.com/ja_jp/directconnect/latest/UserGuide/routing-and-bgp.html',
                     note: 'Direct Connect User Guide',
+                    recommend: true,
                 }
               ],
             },
