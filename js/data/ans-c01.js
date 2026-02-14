@@ -23,21 +23,29 @@ export const ANS_C01 = {
             'Edge security (WAF, Shield)',
             'Lambda@Edge functions',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Global Acceleratorでアプリケーションのパフォーマンスを向上させる',
-              url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/use-aws-global-accelerator-to-improve-application-performance/',
-              note: 'Official Blog: Availability & Performance',
-            },
-            {
-              title: '複数のリージョンにまたがるアクティブ/アクティブなアーキテクチャの構築',
-              url: 'https://aws.amazon.com/blogs/storage/building-an-active-active-latency-based-application-across-multiple-regions/',
-              note: 'Official Blog: Multi-Region Architecture',
-            },
-            {
-              title: 'CloudFrontとWAFを使用してウェブサイトを高速化および保護する',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/accelerate-and-protect-your-websites-using-amazon-cloudfront-and-aws-waf/',
-              note: 'Official Blog: Security & Acceleration',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Global Acceleratorでアプリケーションのパフォーマンスを向上させる',
+                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/use-aws-global-accelerator-to-improve-application-performance/',
+                  note: 'Official Blog: Availability & Performance',
+                },
+                {
+                  title: '複数のリージョンにまたがるアクティブ/アクティブなアーキテクチャの構築',
+                  url: 'https://aws.amazon.com/blogs/storage/building-an-active-active-latency-based-application-across-multiple-regions/',
+                  note: 'Official Blog: Multi-Region Architecture',
+                },
+                {
+                  title: 'CloudFrontとWAFを使用してウェブサイトを高速化および保護する',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/accelerate-and-protect-your-websites-using-amazon-cloudfront-and-aws-waf/',
+                  note: 'Official Blog: Security & Acceleration',
+                },
+              ],
             },
           ],
         },
@@ -51,16 +59,24 @@ export const ANS_C01 = {
             'DNSSEC, TTL, Aliases',
             'Hybrid DNS architectures',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Route 53 Resolverエンドポイントを使用したDNS高可用性の実現',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/how-to-achieve-dns-high-availability-with-route-53-resolver-endpoints/',
-              note: 'Official Blog: DNS High Availability',
-            },
-            {
-              title: 'Route 53とTransit Gatewayを使用したハイブリッドクラウドのDNS一元管理',
-              url: 'https://aws.amazon.com/blogs/security/centralized-dns-management-of-hybrid-cloud-with-amazon-route-53-and-aws-transit-gateway/',
-              note: 'Official Blog: Centralized Management',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Route 53 Resolverエンドポイントを使用したDNS高可用性の実現',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/how-to-achieve-dns-high-availability-with-route-53-resolver-endpoints/',
+                  note: 'Official Blog: DNS High Availability',
+                },
+                {
+                  title: 'Route 53とTransit Gatewayを使用したハイブリッドクラウドのDNS一元管理',
+                  url: 'https://aws.amazon.com/blogs/security/centralized-dns-management-of-hybrid-cloud-with-amazon-route-53-and-aws-transit-gateway/',
+                  note: 'Official Blog: Centralized Management',
+                },
+              ],
             },
           ],
         },
@@ -74,16 +90,32 @@ export const ANS_C01 = {
             'Transit Gateway connect attachments',
             'Direct Connect MACsec',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-              note: 'Official Blog: VPN Architecture',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
+                  note: 'Official Blog: VPN Architecture',
+                },
+              ],
             },
             {
-              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-              note: 'Official Guide: DX Resiliency',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'AWS Direct Connect の耐障害性に関する推奨事項',
+                  url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
+                  note: 'Official Guide: DX Resiliency',
+                },
+              ],
             },
           ],
         },
@@ -97,39 +129,143 @@ export const ANS_C01 = {
             'Transit Gateway connect attachments',
             'Direct Connect MACsec',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-              note: 'Official Blog: VPN Architecture',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
+                  note: 'Official Blog: VPN Architecture',
+                },
+              ],
             },
             {
-              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-              note: 'Official Guide: DX Resiliency',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'AWS Direct Connect の耐障害性に関する推奨事項',
+                  url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
+                  note: 'Official Guide: DX Resiliency',
+                },
+              ],
             },
           ],
         },
-                {
+        {
           id: '1.5',
           title: 'Design a routing strategy and connectivity architecture between on-premises networks and the AWS Cloud.',
           jpTitle: ' オンプレミスネットワークと AWS クラウド間のルーティング戦略と接続アーキテクチャを設計する。',
           knowledge: [
-            'Direct Connect (DX) gateway',
-            'Site-to-Site VPN',
-            'Transit Gateway connect attachments',
-            'Direct Connect MACsec',
+            'BGP',
+            'BGP routing (ASN, prefixes, MED, AS_PATH)',
+            'スタティックルーティングとダイナミックルーティング',
+            'VLAN',
+            'リンクアグリゲーション（LAG）',
+            'ジャンボフレーム (MTU)',
+            'Generic Routing Encapsulation (GRE)',
+            'IPsec',
+            'ハイブリッド接続',
+            'トラフィックパターン（ロードシェアリング、アクティブ/パッシブ）',
+            'SD-WAN',
+            'オーバーレイネットワーク',
+            'Transit Gateway Connect',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-              note: 'Official Blog: VPN Architecture',
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                    title: 'Direct Connect を使用したアクティブ/パッシブな BGP 接続の作成',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Direct Connect 接続への MACsec セキュリティの追加',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/adding-macsec-security-to-aws-direct-connect-connections/',
+                    note: 'Networking: Foundational (Level 100)',
+                },
+                {
+                    title: 'データセンターからクラウド接続までの AWS Direct Connect レイヤー 1 の説明',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/aws-direct-connect-layer-1-explained-from-data-centers-to-cloud-connectivity/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'AWS Direct Connect Gateway を使用したハイブリッドクラウドアーキテクチャ',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'Citrix SD-WAN と AWS Transit Gateway Connect を使用してハイブリッドクラウドを導入する',
+                    url: 'https://aws.amazon.com/blogs/apn/embracing-hybrid-cloud-with-citrix-sd-wan-and-aws-transit-gateway-connect/',
+                    note: 'APN Blogs: Intermediate (Level 200)',
+                },
+                {
+                    title: 'SD-WAN デバイスを AWS Transit Gateway と AWS Direct Connect に統合する',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/integrate-sd-wan-devices-with-aws-transit-gateway-and-aws-direct-connect/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'AWS Transit Gateway Connect を使用したハイブリッドネットワークのセグメンテーション',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/segmenting-hybrid-networks-with-aws-transit-gateway-connect/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'AWS site-to-site VPN: パフォーマンスを最適化するための適切なオプション',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/aws-site-to-site-vpn-choosing-the-right-options-to-optimize-performance/',
+                    note: 'Networking: Expert (Level 400)',
+                }
+              ],
             },
             {
-              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-              note: 'Official Guide: DX Resiliency',
+                key: 'whitepapers',
+                label: 'AWS Whitepapers',
+                iconClass: 'fas fa-file-alt',
+                iconColorClass: 'text-green-500',
+                items: [
+                  {
+                    title: 'ハイブリッド接続',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/hybrid-connectivity/hybrid-connectivity.html',
+                    note: 'Hybrid Connectivity',
+                  },
+                  {
+                    title: 'スケーラブルで安全なマルチVPCネットワークインフラストラクチャの構築',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/direct-connect.html',
+                    note: 'Building a Scalable and Secure Multi-VPC Network Infrastructure',
+                  },
+                  {
+                    title: 'リモートネットワークから Amazon VPC への接続オプション',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-vpc-connectivity-options/network-to-amazon-vpc-connectivity-options.html',
+                    note: 'VPC Connectivity Options',
+                  }
+                ],
+            },
+            {
+              key: 'guides',
+              label: 'ユーザーガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                    title: 'Direct Connect VIF（仮想インターフェース） とホスト型 VIF',
+                    url: 'https://docs.aws.amazon.com/ja_jp/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html',
+                    note: 'Direct Connect User Guide',
+                },
+                {
+                    title: 'Direct Connect ルーティングポリシーと BGP コミュニティ',
+                    url: 'https://docs.aws.amazon.com/ja_jp/directconnect/latest/UserGuide/routing-and-bgp.html',
+                    note: 'Direct Connect User Guide',
+                }
+              ],
             },
           ],
         },
@@ -143,16 +279,32 @@ export const ANS_C01 = {
             'Transit Gateway connect attachments',
             'Direct Connect MACsec',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-              note: 'Official Blog: VPN Architecture',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
+                  note: 'Official Blog: VPN Architecture',
+                },
+              ],
             },
             {
-              title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-              url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-              note: 'Official Guide: DX Resiliency',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'AWS Direct Connect の耐障害性に関する推奨事項',
+                  url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
+                  note: 'Official Guide: DX Resiliency',
+                },
+              ],
             },
           ],
         },
@@ -176,16 +328,32 @@ export const ANS_C01 = {
             'VPC Peering vs TGW',
             'IPv6 implementation',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Gateway Load BalancerとTransit Gatewayを使用した集中型検査アーキテクチャ',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/centralized-inspection-architecture-with-aws-gateway-load-balancer-and-aws-transit-gateway/',
-              note: 'Official Blog: Traffic Inspection',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Gateway Load BalancerとTransit Gatewayを使用した集中型検査アーキテクチャ',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/centralized-inspection-architecture-with-aws-gateway-load-balancer-and-aws-transit-gateway/',
+                  note: 'Official Blog: Traffic Inspection',
+                },
+              ],
             },
             {
-              title: 'Direct Connect ルーティングポリシーと BGP コミュニティ',
-              url: 'https://docs.aws.amazon.com/ja_jp/directconnect/latest/UserGuide/routing-and-bgp.html',
-              note: 'Official Docs: Routing Policies',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'Direct Connect ルーティングポリシーと BGP コミュニティ',
+                  url: 'https://docs.aws.amazon.com/ja_jp/directconnect/latest/UserGuide/routing-and-bgp.html',
+                  note: 'Official Docs: Routing Policies',
+                },
+              ],
             },
           ],
         },
@@ -199,16 +367,32 @@ export const ANS_C01 = {
             'Load Balancers (NLB, ALB, GWLB)',
             'EKS CNI networking',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
-              url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
-              note: 'Official Blog: PrivateLink Security',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
+                  url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
+                  note: 'Official Blog: PrivateLink Security',
+                },
+              ],
             },
             {
-              title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
-              url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
-              note: 'Official Docs: EKS VPC CNI',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
+                  url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
+                  note: 'Official Docs: EKS VPC CNI',
+                },
+              ],
             },
           ],
         },
@@ -222,16 +406,32 @@ export const ANS_C01 = {
             'Load Balancers (NLB, ALB, GWLB)',
             'EKS CNI networking',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
-              url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
-              note: 'Official Blog: PrivateLink Security',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
+                  url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
+                  note: 'Official Blog: PrivateLink Security',
+                },
+              ],
             },
             {
-              title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
-              url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
-              note: 'Official Docs: EKS VPC CNI',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
+                  url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
+                  note: 'Official Docs: EKS VPC CNI',
+                },
+              ],
             },
           ],
         },
@@ -245,16 +445,32 @@ export const ANS_C01 = {
             'Load Balancers (NLB, ALB, GWLB)',
             'EKS CNI networking',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
-              url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
-              note: 'Official Blog: PrivateLink Security',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
+                  url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
+                  note: 'Official Blog: PrivateLink Security',
+                },
+              ],
             },
             {
-              title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
-              url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
-              note: 'Official Docs: EKS VPC CNI',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
+                  url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
+                  note: 'Official Docs: EKS VPC CNI',
+                },
+              ],
             },
           ],
         },
@@ -277,16 +493,24 @@ export const ANS_C01 = {
             'VPC Traffic Mirroring',
             'CloudWatch Metrics/Alarms for network',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'Amazon Athena統合を使用してVPCフローログを分析する',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/analyze-vpc-flow-logs-with-point-and-click-amazon-athena-integration/',
-              note: 'Official Blog: Flow Logs Analysis',
-            },
-            {
-              title: 'VPCトラフィックミラーリングを使用してAWSインフラストラクチャを監視および保護する',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
-              note: 'Official Blog: Traffic Mirroring',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Amazon Athena統合を使用してVPCフローログを分析する',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/analyze-vpc-flow-logs-with-point-and-click-amazon-athena-integration/',
+                  note: 'Official Blog: Flow Logs Analysis',
+                },
+                {
+                  title: 'VPCトラフィックミラーリングを使用してAWSインフラストラクチャを監視および保護する',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
+                  note: 'Official Blog: Traffic Mirroring',
+                },
+              ],
             },
           ],
         },
@@ -299,11 +523,19 @@ export const ANS_C01 = {
             'Jumbo frames (MTU)',
             'Enhanced Networking (ENA, EFA)',
           ],
-          blogs: [
+          resources: [
             {
-              title: '一般的なアーキテクチャのデータ転送コストの概要',
-              url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
-              note: 'Official Blog: Cost Optimization',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: '一般的なアーキテクチャのデータ転送コストの概要',
+                  url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
+                  note: 'Official Blog: Cost Optimization',
+                },
+              ],
             },
           ],
         },
@@ -316,11 +548,19 @@ export const ANS_C01 = {
             'Jumbo frames (MTU)',
             'Enhanced Networking (ENA, EFA)',
           ],
-          blogs: [
+          resources: [
             {
-              title: '一般的なアーキテクチャのデータ転送コストの概要',
-              url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
-              note: 'Official Blog: Cost Optimization',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: '一般的なアーキテクチャのデータ転送コストの概要',
+                  url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
+                  note: 'Official Blog: Cost Optimization',
+                },
+              ],
             },
           ],
         },
@@ -344,16 +584,32 @@ export const ANS_C01 = {
             'WAF & Shield Advanced',
             'Encryption in transit (TLS, VPN, MACsec)',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'AWS Network Firewallのデプロイモデル',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
-              note: 'Official Blog: Firewall Deployment',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS Network Firewallのデプロイモデル',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
+                  note: 'Official Blog: Firewall Deployment',
+                },
+              ],
             },
             {
-              title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
-              url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
-              note: 'Official Whitepaper: DDoS Mitigation',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
+                  url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
+                  note: 'Official Whitepaper: DDoS Mitigation',
+                },
+              ],
             },
           ],
         },
@@ -367,16 +623,32 @@ export const ANS_C01 = {
             'WAF & Shield Advanced',
             'Encryption in transit (TLS, VPN, MACsec)',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'AWS Network Firewallのデプロイモデル',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
-              note: 'Official Blog: Firewall Deployment',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS Network Firewallのデプロイモデル',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
+                  note: 'Official Blog: Firewall Deployment',
+                },
+              ],
             },
             {
-              title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
-              url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
-              note: 'Official Whitepaper: DDoS Mitigation',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
+                  url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
+                  note: 'Official Whitepaper: DDoS Mitigation',
+                },
+              ],
             },
           ],
         },
@@ -390,16 +662,32 @@ export const ANS_C01 = {
             'WAF & Shield Advanced',
             'Encryption in transit (TLS, VPN, MACsec)',
           ],
-          blogs: [
+          resources: [
             {
-              title: 'AWS Network Firewallのデプロイモデル',
-              url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
-              note: 'Official Blog: Firewall Deployment',
+              key: 'blogs',
+              label: 'ブログ',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS Network Firewallのデプロイモデル',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
+                  note: 'Official Blog: Firewall Deployment',
+                },
+              ],
             },
             {
-              title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
-              url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
-              note: 'Official Whitepaper: DDoS Mitigation',
+              key: 'guides',
+              label: '開発者ガイド',
+              iconClass: 'fas fa-book-open',
+              iconColorClass: 'text-blue-600',
+              items: [
+                {
+                  title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
+                  url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
+                  note: 'Official Whitepaper: DDoS Mitigation',
+                },
+              ],
             },
           ],
         },
