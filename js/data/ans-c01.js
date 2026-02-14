@@ -124,10 +124,12 @@ export const ANS_C01 = {
           title: ' Define logging and monitoring requirements across AWS and hybrid networks.',
           jpTitle: 'AWS とハイブリッドネットワーク全体でログ記録とモニタリングの要件を定義する。',
           knowledge: [
-            'Direct Connect (DX) gateway',
-            'Site-to-Site VPN',
-            'Transit Gateway connect attachments',
-            'Direct Connect MACsec',
+            'Amazon CloudWatch（メトリクス、エージェント、ログ、アラーム、ダッシュボード、インサイト）',
+            'AWS Transit Gateway Network Manager',
+            'VPC Reachability Analyzer',
+            'VPC Flow Logs',
+            'VPC Traffic Mirroring',
+            'Amazon CloudFront Access Logs',
           ],
           resources: [
             {
@@ -137,25 +139,71 @@ export const ANS_C01 = {
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-                  note: 'Official Blog: VPN Architecture',
+                  title: 'VPC トラフィックミラーリングを使用して AWS インフラストラクチャを監視および保護する',
+                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
+                  note: 'VPC Traffic Mirroring: Intermediate (Level 200)',
+                },
+                {
+                  title: 'Amazon CloudWatch Internet Monitorを使用して、アプリケーションのインターネットパフォーマンスに対するエンドツーエンドの可視性を実現する',
+                  url: 'https://aws.amazon.com/jp/blogs/aws/cloudwatch-internet-monitor-end-to-end-visibility-into-internet-performance-for-your-applications/',
+                  note: 'CloudWatch Internet Monitor: Introductory (Level 100)',
+                },
+                {
+                    title: 'AWS Transit Gateway Network Manager Route Analyzer を使用した高度なトラブルシューティング',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/advanced-troubleshooting-with-aws-transit-gateway-network-manager-route-analyzer/',
+                    note: 'Transit Gateway Network Manager Route Analyzer: Advanced (Level 300)',
+                },
+                {
+                    title: 'VPC Reachability Analyzer を使用した接続性評価の自動化',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/automating-connectivity-assessments-with-vpc-reachability-analyzer/',
+                    note: 'VPC Reachability Analyzer: Intermediate (Level 200)',
                 },
               ],
             },
             {
               key: 'guides',
-              label: '開発者ガイド',
+              label: 'ユーザーガイド',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-                  url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-                  note: 'Official Guide: DX Resiliency',
+                  title: 'VPC フローログを使用した IP トラフィックのログ記録',
+                  url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/flow-logs.html',
+                  note: 'Amazon VPC: VPC Flow Logs',
+                },
+                {
+                  title: 'VPC のモニタリング',
+                  url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/monitoring.html',
+                  note: 'Amazon VPC: VPC Monitoring',
                 },
               ],
             },
+            {
+                key: 're:post',
+                label: 'AWS re:Post',
+                iconClass: 'fas fa-comments',
+                iconColorClass: 'text-purple-500',
+                items: [
+                    {
+                        title: 'VPC フローログと VPC トラフィックミラーリングの違い',
+                        url: 'https://repost.aws/questions/QUlSBSyx_vR4W0skbgRfq3uA/vpc-flow-logs-difference-with-vpc-traffic-mirroring',
+                        note: 'VPC Flow Logs vs VPC Traffic Mirroring',
+                    },
+                ],
+            },
+            {
+                key: 'knowledge-center',
+                label: 'AWS Knowledge Center',
+                iconClass: 'fas fa-lightbulb',
+                iconColorClass: 'text-yellow-500',
+                items: [
+                    {
+                        title: 'Transit Gateway を使用した VPC 間通信のトラブルシューティングはどのように行いますか？',
+                        url: 'https://repost.aws/knowledge-center/transit-gateway-fix-vpc-connection',
+                        note: 'Troubleshooting VPC Communication with Transit Gateway',
+                    },
+                ],
+            }
           ],
         },
         {
