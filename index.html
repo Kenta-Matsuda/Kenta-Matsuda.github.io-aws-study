@@ -94,6 +94,39 @@
             animation: gradientBG 3s ease infinite;
         }
 
+        /* Recommended resource card ("おススメ") */
+        .recommend-card {
+            position: relative;
+            overflow: hidden;
+            border-color: #fdba74; /* orange-300 */
+            background: linear-gradient(135deg, rgba(255, 237, 213, 0.95), rgba(255, 255, 255, 0.95), rgba(254, 215, 170, 0.95));
+            background-size: 240% 240%;
+            animation: gradientBG 5s ease infinite;
+        }
+
+        /* subtle shimmer */
+        .recommend-card::before {
+            content: "";
+            position: absolute;
+            inset: -40% -60%;
+            background: linear-gradient(120deg, transparent 35%, rgba(255, 255, 255, 0.55) 50%, transparent 65%);
+            transform: translateX(-30%) rotate(8deg);
+            animation: recommendShimmer 2.8s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes recommendShimmer {
+            0% { transform: translateX(-55%) rotate(8deg); opacity: 0.0; }
+            35% { opacity: 0.35; }
+            60% { opacity: 0.12; }
+            100% { transform: translateX(35%) rotate(8deg); opacity: 0.0; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .recommend-card { animation: none; }
+            .recommend-card::before { animation: none; display: none; }
+        }
+
         @keyframes gradientBG {
             0% { background-position: 0% 50%; }
             50% { background-position: 100% 50%; }

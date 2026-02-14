@@ -175,6 +175,7 @@ export const ANS_C01 = {
                   title: 'VPC のモニタリング',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/monitoring.html',
                   note: 'Amazon VPC: VPC Monitoring',
+                  recommend: true,
                 },
               ],
             },

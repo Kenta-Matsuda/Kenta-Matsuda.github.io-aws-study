@@ -107,6 +107,10 @@ function wireGlobalUiHandlers({ els }) {
   // Exam dropdown
   els.examMenuBtn?.addEventListener('click', (e) => {
     e.preventDefault();
+    // 1つしか試験がない等で無効化されている場合は何もしない
+    if (els.examMenuBtn.disabled || els.examMenuBtn.getAttribute('aria-disabled') === 'true') {
+      return;
+    }
     toggleExamMenu(els);
   });
 
@@ -161,13 +165,22 @@ function renderExamSwitcher({ els, exams, state, onSelect }) {
   if (!exams || exams.length <= 1) {
     els.examSwitcher.innerHTML = '';
     els.examSwitcher.classList.add('hidden');
-    els.examMenuBtn?.classList.add('cursor-default');
+    closeExamMenu(els);
+    if (els.examMenuBtn) {
+      els.examMenuBtn.disabled = true;
+      els.examMenuBtn.setAttribute('aria-disabled', 'true');
+      els.examMenuBtn.classList.add('cursor-default', 'opacity-60');
+    }
     return;
   }
 
   els.examSwitcher.classList.remove('hidden');
   els.examSwitcher.innerHTML = '';
-  els.examMenuBtn?.classList.remove('cursor-default');
+  if (els.examMenuBtn) {
+    els.examMenuBtn.disabled = false;
+    els.examMenuBtn.removeAttribute('aria-disabled');
+    els.examMenuBtn.classList.remove('cursor-default', 'opacity-60');
+  }
 
   for (const exam of exams) {
     const btn = document.createElement('button');
@@ -444,17 +457,33 @@ function renderKnowledgeRow({ knowledge, term }) {
 }
 
 function renderBlogCard({ blog, term }) {
+  const isRecommended = blog?.recommend === true;
   const titleSafe = escapeHtml(blog.title);
   const title = highlightHtml(titleSafe, term);
   const urlSafe = escapeHtml(blog.url);
   const noteSafe = escapeHtml(blog.note);
 
+  const cardClass = isRecommended
+    ? 'recommend-card p-3 rounded shadow-sm border'
+    : 'bg-white p-3 rounded shadow-sm border border-gray-100';
+
+  const badge = isRecommended
+    ? `
+      <span class="inline-flex items-center gap-1 text-[10px] font-bold text-orange-700 bg-orange-100 border border-orange-200 rounded px-2 py-0.5 whitespace-nowrap">
+        おススメ
+      </span>
+    `
+    : '';
+
   return `
-    <div class="bg-white p-3 rounded shadow-sm border border-gray-100">
-      <a href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 hover:underline flex items-start justify-between group">
-        <span>${title}</span>
-        <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
-      </a>
+    <div class="${cardClass}">
+      <div class="flex items-start justify-between gap-3">
+        <a href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 hover:underline flex items-start gap-2 group">
+          <span>${title}</span>
+          <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
+        </a>
+        ${badge}
+      </div>
       <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
         <i class="fas fa-info-circle text-gray-400"></i>
         <span>${noteSafe}</span>
@@ -647,6 +676,7 @@ function normalizeResourceItems(items) {
       title: String(item.title || ''),
       url: String(item.url || ''),
       note: String(item.note || ''),
+      recommend: item.recommend === true,
     }))
     .filter((item) => item.title && item.url);
 }
