@@ -11,7 +11,7 @@ export const ANS_C01 = {
       jpTitle: 'ネットワーク設計',
       weight: 30,
       color: '#3b82f6',
-      description: 'エッジサービス、DNS、ハイブリッド接続を含む全体的なネットワークアーキテクチャの設計。',
+      description: 'このドメインでは、AWS クラウドとハイブリッドネットワークの設計に関する知識とスキルが問われます。受験者は、グローバルアーキテクチャ向けのエッジネットワークサービスの統合、DNS ソリューションの設計、ロードバランシングの統合、ログ記録とモニタリングの要件の定義、オンプレミスネットワークと AWS クラウド間のルーティング戦略と接続アーキテクチャの設計など、幅広いネットワーク設計の課題に対処する能力が求められます。',
       tasks: [
         {
           id: '1.1',
@@ -522,7 +522,7 @@ export const ANS_C01 = {
             },
           ],
         },
-                {
+        {
           id: '1.6',
           title: 'Design a routing strategy and connectivity architecture that include multiple AWS accounts, AWS Regions, and VPCs to support different connectivity patterns.',
           jpTitle: 'さまざまな接続パターンをサポートするために、複数の AWS アカウントや AWS リージョン、VPC を含むルーティング戦略と接続アーキテクチャを設計する。',
@@ -663,10 +663,24 @@ export const ANS_C01 = {
             '- 環境間の接続性のテストと検証',
           ],
           knowledge: [
-            'BGP routing (ASN, prefixes, MED, AS_PATH)',
-            'TGW Route Tables',
-            'VPC Peering vs TGW',
-            'IPv6 implementation',
+            'ルーティングプロトコル（スタティック、ダイナミック）',
+            'VPN',
+            '承認書（LOA）文書',
+            'コロケーションファシリティ',
+            'AWS Direct Connect',
+            'VLAN',
+            'SD-WAN',
+            'Amazon Transit Gateway',
+            'Transit Gateway Connect',
+            'DNS（条件付き転送、ホストゾーン、リゾルバーなど）',
+            'セキュリティアプライアンス',
+            'リバースプロキシ',
+            'AWS Organizations',
+            'AWS Resource Access Manager (AWS RAM)',
+            'Amazon VPC',
+            'AWS Route 53',
+            'Route Analyzer',
+            'Reachability Analyzer',
           ],
           resources: [
             {
