@@ -27,34 +27,65 @@ export const ANS_C01 = {
             '- 適切なコンテンツ配信ソリューションを設計するための、インターネットからのグローバルなインバウンドおよびアウトバウンドトラフィックの要件の評価'
         ],
           knowledge: [
-            'CloudFront distributions',
+            'Amazon CloudFront',
+            'コンテンツ配信ネットワーク（CDN）',
             'AWS Global Accelerator',
-            'Edge security (WAF, Shield)',
-            'Lambda@Edge functions',
+            'Elastic Load Balancing (ELB)',
+            'Amazon API Gateway',
           ],
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'Global Acceleratorでアプリケーションのパフォーマンスを向上させる',
-                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/use-aws-global-accelerator-to-improve-application-performance/',
-                  note: 'Official Blog: Availability & Performance',
+                    title: 'AWSが自動化されたトラフィックエンジニアリングを通じてグローバル接続性を向上させる方法',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/how-aws-improves-global-connectivity-via-automated-traffic-engineering/',
+                    note: 'Content Delivery: Advanced (Level 300)',
                 },
                 {
-                  title: '複数のリージョンにまたがるアクティブ/アクティブなアーキテクチャの構築',
-                  url: 'https://aws.amazon.com/blogs/storage/building-an-active-active-latency-based-application-across-multiple-regions/',
-                  note: 'Official Blog: Multi-Region Architecture',
+                    title: 'CloudFrontとAWS Global Acceleratorを使用してオンラインアプリケーションを適切に設計する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/well-architecting-online-applications-with-cloudfront-and-aws-global-accelerator/',
+                    note: 'Networking: Introductory (Level 100)',
                 },
                 {
-                  title: 'CloudFrontとWAFを使用してウェブサイトを高速化および保護する',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/accelerate-and-protect-your-websites-using-amazon-cloudfront-and-aws-waf/',
-                  note: 'Official Blog: Security & Acceleration',
+                    title: 'AWS Global Accelerator を使用してトラフィックを管理する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/traffic-management-with-aws-global-accelerator/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS Global Accelerator による静的 IP アドレスを介した AWS API Gateway へのアクセス',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/accessing-an-aws-api-gateway-via-static-ip-addresses-provided-by-aws-global-accelerator/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
+                },
+                {
+                    title: 'HTTP Strict Transport Security (HSTS) を AWS サービス全体で実装する',
+                    url: 'https://aws.amazon.com/jp/blogs/security/implementing-http-strict-transport-security-hsts-across-aws-services/',
+                    note: 'Security: Advanced (Level 300)',
                 },
               ],
+            },
+            {
+                key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'Amazon CloudFront Deep Dive',
+                        url: 'https://aws.amazon.com/jp/events/aws-event-resource/archive/?ams%23interactive-card-vertical%23pattern-data--1962452770.search=cloudfront%20deep%20dive',
+                        note: 'PDF | Youtube: 2020/10/28',
+                    },
+                    {
+                    title: 'Amazon CloudFront（基礎編）',
+                    url: 'https://aws.amazon.com/jp/blogs/news/2025-07-aws-blackbelt/#:~:text=Amazon%20CloudFront%EF%BC%88%E5%9F%BA%E7%A4%8E%E7%B7%A8%EF%BC%89',
+                    note: 'PDF | Youtube: 2025/07',
+                    recommend: true,
+                    },
+                ],
             },
           ],
         },
