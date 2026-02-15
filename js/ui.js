@@ -744,14 +744,18 @@ async function explainTerm({ els, exam, term, taskContext }) {
   showAiModal(els, `用語解説: ${term}`, true);
 
   const systemPrompt =
-    `あなたはAWS認定インストラクターです。${exam.code}（${exam.shortLabel}）の受験者に向けて、` +
-    `指定されたAWS/ネットワーク用語を簡潔に、かつ試験に関連する重要ポイントを押さえて日本語で解説してください。`;
+    `あなたはAWS認定インストラクターです。${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
+    `指定されたAWS/ネットワーク用語を「腹落ち」するように解説してください。辞書的な定義の丸写しではなく、` +
+    `具体的な説明を心がけて、初心者でも納得して理解できるようにしてください。` +
+    `出力はMarkdownで、見出しと箇条書きを使って読みやすくしてください。` +
+    `また、説明の中で新しい用語（初学者がつまずきやすい関連用語）を出す場合は、` +
+    `初出に短い補足（括弧で5〜15字程度）を付けるか、最後に「ミニ用語集」で必ず説明してください。`;
 
   const contextPrompt = taskContext
     ? `\n\n【タスク文脈】\n${taskContext}`
     : '';
 
-  const userPrompt = `用語: 「${term}」について、AWSの文脈で150文字以内で解説してください。`;
+  const userPrompt = `用語: 「${term}」について、「AWS」の文脈で150文字程度で解説してください。`;
 
   const response = await callGemini({
     userPrompt,

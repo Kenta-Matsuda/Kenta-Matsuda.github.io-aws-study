@@ -114,6 +114,7 @@ export const ANS_C01 = {
             'TTL',
             'DNSSEC',
             'DNS 委任',
+            'AWS Route 53',
             'Route53 の機能: エイリアスレコード',
             'Route53 の機能: トラフィックポリシー',
             'Route53 の機能: リゾルバー',
@@ -125,21 +126,52 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'Route 53 Resolverエンドポイントを使用したDNS高可用性の実現',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/how-to-achieve-dns-high-availability-with-route-53-resolver-endpoints/',
-                  note: 'Official Blog: DNS High Availability',
+                    title: 'Route 53 Resolverエンドポイントを使用したDNS高可用性の実現',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/how-to-achieve-dns-high-availability-with-route-53-resolver-endpoints/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
                 },
                 {
-                  title: 'Route 53とTransit Gatewayを使用したハイブリッドクラウドのDNS一元管理',
-                  url: 'https://aws.amazon.com/blogs/security/centralized-dns-management-of-hybrid-cloud-with-amazon-route-53-and-aws-transit-gateway/',
-                  note: 'Official Blog: Centralized Management',
+                    title: 'Amazon Route 53 Resolver エンドポイントのメトリクスを使用してハイブリッド DNS セットアップをスケーリングする',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/scaling-your-hybrid-dns-setup-with-amazon-route-53-resolver-endpoint-metrics/',
+                    note: 'Networking: Advanced (Level 300)',
                 },
+                {
+                    title: 'Route 53 Resolver を使用してマルチアカウント環境での DNS 管理を簡素化する',
+                    url: 'https://aws.amazon.com/jp/blogs/security/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
+                }
               ],
+            },
+            {
+                key: 'docs',
+                label: '公式ドキュメント',
+                iconClass: 'fas fa-book-open',
+                iconColorClass: 'text-blue-600',
+                items: [
+                    {
+                        title: 'マルチアカウント AWS 環境でハイブリッドネットワークの DNS 解決を設定する',
+                        url:  'https://docs.aws.amazon.com/ja_jp/prescriptive-guidance/latest/patterns/set-up-dns-resolution-for-hybrid-networks-in-a-multi-account-aws-environment.html',
+                        note: 'AWS Prescriptive Guidance',
+                        recommend: true,
+                    },
+                    {
+                        title: 'プライベートホストゾーンの使用',
+                        url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/hosted-zones-private.html',
+                        note: 'Amazon Route 53: Using Private Hosted Zones',
+                    },
+                    {
+                        title: 'パブリックホストゾーンの使用',
+                        url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/AboutHZWorkingWith.html',
+                        note: 'Amazon Route 53: Using Public Hosted Zones',
+                    }
+                ],
             },
           ],
         },
@@ -184,7 +216,7 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
@@ -229,8 +261,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -287,7 +319,7 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
@@ -315,8 +347,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: 'ユーザーガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -470,8 +502,8 @@ export const ANS_C01 = {
                 ],
             },
             {
-              key: 'guides',
-              label: 'ユーザーガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -526,8 +558,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -599,8 +631,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -657,8 +689,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -715,8 +747,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -767,8 +799,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -977,8 +1009,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -1033,8 +1065,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
@@ -1086,8 +1118,8 @@ export const ANS_C01 = {
               ],
             },
             {
-              key: 'guides',
-              label: '開発者ガイド',
+              key: 'docs',
+              label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
