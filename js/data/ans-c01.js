@@ -548,7 +548,7 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
@@ -559,11 +559,41 @@ export const ANS_C01 = {
                     recommend: true,
                 },
                 {
-                  title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
-                  note: 'Official Blog: VPN Architecture',
+                    title: 'VPC ピアリングから AWS Transit Gateway への移行に関するベストプラクティスと考慮事項',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/best-practices-and-considerations-to-migrate-from-vpc-peering-to-aws-transit-gateway/',
+                    note: 'Migration: Intermediate (Level 200)',
                 },
+                {
+                    title: 'IP アドレス範囲が重複するネットワークの接続',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/connecting-networks-with-overlapping-ip-ranges/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
+                },
+                {
+                    title: 'AWS Transit Gateway と AWS PrivateLink、Amazon Route 53 Resolver の統合',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/integrating-aws-transit-gateway-with-aws-privatelink-and-amazon-route-53-resolver/',
+                    note: 'Networking: Expert (Level 400)',
+                },
+                {
+                    title: 'AWS マルチアカウント環境での、SCP を使用した VPC 共有の制御',
+                    url: 'https://aws.amazon.com/jp/blogs/security/control-vpc-sharing-in-an-aws-multi-account-setup-with-service-control-policies/',
+                    note: 'Security: Intermediate (Level 200)',
+                }
               ],
+            },
+            {
+                key: 'whitepapers',
+                label: 'AWS Whitepapers',
+                iconClass: 'fas fa-file-alt',
+                iconColorClass: 'text-green-500',
+                items: [
+                  {
+                    title: 'スケーラブルで安全なマルチ VPC ネットワークインフラストラクチャの構築',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/welcome.html',
+                    note: 'Building a Scalable and Secure Multi-VPC Network Infrastructure',
+                    recommend: true,
+                  },
+                ],
             },
             {
               key: 'docs',
@@ -576,12 +606,21 @@ export const ANS_C01 = {
                     url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/aws-privatelink.html',
                     note: 'Official Guide: AWS PrivateLink',
                 },
-                {
-                  title: 'AWS Direct Connect の耐障害性に関する推奨事項',
-                  url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
-                  note: 'Official Guide: DX Resiliency',
-                },
               ],
+            },
+            {
+                key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'AWS Transit Gateway Deep Dive',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Transit%20Gateway%20deep%20dive',
+                        note: 'PDF | Youtube: 2025/01',
+                        recommend: true,
+                    },
+                ],
             },
           ],
         },
