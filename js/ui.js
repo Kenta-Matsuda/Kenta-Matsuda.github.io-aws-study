@@ -755,7 +755,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
     ? `\n\n【タスク文脈】\n${taskContext}`
     : '';
 
-  const userPrompt = `用語: 「${term}」について、「AWS」の文脈で150文字程度で解説してください。`;
+  const userPrompt = `用語: 「${term}」について、「AWS」の文脈で解説してください。`;
 
   const response = await callGemini({
     userPrompt,

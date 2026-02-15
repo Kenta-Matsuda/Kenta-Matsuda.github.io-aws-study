@@ -1,3 +1,5 @@
+![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=Kenta-Matsuda.github.io-aws-study&left_text=PV)
+
 # AWS認定 合格ナビゲーター
 
 AWS認定試験の学習サイトです。

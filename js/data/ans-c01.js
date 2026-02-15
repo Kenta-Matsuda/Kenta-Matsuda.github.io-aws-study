@@ -538,10 +538,12 @@ export const ANS_C01 = {
             '- 利用可能なさまざまなサービスやオプション (NAT、PrivateLink、Transit Gateway ルーティングなど) を使用した IP の重複管理',
           ],
           knowledge: [
-            'Direct Connect (DX) gateway',
-            'Site-to-Site VPN',
-            'Transit Gateway connect attachments',
-            'Direct Connect MACsec',
+            'VPC ピアリング',
+            'AWS Transit Gateway',
+            'AWS PrivateLink',
+            'VPC 共有',
+            'IP アドレスの重複管理',
+            'NAT',
           ],
           resources: [
             {
@@ -550,6 +552,12 @@ export const ANS_C01 = {
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
+                {
+                    title: 'VPC 共有の重要な考慮事項とベストプラクティス',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/vpc-sharing-key-considerations-and-best-practices/',
+                    note: 'VPC Sharing: Intermediate (Level 200)',
+                    recommend: true,
+                },
                 {
                   title: 'Transit Gatewayを使用したアクティブ/アクティブなVPN接続の作成',
                   url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-active-vpn-connections-with-aws-transit-gateway/',
@@ -563,6 +571,11 @@ export const ANS_C01 = {
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
+                {
+                    title : 'AWS PrivateLink',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/aws-privatelink.html',
+                    note: 'Official Guide: AWS PrivateLink',
+                },
                 {
                   title: 'AWS Direct Connect の耐障害性に関する推奨事項',
                   url: 'https://docs.aws.amazon.com/directconnect/latest/UserGuide/recommendations.html',
