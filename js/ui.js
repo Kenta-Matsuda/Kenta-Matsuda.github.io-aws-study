@@ -744,8 +744,8 @@ async function explainTerm({ els, exam, term, taskContext }) {
   showAiModal(els, `用語解説: ${term}`, true);
 
   const systemPrompt =
-    `あなたはAWS認定インストラクターです。${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
-    `指定されたAWS/ネットワーク用語を「腹落ち」するように解説してください。辞書的な定義の丸写しではなく、` +
+    `${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
+    `指定されたAWS/技術用語を「腹落ち」するように解説してください。辞書的な定義の丸写しではなく、` +
     `具体的な説明を心がけて、初心者でも納得して理解できるようにしてください。` +
     `出力はMarkdownで、見出しと箇条書きを使って読みやすくしてください。` +
     `また、説明の中で新しい用語（初学者がつまずきやすい関連用語）を出す場合は、` +
