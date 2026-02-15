@@ -185,6 +185,15 @@
         }
     </style>
 </head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-HGYPRYH7Q1"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-HGYPRYH7Q1');
+</script>
 <body class="min-h-screen flex flex-col">
 
     <!-- Header -->
@@ -328,7 +337,10 @@
                 </div>
                 <div id="modalContent" class="text-gray-700 ai-response-area text-sm md:text-base"></div>
             </div>
-            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end">
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+                <button id="aiRetryBtn" type="button" class="hidden px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fas fa-rotate-right"></i> もう一度生成
+                </button>
                 <button type="button" data-close-modal="aiModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
                     閉じる
                 </button>
