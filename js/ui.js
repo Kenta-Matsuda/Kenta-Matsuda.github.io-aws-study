@@ -7,6 +7,33 @@ let chartInstance = null;
 export function initApp({ exams, getExamById, defaultExamId }) {
   const els = getElements();
 
+  /** @type {null | { type: 'explain', examId: string, term: string, taskContext: string } | { type: 'quiz', examId: string, taskTitle: string, taskContext: string }} */
+  let lastAiRequest = null;
+
+  function updateAiRetryButton({ visible, disabled } = {}) {
+    if (!els.aiRetryBtn) return;
+    const isVisible = visible ?? Boolean(lastAiRequest);
+    els.aiRetryBtn.classList.toggle('hidden', !isVisible);
+    els.aiRetryBtn.disabled = disabled ?? false;
+    els.aiRetryBtn.classList.toggle('opacity-60', els.aiRetryBtn.disabled);
+    els.aiRetryBtn.classList.toggle('cursor-not-allowed', els.aiRetryBtn.disabled);
+  }
+
+  async function runAiRequest(req) {
+    const exam = getExamById(req.examId);
+    updateAiRetryButton({ visible: true, disabled: true });
+    if (req.type === 'explain') {
+      await explainTerm({ els, exam, term: req.term, taskContext: req.taskContext });
+      return;
+    }
+    await generateQuiz({ els, exam, taskTitle: req.taskTitle, taskContext: req.taskContext });
+  }
+
+  els.aiRetryBtn?.addEventListener('click', async () => {
+    if (!lastAiRequest) return;
+    await runAiRequest(lastAiRequest);
+  });
+
   const state = {
     examId: defaultExamId,
     currentDomainId: null,
@@ -61,13 +88,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const action = btn.dataset.action;
     const exam = getExamById(state.examId);
     const taskContext = btn.dataset.taskContext || '';
+    const examId = state.examId;
 
     if (action === 'quiz') {
+      lastAiRequest = { type: 'quiz', examId, taskTitle: btn.dataset.taskTitle || '', taskContext };
+      updateAiRetryButton({ visible: true, disabled: true });
       await generateQuiz({ els, exam, taskTitle: btn.dataset.taskTitle || '', taskContext });
       return;
     }
 
     if (action === 'explain') {
+      lastAiRequest = { type: 'explain', examId, term: btn.dataset.term || '', taskContext };
+      updateAiRetryButton({ visible: true, disabled: true });
       await explainTerm({ els, exam, term: btn.dataset.term || '', taskContext });
       return;
     }
@@ -93,6 +125,7 @@ function getElements() {
     modalTitle: document.getElementById('modalTitle'),
     modalContent: document.getElementById('modalContent'),
     modalLoading: document.getElementById('modalLoading'),
+    aiRetryBtn: document.getElementById('aiRetryBtn'),
 
     settingsModal: document.getElementById('settingsModal'),
     settingsBtn: document.getElementById('settingsBtn'),
@@ -643,6 +676,10 @@ function showAiModal(els, title, isLoading) {
     els.modalLoading.classList.remove('hidden');
     els.modalContent.textContent = '';
     els.modalContent.innerHTML = '';
+    if (els.aiRetryBtn) {
+      els.aiRetryBtn.disabled = true;
+      els.aiRetryBtn.classList.add('opacity-60', 'cursor-not-allowed');
+    }
   }
 }
 
@@ -670,6 +707,10 @@ function renderMarkdownToSafeHtml(markdown) {
 
 function updateAiModalContent(els, text) {
   els.modalLoading.classList.add('hidden');
+  if (els.aiRetryBtn) {
+    els.aiRetryBtn.disabled = false;
+    els.aiRetryBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+  }
 
   const disclaimer =
     '※注意: AIの生成結果は必ずしも正しくありません（誤りを含む可能性があります）。\n' +
