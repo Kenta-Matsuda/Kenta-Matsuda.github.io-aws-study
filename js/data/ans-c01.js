@@ -17,6 +17,15 @@ export const ANS_C01 = {
           id: '1.1',
           title: 'Design a solution that incorporates edge network services to optimize user performance and traffic management for global architectures.',
           jpTitle: 'グローバルアーキテクチャ向けにユーザーパフォーマンスとトラフィック管理を最適化するために、エッジネットワークサービスを組み込んだソリューションを設計する。',
+          description: [
+            'タスクステートメント 1.1: グローバルアーキテクチャ向けにユーザーパフォーマンスとトラフィック管理を最適化するために、エッジネットワークサービスを組み込んだソリューションを設計する。',
+            '対象知識:',
+            '- コンテンツ配信ネットワーク (Amazon CloudFront など) の使用の設計パターン',
+            '- グローバルトラフィック管理 (AWS Global Accelerator など) の設計パターン',
+            '- コンテンツ配信ネットワークやグローバルトラフィック管理と他のサービス(Elastic Load Balancing [ELB]、Amazon API Gateway など) との統合パターン',
+            '対象スキル:',
+            '- 適切なコンテンツ配信ソリューションを設計するための、インターネットからのグローバルなインバウンドおよびアウトバウンドトラフィックの要件の評価'
+        ],
           knowledge: [
             'CloudFront distributions',
             'AWS Global Accelerator',
@@ -54,10 +63,17 @@ export const ANS_C01 = {
           title: 'Design DNS solutions that meet public, private, and hybrid requirements.',
           jpTitle: 'パブリック、プライベート、ハイブリッドの要件を満たすDNS ソリューションを設計する。',
           knowledge: [
-            'Route 53 public/private hosted zones',
-            'Route 53 Resolver (inbound/outbound)',
-            'DNSSEC, TTL, Aliases',
-            'Hybrid DNS architectures',
+            'DNS レコード',
+            'TTL',
+            'DNSSEC',
+            'DNS 委任',
+            'Route53 の機能: エイリアスレコード',
+            'Route53 の機能: トラフィックポリシー',
+            'Route53 の機能: リゾルバー',
+            'Route53 の機能: ヘルスチェック',
+            'Route53 Resolver エンドポイント',
+            'ドメイン',
+            'Route 53 パブリック/プライベートホストゾーン',
           ],
           resources: [
             {

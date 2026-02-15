@@ -7,6 +7,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.6/dist/purify.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
@@ -83,9 +85,58 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
+        /* AI modal markdown rendering */
         .ai-response-area {
-            white-space: pre-wrap;
-            line-height: 1.6;
+            line-height: 1.7;
+            white-space: normal;
+        }
+        .ai-response-area h1, .ai-response-area h2, .ai-response-area h3 {
+            font-weight: 700;
+            color: #111827;
+            margin: 0.75rem 0 0.5rem;
+        }
+        .ai-response-area h1 { font-size: 1.25rem; }
+        .ai-response-area h2 { font-size: 1.125rem; }
+        .ai-response-area h3 { font-size: 1rem; }
+        .ai-response-area p { margin: 0.5rem 0; }
+        .ai-response-area ul, .ai-response-area ol {
+            margin: 0.5rem 0 0.75rem 1.25rem;
+            padding: 0;
+        }
+        .ai-response-area li { margin: 0.25rem 0; }
+        .ai-response-area a { color: #1d4ed8; text-decoration: underline; }
+        .ai-response-area hr {
+            border: none;
+            border-top: 1px solid #e5e7eb;
+            margin: 0.75rem 0;
+        }
+        .ai-response-area blockquote {
+            margin: 0.75rem 0;
+            padding: 0.5rem 0.75rem;
+            border-left: 4px solid #f59e0b;
+            background: #fffbeb;
+            color: #92400e;
+            border-radius: 8px;
+        }
+        .ai-response-area code {
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.95em;
+            background: #f3f4f6;
+            padding: 0.1rem 0.3rem;
+            border-radius: 6px;
+        }
+        .ai-response-area pre {
+            margin: 0.75rem 0;
+            padding: 0.75rem;
+            background: #111827;
+            color: #e5e7eb;
+            border-radius: 10px;
+            overflow: auto;
+        }
+        .ai-response-area pre code {
+            background: transparent;
+            padding: 0;
+            color: inherit;
         }
 
         .sparkle-btn {

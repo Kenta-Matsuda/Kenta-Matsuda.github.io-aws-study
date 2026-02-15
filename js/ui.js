@@ -60,14 +60,15 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     const action = btn.dataset.action;
     const exam = getExamById(state.examId);
+    const taskContext = btn.dataset.taskContext || '';
 
     if (action === 'quiz') {
-      await generateQuiz({ els, exam, taskTitle: btn.dataset.taskTitle || '' });
+      await generateQuiz({ els, exam, taskTitle: btn.dataset.taskTitle || '', taskContext });
       return;
     }
 
     if (action === 'explain') {
-      await explainTerm({ els, exam, term: btn.dataset.term || '' });
+      await explainTerm({ els, exam, term: btn.dataset.term || '', taskContext });
       return;
     }
   });
@@ -358,6 +359,22 @@ function renderContent({ els, exam, state }) {
       const card = document.createElement('div');
       card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
+      const taskContext = buildTaskAiContext(task);
+      const shouldShowDescription = task?.showDescription === true;
+      const taskDescriptionLines = normalizeDescriptionLines(task?.description);
+      const taskDescriptionHtml = taskDescriptionLines
+        .map((line) => `<div>${highlightHtml(escapeHtml(line), term)}</div>`)
+        .join('');
+      const descriptionHtml =
+        shouldShowDescription && taskDescriptionLines.length
+          ? `
+            <div class="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
+              <div class="text-xs font-bold text-amber-700 mb-1">説明</div>
+              <div class="space-y-1">${taskDescriptionHtml}</div>
+            </div>
+          `
+          : '';
+
       const header = document.createElement('div');
       header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white';
       header.innerHTML = `
@@ -366,12 +383,14 @@ function renderContent({ els, exam, state }) {
             <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Task Statement ${escapeHtml(task.id)}</div>
             <h3 class="text-lg font-bold text-gray-900">${escapeHtml(task.jpTitle)}</h3>
             <p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>
+            ${descriptionHtml}
           </div>
           <div class="flex justify-end">
             <button
               type="button"
               data-action="quiz"
               data-task-title="${escapeHtml(task.jpTitle)}"
+              data-task-context="${escapeHtml(taskContext)}"
               class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap"
             >
             <i class="fas fa-magic"></i> 模擬問題を作成
@@ -392,7 +411,7 @@ function renderContent({ els, exam, state }) {
           <i class="fas fa-check-circle text-green-500"></i> 必要な知識・スキル
         </h4>
         <ul class="space-y-3">
-          ${(task.knowledge || []).map((k) => renderKnowledgeRow({ knowledge: k, term })).join('')}
+          ${(task.knowledge || []).map((k) => renderKnowledgeRow({ knowledge: k, term, taskContext })).join('')}
         </ul>
       `;
 
@@ -433,7 +452,7 @@ function renderContent({ els, exam, state }) {
   }
 }
 
-function renderKnowledgeRow({ knowledge, term }) {
+function renderKnowledgeRow({ knowledge, term, taskContext }) {
   const safe = escapeHtml(knowledge);
   const highlighted = highlightHtml(safe, term);
   return `
@@ -446,12 +465,43 @@ function renderKnowledgeRow({ knowledge, term }) {
         type="button"
         data-action="explain"
         data-term="${safe}"
+        data-task-context="${escapeHtml(taskContext || '')}"
         class="text-xs text-purple-600 border border-purple-200 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded flex items-center gap-1 whitespace-nowrap transition"
       >
         <i class="fas fa-sparkles"></i> 解説
       </button>
     </li>
   `;
+}
+
+function buildTaskAiContext(task) {
+  if (!task || typeof task !== 'object') return '';
+  const id = typeof task.id === 'string' ? task.id.trim() : String(task.id || '').trim();
+  const jpTitle = typeof task.jpTitle === 'string' ? task.jpTitle.trim() : '';
+  const enTitle = typeof task.title === 'string' ? task.title.trim() : '';
+  const description = normalizeDescriptionLines(task.description).join('\n');
+
+  const parts = [];
+  if (id) parts.push(`Task ${id}`);
+  if (jpTitle) parts.push(`JP: ${jpTitle}`);
+  if (enTitle) parts.push(`EN: ${enTitle}`);
+  if (description) parts.push(`DESC: ${description}`);
+  return parts.join(' | ');
+}
+
+function normalizeDescriptionLines(description) {
+  if (!description) return [];
+  if (Array.isArray(description)) {
+    return description
+      .map((v) => (typeof v === 'string' ? v.trim() : String(v ?? '').trim()))
+      .filter(Boolean);
+  }
+  if (typeof description === 'string') {
+    const trimmed = description.trim();
+    return trimmed ? [trimmed] : [];
+  }
+  const asString = String(description).trim();
+  return asString ? [asString] : [];
 }
 
 function renderBlogCard({ blog, term }) {
@@ -592,15 +642,59 @@ function showAiModal(els, title, isLoading) {
   if (isLoading) {
     els.modalLoading.classList.remove('hidden');
     els.modalContent.textContent = '';
+    els.modalContent.innerHTML = '';
   }
+}
+
+function renderMarkdownToSafeHtml(markdown) {
+  const md = String(markdown ?? '');
+
+  const marked = typeof window !== 'undefined' ? window.marked : undefined;
+  const DOMPurify = typeof window !== 'undefined' ? window.DOMPurify : undefined;
+
+  if (!marked || typeof marked.parse !== 'function' || !DOMPurify || typeof DOMPurify.sanitize !== 'function') {
+    return { html: '', usedMarkdown: false };
+  }
+
+  // keep it simple: gfm + line breaks
+  try {
+    marked.setOptions?.({ gfm: true, breaks: true });
+  } catch {
+    // ignore
+  }
+
+  const rawHtml = marked.parse(md);
+  const cleanHtml = DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } });
+  return { html: cleanHtml, usedMarkdown: true };
 }
 
 function updateAiModalContent(els, text) {
   els.modalLoading.classList.add('hidden');
-  els.modalContent.textContent = text;
+
+  const disclaimer =
+    '※注意: AIの生成結果は必ずしも正しくありません（誤りを含む可能性があります）。\n' +
+    '重要な判断は、AWS公式ドキュメント等の一次情報で確認してください。';
+
+  const baseText = String(text ?? '');
+  const shouldAppend = baseText && !baseText.includes('AIの生成結果は必ずしも正しくありません');
+  const md = shouldAppend ? `${baseText}\n\n---\n\n> ${disclaimer.replaceAll('\n', '\n> ')}` : baseText;
+
+  const { html, usedMarkdown } = renderMarkdownToSafeHtml(md);
+  if (usedMarkdown) {
+    els.modalContent.innerHTML = html;
+    // Ensure links open safely in a new tab
+    els.modalContent.querySelectorAll('a').forEach((a) => {
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+    });
+    return;
+  }
+
+  // Fallback: plain text
+  els.modalContent.textContent = shouldAppend ? `${baseText}\n\n---\n${disclaimer}` : baseText;
 }
 
-async function explainTerm({ els, exam, term }) {
+async function explainTerm({ els, exam, term, taskContext }) {
   if (!getApiKey()) {
     openSettingsModal(els);
     return;
@@ -612,18 +706,22 @@ async function explainTerm({ els, exam, term }) {
     `あなたはAWS認定インストラクターです。${exam.code}（${exam.shortLabel}）の受験者に向けて、` +
     `指定されたAWS/ネットワーク用語を簡潔に、かつ試験に関連する重要ポイントを押さえて日本語で解説してください。`;
 
+  const contextPrompt = taskContext
+    ? `\n\n【タスク文脈】\n${taskContext}`
+    : '';
+
   const userPrompt = `用語: 「${term}」について、AWSの文脈で150文字以内で解説してください。`;
 
   const response = await callGemini({
     userPrompt,
-    systemPrompt,
+    systemPrompt: systemPrompt + contextPrompt,
     onRequireApiKey: () => openSettingsModal(els),
   });
 
   if (response) updateAiModalContent(els, response);
 }
 
-async function generateQuiz({ els, exam, taskTitle }) {
+async function generateQuiz({ els, exam, taskTitle, taskContext }) {
   if (!getApiKey()) {
     openSettingsModal(els);
     return;
@@ -633,6 +731,10 @@ async function generateQuiz({ els, exam, taskTitle }) {
 
   const systemPrompt =
     `あなたはAWS認定試験のエキスパートです。${exam.code}（${exam.shortLabel}）レベルの4択問題を1問作成してください。`;
+
+  const contextPrompt = taskContext
+    ? `\n\n【タスク文脈】\n${taskContext}`
+    : '';
 
   const userPrompt = `タスク: 「${taskTitle}」に関連する、実践的なシナリオベースの選択問題を1問作成してください。
 
@@ -652,7 +754,7 @@ D. [選択肢]
 
   const response = await callGemini({
     userPrompt,
-    systemPrompt,
+    systemPrompt: systemPrompt + contextPrompt,
     onRequireApiKey: () => openSettingsModal(els),
   });
 
