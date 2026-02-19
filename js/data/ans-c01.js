@@ -11,7 +11,7 @@ export const ANS_C01 = {
       jpTitle: 'ネットワーク設計',
       weight: 30,
       color: '#3b82f6',
-      description: 'このドメインでは、AWS クラウドとハイブリッドネットワークの設計に関する知識とスキルが問われます。受験者は、グローバルアーキテクチャ向けのエッジネットワークサービスの統合、DNS ソリューションの設計、ロードバランシングの統合、ログ記録とモニタリングの要件の定義、オンプレミスネットワークと AWS クラウド間のルーティング戦略と接続アーキテクチャの設計など、幅広いネットワーク設計の課題に対処する能力が求められます。',
+      description: 'このドメインでは、ハイブリッドネットワークやグローバルアーキテクチャなどの複雑なネットワークソリューションの設計に関連するスキルと知識が問われます。ネットワークの要件を理解し、AWSのサービスを活用して最適な設計を行う能力に焦点を当てています。',
       tasks: [
         {
           id: '1.1',
@@ -632,7 +632,7 @@ export const ANS_C01 = {
       jpTitle: 'ネットワーク実装',
       weight: 26,
       color: '#10b981',
-      description: 'ルーティングプロトコル、接続性、およびオートメーションの実装。',
+      description: 'このドメインでは、ハイブリッドネットワークなどの複雑なネットワークソリューションの実装に関連するスキルと知識が問われます。ネットワークの設計とアーキテクチャに関するドメインで定義された要件を満たすための実装に焦点を当てています。',
       tasks: [
         {
           id: '2.1',
@@ -685,15 +685,41 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'Gateway Load BalancerとTransit Gatewayを使用した集中型検査アーキテクチャ',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/centralized-inspection-architecture-with-aws-gateway-load-balancer-and-aws-transit-gateway/',
-                  note: 'Official Blog: Traffic Inspection',
+                    title: 'Direct Connect を使用したアクティブ/パッシブな BGP 接続の作成',
+                    url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
+                    note: 'Networking: Intermediate (Level 200)',
+                    recommend: true,
                 },
+                {
+                    title: 'Direct Connect Gateway を使用したハイブリッドクラウドアーキテクチャの構築',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Transit Gateway Connect を使用した SD-WAN 接続の簡素化',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/simplify-sd-wan-connectivity-with-aws-transit-gateway-connect/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS Transit Gateway と AWS Direct Connect を使用して SD-WAN デバイスを統合する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/integrate-sd-wan-devices-with-aws-transit-gateway-and-aws-direct-connect/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Route 53 Resolver Endpoints を使用してハイブリッド DNS インフラストラクチャを自動化する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/automating-dns-infrastructure-using-route-53-resolver-endpoints/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'VPC Reachability Analyzer を使用して Amazon RDS データベースへのネットワーク接続をトラブルシューティングする',
+                    url: 'https://aws.amazon.com/jp/blogs/database/troubleshoot-network-connectivity-to-amazon-rds-databases-using-vpc-reachability-analyzer/',
+                    note: 'Networking: Intermediate (Level 200)',
+                }
               ],
             },
             {
@@ -703,12 +729,56 @@ export const ANS_C01 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'Direct Connect ルーティングポリシーと BGP コミュニティ',
-                  url: 'https://docs.aws.amazon.com/ja_jp/directconnect/latest/UserGuide/routing-and-bgp.html',
-                  note: 'Official Docs: Routing Policies',
+                    title: 'AWS VPC 接続の選択肢',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-vpc-connectivity-options/aws-direct-connect-aws-transit-gateway-vpn.html',
+                    note: 'Official Docs: Whitepaper',
                 },
+                {
+                    title: 'スケーラブルで安全なマルチVPCネットワークインフラストラクチャの構築 - Direct Connect',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/direct-connect.html',
+                    note: 'Official Docs: Whitepaper',
+                },
+                {
+                    title: 'マルチアカウント AWS 環境でハイブリッドネットワークの DNS 解決を設定する',
+                    url: 'https://docs.aws.amazon.com/ja_jp/prescriptive-guidance/latest/patterns/set-up-dns-resolution-for-hybrid-networks-in-a-multi-account-aws-environment.html',
+                    note: 'Official Docs: Prescriptive Guidance',
+                    recommend: true,
+                },
+                {
+                    title: 'アーキテクチャ 3.1: AWS RAMを使用したトランジットゲートウェイ',
+                    url: 'https://docs.aws.amazon.com/ja_jp/prescriptive-guidance/latest/integrate-third-party-services/architecture-3-1.html',
+                    note: 'Official Docs: Prescriptive Guidance',
+                }
               ],
             },
+            {
+                key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'AWS Direct Connect Deep Dive',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2021/02%0AArchived-,AWS%20Direct%20Connect,-PDF',
+                        note: 'PDF | Youtube: 2021/02',
+                    },
+                    {
+                        title: 'AWS Transit Gateway',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2019/11%0AArchived-,AWS%20Transit%20Gateway,-PDF',
+                        note: 'PDF | Youtube: 2019/11',
+                    },
+                    {
+                        title: 'AWS Transit Gateway Deep Dive',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Transit%20Gateway%20deep%20dive',
+                        note: 'PDF | Youtube: 2025/01',
+                    },
+                    {
+                        title: 'AWS Direct Connect 概要～これだけはおさえておきたいこと～',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Direct%20Connect%20%E6%A6%82%E8%A6%81%E3%80%9C%E3%81%93%E3%82%8C%E3%81%A0%E3%81%91%E3%81%AF%E3%81%8A%E3%81%95%E3%81%88%E3%81%A6%E3%81%8A%E3%81%8D%E3%81%9F%E3%81%84%E3%81%93%E3%81%A8%E3%80%9C',
+                        note: 'PDF | Youtube: 2025/06',
+                    },
+                ],
+            }
           ],
         },
         {
@@ -735,22 +805,64 @@ export const ANS_C01 = {
             '- AWS ソリューションを使用したネットワークモニタリングとログ記録の構成',
           ],
           knowledge: [
-            'VPC Endpoints (Interface vs Gateway)',
-            'PrivateLink provider/consumer',
-            'Load Balancers (NLB, ALB, GWLB)',
-            'EKS CNI networking',
+            'VPC ピアリング',
+            'AWS Transit Gateway',
+            'VPN',
+            'SD-WAN',
+            'マルチプロトコルラベルスイッチング (MPLS)',
+            'AWS PrivateLink',
+            'AWS Organizations',
+            'AWS Resource Access Manager (AWS RAM)',
+            '名前解決 (DNS)',
+            '認証と認可',
+            'SAML',
+            'Active Directory',
+            'セキュリティグループ',
+            'ネットワーク ACL',
+            'AWS Network Firewall',
+            'Route Analyzer',
+            'Reachability Analyzer',
+            'ツーリング',
+            'VPC',
+            'DHCP',
+            'ルーティング',
+            'ハイブリッド接続',
+            'ハブアンドスポークネットワークアーキテクチャ',
+            'トランジット VPC',
           ],
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
-                  url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
-                  note: 'Official Blog: PrivateLink Security',
+                    title: 'マルチリージョンネットワークの最適なルーティングを AWS Cloud WAN で実現',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/achieve-optimal-routing-with-aws-cloud-wan-for-multi-region-networks/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Amazon Route 53 profiles を使用して AWS PrivateLink 展開の DNS 管理を合理化する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/streamline-dns-management-for-aws-privatelink-deployment-with-amazon-route-53-profiles/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS PrivateLink を使用して AWS カスタマー向けの SaaS サービスを構築する',
+                    url: 'https://aws.amazon.com/jp/blogs/architecture/building-saas-services-for-aws-customers-with-privatelink/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'マルチアカウント環境で Route 53 Resolver を使用して DNS 管理を簡素化する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
+                },
+                {
+                    title: 'AWS Client VPN ユーザーを SAML で認証する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/authenticate-aws-client-vpn-users-with-saml/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
                 },
               ],
             },
@@ -761,11 +873,34 @@ export const ANS_C01 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
-                  url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
-                  note: 'Official Docs: EKS VPC CNI',
+                    title: 'スケーラブルで安全なマルチ VPC AWS ネットワークインフラストラクチャの構築',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/welcome.html',
+                    note: 'Official Docs: Whitepaper',
                 },
+                {
+                    title: 'AWS Transit Gateway 設計のベストプラクティス',
+                    url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/tgw/tgw-best-design-practices.html',
+                    note: 'Official Docs: Amazon VPC - Transit Gateway',
+                }
               ],
+            },
+            {
+                key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'PrivateLink and Lattice – Amazon VPC Lattice Service 編',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=PrivateLink%20and%20Lattice%20%E2%80%93%20Amazon%20VPC%20Lattice%20Service%20%E7%B7%A8',
+                        note: 'PDF | Youtube: 2025/01',
+                    },
+                    {
+                        title: 'PrivateLink and Lattice – AWS PrivateLink 編',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=PrivateLink%20and%20Lattice%20%E2%80%93%20AWS%20PrivateLink%20%E7%B7%A8',
+                        note: 'PDF | Youtube: 2025/07',
+                    }
+                ],
             },
           ],
         },
@@ -793,22 +928,41 @@ export const ANS_C01 = {
             '- Route 53 での DNS モニタリングとログ記録の構成',
           ],
           knowledge: [
-            'VPC Endpoints (Interface vs Gateway)',
-            'PrivateLink provider/consumer',
-            'Load Balancers (NLB, ALB, GWLB)',
-            'EKS CNI networking',
+            'プライベートホストゾーンとパブリックホストゾーン',
+            'DNS の委任と転送（条件付き転送など）',  
+            'DNS レコードタイプ（A、AAAA、TXT、ポインタレコード、エイリアスレコードなど）',
+            'DNSSEC',          
+            'AWS Resource Access Manager (AWS RAM)',
+            'DNS ゾーン',
+            '集中型または分散型ネットワークアーキテクチャ内での DNS の構成',
           ],
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
-                  url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
-                  note: 'Official Blog: PrivateLink Security',
+                    title: 'マルチアカウント環境で DNS 管理を集中化する方法',
+                    url: 'https://aws.amazon.com/jp/blogs/security/how-to-centralize-dns-management-in-a-multi-account-environment/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'クロスアカウント・マルチリージョンアーキテクチャのための Route 53 プライベートホストゾーンの使用',
+                    url: 'https://aws.amazon.com/jp/blogs/architecture/using-route-53-private-hosted-zones-for-cross-account-multi-region-architectures/',
+                    note: 'Networking: Advanced (Level 300)',
+                    recommend: true,
+                },
+                {
+                    title: 'Amazon Route 53 profiles を使用して一貫した DNS クエリロギングを実装する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/implementing-consistent-dns-query-logging-with-amazon-route-53-profiles/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'マルチアカウント DNS 環境を Amazon Route 53 プロファイルに移行する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/migrating-your-multi-account-dns-environment-to-amazon-route-53-profiles/',
+                    note: 'Networking: Intermediate (Level 200)',
                 },
               ],
             },
@@ -819,12 +973,49 @@ export const ANS_C01 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
-                  url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
-                  note: 'Official Docs: EKS VPC CNI',
+                    title: 'Amazon VPCのハイブリッドクラウドDNSオプション',
+                    url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/hybrid-cloud-dns-options-for-vpc/hybrid-cloud-dns-options-for-vpc.html',
+                    note: 'Official Docs: Whitepaper',
                 },
+                {
+                    title: 'パブリック DNS クエリのログ記録',
+                    url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/query-logs.html',
+                    note: 'Developer Guide: Route 53 Query Logs',
+                }
               ],
             },
+            {
+                key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'Amazon Route 53 Resolver',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Route%2053%20Resolver',
+                        note: 'PDF | Youtube: 2023/05',
+                    },
+                ],
+            },
+            {
+                key: 'knowledge-center',
+                label: 'AWS Knowledge Center',
+                iconClass: 'fas fa-lightbulb',
+                iconColorClass: 'text-yellow-500',
+                items: [
+                    {
+                        title: 'VPC 内のリソースからリモートネットワークでホストされている DNS レコードを解決するように Route 53 Resolver のアウトバウンドエンドポイントを設定するにはどうすればよいですか？',
+                        url: 'https://repost.aws/knowledge-center/route53-resolve-with-outbound-endpoint',
+                        note: 'Knowledge Center: Route 53 Resolver',
+                    },
+                    {
+                        title: 'Route 53 リゾルバーのエンドポイントに関する DNS 解決の問題をトラブルシューティングするにはどうすれば良いですか？',
+                        url: 'https://repost.aws/ja/knowledge-center/route-53-fix-dns-resolution-resolver',
+                        note: 'Knowledge Center: Route 53 Resolver',
+                        recommend: true,
+                    }
+                ],
+            }
           ],
         },
         {
@@ -845,37 +1036,75 @@ export const ANS_C01 = {
             '- IaC によるクラウドネットワークリソースの最適化プロセスの自動化',
           ],
           knowledge: [
-            'VPC Endpoints (Interface vs Gateway)',
-            'PrivateLink provider/consumer',
-            'Load Balancers (NLB, ALB, GWLB)',
-            'EKS CNI networking',
+            'Infrastructure as Code (IaC)',
+            'AWS Cloud Development Kit (AWS CDK)',
+            'AWS CloudFormation',
+            'AWS CLI',
+            'AWS SDK',
+            'イベント駆動',
+            'ハードコード',
           ],
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'マルチアカウント環境でのPrivateLinkサービスアクセスのガバナンスとセキュリティ',
-                  url: 'https://aws.amazon.com/blogs/security/governing-and-securing-aws-privatelink-service-access-at-scale-in-multi-account-environments/',
-                  note: 'Official Blog: PrivateLink Security',
+                    title: 'NetDevOps: AWS ネットワーキング展開のモダンなアプローチ',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/netdevops-a-modern-approach-to-aws-networking-deployments/',
+                    note: 'Official Blog: NetDevOps',
+                },
+                {
+                    title: 'AWS ネットワークのスケーリング方法',
+                    url: 'https://aws.amazon.com/jp/blogs/architecture/field-notes-how-to-scale-your-networks-on-amazon-web-services/',
+                    note: 'AWS Architecture Blog',
                 },
               ],
             },
             {
-              key: 'docs',
-              label: '公式ドキュメント',
-              iconClass: 'fas fa-book-open',
-              iconColorClass: 'text-blue-600',
-              items: [
-                {
-                  title: 'Amazon EKS ベストプラクティスガイド: VPC CNI',
-                  url: 'https://docs.aws.amazon.com/eks/latest/best-practices/vpc-cni.html',
-                  note: 'Official Docs: EKS VPC CNI',
-                },
-              ],
+                key: 'docs',
+                label: '公式ドキュメント',
+                iconClass: 'fas fa-book-open',
+                iconColorClass: 'text-blue-600',
+                items: [
+                  {
+                    title: 'AWS Transit Gatewayを使用して、トランジットネットワークの設定と管理を自動化する',
+                    url: 'https://docs.aws.amazon.com/ja_jp/solutions/latest/network-orchestration-aws-transit-gateway/solution-overview.html',
+                    note: 'Network Orchestration for AWS Transit Gateway',
+                    recommend: true,
+                  },
+                ],
+            },
+            {
+              key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'AWS CloudFormation#1 基礎編',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                        note: 'PDF | Youtube: 2023/07',
+                    
+                    },
+                    {
+                        title: 'AWS CloudFormation#2 基礎編',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%232%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                        note: 'PDF | Youtube: 2023/12',
+                    },
+                    {
+                        title: 'AWS CloudFormation DeepDive 編',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%20DeepDive%20%E7%B7%A8',
+                        note: 'PDF | Youtube: 2023/10',
+                    },
+                    {
+                        title: 'AWS CloudFormation 開発・テスト・デプロイ編',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%20%E9%96%8B%E7%99%BA%E3%83%BB%E3%83%86%E3%82%B9%E3%83%88%E3%83%BB%E3%83%87%E3%83%97%E3%83%AD%E3%82%A4%E7%B7%A8',
+                        note: 'PDF | Youtube: 2023/12',
+                    },
+                ],
             },
           ],
         },
@@ -887,7 +1116,7 @@ export const ANS_C01 = {
       jpTitle: 'ネットワークの管理と運用',
       weight: 20,
       color: '#f59e0b',
-      description: 'ネットワークの監視、トラブルシューティング、最適化。',
+      description: 'このドメインでは、AWS ネットワークの管理と運用に関連するスキルと知識が問われます。トラブルシューティング、モニタリング、最適化などのネットワーク管理の側面に焦点を当てています。',
       tasks: [
         {
           id: '3.1',
@@ -909,28 +1138,65 @@ export const ANS_C01 = {
             '- ダイナミックルーティングプロトコルとスタティックルーティングプロトコルによるルーティングの最適化 (ルートの集約、CIDR の重複など)',
           ],
           knowledge: [
-            'VPC Flow Logs',
-            'VPC Traffic Mirroring',
-            'CloudWatch Metrics/Alarms for network',
+            'Direct Connect',
+            'BGP',
+            'Direct Connect ゲートウェイ',
+            'Transit Gateway',
+            'Virtual Interface (VIF)',
+            'PrivateLink',
+            'VPC ピアリング',
+            'VPN',
+            '自動伝播',
           ],
           resources: [
             {
-              key: 'blogs',
-              label: 'ブログ',
-              iconClass: 'fas fa-book',
-              iconColorClass: 'text-orange-500',
-              items: [
-                {
-                  title: 'Amazon Athena統合を使用してVPCフローログを分析する',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/analyze-vpc-flow-logs-with-point-and-click-amazon-athena-integration/',
-                  note: 'Official Blog: Flow Logs Analysis',
-                },
-                {
-                  title: 'VPCトラフィックミラーリングを使用してAWSインフラストラクチャを監視および保護する',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
-                  note: 'Official Blog: Traffic Mirroring',
-                },
-              ],
+                key: 'docs',
+                label: '公式ドキュメント',
+                iconClass: 'fas fa-book-open',
+                iconColorClass: 'text-blue-600',
+                items: [
+                    {
+                        title: 'VPC Peering',
+                        url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/vpc-peering.html',
+                        note: 'Official Docs: Whitepaper',
+                    },
+                    {
+                        title: 'AWS Transit Gateway の VPC アタッチメント',
+                        url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/tgw/tgw-vpc-attachments.html',
+                        note: 'Official Docs: Amazon VPC',
+                    },
+                ],
+              
+            },
+            {
+                key: 'blogs',
+                label: 'AWS Blogs',
+                iconClass: 'fas fa-book',
+                iconColorClass: 'text-orange-500',
+                items: [
+                    {
+                        title: 'AWS Transit Gateway connect を使用してハイブリッドネットワークをセグメント化する',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/segmenting-hybrid-networks-with-aws-transit-gateway-connect/',
+                        note: 'Networking: Intermediate (Level 200)',
+                    },
+                    {
+                        title: '重複する IP 範囲を持つネットワークの接続',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/connecting-networks-with-overlapping-ip-ranges/',
+                        note: 'Networking: Intermediate (Level 200)',
+                        recommend: true,
+                    },
+                    {
+                        title: 'AWS Direct Connect gateway を使用したハイブリッドクラウドアーキテクチャ',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
+                        note: 'Networking: Intermediate (Level 200)',
+                    },
+                    {
+                        title: 'AWS Direct Connect でのアクティブ/パッシブ BGP 接続の作成',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
+                        note: 'Networking: Intermediate (Level 200)',
+                    }
+                    
+                ],
             },
           ],
         },
@@ -955,23 +1221,81 @@ export const ANS_C01 = {
             '- ネットワーク接続を復元するための VPC 内のパケットサイズ不一致のトラブルシューティング',
           ],
           knowledge: [
-            'Data transfer cost reduction',
-            'Jumbo frames (MTU)',
-            'Enhanced Networking (ENA, EFA)',
+            'パケット損失',
+            'CloudWatch',
+            'VPC フローログ',
+            'VPC トラフィックミラーリング',
+            'Reachability Analyzer',
+            'Transit Gateway Network Manager',
+            'Amazon CloudWatch Logs',
+            'パケットシェーピング',
           ],
           resources: [
             {
-              key: 'blogs',
-              label: 'ブログ',
-              iconClass: 'fas fa-book',
-              iconColorClass: 'text-orange-500',
-              items: [
-                {
-                  title: '一般的なアーキテクチャのデータ転送コストの概要',
-                  url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
-                  note: 'Official Blog: Cost Optimization',
-                },
-              ],
+                key: 'docs',
+                label: '公式ドキュメント',
+                iconClass: 'fas fa-book-open',
+                iconColorClass: 'text-blue-600',
+                items: [
+                    {
+                        title: 'フローログレコード',
+                        url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/flow-log-records.html',
+                        note: 'Official Docs: Amazon VPC - VPC Flow Logs',
+                    },
+                ],
+            },
+            {
+                key: 'blogs',
+                label: 'AWS Blogs',
+                iconClass: 'fas fa-book',
+                iconColorClass: 'text-orange-500',
+                items: [
+                    {
+                        title: 'Amazon Virtual Private Cloud (VPC) のネットワークトラフィックを CIDR ブロックで分析する',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/analyze-network-traffic-of-amazon-virtual-private-cloud-vpc-by-cidr-blocks/',
+                        note: 'Networking: Intermediate (Level 200)',
+                    },
+                    {
+                        title: 'VPC トラフィックミラーリングを使用して AWS インフラストラクチャを監視および保護する',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
+                        note: 'Networking: Intermediate (Level 200)',
+                        recommend: true,
+                    },
+                    {
+                        title: 'VPC Reachability Analyzer を使用して AWS ネットワークの接続性を評価する',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/automating-connectivity-assessments-with-vpc-reachability-analyzer/',
+                        note: 'Networking: Intermediate (Level 200)',
+                    },
+                    {
+                        title: '複数の AWS リージョンにわたるネットワークパスを発見するための VPC Reachability Analyzer の使用',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/using-vpc-reachability-analyzer-to-discover-network-paths-across-multiple-aws-regions/',
+                        note: 'Networking: Advanced (Level 300)',
+                    },
+                    {
+                        title: 'VPC Reachability Analyzer を使用して接続を自動化する',
+                        url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/automating-connectivity-assessments-with-vpc-reachability-analyzer/',
+                        note: 'Networking: Intermediate (Level 200)',
+                    },
+                ],
+            },
+            {
+                key: 're:posts',
+                label: 'AWS re:Post',
+                iconClass: 'fas fa-comments',
+                iconColorClass: 'text-green-500',
+                items: [
+                    {
+                        title: 'VPC フローログと VPC トラフィックミラーリングの違い',
+                        url: 'https://repost.aws/questions/QUlSBSyx_vR4W0skbgRfq3uA/vpc-flow-logs-difference-with-vpc-traffic-mirroring',
+                        note: 're:Post: Network Performance and Reachability Troubleshooting',
+                    },
+                    {
+                        title: 'VPC トラフィックミラーリングの問題をトラブルシューティングするにはどうすればよいですか？',
+                        url: 'https://repost.aws/knowledge-center/vpc-traffic-mirroring',
+                        note: 're:Post: Network Performance and Reachability Troubleshooting',
+                        recommend: true,
+                    },
+                ],
             },
           ],
         },
@@ -1004,24 +1328,84 @@ export const ANS_C01 = {
             '- ネットワークパフォーマンスとアプリケーションの可用性を向上させるための、Global Accelerator を使用したネットワーク接続の最適化',
           ],
           knowledge: [
-            'Data transfer cost reduction',
-            'Jumbo frames (MTU)',
-            'Enhanced Networking (ENA, EFA)',
-          ],
+            'マルチキャストとユニキャスト',
+            'CloudFront',
+            '加重レコードセット',
+            'DNS ロードバランシング',
+            'Route 53 の可用性オプション',
+            'VPC サブネット最適化',
+            '様々な接続タイプにおけるフレームサイズの最適化',
+            'Elastic Network Interface',
+            'Elastic Network Adapter (ENA)',
+            'Elastic Fabric Adapter (EFA)',
+            'VPC ピアリング',
+            'プロキシパターン',
+            'Transit Gateway 接続',
+            'VPN 接続',
+            'Route 53 パブリックホストゾーン',
+            'Route 53 プライベートホストゾーン',
+            'オートスケーリング',
+            'ジャンボフレーム',
+            'Global Accelerator',
+            ],
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: '一般的なアーキテクチャのデータ転送コストの概要',
-                  url: 'https://aws.amazon.com/blogs/architecture/overview-of-data-transfer-costs-for-common-architectures/',
-                  note: 'Official Blog: Cost Optimization',
+                    title: 'AWS とハイブリッドネットワークのパフォーマンスを最適化する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/using-ena-express-to-improve-workload-performance-on-aws/',
+                    note: 'Networking: Advanced (Level 300)',
                 },
+                {
+                    title: 'AWS Global Accelerator を使用してアプリケーションのパフォーマンスを向上させる',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/use-aws-global-accelerator-to-improve-application-performance/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS Direct Connect gateway を使用したハイブリッドクラウドアーキテクチャ',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS ネットワーク最適化のヒント',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/aws-network-optimization-tips/',
+                    note: 'Networking: Intermediate (Level 200)',
+                    recommend: true,
+                },
+                {
+                    title: 'AWS での IPv6 インターネット検査アーキテクチャの設計と構築',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/design-and-build-ipv6-internet-inspection-architectures-on-aws/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'AWS での外部マルチキャストサービスの統合',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/integrating-external-multicast-services-with-aws/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: '透過的なフォワードプロキシを介してインターネットバウンドトラフィックをリダイレクトする',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/redirecting-internet-bound-traffic-through-a-transparent-forward-proxy/',
+                    note: 'Networking: Intermediate (Level 200)',
+                }
               ],
             },
+            {
+                key: 'docs',
+                label: '公式ドキュメント',
+                iconClass: 'fas fa-book-open',
+                iconColorClass: 'text-blue-600',
+                items: [
+                    {
+                        title: 'ENA Express を使用して AWS 上のワークロードのパフォーマンスを向上させる',
+                        url: 'https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/ena-express.html',
+                        note: 'Official Docs: Amazon EC2 - ENA Express',
+                    },
+                ],
+            }
           ],
         },
       ],
@@ -1055,15 +1439,24 @@ export const ANS_C01 = {
             '- AWS を使用したセキュリティインシデントのレポートとアラートの自動化',            
           ],
           knowledge: [
-            'Security Groups vs NACLs',
+            '脅威モデル',
+            '一般的なセキュリティ上の脅威',
+            'AWS WAF',
+            'AWS Shield',
             'AWS Network Firewall',
-            'WAF & Shield Advanced',
-            'Encryption in transit (TLS, VPN, MACsec)',
-          ],
+            'プロキシ',
+            'Gateway Load Balancer',
+            'セキュリティグループ',
+            'ネットワーク ACL',
+            'VPC エンドポイントポリシー',
+            '境界 VPC',
+            '3 層アーキテクチャ',
+            'フェイルオーバーテスト',
+        ],
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
@@ -1111,10 +1504,20 @@ export const ANS_C01 = {
             '- 単一または複数の AWS ネットワークサービスとアカウント間でのネットワーク監査戦略の実装 (Firewall Manager、セキュリティグループ、ネットワーク ACL など)',
           ],
           knowledge: [
-            'Security Groups vs NACLs',
-            'AWS Network Firewall',
-            'WAF & Shield Advanced',
-            'Encryption in transit (TLS, VPN, MACsec)',
+            'CloudWatch',
+            'AWS CloudTrail',
+            'VPC トラフィックミラーリング',
+            'VPC フローログ',
+            'Transit Gateway Network Manager',
+            'CloudWatch アラーム',
+            'ロードバランサーアクセスログ',
+            'CloudFront アクセスログ',
+            'Amazon Kinesis',
+            'AWS Route 53',
+            'セキュリティグループ',
+            'AWS Firewall Manager',
+            'AWS Trusted Advisor',
+            'ネットワーク ACL',
           ],
           resources: [
             {
@@ -1164,10 +1567,20 @@ export const ANS_C01 = {
             '- セキュアな DNS 通信の実装',
           ],
           knowledge: [
-            'Security Groups vs NACLs',
-            'AWS Network Firewall',
-            'WAF & Shield Advanced',
-            'Encryption in transit (TLS, VPN, MACsec)',
+            'AWS で利用可能なネットワーク暗号化オプション',
+            'Direct Connect 経由の VPN 接続',
+            'IPsec',
+            'DNSSEC',
+            'TLS',
+            'CloudFront',
+            'Application Load Balancer',
+            'Network Load Balancer',
+            'AWS マネージドデータベース',
+            'Amazon S3',
+            'Transit Gateway',
+            '認証局',
+            'AWS Certificate Manager (ACM)',
+            'AWS Certificate Manager Private Certificate Authority (ACM PCA)',
           ],
           resources: [
             {
