@@ -9,13 +9,12 @@ import {
   addXp,
   getXpSummary,
 } from './storage.js';
-import { MILESTONE_SHARE_PAGE_IDS } from './config.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 
 let chartInstance = null;
 
 const XP_RULES = {
-  link: 1,
+  link: 2,
   explain: 5,
   quiz: 10,
 };
@@ -338,23 +337,12 @@ function wireProfileHandlers({ els, state, getExamById }) {
       weekXp: summary.weekXp,
       title: summary.title,
     });
-    const shareUrl = buildMilestoneShareUrl({ milestoneId: summary.milestoneId });
-    const intentUrl = buildTweetIntentUrl({ text, url: shareUrl || window.location.href });
+
+    // SNS投稿はシンプルに「サイトURLのみ」を埋め込む（画像カード等は狙わない）
+    const siteUrl = 'https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/';
+    const intentUrl = buildTweetIntentUrl({ text, url: siteUrl });
     window.open(intentUrl, '_blank', 'noopener,noreferrer');
   });
-}
-
-function buildMilestoneShareUrl({ milestoneId }) {
-  const id = String(milestoneId || '').trim();
-  if (!id) return null;
-  if (!Array.isArray(MILESTONE_SHARE_PAGE_IDS) || !MILESTONE_SHARE_PAGE_IDS.includes(id)) return null;
-  // share pages are static HTML files so OG/Twitter can pick up the correct image.
-  try {
-    const base = new URL('./', window.location.href);
-    return new URL(`share/${encodeURIComponent(id)}.html`, base).toString();
-  } catch {
-    return null;
-  }
 }
 
 function wireToastHandlers({ els }) {
