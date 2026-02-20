@@ -465,6 +465,7 @@ function renderRecentXpActionsHtml(actions) {
       const applied = Number(a?.appliedXp || 0);
       const bonus = Number(a?.bonusXp || 0);
       const at = String(a?.at || '');
+      const day = String(a?.day || '');
 
       const label =
         reason === 'link'
@@ -481,7 +482,7 @@ function renderRecentXpActionsHtml(actions) {
         if (!Number.isNaN(d.getTime())) {
           const hh = String(d.getHours()).padStart(2, '0');
           const mm = String(d.getMinutes()).padStart(2, '0');
-          timeText = `${hh}:${mm}`;
+          timeText = day ? `${day} ${hh}:${mm}` : `${hh}:${mm}`;
         }
       } catch {
         // ignore
@@ -503,9 +504,11 @@ function renderRecentXpActionsHtml(actions) {
       const detailText = detail ? `<span class="ml-1 text-gray-400">(${escapeHtml(detail)})</span>` : '';
 
       return `
-        <div class="flex items-center justify-between gap-2">
-          <div class="min-w-0 truncate"><span class="font-semibold text-gray-700">${escapeHtml(label)}</span>${detailText}</div>
-          <div class="flex items-center gap-1 whitespace-nowrap">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+          <div class="min-w-0">
+            <div class="truncate"><span class="font-semibold text-gray-700">${escapeHtml(label)}</span>${detailText}</div>
+          </div>
+          <div class="flex flex-wrap items-baseline gap-x-1 gap-y-0">
             <span class="font-mono text-gray-800">+${applied}</span>
             <span class="text-gray-400">XP</span>
             ${bonusBadge}
