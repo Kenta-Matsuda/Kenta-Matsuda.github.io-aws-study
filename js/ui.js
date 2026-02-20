@@ -397,11 +397,11 @@ function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
   const total = Number(totalXp || 0);
   const week = Number(weekXp || 0);
   return [
-    `${name} のAWS学習ログ`,
-    `累積XP(全試験合算): ${total} / 直近1週間: ${week}`,
-    code ? `今の試験: ${code}` : null,
-    `称号: ${t}`,
-    `#AWS #AWS認定`,
+    `${name} のAWS学習ログ` + (code ? `（${code}を勉強中）` : ''),
+    `称号：${t}`,
+    `累積XP：${total}（今週+${week}）`,
+    '完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！ #AWS #AWS合格ナビゲーター',
+    'https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/',
   ].filter(Boolean).join('\n');
 }
 
@@ -443,7 +443,10 @@ function renderXpDashboard({ els, exam, state }) {
   if (els.xpRecentActions) {
     els.xpRecentActions.innerHTML = renderRecentXpActionsHtml(summary.recentActions);
   }
-  if (els.xpWeek) els.xpWeek.textContent = String(summary.weekXp);
+  if (els.xpWeek) {
+    const week = Number(summary.weekXp || 0);
+    els.xpWeek.textContent = `+${week}`;
+  }
   if (els.xpTitleBadge) els.xpTitleBadge.textContent = summary.title || '-';
   if (els.xpNextTitle) els.xpNextTitle.textContent = summary.nextTitle ? String(summary.nextTitle) : '-';
   if (els.xpRemaining) els.xpRemaining.textContent = summary.nextTitle ? `${summary.remainingXp} XP` : '-';
@@ -469,11 +472,11 @@ function renderRecentXpActionsHtml(actions) {
 
       const label =
         reason === 'link'
-          ? 'リンク'
+          ? 'URL遷移'
           : reason === 'explain'
-            ? '用語解説'
+            ? 'AI解説'
             : reason === 'quiz'
-              ? 'クイズ作成'
+              ? 'AI作問'
               : reason || 'XP';
 
       let timeText = '';
@@ -488,25 +491,12 @@ function renderRecentXpActionsHtml(actions) {
         // ignore
       }
 
-      let detail = '';
-      if (reason === 'link') {
-        const url = String(a?.url || '');
-        if (url) {
-          try {
-            detail = new URL(url).hostname;
-          } catch {
-            detail = '';
-          }
-        }
-      }
-
       const bonusBadge = bonus > 0 ? `<span class="ml-1 text-[11px] font-bold text-orange-700">初回+${bonus}</span>` : '';
-      const detailText = detail ? `<span class="ml-1 text-gray-400">(${escapeHtml(detail)})</span>` : '';
 
       return `
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
           <div class="min-w-0">
-            <div class="truncate"><span class="font-semibold text-gray-700">${escapeHtml(label)}</span>${detailText}</div>
+            <div class="truncate"><span class="font-semibold text-gray-700">${escapeHtml(label)}</span></div>
           </div>
           <div class="flex flex-wrap items-baseline gap-x-1 gap-y-0">
             <span class="font-mono text-gray-800">+${applied}</span>

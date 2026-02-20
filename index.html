@@ -311,17 +311,15 @@
                     </div>
                 </div>
 
-                <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
                         <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">これまでの累積 XP</div>
-                        <div id="xpTotal" class="mt-1 text-3xl font-extrabold text-gray-900 font-mono">0</div>
+                        <div class="mt-1 flex items-end gap-2">
+                            <div id="xpTotal" class="text-3xl font-extrabold text-gray-900 font-mono">0</div>
+                            <div class="pb-1 text-sm font-bold text-gray-500 font-mono">(直近7日間 <span id="xpWeek">+0</span>)</div>
+                        </div>
                         <div class="mt-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide">直近の獲得</div>
                         <div id="xpRecentActions" class="mt-1 space-y-1 text-xs text-gray-600"></div>
-                    </div>
-
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">直近 7 日間の獲得 XP</div>
-                        <div id="xpWeek" class="mt-1 text-3xl font-extrabold text-gray-900 font-mono">0</div>
                     </div>
 
                     <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
