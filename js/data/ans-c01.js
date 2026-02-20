@@ -1416,7 +1416,7 @@ export const ANS_C01 = {
       jpTitle: 'ネットワークのセキュリティ、コンプライアンス、ガバナンス',
       weight: 24,
       color: '#ef4444',
-      description: 'セキュリティコントロールの実装、脅威からの保護。',
+      description: 'このドメインでは、AWS ネットワークのセキュリティ、コンプライアンス、およびガバナンスに関連するスキルと知識が問われます。ネットワークセキュリティのベストプラクティス、コンプライアンス要件の理解、およびガバナンス戦略の実装に焦点を当てています。',
       tasks: [
         {
           id: '4.1',
@@ -1463,8 +1463,47 @@ export const ANS_C01 = {
                 {
                   title: 'AWS Network Firewallのデプロイモデル',
                   url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
-                  note: 'Official Blog: Firewall Deployment',
+                  note: 'Networking: Advanced (Level 300)',
+                  recommend: true,
                 },
+                {
+                    title: 'Amazon Virtual Private Gateway Ingress Routing が Gateway Load Balancer をサポート',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/announcing-amazon-virtual-private-gateway-ingress-routing-support-for-gateway-load-balancer/',
+                    note: 'Networking: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS Gateway Load Balancer と AWS Transit Gateway を使用した集中型検査アーキテクチャ',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/centralized-inspection-architecture-with-aws-gateway-load-balancer-and-aws-transit-gateway/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'AWS Gateway Load Balancer 対応アーキテクチャパターンの紹介',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/introducing-aws-gateway-load-balancer-supported-architecture-patterns/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title: 'Gateway Load Balancer の展開に関するベストプラクティス',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/best-practices-for-deploying-gateway-load-balancer/',
+                    note: 'Networking: Advanced (Level 300)',
+                },
+                {
+                    title : 'Amazon VPC エンドポイントを使用してコストを削減し、セキュリティを向上させる',
+                    url: 'https://aws.amazon.com/jp/blogs/architecture/reduce-cost-and-increase-security-with-amazon-vpc-endpoints/',
+                    note: 'Architecture: Intermediate (Level 200)',
+
+                },
+                {
+                    title: 'AWS での脅威モデリングへのアプローチ',
+                    url: 'https://aws.amazon.com/jp/blogs/security/how-to-approach-threat-modeling/',
+                    note: 'Security: Intermediate (Level 200)',
+                    recommend: true,
+                },
+                {
+                    title: 'AWS でのセキュリティレスポンス自動化の開始方法',
+                    url: 'https://aws.amazon.com/jp/blogs/security/how-get-started-security-response-automation-aws/',
+                    note: 'Security: Advanced (Level 300)',
+                    recommend: true,
+                }
               ],
             },
             {
@@ -1474,13 +1513,54 @@ export const ANS_C01 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
-                  url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
-                  note: 'Official Whitepaper: DDoS Mitigation',
+                    title: 'セキュリティアーキテクチャの構築-段階的なアプローチ',
+                    url: 'https://docs.aws.amazon.com/ja_jp/prescriptive-guidance/latest/security-reference-architecture/phases.html',
+                    note: 'Prescriptive Guidance: セキュリティリファレンスアーキテクチャ（SRA）',
                 },
+                {
+                    title: 'インフラストラクチャOU-ネットワークアカウント',
+                    url: 'https://docs.aws.amazon.com/ja_jp/prescriptive-guidance/latest/security-reference-architecture/network.html',
+                    note: 'Prescriptive Guidance: セキュリティリファレンスアーキテクチャ（SRA）',
+                },
+                {
+                    title: 'AWS WAF or AWS Shield?',
+                    url: 'https://docs.aws.amazon.com/ja_jp/decision-guides/latest/waf-or-shield/waf-or-shield.html',
+                    note: 'Prescriptive Guidance: AWS WAF or AWS Shield?',
+                }
               ],
             },
-          ],
+            {
+                key: 'blackbelts',
+                label: 'AWS Black Belt Online Seminar',
+                iconClass: 'fas fa-video',
+                iconColorClass: 'text-red-500',
+                items: [
+                    {
+                        title: 'AWS Network Firewall 入門',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Network%20Firewall%20%E5%85%A5%E9%96%80',
+                        note: 'PDF | Youtube: 2021/06',
+                    },
+                    {
+                        title: 'AWS Network Firewall 応用編1',
+                        url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Network%20Firewall%20%E5%BF%9C%E7%94%A8%E7%B7%A81',
+                        note: 'PDF | Youtube: 2021/10',
+                    }
+                ],
+            },
+            {
+                key: 'hands-on',
+                label: 'ハンズオン',
+                iconClass: 'fas fa-hand-paper',
+                iconColorClass: 'text-green-500',
+                items: [
+                    {
+                        title: 'AWS Network Firewall の柔軟なルールエンジンのハンズオンウォークスルー',
+                        url: 'https://aws.amazon.com/jp/blogs/security/hands-on-walkthrough-of-the-aws-network-firewall-flexible-rules-engine/',
+                        note: 'Blogs: AWS Network Firewall',
+                    },
+                ],
+            },
+            ],
         },
         {
           id: '4.2',
@@ -1522,28 +1602,30 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'AWS Network Firewallのデプロイモデル',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
-                  note: 'Official Blog: Firewall Deployment',
+                  title: 'Amazon Athena と Amazon QuickSight を使用して VPC フローログを分析する',
+                  url: 'https://aws.amazon.com/jp/blogs/big-data/analyzing-vpc-flow-logs-using-amazon-athena-and-amazon-quicksight/',
+                  note: 'Big Data: Intermediate (Level 200)',
                 },
-              ],
-            },
-            {
-              key: 'docs',
-              label: '公式ドキュメント',
-              iconClass: 'fas fa-book-open',
-              iconColorClass: 'text-blue-600',
-              items: [
                 {
-                  title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
-                  url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
-                  note: 'Official Whitepaper: DDoS Mitigation',
+                    title: 'Amazon Kinesis と Amazon Athena を使用して VPC ネットワークトラフィックを分析および可視化する',
+                    url: 'https://aws.amazon.com/jp/blogs/big-data/analyze-and-visualize-your-vpc-network-traffic-using-amazon-kinesis-and-amazon-athena/',
+                    note: 'Big Data: Intermediate (Level 200)',
                 },
+                {
+                    title: 'Cyber Range とは何か、AWS でどのように構築するか',
+                    url: 'https://aws.amazon.com/jp/blogs/security/what-is-cyber-range-how-do-you-build-one-aws/',
+                    note: 'Security: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Route 53 Resolver DNS Firewall ログと CloudWatch Contributor Insights を利用し、異常検出する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/using-route-53-resolver-dns-firewall-logs-with-cloudwatch-contributor-insights-and-anomaly-detection/',
+                    note: 'Networking & Content Delivery: Advanced (Level 300)',
+                }
               ],
             },
           ],
@@ -1585,29 +1667,60 @@ export const ANS_C01 = {
           resources: [
             {
               key: 'blogs',
-              label: 'ブログ',
+              label: 'AWS Blogs',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'AWS Network Firewallのデプロイモデル',
-                  url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
-                  note: 'Official Blog: Firewall Deployment',
+                    title: '外部ネットワーク上の転送中の暗号化- NYDFS およびそれ以降の AWS ガイダンス',
+                    url: 'https://aws.amazon.com/jp/blogs/security/encryption-in-transit-over-external-networks-aws-guidance-for-nydfs-and-beyond/',
+                    note: 'Security: Intermediate (Level 200)',
                 },
+                {
+                    title: 'VPC 暗号化コントロールの紹介-リージョン内およびリージョン間の VPC 内の転送中の暗号化を強制する',
+                    url: 'https://aws.amazon.com/jp/blogs/aws/introducing-vpc-encryption-controls-enforce-encryption-in-transit-within-and-across-vpcs-in-a-region/',
+                    note: 'Security: Intermediate (Level 200)',
+                },
+                {
+                    title: 'AWS での HTTP Strict Transport Security (HSTS) の実装',
+                    url: 'https://aws.amazon.com/jp/blogs/security/implementing-http-strict-transport-security-hsts-across-aws-services/',
+                    note: 'Security: Intermediate (Level 200)',
+                },
+                {
+                    title: 'Amazon CloudFront を使用して Amazon API Gateway を安全な暗号化方式で保護する',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/securing-amazon-api-gateway-with-secure-ciphers-using-amazon-cloudfront/',
+                    note: 'Networking & Content Delivery: Intermediate (Level 200)',
+                },
+                {
+                    title: '自動車と製造業のためのエンタープライズ規模の ACM Private CA 階層を保護する方法',
+                    url: 'https://aws.amazon.com/jp/blogs/security/how-to-secure-an-enterprise-scale-acm-private-ca-hierarchy-for-automotive-and-manufacturing/',
+                    note: 'Security: Expert (Level 400)',
+                },
+                {
+                    title: 'Amazon Route 53 での DNSSEC の署名と検証の設定',
+                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/configuring-dnssec-signing-and-validation-with-amazon-route-53/',
+                    note: 'Networking & Content Delivery: Intermediate (Level 200)',
+                    recommend: true,
+                }
               ],
             },
             {
-              key: 'docs',
-              label: '公式ドキュメント',
-              iconClass: 'fas fa-book-open',
-              iconColorClass: 'text-blue-600',
-              items: [
-                {
-                  title: 'AWS WAFの実装ガイドライン: レイヤー7でのDDoS攻撃',
-                  url: 'https://docs.aws.amazon.com/whitepapers/latest/guidelines-for-implementing-aws-waf/ddos-attacks-at-layer-7.html',
-                  note: 'Official Whitepaper: DDoS Mitigation',
-                },
-              ],
+                key: 'docs',
+                label: '公式ドキュメント',
+                iconClass: 'fas fa-book-open',
+                iconColorClass: 'text-blue-600',
+                items: [
+                    {
+                        title: 'AWS Certificate Manager Private Certificate Authority のベストプラクティス',
+                        url: 'https://docs.aws.amazon.com/ja_jp/privateca/latest/userguide/ca-best-practices.html',
+                        note: 'ユーザーガイド: AWS Certificate Manager Private Certificate Authority',
+                    },
+                    {
+                        title: 'Amazon Route 53 での DNSSEC の署名と検証の設定',
+                        url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/resolver-dnssec-validation.html',
+                        note: 'ユーザーガイド: Amazon Route 53',
+                    }
+                ],
             },
           ],
         },
