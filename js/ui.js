@@ -1,8 +1,23 @@
 import { callGemini } from './gemini.js';
-import { getApiKey, saveApiKeyFromInput, clearApiKey } from './storage.js';
+import {
+  getApiKey,
+  saveApiKeyFromInput,
+  clearApiKey,
+  getUserName,
+  setUserName,
+  addXp,
+  getXpSummary,
+} from './storage.js';
+import { MILESTONE_SHARE_PAGE_IDS } from './config.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 
 let chartInstance = null;
+
+const XP_RULES = {
+  link: 1,
+  explain: 5,
+  quiz: 10,
+};
 
 export function initApp({ exams, getExamById, defaultExamId }) {
   const els = getElements();
@@ -23,10 +38,30 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const exam = getExamById(req.examId);
     updateAiRetryButton({ visible: true, disabled: true });
     if (req.type === 'explain') {
-      await explainTerm({ els, exam, term: req.term, taskContext: req.taskContext });
+      const ok = await explainTerm({ els, exam, examId: req.examId, term: req.term, taskContext: req.taskContext });
+      if (ok) {
+        const result = addXp({ amount: XP_RULES.explain, reason: 'ai' });
+        if (result?.unlocked?.length) {
+          showMilestoneToast({ els, unlocked: result.unlocked });
+        }
+        renderXpDashboard({ els, exam: getExamById(req.examId), state });
+      }
       return;
     }
-    await generateQuiz({ els, exam, taskTitle: req.taskTitle, taskContext: req.taskContext });
+    const ok = await generateQuiz({
+      els,
+      exam,
+      examId: req.examId,
+      taskTitle: req.taskTitle,
+      taskContext: req.taskContext,
+    });
+    if (ok) {
+      const result = addXp({ amount: XP_RULES.quiz, reason: 'ai' });
+      if (result?.unlocked?.length) {
+        showMilestoneToast({ els, unlocked: result.unlocked });
+      }
+      renderXpDashboard({ els, exam: getExamById(req.examId), state });
+    }
   }
 
   els.aiRetryBtn?.addEventListener('click', async () => {
@@ -37,10 +72,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   const state = {
     examId: defaultExamId,
     currentDomainId: null,
-    searchTerm: '',
   };
 
   wireGlobalUiHandlers({ els, state });
+
+  wireProfileHandlers({ els, state, getExamById });
+  wireToastHandlers({ els });
 
   // 初期表示
   setExam(defaultExamId);
@@ -53,32 +90,25 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     state.examId = examId;
     state.currentDomainId = exam.domains?.[0]?.id ?? null;
-    state.searchTerm = '';
-    els.searchInput.value = '';
 
     renderExamMeta({ els, exam });
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
     renderChart({ els, exam, onDomainSelect: (domainId) => switchDomain(domainId) });
+    renderXpDashboard({ els, exam, state });
     renderTabs({ els, exam, state, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderContent({ els, exam, state });
   }
 
   function switchDomain(domainId) {
     state.currentDomainId = domainId;
-    state.searchTerm = '';
-    els.searchInput.value = '';
 
     const exam = getExamById(state.examId);
     renderTabs({ els, exam, state, onDomainSelect: (id) => switchDomain(id) });
     renderContent({ els, exam, state });
   }
 
-  // Search
-  els.searchInput.addEventListener('input', (e) => {
-    state.searchTerm = e.target.value ?? '';
-    const exam = getExamById(state.examId);
-    renderContent({ els, exam, state });
-  });
+  // First visit: require username
+  enforceUserNameIfNeeded({ els });
 
   // Content actions (event delegation)
   els.contentArea.addEventListener('click', async (e) => {
@@ -92,17 +122,39 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     if (action === 'quiz') {
       lastAiRequest = { type: 'quiz', examId, taskTitle: btn.dataset.taskTitle || '', taskContext };
-      updateAiRetryButton({ visible: true, disabled: true });
-      await generateQuiz({ els, exam, taskTitle: btn.dataset.taskTitle || '', taskContext });
+      await runAiRequest(lastAiRequest);
       return;
     }
 
     if (action === 'explain') {
       lastAiRequest = { type: 'explain', examId, term: btn.dataset.term || '', taskContext };
-      updateAiRetryButton({ visible: true, disabled: true });
-      await explainTerm({ els, exam, term: btn.dataset.term || '', taskContext });
+      await runAiRequest(lastAiRequest);
       return;
     }
+  });
+
+  wireXpLinkHandlers({ els, state, getExamById });
+}
+
+function wireXpLinkHandlers({ els, state, getExamById }) {
+  const award = (href) => {
+    const result = addXp({ amount: XP_RULES.link, reason: 'link', url: href });
+    if (result?.unlocked?.length) {
+      showMilestoneToast({ els, unlocked: result.unlocked });
+    }
+    renderXpDashboard({ els, exam: getExamById(state.examId), state });
+  };
+
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[data-xp-link]');
+    if (!a || !a.getAttribute('href')) return;
+    award(a.href);
+  });
+
+  document.addEventListener('auxclick', (e) => {
+    const a = e.target.closest('a[data-xp-link]');
+    if (!a || !a.getAttribute('href')) return;
+    award(a.href);
   });
 }
 
@@ -118,7 +170,19 @@ function getElements() {
     domainLegend: document.getElementById('domainLegend'),
     domainTabs: document.getElementById('domainTabs'),
     contentArea: document.getElementById('contentArea'),
-    searchInput: document.getElementById('searchInput'),
+
+    // XP Dashboard
+    xpDashboard: document.getElementById('xpDashboard'),
+    xpUserLine: document.getElementById('xpUserLine'),
+    xpTotal: document.getElementById('xpTotal'),
+    xpWeek: document.getElementById('xpWeek'),
+    xpTitleBadge: document.getElementById('xpTitleBadge'),
+    xpNextTitle: document.getElementById('xpNextTitle'),
+    xpRemaining: document.getElementById('xpRemaining'),
+    xpProgressBar: document.getElementById('xpProgressBar'),
+    xpMotivation: document.getElementById('xpMotivation'),
+    editUserNameBtn: document.getElementById('editUserNameBtn'),
+    tweetBtn: document.getElementById('tweetBtn'),
 
     // modals
     aiModal: document.getElementById('aiModal'),
@@ -126,6 +190,16 @@ function getElements() {
     modalContent: document.getElementById('modalContent'),
     modalLoading: document.getElementById('modalLoading'),
     aiRetryBtn: document.getElementById('aiRetryBtn'),
+
+    userModal: document.getElementById('userModal'),
+    userModalCloseBtn: document.getElementById('userModalCloseBtn'),
+    userNameInput: document.getElementById('userNameInput'),
+    userNameSaveBtn: document.getElementById('userNameSaveBtn'),
+    userMessage: document.getElementById('userMessage'),
+
+    milestoneToast: document.getElementById('milestoneToast'),
+    milestoneToastText: document.getElementById('milestoneToastText'),
+    milestoneToastCloseBtn: document.getElementById('milestoneToastCloseBtn'),
 
     settingsModal: document.getElementById('settingsModal'),
     settingsBtn: document.getElementById('settingsBtn'),
@@ -137,6 +211,8 @@ function getElements() {
 }
 
 function wireGlobalUiHandlers({ els }) {
+  let pointerDownOnBackdrop = false;
+
   // Exam dropdown
   els.examMenuBtn?.addEventListener('click', (e) => {
     e.preventDefault();
@@ -168,7 +244,9 @@ function wireGlobalUiHandlers({ els }) {
     if (!btn) return;
     const modalId = btn.getAttribute('data-close-modal');
     const modalEl = document.getElementById(modalId);
-    if (modalEl) closeModal(modalEl);
+    if (!modalEl) return;
+    if (modalEl.getAttribute('data-locked') === 'true') return;
+    closeModal(modalEl);
   });
 
   // Close exam menu when clicking outside
@@ -179,11 +257,258 @@ function wireGlobalUiHandlers({ els }) {
   });
 
   // Click outside to close
-  window.addEventListener('click', (event) => {
-    if (event.target?.classList?.contains('modal')) {
-      closeModal(event.target);
-    }
+  window.addEventListener('pointerdown', (event) => {
+    pointerDownOnBackdrop = Boolean(event.target?.classList?.contains?.('modal'));
   });
+
+  window.addEventListener('click', (event) => {
+    if (!event.target?.classList?.contains?.('modal')) return;
+    if (!pointerDownOnBackdrop) return;
+    if (event.target.getAttribute?.('data-locked') === 'true') return;
+    const selection = window.getSelection?.()?.toString?.() || '';
+    if (selection) return;
+    closeModal(event.target);
+  });
+}
+
+function wireProfileHandlers({ els, state, getExamById }) {
+  if (!els.userModal || !els.userNameInput || !els.userNameSaveBtn) return;
+
+  const afterProfileSaved = () => {
+    els.userModal.setAttribute('data-locked', 'false');
+    closeModal(els.userModal);
+    renderXpDashboard({ els, exam: getExamById(state.examId), state });
+    smoothReturnToDashboard({ els });
+  };
+
+  const saveFromModal = () => {
+    const name = String(els.userNameInput.value || '').trim();
+    if (!name) {
+      showInlineMessage(els.userMessage, 'ユーザー名を入力してください。', 'text-red-600');
+      return;
+    }
+    if (name.length > 30) {
+      showInlineMessage(els.userMessage, 'ユーザー名は30文字以内にしてください。', 'text-red-600');
+      return;
+    }
+
+    setUserName(name);
+    els.userMessage?.classList?.add('hidden');
+    afterProfileSaved();
+  };
+
+  els.editUserNameBtn?.addEventListener('click', () => {
+    openUserModal({ els, locked: false });
+  });
+
+  els.userNameSaveBtn.addEventListener('click', () => saveFromModal());
+
+  els.userNameInput.addEventListener('keydown', (e) => {
+    if (e.isComposing) return;
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    saveFromModal();
+  });
+
+  els.tweetBtn?.addEventListener('click', () => {
+    const exam = getExamById(state.examId);
+    const summary = getXpSummary();
+    const name = getUserName() || '名無し';
+    const text = buildTweetText({
+      userName: name,
+      examCode: exam.code,
+      totalXp: summary.totalXp,
+      weekXp: summary.weekXp,
+      title: summary.title,
+    });
+    const shareUrl = buildMilestoneShareUrl({ milestoneId: summary.milestoneId });
+    const intentUrl = buildTweetIntentUrl({ text, url: shareUrl || window.location.href });
+    window.open(intentUrl, '_blank', 'noopener,noreferrer');
+  });
+}
+
+function buildMilestoneShareUrl({ milestoneId }) {
+  const id = String(milestoneId || '').trim();
+  if (!id) return null;
+  if (!Array.isArray(MILESTONE_SHARE_PAGE_IDS) || !MILESTONE_SHARE_PAGE_IDS.includes(id)) return null;
+  // share pages are static HTML files so OG/Twitter can pick up the correct image.
+  try {
+    const base = new URL('./', window.location.href);
+    return new URL(`share/${encodeURIComponent(id)}.html`, base).toString();
+  } catch {
+    return null;
+  }
+}
+
+function wireToastHandlers({ els }) {
+  els.milestoneToastCloseBtn?.addEventListener('click', () => hideMilestoneToast({ els }));
+}
+
+function enforceUserNameIfNeeded({ els }) {
+  const current = getUserName();
+  if (current) return;
+  openUserModal({ els, locked: true });
+}
+
+function openUserModal({ els, locked }) {
+  if (!els.userModal) return;
+
+  const current = getUserName();
+  if (els.userNameInput) {
+    els.userNameInput.value = current || '';
+    setTimeout(() => els.userNameInput.focus(), 0);
+  }
+  els.userMessage?.classList?.add('hidden');
+  els.userModal.setAttribute('data-locked', locked ? 'true' : 'false');
+  if (els.userModalCloseBtn) {
+    els.userModalCloseBtn.classList.toggle('hidden', Boolean(locked));
+  }
+  openModal(els.userModal);
+}
+
+function showInlineMessage(messageEl, text, colorClass) {
+  if (!messageEl) return;
+  messageEl.textContent = text;
+  messageEl.className = `text-sm mb-4 ${colorClass}`;
+  messageEl.classList.remove('hidden');
+}
+
+function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
+  const name = String(userName || '名無し');
+  const code = String(examCode || '');
+  const t = String(title || '');
+  const total = Number(totalXp || 0);
+  const week = Number(weekXp || 0);
+  return [
+    `${name} のAWS学習ログ`,
+    `累積XP(全試験合算): ${total} / 直近1週間: ${week}`,
+    code ? `今の試験: ${code}` : null,
+    `称号: ${t}`,
+    `#AWS #AWS認定`,
+  ].filter(Boolean).join('\n');
+}
+
+function buildTweetIntentUrl({ text, url }) {
+  const base = 'https://twitter.com/intent/tweet';
+  const params = new URLSearchParams();
+  params.set('text', String(text || '').slice(0, 800));
+  if (url) params.set('url', String(url));
+  return `${base}?${params.toString()}`;
+}
+
+function showMilestoneToast({ els, unlocked }) {
+  if (!els.milestoneToast || !els.milestoneToastText) return;
+  const latest = unlocked?.[unlocked.length - 1];
+  if (!latest) return;
+  els.milestoneToastText.textContent = `「${latest.title}」を解放（${latest.xp} XP）`;
+  els.milestoneToast.classList.remove('hidden');
+  window.clearTimeout?.(els.__milestoneToastTimer);
+  els.__milestoneToastTimer = window.setTimeout(() => {
+    hideMilestoneToast({ els });
+  }, 4500);
+}
+
+function hideMilestoneToast({ els }) {
+  els.milestoneToast?.classList?.add('hidden');
+}
+
+function renderXpDashboard({ els, exam, state }) {
+  if (!els.xpDashboard) return;
+
+  const name = getUserName();
+  const summary = getXpSummary();
+
+  if (els.xpUserLine) {
+    els.xpUserLine.textContent = buildDashboardHeadline({ userName: name });
+  }
+
+  if (els.xpTotal) els.xpTotal.textContent = String(summary.totalXp);
+  if (els.xpWeek) els.xpWeek.textContent = String(summary.weekXp);
+  if (els.xpTitleBadge) els.xpTitleBadge.textContent = summary.title || '-';
+  if (els.xpNextTitle) els.xpNextTitle.textContent = summary.nextTitle ? String(summary.nextTitle) : '-';
+  if (els.xpRemaining) els.xpRemaining.textContent = summary.nextTitle ? `${summary.remainingXp} XP` : '-';
+  if (els.xpProgressBar) {
+    const pct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
+    els.xpProgressBar.style.width = `${pct.toFixed(1)}%`;
+  }
+}
+
+function stablePick(list, seedText) {
+  const arr = Array.isArray(list) ? list : [];
+  if (!arr.length) return '';
+  const seed = String(seedText || '');
+  let h = 2166136261;
+  for (let i = 0; i < seed.length; i += 1) {
+    h ^= seed.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  const idx = Math.abs(h) % arr.length;
+  return arr[idx];
+}
+
+function buildDashboardHeadline({ userName }) {
+  const name = String(userName || '').trim();
+
+  const now = new Date();
+  const hour = now.getHours();
+  const daySeed = now.toISOString().slice(0, 10);
+  const baseSeed = `${daySeed}|${name || 'anon'}`;
+
+  const greetingCandidates =
+    hour < 5
+      ? ['こんばんは。', 'おつかれさまです。', '夜遅くまでおつかれさまです。']
+      : hour < 11
+        ? ['おはようございます。', 'おはよう。', 'いい朝ですね。']
+        : hour < 18
+          ? ['こんにちは。', 'こんにちは！', 'やあ。']
+          : ['こんばんは。', 'おつかれさまです。', 'おかえりなさい。'];
+
+  const greet = stablePick(greetingCandidates, `${baseSeed}|g`);
+
+  const you = name ? `${name}さん` : 'あなた';
+  const line1 = `${greet} ${you}`.trim();
+  const line2 = buildDashboardOneLiner({ userName: name });
+  return [line1, line2].filter(Boolean).join('\n').trim();
+}
+
+function buildDashboardOneLiner({ userName, title } = {}) {
+  const name = String(userName || '').trim();
+  const now = new Date();
+  const hour = now.getHours();
+  const daySeed = now.toISOString().slice(0, 10);
+  const baseSeed = `${daySeed}|${name || 'anon'}|${String(title || '')}`;
+
+  const base = [
+    '今日も1つだけ進めよう。',
+    '5分だけでもOK。',
+    'コツコツは裏切らない。',
+    'メモ1行でOK。',
+    '一歩ずつ、積み上げ。',
+    '集中は短く、回数で勝つ。',
+    'できたところに丸をつけよう。',
+    '迷ったら公式ドキュメント。',
+    '今日の自分に勝つ。',
+    '小さく始めて大きく伸ばす。',
+  ];
+
+  const lateNight = ['夜更かししすぎないでね。', '無理しないでね。', '眠気が来たら撤退も正解。'];
+  const morning = ['良いスタート切ろう。', '朝の集中は最強。', '1トピックだけ片づけよう。'];
+  const evening = ['今日の分、回収しよう。', 'おつかれさま。あと少しだけ。', 'ゆるく続けよう。'];
+
+  const timeAdd = hour < 5 ? lateNight : hour < 11 ? morning : hour < 18 ? [] : evening;
+  const candidates = base.concat(timeAdd);
+  return stablePick(candidates, `${baseSeed}|l`);
+}
+
+function smoothReturnToDashboard({ els }) {
+  const target = els?.xpDashboard;
+  if (!target) return;
+
+  try {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    window.scrollTo?.(0, 0);
+  }
 }
 
 function renderExamMeta({ els, exam }) {
@@ -356,25 +681,11 @@ function renderContent({ els, exam, state }) {
     return;
   }
 
-  const termRaw = (state.searchTerm || '').trim();
-  const term = termRaw.toLowerCase();
-
-  let targetDomains = exam.domains;
-  if (!term) {
-    targetDomains = targetDomains.filter((d) => d.id === state.currentDomainId);
-  }
+  const term = '';
+  const targetDomains = exam.domains.filter((d) => d.id === state.currentDomainId);
 
   for (const domain of targetDomains) {
-    const visibleTasks = (domain.tasks || []).filter((task) => {
-      if (!term) return true;
-      return (
-        task.title.toLowerCase().includes(term) ||
-        task.jpTitle.toLowerCase().includes(term) ||
-        (task.knowledge || []).some((k) => k.toLowerCase().includes(term))
-      );
-    });
-
-    if (visibleTasks.length === 0 && term) continue;
+    const visibleTasks = domain.tasks || [];
 
     const domainHeader = document.createElement('div');
     domainHeader.innerHTML = `
@@ -478,8 +789,8 @@ function renderContent({ els, exam, state }) {
   if (!els.contentArea.innerHTML) {
     els.contentArea.innerHTML = `
       <div class="text-center py-12 text-gray-500">
-        <i class="fas fa-search text-4xl mb-3 text-gray-300"></i>
-        <p>該当するタスクが見つかりませんでした。</p>
+        <i class="fas fa-circle-info text-4xl mb-3 text-gray-300"></i>
+        <p>このドメインのタスクが見つかりませんでした。</p>
       </div>
     `;
   }
@@ -559,7 +870,7 @@ function renderBlogCard({ blog, term }) {
   return `
     <div class="${cardClass}">
       <div class="flex items-start justify-between gap-3">
-        <a href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 hover:underline flex items-start gap-2 group">
+        <a data-xp-link="resource" href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 hover:underline flex items-start gap-2 group">
           <span>${title}</span>
           <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
         </a>
@@ -764,6 +1075,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   });
 
   if (response) updateAiModalContent(els, response);
+  return isSuccessfulAiResponse(response);
 }
 
 async function generateQuiz({ els, exam, taskTitle, taskContext }) {
@@ -804,4 +1116,15 @@ D. [選択肢]
   });
 
   if (response) updateAiModalContent(els, response);
+  return isSuccessfulAiResponse(response);
+}
+
+function isSuccessfulAiResponse(response) {
+  if (!response) return false;
+  const text = String(response).trim();
+  if (!text) return false;
+  if (text.startsWith('エラーが発生しました')) return false;
+  if (text === '回答を生成できませんでした。') return false;
+  if (text.length < 80) return false;
+  return true;
 }

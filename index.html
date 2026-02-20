@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AWS Study Navigator</title>
+
+        <!-- Open Graph / Twitter Card
+            NOTE: For milestone-specific images, we use /share/*.html pages that point to assets/og/*.png.
+        -->
+        <meta property="og:locale" content="ja_JP">
+        <meta property="og:type" content="website">
+        <meta property="og:title" content="AWS Study Navigator">
+        <meta property="og:description" content="AWS認定の学習を、XPと称号で積み上げる学習ナビ。">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
@@ -203,7 +211,7 @@
                 <div>
                     <h1 id="siteTitle" class="text-2xl md:text-3xl font-bold tracking-tight">AWS Study Navigator</h1>
                     <p id="siteSubtitle" class="text-gray-300 mt-2 text-sm md:text-base">
-                        <a href="https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf" target="_blank" rel="noopener noreferrer" class="underline decoration-gray-500 hover:decoration-gray-200 hover:text-white transition-colors">試験ガイド</a>に基づく学習リソースナビゲーター
+                        <a data-xp-link="resource" href="https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf" target="_blank" rel="noopener noreferrer" class="underline decoration-gray-500 hover:decoration-gray-200 hover:text-white transition-colors">試験ガイド</a>に基づく学習リソースナビゲーター
                     </p>
                 </div>
 
@@ -256,7 +264,7 @@
                     <div class="flex items-center text-sm text-gray-700">
                         <i class="fas fa-book-open w-6 text-orange-500"></i>
                         <span>
-                            <a href="https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf" target="_blank" rel="noopener noreferrer" class="text-blue-700 hover:text-blue-900 underline">試験ガイド</a>を確認する
+                            <a data-xp-link="resource" href="https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf" target="_blank" rel="noopener noreferrer" class="text-blue-700 hover:text-blue-900 underline">試験ガイド</a>を確認する
                         </span>
 
                     </div>
@@ -285,23 +293,60 @@
         <section class="lg:col-span-8 xl:col-span-9 space-y-6">
             
             <!-- Context Header for Right Section -->
-            <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-2">ドメイン・タスク エクスプローラー</h2>
-                <p class="text-gray-600 text-sm">
-                    ドメインを選択してタスク詳細を確認してください。
-                </p>
+            <div id="xpDashboard" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
+                    <div class="min-w-0 flex-1">
+                        <h2 class="text-xl font-bold text-gray-900">学習ダッシュボード</h2>
+                        <p id="xpUserLine" class="text-gray-600 text-sm mt-1 whitespace-pre-line break-words">
+                            学習の総量を積み上げていきましょう。
+                        </p>
+                    </div>
+                    <div class="flex gap-2 justify-end flex-shrink-0">
+                        <button id="editUserNameBtn" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap">
+                            <i class="fas fa-user-pen"></i> ユーザー名変更
+                        </button>
+                        <button id="tweetBtn" type="button" class="px-3 py-2 bg-black hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition flex items-center gap-2 whitespace-nowrap">
+                            Xに投稿
+                        </button>
+                    </div>
+                </div>
+
+                <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">これまでの累積 XP</div>
+                        <div id="xpTotal" class="mt-1 text-3xl font-extrabold text-gray-900 font-mono">0</div>
+                    </div>
+
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">直近 7 日間の獲得 XP</div>
+                        <div id="xpWeek" class="mt-1 text-3xl font-extrabold text-gray-900 font-mono">0</div>
+                    </div>
+
+                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
+                        <div class="flex items-center gap-2">
+                            <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">称号</div>
+                            <div id="xpTitleBadge" class="text-[11px] font-bold px-2 py-0.5 rounded border bg-white text-gray-800 border-gray-200">-</div>
+                        </div>
+                        <div class="mt-3 space-y-1 text-xs text-gray-600">
+                            <div class="flex items-center gap-2 min-w-0">
+                                <span class="whitespace-nowrap">次の称号：</span>
+                                <span id="xpNextTitle" class="min-w-0 truncate font-semibold text-gray-800">-</span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="whitespace-nowrap">残り：</span>
+                                <span id="xpRemaining" class="whitespace-nowrap">0 XP</span>
+                            </div>
+                        </div>
+                        <div class="mt-2 h-2 rounded bg-gray-200 overflow-hidden">
+                            <div id="xpProgressBar" class="h-2 bg-orange-500" style="width: 0%"></div>
+                        </div>
+                    </div>
+                </div>
 
                 <div id="appBootError" class="hidden mt-4 p-3 bg-red-50 text-red-800 text-xs rounded border border-red-200">
                     <i class="fas fa-triangle-exclamation mr-1"></i>
                     画面データの読み込みに失敗しました。ページを再読み込みしてください。
                     ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。
-                </div>
-                
-                <!-- Search/Filter -->
-                <div class="mt-4 relative">
-                    <input type="text" id="searchInput" placeholder="キーワードで検索 (例: Direct Connect, BGP, IPv6...)" 
-                           class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all">
-                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
                 </div>
             </div>
 
@@ -383,6 +428,54 @@
                 </button>
                 <button id="apiKeySaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
                     保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Profile Modal -->
+    <div id="userModal" class="modal" data-locked="false">
+        <div class="modal-content" style="max-width: 520px;">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-user text-gray-700"></i> ユーザー名登録
+                </h3>
+                <button id="userModalCloseBtn" type="button" data-close-modal="userModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6">
+                <p class="text-sm text-gray-600 mb-4">
+                    学習進捗を保存するため、まずユーザー名を登録してください（この端末のブラウザに保存されます）。
+                </p>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="userNameInput">ユーザー名</label>
+                    <input id="userNameInput" type="text" maxlength="30" placeholder="例: matsu" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <p class="text-gray-500 text-xs mt-2">後からいつでも変更できます。</p>
+                </div>
+                <div id="userMessage" class="text-sm mb-4 hidden"></div>
+            </div>
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+                <button id="userNameSaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Milestone Toast (fixed) -->
+    <div id="milestoneToast" class="hidden fixed top-4 right-4 z-[1100] max-w-sm">
+        <div class="bg-white border border-orange-200 shadow-lg rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-gray-900">称号を解放しました！</div>
+                    <div id="milestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
+                </div>
+                <button id="milestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
                 </button>
             </div>
         </div>

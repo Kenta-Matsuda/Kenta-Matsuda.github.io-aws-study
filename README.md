@@ -42,6 +42,14 @@ Gemini API キーを設定すると、以下のAI機能を利用できます。
 
 ※ API キーはブラウザの LocalStorage に保存されます。共有PCなどではキーの削除を推奨します。
 
+## X(Twitter) 共有カード（称号ごとの画像）
+
+Xのカード画像は、共有URL先のHTMLにあるOG metaを読み取って表示されます。
+
+- 画像: `assets/og/{milestoneId}.png`
+- shareページ: `share/{milestoneId}.html`（例: `share/rookie.html`）
+- 有効化: `js/config.js` の `MILESTONE_SHARE_PAGE_IDS` に `milestoneId` を追加
+
 ## 自分用にカスタマイズ
 
 このリポジトリは、フォークして独自の学習サイトに作り替えることも可能です。
