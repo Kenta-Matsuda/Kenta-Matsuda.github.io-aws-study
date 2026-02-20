@@ -405,7 +405,8 @@ function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
 }
 
 function buildTweetIntentUrl({ text, url }) {
-  const base = 'https://twitter.com/intent/tweet';
+  // X current endpoint (twitter.com still works, but this reduces redirects)
+  const base = 'https://x.com/intent/post';
   const params = new URLSearchParams();
   params.set('text', String(text || '').slice(0, 800));
   if (url) params.set('url', String(url));
