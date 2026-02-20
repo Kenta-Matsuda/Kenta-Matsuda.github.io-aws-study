@@ -258,12 +258,15 @@ function wireGlobalUiHandlers({ els }) {
 
   // Click outside to close
   window.addEventListener('pointerdown', (event) => {
-    pointerDownOnBackdrop = Boolean(event.target?.classList?.contains?.('modal'));
+    const isBackdrop = Boolean(event.target?.classList?.contains?.('modal'));
+    const canBackdropClose = event.target?.getAttribute?.('data-backdrop-close') === 'true';
+    pointerDownOnBackdrop = isBackdrop && canBackdropClose;
   });
 
   window.addEventListener('click', (event) => {
     if (!event.target?.classList?.contains?.('modal')) return;
     if (!pointerDownOnBackdrop) return;
+    if (event.target.getAttribute?.('data-backdrop-close') !== 'true') return;
     if (event.target.getAttribute?.('data-locked') === 'true') return;
     const selection = window.getSelection?.()?.toString?.() || '';
     if (selection) return;
