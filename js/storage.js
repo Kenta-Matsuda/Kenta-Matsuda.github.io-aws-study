@@ -89,6 +89,7 @@ function defaultStudyState() {
       week: null,
       milestonesUnlocked: {},
       lastUrlAwardedDay: {},
+      lastDailyFirstBonusDayByReason: {},
     },
   };
 }
@@ -151,6 +152,7 @@ function migrateV1ToV2(parsedV1, todayDay) {
   out.xp.week = weekRingFromOffsets(weekOffsetsSum, todayDay);
   out.xp.lastUrlAwardedDay = lastUrlAwardedDay;
   out.xp.milestonesUnlocked = {};
+  out.xp.lastDailyFirstBonusDayByReason = {};
   return out;
 }
 
@@ -172,11 +174,22 @@ export function loadStudyState() {
     if (parsed.schemaVersion !== 2) return defaultStudyState();
 
     if (!parsed.profile || typeof parsed.profile !== 'object') parsed.profile = { name: '' };
-    if (!parsed.xp || typeof parsed.xp !== 'object') parsed.xp = { total: 0, week: null, milestonesUnlocked: {}, lastUrlAwardedDay: {} };
+    if (!parsed.xp || typeof parsed.xp !== 'object') {
+      parsed.xp = {
+        total: 0,
+        week: null,
+        milestonesUnlocked: {},
+        lastUrlAwardedDay: {},
+        lastDailyFirstBonusDayByReason: {},
+      };
+    }
     if (!Number.isFinite(Number(parsed.xp.total))) parsed.xp.total = 0;
     // week normalized later in ensureXpState
     if (!parsed.xp.milestonesUnlocked || typeof parsed.xp.milestonesUnlocked !== 'object') parsed.xp.milestonesUnlocked = {};
     if (!parsed.xp.lastUrlAwardedDay || typeof parsed.xp.lastUrlAwardedDay !== 'object') parsed.xp.lastUrlAwardedDay = {};
+    if (!parsed.xp.lastDailyFirstBonusDayByReason || typeof parsed.xp.lastDailyFirstBonusDayByReason !== 'object') {
+      parsed.xp.lastDailyFirstBonusDayByReason = {};
+    }
     return parsed;
   } catch {
     return defaultStudyState();
@@ -216,13 +229,23 @@ function normalizeExternalUrl(href) {
 function ensureXpState(studyState, todayDay) {
   const state = studyState;
   if (!state.xp || typeof state.xp !== 'object') {
-    state.xp = { total: 0, week: ensureWeekRing(null, todayDay), milestonesUnlocked: {}, lastUrlAwardedDay: {} };
+    state.xp = {
+      total: 0,
+      week: ensureWeekRing(null, todayDay),
+      milestonesUnlocked: {},
+      lastUrlAwardedDay: {},
+      lastDailyFirstBonusDayByReason: {},
+    };
   }
 
   state.xp.total = Number(state.xp.total || 0);
   state.xp.week = ensureWeekRing(state.xp.week, todayDay);
   state.xp.milestonesUnlocked = state.xp.milestonesUnlocked && typeof state.xp.milestonesUnlocked === 'object' ? state.xp.milestonesUnlocked : {};
   state.xp.lastUrlAwardedDay = state.xp.lastUrlAwardedDay && typeof state.xp.lastUrlAwardedDay === 'object' ? state.xp.lastUrlAwardedDay : {};
+  state.xp.lastDailyFirstBonusDayByReason =
+    state.xp.lastDailyFirstBonusDayByReason && typeof state.xp.lastDailyFirstBonusDayByReason === 'object'
+      ? state.xp.lastDailyFirstBonusDayByReason
+      : {};
   return state.xp;
 }
 
@@ -233,7 +256,7 @@ function sumWeekBuckets(week) {
 
 export function addXp({ examId, amount, reason, url } = {}) {
   const xp = Math.max(0, Math.floor(Number(amount || 0)));
-  if (!xp) return { applied: false, amountApplied: 0, unlocked: [], summary: getXpSummary() };
+  if (!xp) return { applied: false, amountApplied: 0, bonusApplied: 0, unlocked: [], summary: getXpSummary() };
 
   const today = getLocalDayString();
   const state = loadStudyState();
@@ -264,9 +287,21 @@ export function addXp({ examId, amount, reason, url } = {}) {
     }
   }
 
+  // Daily first bonus: first action per reason per day gets 2x (i.e., +xp bonus)
+  const dailyBonusReasons = new Set(['link', 'explain', 'quiz']);
+  let bonus = 0;
+  if (dailyBonusReasons.has(String(reason || ''))) {
+    const lastDay = String(ex.lastDailyFirstBonusDayByReason[String(reason)] || '');
+    if (lastDay !== today) {
+      bonus = xp;
+      ex.lastDailyFirstBonusDayByReason[String(reason)] = today;
+    }
+  }
+
   const prevTotal = ex.total;
-  ex.total += xp;
-  ex.week.buckets[ex.week.baseIndex] = Number(ex.week.buckets[ex.week.baseIndex] || 0) + xp;
+  const applied = xp + bonus;
+  ex.total += applied;
+  ex.week.buckets[ex.week.baseIndex] = Number(ex.week.buckets[ex.week.baseIndex] || 0) + applied;
 
   const unlocked = getNewlyUnlockedMilestones(prevTotal, ex.total);
   const nowIso = new Date().toISOString();
@@ -282,7 +317,8 @@ export function addXp({ examId, amount, reason, url } = {}) {
   saveStudyState(state);
   return {
     applied: true,
-    amountApplied: xp,
+    amountApplied: applied,
+    bonusApplied: bonus,
     unlocked,
     summary: getXpSummary(),
   };

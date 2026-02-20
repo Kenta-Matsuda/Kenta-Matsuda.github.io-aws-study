@@ -40,7 +40,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (req.type === 'explain') {
       const ok = await explainTerm({ els, exam, examId: req.examId, term: req.term, taskContext: req.taskContext });
       if (ok) {
-        const result = addXp({ amount: XP_RULES.explain, reason: 'ai' });
+        const result = addXp({ amount: XP_RULES.explain, reason: 'explain' });
         if (result?.unlocked?.length) {
           showMilestoneToast({ els, unlocked: result.unlocked });
         }
@@ -56,7 +56,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       taskContext: req.taskContext,
     });
     if (ok) {
-      const result = addXp({ amount: XP_RULES.quiz, reason: 'ai' });
+      const result = addXp({ amount: XP_RULES.quiz, reason: 'quiz' });
       if (result?.unlocked?.length) {
         showMilestoneToast({ els, unlocked: result.unlocked });
       }
@@ -482,21 +482,27 @@ function buildDashboardOneLiner({ userName, title } = {}) {
   const baseSeed = `${daySeed}|${name || 'anon'}|${String(title || '')}`;
 
   const base = [
-    '今日も1つだけ進めよう。',
-    '5分だけでもOK。',
-    'コツコツは裏切らない。',
-    'メモ1行でOK。',
-    '一歩ずつ、積み上げ。',
-    '集中は短く、回数で勝つ。',
-    'できたところに丸をつけよう。',
-    '迷ったら公式ドキュメント。',
-    '今日の自分に勝つ。',
-    '小さく始めて大きく伸ばす。',
+    '今日も来てくれて嬉しいです。',
+    '継続は力なり、ですね。',
+    'コツコツやるのが一番です。',
+    '今日も一歩ずつ進めましょう。',
+    '今日も頑張りましょう。',
+    'マイペースで大丈夫ですよ。',
+    '疲れたら休憩しましょう。',
+    '今日の努力が明日のあなたを作ります。',
+    '千里の道も一歩から、ですね。',
+    'あなたの成果を投稿してみませんか？',
+    'AWS学習、応援しています！',
+    '困ったときはAI機能も活用してくださいね。',
+    '今日も楽しくAWSを学びましょう。',
+    '息抜きに、SNSでシェアしてみませんか？',
+    'AIがあなたの学習をサポートします。',
+    '用語解説はAIにお任せください！',
   ];
 
-  const lateNight = ['夜更かししすぎないでね。', '無理しないでね。', '眠気が来たら撤退も正解。'];
-  const morning = ['良いスタート切ろう。', '朝の集中は最強。', '1トピックだけ片づけよう。'];
-  const evening = ['今日の分、回収しよう。', 'おつかれさま。あと少しだけ。', 'ゆるく続けよう。'];
+  const lateNight = ['夜更かしはほどほどに。', 'また明日。', '眠気が来たら撤退も正解。'];
+  const morning = ['朝から良いスタート切ろう。', '朝の集中は最強。', '1トピックだけ片づけよう。'];
+  const evening = ['一日おつかれさま。', 'おつかれさま。あと少しだけ。', 'ゆるく続けよう。'];
 
   const timeAdd = hour < 5 ? lateNight : hour < 11 ? morning : hour < 18 ? [] : evening;
   const candidates = base.concat(timeAdd);
