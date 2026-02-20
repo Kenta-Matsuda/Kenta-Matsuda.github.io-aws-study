@@ -1,4 +1,4 @@
-import { callGemini } from './gemini.js';
+import { callGemini, callGeminiStream } from './gemini.js';
 import {
   getApiKey,
   saveApiKeyFromInput,
@@ -401,7 +401,6 @@ function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
     `称号：${t}`,
     `累積XP：${total}（今週+${week}）`,
     '完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！ #AWS #AWS合格ナビゲーター',
-    'https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/',
   ].filter(Boolean).join('\n');
 }
 
@@ -1131,6 +1130,12 @@ function updateAiModalContent(els, text) {
   els.modalContent.textContent = shouldAppend ? `${baseText}\n\n---\n${disclaimer}` : baseText;
 }
 
+function updateAiModalContentStreaming(els, partialText) {
+  // While streaming, keep it simple (plain text). We'll render Markdown + disclaimer once the stream completes.
+  els.modalLoading.classList.add('hidden');
+  els.modalContent.textContent = String(partialText ?? '');
+}
+
 async function explainTerm({ els, exam, term, taskContext }) {
   if (!getApiKey()) {
     openSettingsModal(els);
@@ -1153,11 +1158,21 @@ async function explainTerm({ els, exam, term, taskContext }) {
 
   const userPrompt = `用語: 「${term}」について、「AWS」の文脈で解説してください。`;
 
-  const response = await callGemini({
+  let response = await callGeminiStream({
     userPrompt,
     systemPrompt: systemPrompt + contextPrompt,
     onRequireApiKey: () => openSettingsModal(els),
+    onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
   });
+
+  // Fallback to non-streaming when the runtime doesn't support streams/SSE.
+  if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    response = await callGemini({
+      userPrompt,
+      systemPrompt: systemPrompt + contextPrompt,
+      onRequireApiKey: () => openSettingsModal(els),
+    });
+  }
 
   if (response) updateAiModalContent(els, response);
   return isSuccessfulAiResponse(response);
@@ -1194,11 +1209,20 @@ D. [選択肢]
 正解: [記号]
 解説: [なぜ正解か/他がなぜ違うかを簡潔に]`;
 
-  const response = await callGemini({
+  let response = await callGeminiStream({
     userPrompt,
     systemPrompt: systemPrompt + contextPrompt,
     onRequireApiKey: () => openSettingsModal(els),
+    onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
   });
+
+  if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    response = await callGemini({
+      userPrompt,
+      systemPrompt: systemPrompt + contextPrompt,
+      onRequireApiKey: () => openSettingsModal(els),
+    });
+  }
 
   if (response) updateAiModalContent(els, response);
   return isSuccessfulAiResponse(response);
