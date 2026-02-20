@@ -4,6 +4,12 @@ const API_KEY_STORAGE_KEY = 'gemini_api_key';
 
 const STUDY_STATE_STORAGE_KEY = 'asn_study_state_v1';
 
+export function resetAppStorage() {
+  // Avoid localStorage.clear() to not wipe unrelated data.
+  localStorage.removeItem(API_KEY_STORAGE_KEY);
+  localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
+}
+
 export function getApiKey() {
   return localStorage.getItem(API_KEY_STORAGE_KEY);
 }
@@ -90,6 +96,7 @@ function defaultStudyState() {
       milestonesUnlocked: {},
       lastUrlAwardedDay: {},
       lastDailyFirstBonusDayByReason: {},
+      recentActions: [],
     },
   };
 }
@@ -153,6 +160,7 @@ function migrateV1ToV2(parsedV1, todayDay) {
   out.xp.lastUrlAwardedDay = lastUrlAwardedDay;
   out.xp.milestonesUnlocked = {};
   out.xp.lastDailyFirstBonusDayByReason = {};
+  out.xp.recentActions = [];
   return out;
 }
 
@@ -190,6 +198,7 @@ export function loadStudyState() {
     if (!parsed.xp.lastDailyFirstBonusDayByReason || typeof parsed.xp.lastDailyFirstBonusDayByReason !== 'object') {
       parsed.xp.lastDailyFirstBonusDayByReason = {};
     }
+    if (!Array.isArray(parsed.xp.recentActions)) parsed.xp.recentActions = [];
     return parsed;
   } catch {
     return defaultStudyState();
@@ -235,6 +244,7 @@ function ensureXpState(studyState, todayDay) {
       milestonesUnlocked: {},
       lastUrlAwardedDay: {},
       lastDailyFirstBonusDayByReason: {},
+      recentActions: [],
     };
   }
 
@@ -246,6 +256,7 @@ function ensureXpState(studyState, todayDay) {
     state.xp.lastDailyFirstBonusDayByReason && typeof state.xp.lastDailyFirstBonusDayByReason === 'object'
       ? state.xp.lastDailyFirstBonusDayByReason
       : {};
+  state.xp.recentActions = Array.isArray(state.xp.recentActions) ? state.xp.recentActions : [];
   return state.xp;
 }
 
@@ -263,16 +274,17 @@ export function addXp({ examId, amount, reason, url } = {}) {
   const ex = ensureXpState(state, today);
 
   // Enforce: same URL once per day
+  let normalizedUrl = null;
   if (reason === 'link') {
-    const normalized = normalizeExternalUrl(url);
-    if (!normalized) {
+    normalizedUrl = normalizeExternalUrl(url);
+    if (!normalizedUrl) {
       return { applied: false, amountApplied: 0, unlocked: [], summary: getXpSummary() };
     }
-    const already = String(ex.lastUrlAwardedDay[normalized] || '');
+    const already = String(ex.lastUrlAwardedDay[normalizedUrl] || '');
     if (already === today) {
       return { applied: false, amountApplied: 0, unlocked: [], summary: getXpSummary() };
     }
-    ex.lastUrlAwardedDay[normalized] = today;
+    ex.lastUrlAwardedDay[normalizedUrl] = today;
 
     // Soft cap: prevent unbounded growth
     const keys = Object.keys(ex.lastUrlAwardedDay);
@@ -303,8 +315,20 @@ export function addXp({ examId, amount, reason, url } = {}) {
   ex.total += applied;
   ex.week.buckets[ex.week.baseIndex] = Number(ex.week.buckets[ex.week.baseIndex] || 0) + applied;
 
-  const unlocked = getNewlyUnlockedMilestones(prevTotal, ex.total);
+  // Keep recent actions (most recent first)
   const nowIso = new Date().toISOString();
+  ex.recentActions.unshift({
+    at: nowIso,
+    day: today,
+    reason: String(reason || ''),
+    baseXp: xp,
+    bonusXp: bonus,
+    appliedXp: applied,
+    url: normalizedUrl,
+  });
+  if (ex.recentActions.length > 30) ex.recentActions.length = 30;
+
+  const unlocked = getNewlyUnlockedMilestones(prevTotal, ex.total);
   for (const m of unlocked) {
     if (!ex.milestonesUnlocked[m.id]) {
       ex.milestonesUnlocked[m.id] = {
@@ -344,6 +368,7 @@ export function getXpSummary(examId) {
     nextTitle: ms.next?.title || null,
     remainingXp: ms.remainingXp,
     progress01: ms.progress01,
+    recentActions: Array.isArray(ex.recentActions) ? ex.recentActions.slice(0, 3) : [],
   };
 }
 

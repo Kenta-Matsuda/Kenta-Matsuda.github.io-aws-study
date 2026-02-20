@@ -3,6 +3,7 @@ import {
   getApiKey,
   saveApiKeyFromInput,
   clearApiKey,
+  resetAppStorage,
   getUserName,
   setUserName,
   addXp,
@@ -175,6 +176,7 @@ function getElements() {
     xpDashboard: document.getElementById('xpDashboard'),
     xpUserLine: document.getElementById('xpUserLine'),
     xpTotal: document.getElementById('xpTotal'),
+    xpRecentActions: document.getElementById('xpRecentActions'),
     xpWeek: document.getElementById('xpWeek'),
     xpTitleBadge: document.getElementById('xpTitleBadge'),
     xpNextTitle: document.getElementById('xpNextTitle'),
@@ -207,6 +209,7 @@ function getElements() {
     settingsMessage: document.getElementById('settingsMessage'),
     apiKeySaveBtn: document.getElementById('apiKeySaveBtn'),
     apiKeyClearBtn: document.getElementById('apiKeyClearBtn'),
+    resetLocalBtn: document.getElementById('resetLocalBtn'),
   };
 }
 
@@ -236,6 +239,17 @@ function wireGlobalUiHandlers({ els }) {
 
   els.apiKeyClearBtn.addEventListener('click', () => {
     clearApiKey({ inputEl: els.apiKeyInput, messageEl: els.settingsMessage });
+  });
+
+  els.resetLocalBtn?.addEventListener('click', () => {
+    const ok = window.confirm(
+      'この端末に保存されている学習データ（ユーザー名・XP・称号）とAPIキーを初期化します。\n続行しますか？',
+    );
+    if (!ok) return;
+    resetAppStorage();
+    closeModal(els.settingsModal);
+    // Ensure UI + in-memory state is consistent
+    window.location.reload();
   });
 
   // Close modal buttons
@@ -426,6 +440,9 @@ function renderXpDashboard({ els, exam, state }) {
   }
 
   if (els.xpTotal) els.xpTotal.textContent = String(summary.totalXp);
+  if (els.xpRecentActions) {
+    els.xpRecentActions.innerHTML = renderRecentXpActionsHtml(summary.recentActions);
+  }
   if (els.xpWeek) els.xpWeek.textContent = String(summary.weekXp);
   if (els.xpTitleBadge) els.xpTitleBadge.textContent = summary.title || '-';
   if (els.xpNextTitle) els.xpNextTitle.textContent = summary.nextTitle ? String(summary.nextTitle) : '-';
@@ -434,6 +451,72 @@ function renderXpDashboard({ els, exam, state }) {
     const pct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
     els.xpProgressBar.style.width = `${pct.toFixed(1)}%`;
   }
+}
+
+function renderRecentXpActionsHtml(actions) {
+  const list = Array.isArray(actions) ? actions : [];
+  if (!list.length) {
+    return '<div class="text-gray-400">まだ獲得履歴がありません</div>';
+  }
+
+  const rows = list
+    .map((a) => {
+      const reason = String(a?.reason || '');
+      const applied = Number(a?.appliedXp || 0);
+      const bonus = Number(a?.bonusXp || 0);
+      const at = String(a?.at || '');
+
+      const label =
+        reason === 'link'
+          ? 'リンク'
+          : reason === 'explain'
+            ? '用語解説'
+            : reason === 'quiz'
+              ? 'クイズ作成'
+              : reason || 'XP';
+
+      let timeText = '';
+      try {
+        const d = new Date(at);
+        if (!Number.isNaN(d.getTime())) {
+          const hh = String(d.getHours()).padStart(2, '0');
+          const mm = String(d.getMinutes()).padStart(2, '0');
+          timeText = `${hh}:${mm}`;
+        }
+      } catch {
+        // ignore
+      }
+
+      let detail = '';
+      if (reason === 'link') {
+        const url = String(a?.url || '');
+        if (url) {
+          try {
+            detail = new URL(url).hostname;
+          } catch {
+            detail = '';
+          }
+        }
+      }
+
+      const bonusBadge = bonus > 0 ? `<span class="ml-1 text-[11px] font-bold text-orange-700">初回+${bonus}</span>` : '';
+      const detailText = detail ? `<span class="ml-1 text-gray-400">(${escapeHtml(detail)})</span>` : '';
+
+      return `
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0 truncate"><span class="font-semibold text-gray-700">${escapeHtml(label)}</span>${detailText}</div>
+          <div class="flex items-center gap-1 whitespace-nowrap">
+            <span class="font-mono text-gray-800">+${applied}</span>
+            <span class="text-gray-400">XP</span>
+            ${bonusBadge}
+            ${timeText ? `<span class="ml-2 text-gray-400 font-mono">${escapeHtml(timeText)}</span>` : ''}
+          </div>
+        </div>
+      `.trim();
+    })
+    .join('');
+
+  return rows;
 }
 
 function stablePick(list, seedText) {
