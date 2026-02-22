@@ -69,6 +69,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     await runAiRequest(lastAiRequest);
   });
 
+  els.aiCopyBtn?.addEventListener('click', async () => {
+    const text = getAiCopyText(els);
+    if (!text) return;
+
+    const ok = await copyTextToClipboard(text);
+    if (ok) {
+      flashAiCopyButton(els, 'コピーしました');
+    } else {
+      flashAiCopyButton(els, 'コピー失敗');
+    }
+  });
+
   const state = {
     examId: defaultExamId,
     currentDomainId: null,
@@ -190,6 +202,7 @@ function getElements() {
     modalTitle: document.getElementById('modalTitle'),
     modalContent: document.getElementById('modalContent'),
     modalLoading: document.getElementById('modalLoading'),
+    aiCopyBtn: document.getElementById('aiCopyBtn'),
     aiRetryBtn: document.getElementById('aiRetryBtn'),
 
     userModal: document.getElementById('userModal'),
@@ -210,6 +223,89 @@ function getElements() {
     apiKeyClearBtn: document.getElementById('apiKeyClearBtn'),
     resetLocalBtn: document.getElementById('resetLocalBtn'),
   };
+}
+
+function getAiCopyText(els) {
+  const fromDataset = els.modalContent?.dataset?.aiCopyText;
+  if (fromDataset && String(fromDataset).trim()) return String(fromDataset);
+  const fromText = els.modalContent?.textContent;
+  if (fromText && String(fromText).trim()) return String(fromText);
+  return '';
+}
+
+function setAiCopyButtonEnabled(els, enabled) {
+  if (!els.aiCopyBtn) return;
+  const isEnabled = Boolean(enabled);
+  els.aiCopyBtn.disabled = !isEnabled;
+  els.aiCopyBtn.classList.toggle('opacity-60', !isEnabled);
+  els.aiCopyBtn.classList.toggle('cursor-not-allowed', !isEnabled);
+}
+
+function setAiCopyButtonLabel(els, label) {
+  if (!els.aiCopyBtn) return;
+  const span = els.aiCopyBtn.querySelector('[data-ai-copy-label]');
+  if (span) {
+    span.textContent = String(label ?? 'コピー');
+  } else {
+    els.aiCopyBtn.textContent = String(label ?? 'コピー');
+  }
+}
+
+function clearAiCopyFlashTimer(els) {
+  if (!els.aiCopyBtn) return;
+  if (els.aiCopyBtn.__aiCopyTimer) {
+    clearTimeout(els.aiCopyBtn.__aiCopyTimer);
+  }
+  els.aiCopyBtn.__aiCopyTimer = null;
+}
+
+function resetAiCopyButton(els) {
+  clearAiCopyFlashTimer(els);
+  setAiCopyButtonLabel(els, 'コピー');
+  setAiCopyButtonEnabled(els, false);
+}
+
+function flashAiCopyButton(els, message, ms = 1400) {
+  if (!els.aiCopyBtn) return;
+  clearAiCopyFlashTimer(els);
+  setAiCopyButtonLabel(els, message);
+  els.aiCopyBtn.__aiCopyTimer = setTimeout(() => {
+    setAiCopyButtonLabel(els, 'コピー');
+    els.aiCopyBtn.__aiCopyTimer = null;
+  }, ms);
+}
+
+async function copyTextToClipboard(text) {
+  const t = String(text ?? '');
+  if (!t) return false;
+
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(t);
+      return true;
+    }
+  } catch {
+    // fall through to legacy copy
+  }
+
+  // Fallback for non-secure contexts / older browsers.
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = t;
+    ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed';
+    ta.style.top = '-1000px';
+    ta.style.left = '-1000px';
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    ta.setSelectionRange?.(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return Boolean(ok);
+  } catch {
+    return false;
+  }
 }
 
 function wireGlobalUiHandlers({ els }) {
@@ -1060,6 +1156,10 @@ function showAiModal(els, title, isLoading) {
     els.modalLoading.classList.remove('hidden');
     els.modalContent.textContent = '';
     els.modalContent.innerHTML = '';
+    if (els.modalContent?.dataset) {
+      delete els.modalContent.dataset.aiCopyText;
+    }
+    resetAiCopyButton(els);
     if (els.aiRetryBtn) {
       els.aiRetryBtn.disabled = true;
       els.aiRetryBtn.classList.add('opacity-60', 'cursor-not-allowed');
@@ -1104,6 +1204,11 @@ function updateAiModalContent(els, text) {
   const shouldAppend = baseText && !baseText.includes('AIの生成結果は必ずしも正しくありません');
   const md = shouldAppend ? `${baseText}\n\n---\n\n> ${disclaimer.replaceAll('\n', '\n> ')}` : baseText;
 
+  if (els.modalContent?.dataset) {
+    els.modalContent.dataset.aiCopyText = md;
+  }
+  setAiCopyButtonEnabled(els, Boolean(md.trim()));
+
   const { html, usedMarkdown } = renderMarkdownToSafeHtml(md);
   if (usedMarkdown) {
     els.modalContent.innerHTML = html;
@@ -1122,7 +1227,12 @@ function updateAiModalContent(els, text) {
 function updateAiModalContentStreaming(els, partialText) {
   // While streaming, keep it simple (plain text). We'll render Markdown + disclaimer once the stream completes.
   els.modalLoading.classList.add('hidden');
-  els.modalContent.textContent = String(partialText ?? '');
+  const t = String(partialText ?? '');
+  els.modalContent.textContent = t;
+  if (els.modalContent?.dataset) {
+    els.modalContent.dataset.aiCopyText = t;
+  }
+  setAiCopyButtonEnabled(els, Boolean(t.trim()));
 }
 
 async function explainTerm({ els, exam, term, taskContext }) {
