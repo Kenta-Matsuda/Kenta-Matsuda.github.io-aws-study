@@ -1,5 +1,23 @@
 const VOTE_STORAGE_KEY = 'asn_votes_v1';
 
+function safeLocalStorageGetItem(key) {
+  try {
+    if (typeof localStorage === 'undefined') return null;
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function safeLocalStorageSetItem(key, value) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(key, value);
+  } catch {
+    // ignore
+  }
+}
+
 function safeParseJson(raw) {
   try {
     const parsed = JSON.parse(String(raw || ''));
@@ -10,7 +28,7 @@ function safeParseJson(raw) {
 }
 
 function loadVoteState() {
-  const raw = typeof localStorage !== 'undefined' ? localStorage.getItem(VOTE_STORAGE_KEY) : null;
+  const raw = safeLocalStorageGetItem(VOTE_STORAGE_KEY);
   const parsed = safeParseJson(raw);
   if (!parsed) return { schemaVersion: 1, votes: {} };
   if (parsed.schemaVersion !== 1) return { schemaVersion: 1, votes: {} };
@@ -19,8 +37,7 @@ function loadVoteState() {
 }
 
 function saveVoteState(state) {
-  if (typeof localStorage === 'undefined') return;
-  localStorage.setItem(VOTE_STORAGE_KEY, JSON.stringify(state));
+  safeLocalStorageSetItem(VOTE_STORAGE_KEY, JSON.stringify(state));
 }
 
 function normalizeTargetId(targetId) {
