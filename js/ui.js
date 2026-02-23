@@ -9,7 +9,7 @@ import {
   addXp,
   getXpSummary,
 } from './storage.js';
-import { getExistingVote, submitVote } from './votes.js';
+import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 
 let chartInstance = null;
@@ -84,6 +84,21 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (!targetId) return { ok: false, reason: 'missing_ai_request' };
     const examId = String(lastAiRequest?.examId || '');
     const kind = String(lastAiRequest?.type || '');
+
+    const existing = getExistingVote({ targetType: 'ai', targetId });
+    if (existing === value) {
+      return clearVote({
+        targetType: 'ai',
+        targetId,
+        meta: {
+          exam_id: examId,
+          ai_kind: kind,
+          ai_term: kind === 'explain' ? String(lastAiRequest?.term || '') : undefined,
+          ai_task_id: kind === 'quiz' ? String(lastAiRequest?.taskId || '') : undefined,
+          ai_task_title: kind === 'quiz' ? String(lastAiRequest?.taskTitle || '') : undefined,
+        },
+      });
+    }
 
     return submitVote({
       targetType: 'ai',
@@ -235,7 +250,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         resource_url: String(btn.dataset.resourceUrl || ''),
       };
 
-      submitVote({ targetType, targetId, value, meta });
+      const before = getExistingVote({ targetType, targetId });
+      if (before === value) {
+        clearVote({ targetType, targetId, meta });
+      } else {
+        submitVote({ targetType, targetId, value, meta });
+      }
 
       // reflect immediately (no reload)
       const group = btn.closest('[data-vote-group]');

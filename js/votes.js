@@ -44,6 +44,31 @@ export function getExistingVote({ targetType, targetId }) {
   return value === 'good' || value === 'bad' ? value : null;
 }
 
+export function clearVote({ targetType, targetId, meta }) {
+  const id = normalizeTargetId(targetId);
+  if (!id) return { ok: false, reason: 'missing_target_id' };
+
+  const existing = getExistingVote({ targetType, targetId: id });
+  if (!existing) return { ok: true, cleared: false };
+
+  const s = loadVoteState();
+  const key = makeVoteKey({ targetType, targetId: id });
+  if (s.votes && typeof s.votes === 'object') {
+    delete s.votes[key];
+  }
+  saveVoteState(s);
+
+  const gaParams = {
+    target_type: String(targetType || ''),
+    target_id: id,
+    prev_value: existing,
+    ...((meta && typeof meta === 'object') ? meta : {}),
+  };
+  sendGaEvent('vote_clear', gaParams);
+
+  return { ok: true, cleared: true, previous: existing };
+}
+
 function sendGaEvent(eventName, params) {
   try {
     if (typeof window === 'undefined') return;
