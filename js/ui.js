@@ -9,6 +9,7 @@ import {
   addXp,
   getXpSummary,
 } from './storage.js';
+import { getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 
 let chartInstance = null;
@@ -22,8 +23,81 @@ const XP_RULES = {
 export function initApp({ exams, getExamById, defaultExamId }) {
   const els = getElements();
 
-  /** @type {null | { type: 'explain', examId: string, term: string, taskContext: string } | { type: 'quiz', examId: string, taskTitle: string, taskContext: string }} */
+  /** @type {null | { type: 'explain', examId: string, term: string, taskContext: string } | { type: 'quiz', examId: string, taskId: string, taskTitle: string, taskContext: string }} */
   let lastAiRequest = null;
+
+  const VOTE_SELECTED_CLASSES = ['bg-gray-900', 'text-white', 'border-gray-900', 'hover:bg-gray-800'];
+  const VOTE_NORMAL_CLASSES = ['bg-white', 'text-gray-700', 'border-gray-200', 'hover:bg-gray-100'];
+
+  function setVoteButtonState(btn, { selected, disabled }) {
+    if (!btn) return;
+    btn.disabled = Boolean(disabled);
+    btn.classList.toggle('opacity-60', Boolean(disabled));
+    btn.classList.toggle('cursor-not-allowed', Boolean(disabled));
+
+    const add = selected ? VOTE_SELECTED_CLASSES : VOTE_NORMAL_CLASSES;
+    const remove = selected ? VOTE_NORMAL_CLASSES : VOTE_SELECTED_CLASSES;
+    btn.classList.add(...add);
+    btn.classList.remove(...remove);
+    btn.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  }
+
+  function applyVoteGroupStyles(groupEl, selectedValue, { disabled } = {}) {
+    if (!groupEl) return;
+    groupEl.querySelectorAll('button[data-action="vote"]').forEach((b) => {
+      const v = String(b.dataset.vote || '').trim();
+      setVoteButtonState(b, { selected: v && v === selectedValue, disabled });
+    });
+  }
+
+  function buildAiVoteTargetId(req) {
+    if (!req) return '';
+    const examId = String(req.examId || '');
+    if (req.type === 'explain') {
+      return `explain|${examId}|${String(req.term || '').trim()}`;
+    }
+    if (req.type === 'quiz') {
+      const taskId = String(req.taskId || '').trim();
+      return taskId ? `quiz|${examId}|${taskId}` : `quiz|${examId}|${String(req.taskTitle || '').trim()}`;
+    }
+    return '';
+  }
+
+  function applyBinaryVoteStyles({ goodBtn, badBtn, value, disabled }) {
+    setVoteButtonState(goodBtn, { selected: value === 'good', disabled });
+    setVoteButtonState(badBtn, { selected: value === 'bad', disabled });
+  }
+
+  function reflectAiVoteUi() {
+    const targetId = buildAiVoteTargetId(lastAiRequest);
+    const existing = targetId ? getExistingVote({ targetType: 'ai', targetId }) : null;
+    applyBinaryVoteStyles({
+      goodBtn: els.aiVoteGoodBtn,
+      badBtn: els.aiVoteBadBtn,
+      value: existing,
+      disabled: !targetId,
+    });
+  }
+
+  function voteAi(value) {
+    const targetId = buildAiVoteTargetId(lastAiRequest);
+    if (!targetId) return { ok: false, reason: 'missing_ai_request' };
+    const examId = String(lastAiRequest?.examId || '');
+    const kind = String(lastAiRequest?.type || '');
+
+    return submitVote({
+      targetType: 'ai',
+      targetId,
+      value,
+      meta: {
+        exam_id: examId,
+        ai_kind: kind,
+        ai_term: kind === 'explain' ? String(lastAiRequest?.term || '') : undefined,
+        ai_task_id: kind === 'quiz' ? String(lastAiRequest?.taskId || '') : undefined,
+        ai_task_title: kind === 'quiz' ? String(lastAiRequest?.taskTitle || '') : undefined,
+      },
+    });
+  }
 
   function updateAiRetryButton({ visible, disabled } = {}) {
     if (!els.aiRetryBtn) return;
@@ -67,6 +141,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   els.aiRetryBtn?.addEventListener('click', async () => {
     if (!lastAiRequest) return;
     await runAiRequest(lastAiRequest);
+  });
+
+  els.aiVoteGoodBtn?.addEventListener('click', () => {
+    voteAi('good');
+    reflectAiVoteUi();
+  });
+
+  els.aiVoteBadBtn?.addEventListener('click', () => {
+    voteAi('bad');
+    reflectAiVoteUi();
   });
 
   els.aiCopyBtn?.addEventListener('click', async () => {
@@ -122,6 +206,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // First visit: require username
   enforceUserNameIfNeeded({ els });
 
+  // AI vote buttons are enabled only when an AI result exists
+  reflectAiVoteUi();
+
   // Content actions (event delegation)
   els.contentArea.addEventListener('click', async (e) => {
     const btn = e.target.closest('button[data-action]');
@@ -132,14 +219,45 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const taskContext = btn.dataset.taskContext || '';
     const examId = state.examId;
 
+    if (action === 'vote') {
+      const value = String(btn.dataset.vote || '').trim();
+      const targetType = String(btn.dataset.voteTargetType || '').trim();
+      const targetId = String(btn.dataset.voteTargetId || '').trim();
+      if (!targetType || !targetId) return;
+
+      const meta = {
+        exam_id: String(btn.dataset.examId || state.examId || ''),
+        domain_id: String(btn.dataset.domainId || ''),
+        task_id: String(btn.dataset.taskId || ''),
+        task_title: String(btn.dataset.taskTitle || ''),
+        resource_section: String(btn.dataset.resourceSection || ''),
+        resource_title: String(btn.dataset.resourceTitle || ''),
+        resource_url: String(btn.dataset.resourceUrl || ''),
+      };
+
+      submitVote({ targetType, targetId, value, meta });
+
+      // reflect immediately (no reload)
+      const group = btn.closest('[data-vote-group]');
+      const existing = getExistingVote({ targetType, targetId });
+      if (group) {
+        applyVoteGroupStyles(group, existing);
+      } else {
+        setVoteButtonState(btn, { selected: String(btn.dataset.vote || '') === existing, disabled: false });
+      }
+      return;
+    }
+
     if (action === 'quiz') {
-      lastAiRequest = { type: 'quiz', examId, taskTitle: btn.dataset.taskTitle || '', taskContext };
+      lastAiRequest = { type: 'quiz', examId, taskId: btn.dataset.taskId || '', taskTitle: btn.dataset.taskTitle || '', taskContext };
+      reflectAiVoteUi();
       await runAiRequest(lastAiRequest);
       return;
     }
 
     if (action === 'explain') {
       lastAiRequest = { type: 'explain', examId, term: btn.dataset.term || '', taskContext };
+      reflectAiVoteUi();
       await runAiRequest(lastAiRequest);
       return;
     }
@@ -203,6 +321,8 @@ function getElements() {
     modalContent: document.getElementById('modalContent'),
     modalLoading: document.getElementById('modalLoading'),
     aiCopyBtn: document.getElementById('aiCopyBtn'),
+    aiVoteGoodBtn: document.getElementById('aiVoteGoodBtn'),
+    aiVoteBadBtn: document.getElementById('aiVoteBadBtn'),
     aiRetryBtn: document.getElementById('aiRetryBtn'),
 
     userModal: document.getElementById('userModal'),
@@ -902,6 +1022,7 @@ function renderContent({ els, exam, state }) {
             <button
               type="button"
               data-action="quiz"
+              data-task-id="${escapeHtml(task.id)}"
               data-task-title="${escapeHtml(task.jpTitle)}"
               data-task-context="${escapeHtml(taskContext)}"
               class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap"
@@ -943,6 +1064,13 @@ function renderContent({ els, exam, state }) {
                   iconColorClass: section.iconColorClass,
                   items: section.items,
                   term,
+                  context: {
+                    examId: state.examId,
+                    domainId: String(domain.id || ''),
+                    taskId: String(task.id || ''),
+                    taskTitle: String(task.jpTitle || ''),
+                    resourceSection: String(section.key || ''),
+                  },
                 })
               )
               .join('')}
@@ -1017,12 +1145,23 @@ function normalizeDescriptionLines(description) {
   return asString ? [asString] : [];
 }
 
-function renderBlogCard({ blog, term }) {
+function renderBlogCard({ blog, term, context }) {
   const isRecommended = blog?.recommend === true;
   const titleSafe = escapeHtml(blog.title);
   const title = highlightHtml(titleSafe, term);
   const urlSafe = escapeHtml(blog.url);
   const noteSafe = escapeHtml(blog.note);
+
+  const voteTargetId = String(blog.url || '').trim();
+  const existing = voteTargetId ? getExistingVote({ targetType: 'resource', targetId: voteTargetId }) : null;
+  const goodSelected = existing === 'good';
+  const badSelected = existing === 'bad';
+  const goodClass = goodSelected
+    ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800'
+    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100';
+  const badClass = badSelected
+    ? 'bg-gray-900 text-white border-gray-900 hover:bg-gray-800'
+    : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-100';
 
   const cardClass = isRecommended
     ? 'recommend-card p-3 rounded shadow-sm border'
@@ -1043,7 +1182,17 @@ function renderBlogCard({ blog, term }) {
           <span>${title}</span>
           <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
         </a>
-        ${badge}
+        <div class="flex items-center gap-2">
+          <div data-vote-group class="flex items-center gap-1">
+            <button type="button" data-action="vote" data-vote="good" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${goodClass}" aria-pressed="${goodSelected ? 'true' : 'false'}" title="役に立った">
+              <i class="fa-regular fa-thumbs-up"></i>
+            </button>
+            <button type="button" data-action="vote" data-vote="bad" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${badClass}" aria-pressed="${badSelected ? 'true' : 'false'}" title="微妙 / 改善してほしい">
+              <i class="fa-regular fa-thumbs-down"></i>
+            </button>
+          </div>
+          ${badge}
+        </div>
       </div>
       <div class="text-xs text-gray-500 mt-1 flex items-center gap-1">
         <i class="fas fa-info-circle text-gray-400"></i>
@@ -1053,10 +1202,10 @@ function renderBlogCard({ blog, term }) {
   `;
 }
 
-function renderResourceSection({ title, iconClass, iconColorClass, items, term }) {
+function renderResourceSection({ title, iconClass, iconColorClass, items, term, context }) {
   if (!items || items.length === 0) return '';
   const safeTitle = escapeHtml(title);
-  const rows = (items || []).map((blog) => renderBlogCard({ blog, term })).join('');
+  const rows = (items || []).map((blog) => renderBlogCard({ blog, term, context })).join('');
   const icon = iconClass
     ? `<i class="${escapeHtml(iconClass)} ${escapeHtml(iconColorClass || '')}"></i>`
     : '';
