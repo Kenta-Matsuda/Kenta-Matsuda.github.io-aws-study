@@ -33,6 +33,33 @@ function makeVoteKey({ targetType, targetId }) {
   return `${t}|${id}`;
 }
 
+function computeVoteDeltas(prevValue, nextValue) {
+  const prev = prevValue === 'good' || prevValue === 'bad' ? prevValue : null;
+  const next = nextValue === 'good' || nextValue === 'bad' ? nextValue : null;
+
+  let voteGoodDelta = 0;
+  let voteBadDelta = 0;
+
+  // Remove previous state
+  if (prev === 'good') voteGoodDelta -= 1;
+  if (prev === 'bad') voteBadDelta -= 1;
+
+  // Apply next state
+  if (next === 'good') voteGoodDelta += 1;
+  if (next === 'bad') voteBadDelta += 1;
+
+  // Convenience score: good=+1, bad=-1
+  const voteScoreDelta = voteGoodDelta - voteBadDelta;
+
+  return {
+    prev,
+    next,
+    voteGoodDelta,
+    voteBadDelta,
+    voteScoreDelta,
+  };
+}
+
 export function getExistingVote({ targetType, targetId }) {
   const id = normalizeTargetId(targetId);
   if (!id) return null;
@@ -58,10 +85,15 @@ export function clearVote({ targetType, targetId, meta }) {
   }
   saveVoteState(s);
 
+  const deltas = computeVoteDeltas(existing, null);
   const gaParams = {
     target_type: String(targetType || ''),
     target_id: id,
-    prev_value: existing,
+    prev_value: deltas.prev,
+    next_value: deltas.next,
+    vote_good_delta: deltas.voteGoodDelta,
+    vote_bad_delta: deltas.voteBadDelta,
+    vote_score_delta: deltas.voteScoreDelta,
     ...((meta && typeof meta === 'object') ? meta : {}),
   };
   sendGaEvent('vote_clear', gaParams);
@@ -102,11 +134,16 @@ export function submitVote({ targetType, targetId, value, meta }) {
 
   const updated = Boolean(existing && existing !== v);
   const eventName = v === 'good' ? 'vote_good' : 'vote_bad';
+  const deltas = computeVoteDeltas(existing, v);
   const gaParams = {
     target_type: String(targetType || ''),
     target_id: id,
     is_update: updated,
-    prev_value: updated ? existing : undefined,
+    prev_value: deltas.prev,
+    next_value: deltas.next,
+    vote_good_delta: deltas.voteGoodDelta,
+    vote_bad_delta: deltas.voteBadDelta,
+    vote_score_delta: deltas.voteScoreDelta,
     ...((meta && typeof meta === 'object') ? meta : {}),
   };
   sendGaEvent(eventName, gaParams);
