@@ -1336,8 +1336,48 @@ function showAiModal(els, title, isLoading) {
   }
 }
 
+function normalizeMarkdownForJapanese(markdown) {
+  const input = String(markdown ?? '');
+
+  // Japanese IMEs/editors sometimes emit:
+  // - Fullwidth asterisk: U+FF0A '＊' (looks like '*')
+  // - Zero-width space/BOM around delimiters
+  // These can prevent Markdown emphasis parsing (e.g. **「...」** / ＊＊「...」＊＊).
+  // To avoid breaking code samples, we normalize only outside fenced/inline code.
+
+  const FENCE_RE = /(^|\n)( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?\n\2\3[ \t]*($|\n)/g;
+  const CODE_SPAN_RE = /`+[^`]*?`+/g;
+
+  function normalizeTextSegment(segment) {
+    return segment
+      .replaceAll('\u200B', '')
+      .replaceAll('\uFEFF', '')
+      .replaceAll('＊', '*');
+  }
+
+  function normalizeOutsideCode(segment) {
+    // Preserve inline code spans as-is.
+    return segment.replace(CODE_SPAN_RE, (codeSpan) => `\u0000${codeSpan}\u0000`).split('\u0000').map((part) => {
+      if (part.startsWith('`')) return part;
+      return normalizeTextSegment(part);
+    }).join('');
+  }
+
+  // Preserve fenced code blocks as-is.
+  let out = '';
+  let lastIndex = 0;
+  for (const match of input.matchAll(FENCE_RE)) {
+    const index = match.index ?? 0;
+    out += normalizeOutsideCode(input.slice(lastIndex, index));
+    out += match[0];
+    lastIndex = index + match[0].length;
+  }
+  out += normalizeOutsideCode(input.slice(lastIndex));
+  return out;
+}
+
 function renderMarkdownToSafeHtml(markdown) {
-  const md = String(markdown ?? '');
+  const md = normalizeMarkdownForJapanese(markdown);
 
   const marked = typeof window !== 'undefined' ? window.marked : undefined;
   const DOMPurify = typeof window !== 'undefined' ? window.DOMPurify : undefined;
