@@ -1,12 +1,16 @@
 import { getMilestoneStatus, getNewlyUnlockedMilestones } from './milestones.js';
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
+const OPENAI_KEY_STORAGE_KEY = 'openai_api_key';
+const AI_PROVIDER_STORAGE_KEY = 'ai_provider'; // 'gemini' | 'openai'
 
 const STUDY_STATE_STORAGE_KEY = 'asn_study_state_v1';
 
 export function resetAppStorage() {
   // Avoid localStorage.clear() to not wipe unrelated data.
   localStorage.removeItem(API_KEY_STORAGE_KEY);
+  localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
+  localStorage.removeItem(AI_PROVIDER_STORAGE_KEY);
   localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
 }
 
@@ -31,6 +35,44 @@ export function clearApiKey({ inputEl, messageEl }) {
   localStorage.removeItem(API_KEY_STORAGE_KEY);
   inputEl.value = '';
   showMessage(messageEl, 'APIキーを削除しました。', 'text-gray-500');
+}
+
+// --- OpenAI API Key ---
+
+export function getOpenAiApiKey() {
+  return localStorage.getItem(OPENAI_KEY_STORAGE_KEY);
+}
+
+export function saveOpenAiApiKey({ inputEl, messageEl, onSuccess }) {
+  const key = (inputEl.value || '').trim();
+
+  if (!key) {
+    showMessage(messageEl, 'OpenAI APIキーを入力してください。', 'text-red-500');
+    return;
+  }
+
+  localStorage.setItem(OPENAI_KEY_STORAGE_KEY, key);
+  showMessage(messageEl, 'OpenAI APIキーを保存しました。', 'text-green-500');
+  onSuccess?.();
+}
+
+export function clearOpenAiApiKey({ inputEl, messageEl }) {
+  localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
+  inputEl.value = '';
+  showMessage(messageEl, 'OpenAI APIキーを削除しました。', 'text-gray-500');
+}
+
+// --- AI Provider preference ---
+
+export function getAiProvider() {
+  const v = localStorage.getItem(AI_PROVIDER_STORAGE_KEY);
+  return v === 'openai' ? 'openai' : 'gemini';
+}
+
+export function setAiProvider(provider) {
+  const v = provider === 'openai' ? 'openai' : 'gemini';
+  localStorage.setItem(AI_PROVIDER_STORAGE_KEY, v);
+  return v;
 }
 
 function getLocalDayString(d = new Date()) {
