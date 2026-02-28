@@ -1376,6 +1376,20 @@ function normalizeMarkdownForJapanese(markdown) {
   return out;
 }
 
+let __markedConfigured = false;
+
+function configureMarkedOnce(marked) {
+  if (__markedConfigured) return;
+  if (!marked || typeof marked.setOptions !== 'function') return;
+  try {
+    // keep it simple: gfm + line breaks
+    marked.setOptions({ gfm: true, breaks: true });
+    __markedConfigured = true;
+  } catch {
+    // ignore
+  }
+}
+
 function renderMarkdownToSafeHtml(markdown) {
   const md = normalizeMarkdownForJapanese(markdown);
 
@@ -1386,12 +1400,7 @@ function renderMarkdownToSafeHtml(markdown) {
     return { html: '', usedMarkdown: false };
   }
 
-  // keep it simple: gfm + line breaks
-  try {
-    marked.setOptions?.({ gfm: true, breaks: true });
-  } catch {
-    // ignore
-  }
+  configureMarkedOnce(marked);
 
   const rawHtml = marked.parse(md);
   const cleanHtml = DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } });
