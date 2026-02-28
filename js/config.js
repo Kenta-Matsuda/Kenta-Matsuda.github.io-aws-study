@@ -21,3 +21,10 @@ export const GEMINI_MODEL_CANDIDATES = [
 // milestoneごとのOG画像(assets/og/*.png)を用意したIDだけ、/share/{id}.html を用意してください。
 // ここに入っていないIDは share URL を使わず、通常のページURLを投稿します。
 export const MILESTONE_SHARE_PAGE_IDS = ['rookie', 'beginner', 'architect', 'solution_architect', 'senior_architect'];
+
+// OpenAI models – tried in order, similar to Gemini candidates.
+// GPT-5 mini is affordable and suitable for 13–17 users who cannot use Google AI Studio.
+export const OPENAI_MODEL_CANDIDATES = [
+	'gpt-5-mini',
+	'gpt-5',
+];

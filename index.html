@@ -279,7 +279,7 @@
                 </div>
                 <div class="mt-4 p-3 bg-blue-50 text-blue-800 text-xs rounded border border-blue-100">
                     <i class="fas fa-info-circle mr-1"></i>
-                    AI機能を使用するには、右上の設定ボタン(⚙️)からGemini APIキーを設定してください。
+                    AI機能を使用するには、右上の設定ボタン(⚙️)からAPIキーを設定してください。Gemini または OpenAI に対応しています。
                 </div>
 
                 <div class="mt-4 p-3 bg-gray-50 text-gray-700 text-xs rounded border border-gray-200">
@@ -365,7 +365,7 @@
 
     <footer class="bg-gray-800 text-gray-400 py-6 mt-8">
         <div class="container mx-auto px-4 text-center text-sm">
-            <p>&copy; 2024 AWS Study Navigator. Powered by Gemini API.</p>
+            <p>&copy; 2024 AWS Study Navigator. Powered by Gemini / OpenAI.</p>
         </div>
     </footer>
 
@@ -418,25 +418,74 @@
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
-            <div class="p-6">
-                <div class="mb-4">
+            <div class="p-6 space-y-6">
+                <!-- AI Provider Switch -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2">AIプロバイダ</label>
+                    <div id="aiProviderSwitch" class="flex rounded-lg border border-gray-200 overflow-hidden">
+                        <button type="button" data-provider="gemini" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center border-r border-gray-200">
+                            <i class="fas fa-wand-magic-sparkles mr-1"></i> Gemini
+                        </button>
+                        <button type="button" data-provider="openai" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center">
+                            <i class="fas fa-brain mr-1"></i> OpenAI
+                        </button>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        通常は <strong>Gemini（無料）</strong>をご利用ください。<br>
+                        13〜17歳の方は <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Google AI Studio</a> が年齢制限で利用できないため、OpenAI をお選びください。
+                    </p>
+                </div>
+
+                <!-- Gemini API Key -->
+                <div id="geminiKeySection">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="apiKeyInput">
                         Google Gemini API Key
                     </label>
-                    <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="apiKeyInput" type="password" placeholder="AIzaSy...">
+                    <div class="flex gap-2">
+                        <input class="shadow appearance-none border rounded flex-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="apiKeyInput" type="password" placeholder="AIzaSy...">
+                        <button id="apiKeyClearBtn" type="button" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors border border-red-200" title="削除">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                    </div>
                     <p class="text-gray-500 text-xs mt-2">
-                        APIキーはブラウザのローカルストレージにのみ保存され、外部サーバーには送信されません。<br>
-                        キーをお持ちでない場合は <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Google AI Studio</a> から取得してください。
+                        キーをお持ちでない場合は <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Google AI Studio</a> から無料で取得できます（18歳以上）。
                     </p>
                 </div>
+
+                <!-- OpenAI API Key -->
+                <div id="openaiKeySection">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="openaiKeyInput">
+                        OpenAI API Key
+                    </label>
+                    <div class="flex gap-2">
+                        <input class="shadow appearance-none border rounded flex-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="openaiKeyInput" type="password" placeholder="sk-...">
+                        <button id="openaiKeyClearBtn" type="button" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors border border-red-200" title="削除">
+                            <i class="fas fa-trash-can"></i>
+                        </button>
+                    </div>
+                    <p class="text-gray-500 text-xs mt-2">
+                        キーは <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">OpenAI Platform</a> から取得してください。
+                    </p>
+                    <div class="mt-2 p-2.5 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
+                        <i class="fas fa-triangle-exclamation mr-1"></i>
+                        <strong>ご注意：</strong>
+                        OpenAI API は<strong>有料</strong>です（利用量に応じて課金されます）。<br>
+                        18歳未満の方は<strong>保護者の同意・監督のもと</strong>でご利用ください。<br>
+                        詳しくは <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline font-medium">OpenAI 利用規約</a> をご確認ください。
+                    </div>
+                </div>
+
+                <p class="text-gray-400 text-xs">
+                    <i class="fas fa-lock mr-1"></i>
+                    APIキーはブラウザのローカルストレージにのみ保存され、外部サーバーには送信されません。
+                </p>
+
                 <div id="settingsMessage" class="text-sm mb-4 hidden"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
                 <button id="resetLocalBtn" type="button" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors mr-auto">
                     データ初期化
-                </button>
-                <button id="apiKeyClearBtn" type="button" class="px-4 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors">
-                    削除
                 </button>
                 <button id="apiKeySaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
                     保存
