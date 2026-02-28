@@ -368,6 +368,14 @@ function getElements() {
     apiKeyClearBtn: document.getElementById('apiKeyClearBtn'),
     resetLocalBtn: document.getElementById('resetLocalBtn'),
 
+    // Feedback
+    feedbackBtn: document.getElementById('feedbackBtn'),
+    feedbackModal: document.getElementById('feedbackModal'),
+    feedbackCategorySelect: document.getElementById('feedbackCategorySelect'),
+    feedbackTextarea: document.getElementById('feedbackTextarea'),
+    feedbackCharCount: document.getElementById('feedbackCharCount'),
+    feedbackMessage: document.getElementById('feedbackMessage'),
+    feedbackSubmitBtn: document.getElementById('feedbackSubmitBtn'),
     // OpenAI / Provider
     openaiKeyInput: document.getElementById('openaiKeyInput'),
     openaiKeyClearBtn: document.getElementById('openaiKeyClearBtn'),
@@ -475,6 +483,9 @@ function wireGlobalUiHandlers({ els }) {
 
   // Settings
   els.settingsBtn.addEventListener('click', () => openSettingsModal(els));
+
+  // Feedback
+  wireFeedbackHandlers({ els });
 
   els.apiKeySaveBtn.addEventListener('click', () => {
     const provider = getAiProvider();
@@ -1327,6 +1338,101 @@ function highlightHtml(escapedText, termLower) {
   const t = escapeRegExp(termLower);
   const regex = new RegExp(`(${t})`, 'gi');
   return escapedText.replace(regex, '<span class="bg-yellow-200 font-semibold">$1</span>');
+}
+
+// --- Feedback ---
+function wireFeedbackHandlers({ els }) {
+  if (!els.feedbackBtn || !els.feedbackModal) return;
+
+  els.feedbackBtn.addEventListener('click', () => openFeedbackModal(els));
+
+  els.feedbackTextarea?.addEventListener('input', () => {
+    updateFeedbackCharCount(els);
+  });
+
+  els.feedbackSubmitBtn?.addEventListener('click', () => {
+    submitFeedback(els);
+  });
+
+  // Allow Ctrl+Enter / Cmd+Enter to submit
+  els.feedbackTextarea?.addEventListener('keydown', (e) => {
+    if (e.isComposing) return;
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      submitFeedback(els);
+    }
+  });
+}
+
+function openFeedbackModal(els) {
+  if (!els.feedbackModal) return;
+  if (els.feedbackTextarea) els.feedbackTextarea.value = '';
+  if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
+  els.feedbackMessage?.classList?.add('hidden');
+  updateFeedbackCharCount(els);
+  openModal(els.feedbackModal);
+  setTimeout(() => els.feedbackTextarea?.focus(), 0);
+}
+
+function updateFeedbackCharCount(els) {
+  if (!els.feedbackCharCount || !els.feedbackTextarea) return;
+  const len = (els.feedbackTextarea.value || '').length;
+  els.feedbackCharCount.textContent = `${len} / 1000`;
+  els.feedbackCharCount.classList.toggle('text-red-500', len > 950);
+  els.feedbackCharCount.classList.toggle('text-gray-400', len <= 950);
+}
+
+function submitFeedback(els) {
+  const text = String(els.feedbackTextarea?.value || '').trim();
+  const category = String(els.feedbackCategorySelect?.value || 'general');
+
+  if (!text) {
+    showInlineMessage(els.feedbackMessage, 'フィードバック内容を入力してください。', 'text-red-600');
+    return;
+  }
+  if (text.length > 1000) {
+    showInlineMessage(els.feedbackMessage, '1000文字以内で入力してください。', 'text-red-600');
+    return;
+  }
+
+  // Send to Google Analytics as a custom event
+  sendFeedbackToGa({ category, text });
+
+  showInlineMessage(els.feedbackMessage, 'フィードバックを送信しました。ありがとうございます！', 'text-teal-600');
+  if (els.feedbackTextarea) els.feedbackTextarea.value = '';
+  updateFeedbackCharCount(els);
+
+  // Auto-close after a short delay
+  setTimeout(() => {
+    closeModal(els.feedbackModal);
+    els.feedbackMessage?.classList?.add('hidden');
+  }, 1500);
+}
+
+function sendFeedbackToGa({ category, text }) {
+  try {
+    if (typeof window === 'undefined') return;
+    const gtag = window.gtag;
+    if (typeof gtag !== 'function') return;
+
+    // GA4 event parameters are limited to 100 chars per value for standard reporting,
+    // but custom events can send longer strings in exploration reports.
+    // Split long text into chunks for reliable capture.
+    const maxChunk = 500;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += maxChunk) {
+      chunks.push(text.slice(i, i + maxChunk));
+    }
+
+    gtag('event', 'user_feedback', {
+      feedback_category: category,
+      feedback_text: chunks[0] || '',
+      feedback_text_2: chunks[1] || '',
+      feedback_length: text.length,
+    });
+  } catch {
+    // ignore
+  }
 }
 
 // --- Modals + AI actions ---
