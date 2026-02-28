@@ -23,8 +23,8 @@ export const GEMINI_MODEL_CANDIDATES = [
 export const MILESTONE_SHARE_PAGE_IDS = ['rookie', 'beginner', 'architect', 'solution_architect', 'senior_architect'];
 
 // OpenAI models – tried in order, similar to Gemini candidates.
-// gpt-4o-mini is affordable and suitable for 13–17 users who cannot use Google AI Studio.
+// GPT-5 mini is affordable and suitable for 13–17 users who cannot use Google AI Studio.
 export const OPENAI_MODEL_CANDIDATES = [
-	'gpt-4o-mini',
-	'gpt-4o',
+	'gpt-5-mini',
+	'gpt-5',
 ];

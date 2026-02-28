@@ -1,7 +1,7 @@
 import { getOpenAiApiKey } from './storage.js';
 import { OPENAI_MODEL_CANDIDATES } from './config.js';
 
-const DEFAULT_MODEL_CANDIDATES = ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'];
+const DEFAULT_MODEL_CANDIDATES = ['gpt-5-mini', 'gpt-5'];
 
 function getModelCandidates() {
   const fromConfig = Array.isArray(OPENAI_MODEL_CANDIDATES) ? OPENAI_MODEL_CANDIDATES : null;
