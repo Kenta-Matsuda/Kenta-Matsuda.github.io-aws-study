@@ -1,8 +1,13 @@
-import { callGemini, callGeminiStream } from './gemini.js';
+import { callAi, callAiStream, getActiveProviderLabel } from './ai.js';
 import {
   getApiKey,
   saveApiKeyFromInput,
   clearApiKey,
+  getOpenAiApiKey,
+  saveOpenAiApiKey,
+  clearOpenAiApiKey,
+  getAiProvider,
+  setAiProvider,
   resetAppStorage,
   getUserName,
   setUserName,
@@ -371,6 +376,12 @@ function getElements() {
     feedbackCharCount: document.getElementById('feedbackCharCount'),
     feedbackMessage: document.getElementById('feedbackMessage'),
     feedbackSubmitBtn: document.getElementById('feedbackSubmitBtn'),
+    // OpenAI / Provider
+    openaiKeyInput: document.getElementById('openaiKeyInput'),
+    openaiKeyClearBtn: document.getElementById('openaiKeyClearBtn'),
+    aiProviderSwitch: document.getElementById('aiProviderSwitch'),
+    geminiKeySection: document.getElementById('geminiKeySection'),
+    openaiKeySection: document.getElementById('openaiKeySection'),
   };
 }
 
@@ -477,16 +488,32 @@ function wireGlobalUiHandlers({ els }) {
   wireFeedbackHandlers({ els });
 
   els.apiKeySaveBtn.addEventListener('click', () => {
-    saveApiKeyFromInput({
-      inputEl: els.apiKeyInput,
-      messageEl: els.settingsMessage,
-      onSuccess: () => setTimeout(() => closeModal(els.settingsModal), 800),
-    });
+    const provider = getAiProvider();
+    if (provider === 'openai') {
+      saveOpenAiApiKey({
+        inputEl: els.openaiKeyInput,
+        messageEl: els.settingsMessage,
+        onSuccess: () => setTimeout(() => closeModal(els.settingsModal), 800),
+      });
+    } else {
+      saveApiKeyFromInput({
+        inputEl: els.apiKeyInput,
+        messageEl: els.settingsMessage,
+        onSuccess: () => setTimeout(() => closeModal(els.settingsModal), 800),
+      });
+    }
   });
 
   els.apiKeyClearBtn.addEventListener('click', () => {
     clearApiKey({ inputEl: els.apiKeyInput, messageEl: els.settingsMessage });
   });
+
+  els.openaiKeyClearBtn?.addEventListener('click', () => {
+    clearOpenAiApiKey({ inputEl: els.openaiKeyInput, messageEl: els.settingsMessage });
+  });
+
+  // AI Provider toggle
+  wireAiProviderSwitch(els);
 
   els.resetLocalBtn?.addEventListener('click', () => {
     const ok = window.confirm(
@@ -1410,9 +1437,12 @@ function sendFeedbackToGa({ category, text }) {
 
 // --- Modals + AI actions ---
 function openSettingsModal(els) {
-  const key = getApiKey();
-  if (key) els.apiKeyInput.value = key;
+  const geminiKey = getApiKey();
+  if (geminiKey) els.apiKeyInput.value = geminiKey;
+  const openaiKey = getOpenAiApiKey();
+  if (openaiKey && els.openaiKeyInput) els.openaiKeyInput.value = openaiKey;
   els.settingsMessage.classList.add('hidden');
+  reflectProviderUi(els);
   openModal(els.settingsModal);
 }
 
@@ -1422,6 +1452,43 @@ function openModal(modalEl) {
 
 function closeModal(modalEl) {
   modalEl.style.display = 'none';
+}
+
+// --- AI Provider UI ---
+function wireAiProviderSwitch(els) {
+  if (!els.aiProviderSwitch) return;
+  els.aiProviderSwitch.querySelectorAll('button[data-provider]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const provider = btn.dataset.provider;
+      setAiProvider(provider);
+      reflectProviderUi(els);
+    });
+  });
+}
+
+function reflectProviderUi(els) {
+  const provider = getAiProvider();
+
+  // Highlight active toggle button
+  if (els.aiProviderSwitch) {
+    els.aiProviderSwitch.querySelectorAll('button[data-provider]').forEach((btn) => {
+      const isActive = btn.dataset.provider === provider;
+      btn.classList.toggle('bg-blue-600', isActive);
+      btn.classList.toggle('text-white', isActive);
+      btn.classList.toggle('bg-white', !isActive);
+      btn.classList.toggle('text-gray-600', !isActive);
+      btn.classList.toggle('hover:bg-gray-100', !isActive);
+      btn.setAttribute('aria-pressed', String(isActive));
+    });
+  }
+
+  // Show/hide relevant key sections (both always visible, but active one gets highlight)
+  if (els.geminiKeySection) {
+    els.geminiKeySection.classList.toggle('opacity-40', provider !== 'gemini');
+  }
+  if (els.openaiKeySection) {
+    els.openaiKeySection.classList.toggle('opacity-40', provider !== 'openai');
+  }
 }
 
 function showAiModal(els, title, isLoading) {
@@ -1561,11 +1628,12 @@ function updateAiModalContentStreaming(els, partialText) {
 }
 
 async function explainTerm({ els, exam, term, taskContext }) {
-  if (!getApiKey()) {
+  if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
   }
 
+  const providerLabel = getActiveProviderLabel();
   showAiModal(els, `用語解説: ${term}`, true);
 
   const systemPrompt =
@@ -1582,7 +1650,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
 
   const userPrompt = `用語: 「${term}」について、「AWS」の文脈で解説してください。`;
 
-  let response = await callGeminiStream({
+  let response = await callAiStream({
     userPrompt,
     systemPrompt: systemPrompt + contextPrompt,
     onRequireApiKey: () => openSettingsModal(els),
@@ -1591,7 +1659,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
 
   // Fallback to non-streaming when the runtime doesn't support streams/SSE.
   if (String(response || '').includes('ストリーミングに対応していない環境')) {
-    response = await callGemini({
+    response = await callAi({
       userPrompt,
       systemPrompt: systemPrompt + contextPrompt,
       onRequireApiKey: () => openSettingsModal(els),
@@ -1603,11 +1671,12 @@ async function explainTerm({ els, exam, term, taskContext }) {
 }
 
 async function generateQuiz({ els, exam, taskTitle, taskContext }) {
-  if (!getApiKey()) {
+  if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
   }
 
+  const providerLabel = getActiveProviderLabel();
   showAiModal(els, `模擬問題作成: ${taskTitle}`, true);
 
   const systemPrompt =
@@ -1633,7 +1702,7 @@ D. [選択肢]
 正解: [記号]
 解説: [なぜ正解か/他がなぜ違うかを簡潔に]`;
 
-  let response = await callGeminiStream({
+  let response = await callAiStream({
     userPrompt,
     systemPrompt: systemPrompt + contextPrompt,
     onRequireApiKey: () => openSettingsModal(els),
@@ -1641,7 +1710,7 @@ D. [選択肢]
   });
 
   if (String(response || '').includes('ストリーミングに対応していない環境')) {
-    response = await callGemini({
+    response = await callAi({
       userPrompt,
       systemPrompt: systemPrompt + contextPrompt,
       onRequireApiKey: () => openSettingsModal(els),
