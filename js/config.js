@@ -1,8 +1,8 @@
 // 公開（UIで選択可能）にする試験IDをここで制御します。
 // まずは ANS と CLF を公開（切り替え動作確認用）。
-export const PUBLIC_EXAM_IDS = ['ans-c01'];
+export const PUBLIC_EXAM_IDS = ['clf-c02', 'aif-c01', 'saa-c03', 'sap-c02', 'ans-c01'];
 
-export const DEFAULT_EXAM_ID = 'ans-c01';
+export const DEFAULT_EXAM_ID = 'clf-c02';
 
 // Gemini models change over time; keep a small fallback list.
 // The app will try these in order when calling the API.
