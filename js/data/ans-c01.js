@@ -14,21 +14,30 @@ export const ANS_C01 = {
       ],
       resources: [
         {
+          key: 'official-page',
+          label: '試験の公式ページ',
+          iconClass: 'fas fa-file-alt',
+          iconColorClass: 'text-blue-500',
+          items: [
+            {
+              title: 'AWS Certified Advanced Networking - Specialty 公式ページ',
+              url: 'https://aws.amazon.com/jp/certification/certified-advanced-networking-specialty/',
+              note: '試験概要・合格条件・出題範囲などの公式情報',
+              recommend: true,
+            },
+          ],
+        },
+        {
           key: 'registration',
-          label: '申し込み・受験情報',
+          label: '試験の申し込み',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
-              title: 'AWS Certification 公式ページ（受験申し込み）',
-              url: 'https://aws.amazon.com/jp/certification/certified-advanced-networking-specialty/',
-              note: '試験概要・申し込み・合格条件',
+              title: 'AWS Training & Certification（試験申し込み）',
+              url: 'https://www.aws.training/certification?p=cert&c=ai&z=1',
+              note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
               recommend: true,
-            },
-            {
-              title: 'Pearson VUE - AWS 試験予約',
-              url: 'https://www.pearsonvue.co.jp/Clients/Amazon-Web-Services.aspx',
-              note: '試験日程・会場の予約サイト',
             },
           ],
         },
@@ -146,35 +155,9 @@ export const ANS_C01 = {
           ],
         },
       ],
+    }
     },
-    {
-      id: '6',
-      title: 'Use AI features to boost learning',
-      jpTitle: 'AI機能を活用する',
-      description: [
-        'このアプリのAI機能（用語解説・模擬問題生成）を使って、弱点の補強や知識の定着を図りましょう。',
-        'AI機能を使用するには、右上の設定ボタン（⚙️）からAPIキーを設定してください。Gemini（無料）または OpenAI に対応しています。',
-      ],
-      resources: [
-        {
-          key: 'ai-setup',
-          label: 'APIキー取得',
-          iconClass: 'fas fa-key',
-          iconColorClass: 'text-amber-500',
-          items: [
-            {
-              title: 'Google AI Studio（Gemini APIキー取得）',
-              url: 'https://aistudio.google.com/app/apikey',
-              note: '無料で取得可能（18歳以上）',
-              recommend: true,
-            },
-            {
-              title: 'OpenAI Platform（APIキー取得）',
-              url: 'https://platform.openai.com/api-keys',
-              note: '有料 — 13〜17歳の方はこちら',
-            },
-          ],
-        },
+  ],
       ],
     },
   ],

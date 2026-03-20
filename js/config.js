@@ -1,6 +1,6 @@
 // 公開（UIで選択可能）にする試験IDをここで制御します。
 // まずは ANS と CLF を公開（切り替え動作確認用）。
-export const PUBLIC_EXAM_IDS = ['clf-c02', 'aif-c01', 'saa-c03', 'sap-c02', 'ans-c01'];
+export const PUBLIC_EXAM_IDS = ['clf-c02', 'aif-c01', 'saa-c03', 'sap-c02', 'ans-c01', 'dva-c02', 'mla-c01', 'dea-c01', 'soa-c03', 'dop-c02', 'aip-c01', 'scs-c03'];
 
 export const DEFAULT_EXAM_ID = 'clf-c02';
 
