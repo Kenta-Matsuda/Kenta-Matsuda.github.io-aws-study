@@ -205,7 +205,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const exam = getExamById(examId);
 
     state.examId = examId;
-    state.currentDomainId = exam.domains?.[0]?.id ?? null;
+    const hasExamSteps = Array.isArray(exam.steps) && exam.steps.length > 0;
+    state.currentDomainId = hasExamSteps ? 'all' : (exam.domains?.[0]?.id ?? null);
 
     renderExamMeta({ els, exam });
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
@@ -993,6 +994,27 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
 
   if (!exam.domains || exam.domains.length === 0) return;
 
+  // "全般" tab for exam-wide steps
+  const hasExamSteps = Array.isArray(exam.steps) && exam.steps.length > 0;
+  if (hasExamSteps) {
+    const isAllActive = state.currentDomainId === 'all';
+    const allBtn = document.createElement('button');
+    allBtn.type = 'button';
+    allBtn.className = [
+      'whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2',
+      isAllActive
+        ? 'text-gray-900 border-orange-500'
+        : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300',
+    ].join(' ');
+    if (isAllActive) {
+      allBtn.style.borderColor = '#f97316';
+      allBtn.style.color = '#f97316';
+    }
+    allBtn.innerHTML = '<i class="fas fa-star text-xs mr-1"></i>全般';
+    allBtn.addEventListener('click', () => onDomainSelect('all'));
+    els.domainTabs.appendChild(allBtn);
+  }
+
   for (const domain of exam.domains) {
     const isActive = state.currentDomainId === domain.id;
 
@@ -1026,6 +1048,12 @@ function renderContent({ els, exam, state }) {
         <p>この試験のデータはまだ用意されていません。</p>
       </div>
     `;
+    return;
+  }
+
+  // Exam-wide resources ("全般" tab)
+  if (state.currentDomainId === 'all') {
+    renderExamResources({ els, exam, state });
     return;
   }
 
@@ -1149,6 +1177,120 @@ function renderContent({ els, exam, state }) {
         <p>このドメインのタスクが見つかりませんでした。</p>
       </div>
     `;
+  }
+}
+
+function renderExamResources({ els, exam, state }) {
+  const steps = exam.steps;
+  if (!Array.isArray(steps) || steps.length === 0) {
+    els.contentArea.innerHTML = `
+      <div class="text-center py-12 text-gray-500">
+        <i class="fas fa-circle-info text-4xl mb-3 text-gray-300"></i>
+        <p>この試験の学習ステップはまだ登録されていません。</p>
+      </div>
+    `;
+    return;
+  }
+
+  const term = '';
+
+  // Header
+  const headerEl = document.createElement('div');
+  headerEl.innerHTML = `
+    <div class="flex items-center gap-2 mb-4">
+      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-orange-500"><i class="fas fa-star mr-1"></i>全般</span>
+      <h2 class="text-xl font-bold text-gray-800">学習ロードマップ</h2>
+    </div>
+    <p class="text-gray-600 mb-6 bg-gray-50 p-4 rounded-lg border-l-4 border-orange-400">
+      ${escapeHtml(exam.code)} 試験の学習を上から順に進めていきましょう。各ステップのリソースを活用して学習を進めてください。
+    </p>
+  `;
+  els.contentArea.appendChild(headerEl);
+
+  // Render each step as a task card (reusing domain task card format)
+  for (const step of steps) {
+    const card = document.createElement('div');
+    card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
+
+    // Step header — mirrors the domain task header format
+    const stepDescLines = normalizeDescriptionLines(step.description);
+    const stepDescHtml = stepDescLines.length
+      ? `<div class="mt-3 p-3 rounded-lg bg-orange-50 border border-orange-200 text-sm text-orange-900">
+           <div class="space-y-1">${stepDescLines.map((l) => `<div>${escapeHtml(l)}</div>`).join('')}</div>
+         </div>`
+      : '';
+
+    const header = document.createElement('div');
+    header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white';
+    header.innerHTML = `
+      <div class="flex items-center gap-3">
+        <span class="flex items-center justify-center w-9 h-9 rounded-full bg-orange-500 text-white font-bold text-sm flex-shrink-0 shadow-sm">${escapeHtml(step.id)}</span>
+        <div class="flex-1 min-w-0">
+          <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Step ${escapeHtml(step.id)}</div>
+          <h3 class="text-lg font-bold text-gray-900">${escapeHtml(step.jpTitle)}</h3>
+          <p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>
+        </div>
+      </div>
+      ${stepDescHtml}
+    `;
+    card.appendChild(header);
+
+    // Body: knowledge (optional) + resources
+    const resourceSections = buildResourceSections(step);
+    const hasResources = resourceSections.length > 0;
+    const hasKnowledge = Array.isArray(step.knowledge) && step.knowledge.length > 0;
+
+    const body = document.createElement('div');
+    body.className = (hasResources && hasKnowledge) ? 'p-5 grid md:grid-cols-2 gap-6' : 'p-5';
+
+    if (hasKnowledge) {
+      const knowledgeCol = document.createElement('div');
+      knowledgeCol.innerHTML = `
+        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+          <i class="fas fa-check-circle text-green-500"></i> ポイント
+        </h4>
+        <ul class="space-y-2">
+          ${step.knowledge.map((k) => `
+            <li class="text-sm text-gray-600 flex items-start gap-2 p-2 rounded hover:bg-gray-50 transition">
+              <span class="mt-1.5 w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
+              <span>${escapeHtml(k)}</span>
+            </li>
+          `).join('')}
+        </ul>
+      `;
+      body.appendChild(knowledgeCol);
+    }
+
+    if (hasResources) {
+      const resourceCol = document.createElement('div');
+      resourceCol.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200';
+      resourceCol.innerHTML = `
+        <div class="space-y-5">
+          ${resourceSections
+            .map((section) =>
+              renderResourceSection({
+                title: section.title,
+                iconClass: section.iconClass,
+                iconColorClass: section.iconColorClass,
+                items: section.items,
+                term,
+                context: {
+                  examId: state.examId,
+                  domainId: 'all',
+                  taskId: String(step.id || ''),
+                  taskTitle: String(step.jpTitle || ''),
+                  resourceSection: String(section.key || ''),
+                },
+              })
+            )
+            .join('')}
+        </div>
+      `;
+      body.appendChild(resourceCol);
+    }
+
+    card.appendChild(body);
+    els.contentArea.appendChild(card);
   }
 }
 

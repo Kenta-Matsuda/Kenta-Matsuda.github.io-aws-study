@@ -4,6 +4,159 @@ export const ANS_C01 = {
   shortLabel: 'ANS',
   title: 'AWS Certified Advanced Networking - Specialty',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  steps: [
+    {
+      id: '1',
+      title: 'Register for the exam',
+      jpTitle: '試験の申し込み',
+      description: [
+        'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
+      ],
+      resources: [
+        {
+          key: 'official-page',
+          label: '試験の公式ページ',
+          iconClass: 'fas fa-file-alt',
+          iconColorClass: 'text-blue-500',
+          items: [
+            {
+              title: 'AWS Certified Advanced Networking - Specialty 公式ページ',
+              url: 'https://aws.amazon.com/jp/certification/certified-advanced-networking-specialty/',
+              note: '試験概要・合格条件・出題範囲などの公式情報',
+              recommend: true,
+            },
+          ],
+        },
+        {
+          key: 'registration',
+          label: '試験の申し込み',
+          iconClass: 'fas fa-clipboard-check',
+          iconColorClass: 'text-indigo-500',
+          items: [
+            {
+              title: 'AWS Training & Certification（試験申し込み）',
+              url: 'https://www.aws.training/certification?p=cert&c=ai&z=1',
+              note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              recommend: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: '2',
+      title: 'Understand the exam overview',
+      jpTitle: '試験の概要を把握する',
+      description: [
+        '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
+      ],
+      resources: [
+        {
+          key: 'guide',
+          label: '試験ガイド',
+          iconClass: 'fas fa-graduation-cap',
+          iconColorClass: 'text-orange-500',
+          items: [
+            {
+              title: 'AWS Certified Advanced Networking - Specialty 試験ガイド (PDF)',
+              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf',
+              note: '試験範囲・出題比率・サンプル問題を確認',
+              recommend: true,
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: '3',
+      title: 'Learn with official training courses',
+      jpTitle: '公式トレーニングで基礎を固める',
+      description: [
+        'AWS Skill Builder の無料コースで、ネットワーク分野の基礎知識をインプットします。試験対策に特化したコースもあります。',
+      ],
+      resources: [
+        {
+          key: 'training',
+          label: 'AWS トレーニング',
+          iconClass: 'fas fa-chalkboard-teacher',
+          iconColorClass: 'text-green-600',
+          items: [
+            {
+              title: 'Exam Prep Standard Course: AWS Certified Advanced Networking - Specialty',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14952/exam-prep-standard-course-aws-certified-advanced-networking-specialty-ans-c01',
+              note: 'AWS Skill Builder: 試験対策コース（無料）',
+              recommend: true,
+            },
+            {
+              title: 'Networking Learning Plan',
+              url: 'https://explore.skillbuilder.aws/learn/learning_plan/view/89/networking-learning-plan',
+              note: 'AWS Skill Builder: ネットワーク学習プラン',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: '4',
+      title: 'Deep dive into each domain',
+      jpTitle: 'ドメイン別の学習を進める',
+      description: [
+        'このアプリの Domain 1〜4 タブに切り替えて、各ドメインのタスクごとに用意されたブログ・Black Belt・公式ドキュメントを読み進めましょう。',
+        'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
+      ],
+      knowledge: [
+        'Domain 1: ネットワーク設計（30%）',
+        'Domain 2: ネットワーク実装（26%）',
+        'Domain 3: ネットワーク管理と運用（20%）',
+        'Domain 4: ネットワークセキュリティ、コンプライアンス、ガバナンス（24%）',
+      ],
+      resources: [
+        {
+          key: 'whitepapers',
+          label: 'ホワイトペーパー・ガイド',
+          iconClass: 'fas fa-file-alt',
+          iconColorClass: 'text-gray-600',
+          items: [
+            {
+              title: 'Amazon VPC Connectivity Options',
+              url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-vpc-connectivity-options/welcome.html',
+              note: 'ホワイトペーパー: VPC 接続パターンの網羅的解説',
+              recommend: true,
+            },
+            {
+              title: 'AWS Well-Architected Framework - 信頼性の柱',
+              url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/welcome.html',
+              note: 'ホワイトペーパー: ネットワーク設計の信頼性観点',
+            },
+          ],
+        },
+      ],
+    },
+    {
+      id: '5',
+      title: 'Practice with sample questions',
+      jpTitle: '模擬問題で実力を確認する',
+      description: [
+        '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
+      ],
+      resources: [
+        {
+          key: 'practice',
+          label: '練習問題',
+          iconClass: 'fas fa-tasks',
+          iconColorClass: 'text-purple-500',
+          items: [
+            {
+              title: 'AWS Certification 公式練習問題集（日本語）',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14837/aws-certified-advanced-networking-specialty-official-practice-question-set-ans-c01-japanese',
+              note: 'AWS Skill Builder: 無料',
+              recommend: true,
+            },
+          ],
+        },
+      ],
+    },
+  ],
   domains: [
     {
       id: 1,
