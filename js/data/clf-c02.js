@@ -109,13 +109,13 @@ export const CLF_C02 = {
           items: [
             {
               title: 'AWS Cloud Practitioner Essentials（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/1875/aws-cloud-practitioner-essentials-japanese',
-              note: 'AWS Skill Builder: 基礎コース（無料・6時間）',
+              url: 'https://skillbuilder.aws/learn/94T2BEN85A/aws-cloud-practitioner-essentials-/J3USM8JWUK',
+              note: 'AWS Skill Builder: 基礎コース（無料・7時間）',
               recommend: true,
             },
             {
-              title: 'Exam Prep Standard Course: AWS Certified Cloud Practitioner',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/16434/exam-prep-standard-course-aws-certified-cloud-practitioner-clf-c02',
+              title: 'Exam Prep Overview: AWS Certified Cloud Practitioner (CLF-C02 - 日本語)',
+              url: 'https://skillbuilder.aws/learn/N7R36JEFT4/exam-prep-overview-aws-certified-cloud-practitioner-clfc02--/K5E54343CX',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               recommend: true,
             },
@@ -174,8 +174,8 @@ export const CLF_C02 = {
           iconColorClass: 'text-purple-500',
           items: [
             {
-              title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/16792/aws-certified-cloud-practitioner-official-practice-question-set-clf-c02-japanese',
+              title: 'Official Practice Question Set: AWS Certified Cloud Practitioner (CLF-C02 - 日本語)',
+              url: 'https://skillbuilder.aws/learn/E4W52ZKK6P/official-practice-question-set-aws-certified-cloud-practitioner-clfc02--/7Z82N2MBYU',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
