@@ -150,10 +150,6 @@ export const MLA_C01 = {
           ],
         },
       ],
-    }
-    },
-  ],
-      ],
     },
   ],
   domains: [

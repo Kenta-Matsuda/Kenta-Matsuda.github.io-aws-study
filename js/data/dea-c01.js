@@ -130,10 +130,6 @@ export const DEA_C01 = {
           ],
         },
       ],
-    }
-    },
-  ],
-      ],
     },
   ],
   domains: [

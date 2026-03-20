@@ -83,7 +83,7 @@ export const SOA_C03 = {
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified SysOps Administrator - Associate',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/11851/exam-prep-aws-certified-sysops-administrator-associate-soa-c02',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/9313/exam-prep-standard-course-aws-certified-sysops-administrator-associate-soa-c02',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               recommend: true,
             },
@@ -144,16 +144,12 @@ export const SOA_C03 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/12489/aws-certified-sysops-administrator-associate-official-practice-question-set-soa-c02-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/12555/aws-certified-sysops-administrator-associate-official-practice-question-set-soa-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],

@@ -155,10 +155,6 @@ export const SAA_C03 = {
           ],
         },
       ],
-    }
-    },
-  ],
-      ],
     },
   ],
   domains: [

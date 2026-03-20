@@ -175,16 +175,12 @@ export const CLF_C02 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/19916/aws-certified-cloud-practitioner-official-practice-question-set-clf-c02-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/16792/aws-certified-cloud-practitioner-official-practice-question-set-clf-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],

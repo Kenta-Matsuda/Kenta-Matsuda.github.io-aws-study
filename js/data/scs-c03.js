@@ -83,7 +83,7 @@ export const SCS_C03 = {
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified Security - Specialty',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/15097/exam-prep-standard-course-aws-certified-security-specialty-scs-c02',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18291/exam-prep-standard-course-aws-certified-security-specialty-scs-c02-english',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               recommend: true,
             },
@@ -146,16 +146,12 @@ export const SCS_C03 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/15111/aws-certified-security-specialty-official-practice-question-set-scs-c02-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/15232/aws-certified-security-specialty-official-practice-question-set-scs-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],

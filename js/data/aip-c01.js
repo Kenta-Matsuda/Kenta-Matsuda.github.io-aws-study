@@ -151,10 +151,6 @@ export const AIP_C01 = {
           ],
         },
       ],
-    }
-    },
-  ],
-      ],
     },
   ],
   domains: [

@@ -148,16 +148,12 @@ export const ANS_C01 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14760/aws-certified-advanced-networking-specialty-official-practice-question-set-ans-c01-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14837/aws-certified-advanced-networking-specialty-official-practice-question-set-ans-c01-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],

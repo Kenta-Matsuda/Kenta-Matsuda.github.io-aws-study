@@ -143,16 +143,12 @@ export const DVA_C02 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/19757/aws-certified-developer-associate-official-practice-question-set-dva-c02-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14060/aws-certified-developer-associate-official-practice-question-set-dva-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],

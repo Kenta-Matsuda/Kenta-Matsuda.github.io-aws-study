@@ -178,10 +178,6 @@ export const AIF_C01 = {
           ],
         },
       ],
-    }
-    },
-  ],
-      ],
     },
   ],
   domains: [

@@ -146,16 +146,12 @@ export const DOP_C02 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14963/aws-certified-devops-engineer-professional-official-practice-question-set-dop-c02-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14541/aws-certified-devops-engineer-professional-official-practice-question-set-dop-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],

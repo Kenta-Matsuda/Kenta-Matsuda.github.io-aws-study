@@ -149,16 +149,12 @@ export const SAP_C02 = {
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/13269/aws-certified-solutions-architect-professional-official-practice-question-set-sap-c02-japanese',
+              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/13272/aws-certified-solutions-architect-professional-official-practice-question-set-sap-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               recommend: true,
             },
           ],
         },
-      ],
-    }
-    },
-  ],
       ],
     },
   ],
