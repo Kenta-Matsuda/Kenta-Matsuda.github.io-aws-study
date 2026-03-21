@@ -123,15 +123,25 @@ async function consumeSseText({ response, onTextDelta }) {
   return accumulated;
 }
 
-export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey }) {
+export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, history }) {
   const apiKey = getApiKey();
   if (!apiKey) {
     onRequireApiKey?.();
     return null;
   }
 
+  // Build contents array: history (if any) + current user message
+  const contents = [];
+  if (Array.isArray(history)) {
+    for (const msg of history) {
+      const role = msg.role === 'assistant' ? 'model' : msg.role;
+      contents.push({ role, parts: [{ text: msg.content }] });
+    }
+  }
+  contents.push({ role: 'user', parts: [{ text: userPrompt }] });
+
   const payload = {
-    contents: [{ parts: [{ text: userPrompt }] }],
+    contents,
     systemInstruction: { parts: [{ text: systemPrompt }] },
   };
 
@@ -201,6 +211,7 @@ export async function callGeminiStream({
   systemPrompt,
   onRequireApiKey,
   onTextDelta,
+  history,
 }) {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -208,8 +219,18 @@ export async function callGeminiStream({
     return null;
   }
 
+  // Build contents array: history (if any) + current user message
+  const contents = [];
+  if (Array.isArray(history)) {
+    for (const msg of history) {
+      const role = msg.role === 'assistant' ? 'model' : msg.role;
+      contents.push({ role, parts: [{ text: msg.content }] });
+    }
+  }
+  contents.push({ role: 'user', parts: [{ text: userPrompt }] });
+
   const payload = {
-    contents: [{ parts: [{ text: userPrompt }] }],
+    contents,
     systemInstruction: { parts: [{ text: systemPrompt }] },
   };
 
