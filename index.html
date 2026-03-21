@@ -227,6 +227,79 @@
         .quiz-anim-correct { animation: quizCorrect 0.4s ease; }
         .quiz-anim-incorrect { animation: quizIncorrect 0.3s ease; }
 
+        /* ── Quiz Mode Selection ── */
+        .quiz-mode-card {
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+        }
+        .quiz-mode-card:hover {
+            border-color: #6366f1;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+        }
+        .quiz-mode-card.selected {
+            border-color: #6366f1;
+            background: #eef2ff;
+        }
+
+        /* ── Quiz Timer ── */
+        .quiz-timer {
+            font-variant-numeric: tabular-nums;
+        }
+        .quiz-timer-warning {
+            color: #dc2626 !important;
+            animation: timerPulse 0.5s ease-in-out infinite;
+        }
+        @keyframes timerPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* ── Quiz Progress Bar ── */
+        .quiz-progress-track {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        .quiz-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            transition: width 0.3s ease;
+        }
+
+        /* ── Pre-generation Loading ── */
+        .quiz-pregen-bar {
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        .quiz-pregen-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #a855f7);
+            transition: width 0.4s ease;
+        }
+
+        /* ── Quiz Summary ── */
+        .quiz-summary-stat {
+            text-align: center;
+            padding: 12px 8px;
+        }
+        .quiz-summary-stat .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .quiz-summary-stat .stat-label {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+
         /* ── Combo Counter ── */
         .combo-badge {
             animation: comboPulse 0.6s ease;
@@ -488,6 +561,63 @@
         </div>
     </footer>
 
+    <!-- Quiz Mode Selection Modal -->
+    <div id="quizModeModal" class="modal" data-backdrop-close="true">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
+                    <i class="fas fa-gamepad text-indigo-500"></i> クイズモード選択
+                </h3>
+                <button type="button" data-close-modal="quizModeModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5">
+                <p id="quizModeTaskLabel" class="text-sm text-gray-500 mb-4 truncate"></p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="quizModeCards">
+                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4 selected" data-quiz-mode="single">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">🎯</span>
+                            <span class="font-bold text-gray-800 text-sm">1問チャレンジ</span>
+                        </div>
+                        <p class="text-xs text-gray-500">1問だけサクッと挑戦。スキマ時間に最適。</p>
+                    </div>
+                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="quick5">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">⚡</span>
+                            <span class="font-bold text-gray-800 text-sm">5問連続</span>
+                        </div>
+                        <p class="text-xs text-gray-500">5問連続出題。コンボを繋げてXPを稼ごう！</p>
+                    </div>
+                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="speed">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">⏱️</span>
+                            <span class="font-bold text-gray-800 text-sm">スピードチャレンジ</span>
+                        </div>
+                        <p class="text-xs text-gray-500">10問を制限時間内に。事前に全問題を生成してからスタート！</p>
+                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">⏰ 1問あたり30秒</div>
+                    </div>
+                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="mock">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">📝</span>
+                            <span class="font-bold text-gray-800 text-sm">本番模擬試験</span>
+                        </div>
+                        <p class="text-xs text-gray-500">15問の本番形式。事前に全問題を生成してからスタート！</p>
+                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">⏰ 合計25分</div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+                <button type="button" data-close-modal="quizModeModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
+                    キャンセル
+                </button>
+                <button id="quizModeStartBtn" type="button" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
+                    <i class="fas fa-play"></i> スタート
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- AI Modal -->
     <div id="aiModal" class="modal">
         <div class="modal-content">
@@ -508,16 +638,43 @@
 
                 <!-- Quiz Interactive Area (hidden until quiz mode) -->
                 <div id="quizArea" class="hidden">
+                    <!-- Pre-generation overlay (for speed/mock) -->
+                    <div id="quizPregenOverlay" class="hidden">
+                        <div class="text-center py-8">
+                            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
+                            <p class="text-gray-700 font-bold text-sm mb-2">問題を生成中...</p>
+                            <p id="quizPregenStatus" class="text-gray-500 text-xs mb-4">0 / 10 問</p>
+                            <div class="quiz-pregen-bar max-w-xs mx-auto">
+                                <div id="quizPregenFill" class="quiz-pregen-fill" style="width: 0%"></div>
+                            </div>
+                            <p class="text-gray-400 text-xs mt-3">全問題の生成が完了するとクイズが始まります</p>
+                        </div>
+                    </div>
+
+                    <!-- Timer + Progress header -->
                     <div id="quizComboBar" class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
-                            <span class="text-xs font-bold text-gray-500 uppercase">Quiz</span>
+                            <span id="quizModeLabel" class="text-xs font-bold text-gray-500 uppercase">Quiz</span>
                             <span id="quizSessionProgress" class="text-xs text-gray-400"></span>
                         </div>
-                        <div id="quizComboDisplay" class="hidden">
-                            <span class="combo-badge inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-                                🔥 <span id="quizComboCount">0</span> コンボ
-                                <span id="quizComboMultiplier" class="text-orange-500 text-[10px]"></span>
-                            </span>
+                        <div class="flex items-center gap-3">
+                            <div id="quizTimerDisplay" class="hidden flex items-center gap-1.5">
+                                <i class="fas fa-clock text-indigo-500 text-xs"></i>
+                                <span id="quizTimerValue" class="quiz-timer text-sm font-bold font-mono text-gray-700">5:00</span>
+                            </div>
+                            <div id="quizComboDisplay" class="hidden">
+                                <span class="combo-badge inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
+                                    🔥 <span id="quizComboCount">0</span> コンボ
+                                    <span id="quizComboMultiplier" class="text-orange-500 text-[10px]"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div id="quizProgressBar" class="hidden mb-4">
+                        <div class="quiz-progress-track">
+                            <div id="quizProgressFill" class="quiz-progress-fill" style="width: 0%"></div>
                         </div>
                     </div>
 
@@ -536,6 +693,47 @@
                             </div>
                         </div>
                         <div id="quizExplanation" class="text-sm text-gray-700 ai-response-area bg-gray-50 rounded-lg p-4 border border-gray-200"></div>
+                    </div>
+
+                    <!-- Session Summary (hidden until session ends) -->
+                    <div id="quizSummary" class="hidden">
+                        <div class="text-center py-4">
+                            <div class="text-3xl mb-2" id="quizSummaryEmoji">🎉</div>
+                            <h3 class="text-lg font-bold text-gray-800 mb-1" id="quizSummaryTitle">クイズ完了！</h3>
+                            <p class="text-sm text-gray-500 mb-5" id="quizSummarySubtitle"></p>
+                        </div>
+                        <div class="grid grid-cols-4 gap-2 mb-5 bg-gray-50 rounded-xl p-4">
+                            <div class="quiz-summary-stat">
+                                <div class="stat-value text-gray-900" id="quizSumCorrect">0</div>
+                                <div class="stat-label">正解</div>
+                            </div>
+                            <div class="quiz-summary-stat">
+                                <div class="stat-value text-gray-400" id="quizSumTotal">0</div>
+                                <div class="stat-label">問題数</div>
+                            </div>
+                            <div class="quiz-summary-stat">
+                                <div class="stat-value text-indigo-600" id="quizSumAccuracy">0%</div>
+                                <div class="stat-label">正答率</div>
+                            </div>
+                            <div class="quiz-summary-stat">
+                                <div class="stat-value text-orange-600" id="quizSumXp">0</div>
+                                <div class="stat-label">獲得XP</div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm">🔥</span>
+                                <span class="text-xs font-bold text-gray-600">最大コンボ</span>
+                            </div>
+                            <span class="font-mono font-bold text-gray-800 text-sm" id="quizSumCombo">0</span>
+                        </div>
+                        <div id="quizSumTime" class="hidden flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
+                            <div class="flex items-center gap-2">
+                                <span class="text-sm">⏱️</span>
+                                <span class="text-xs font-bold text-gray-600">所要時間</span>
+                            </div>
+                            <span class="font-mono font-bold text-gray-800 text-sm" id="quizSumTimeValue">0:00</span>
+                        </div>
                     </div>
                 </div>
             </div>

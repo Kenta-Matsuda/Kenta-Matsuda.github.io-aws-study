@@ -130,17 +130,30 @@ export function getComboLabel(streak) {
 
 // ─── Quiz Session State ─────────────────────────────────────
 
+/** Mode configuration: question count and time limits */
+export const QUIZ_MODE_CONFIG = {
+  single: { questionCount: 1, timeLimitSec: 0, preGenerate: false, label: '1問チャレンジ' },
+  quick5: { questionCount: 5, timeLimitSec: 0, preGenerate: false, label: '5問連続' },
+  speed:  { questionCount: 10, timeLimitSec: 300, preGenerate: true, label: 'スピードチャレンジ' },  // 30s × 10
+  mock:   { questionCount: 15, timeLimitSec: 1500, preGenerate: true, label: '本番模擬試験' },        // 25 min
+};
+
 /**
  * Create a new quiz session object.
  * @param {{ examId: string, domainId?: number, mode?: string }} opts
  */
 export function createQuizSession(opts = {}) {
+  const mode = opts.mode || 'single';
+  const config = QUIZ_MODE_CONFIG[mode] || QUIZ_MODE_CONFIG.single;
   return {
     examId: opts.examId || '',
     domainId: opts.domainId ?? null,
-    mode: opts.mode || 'single',       // 'single' | 'quick5' | 'speed' | 'mock'
+    mode,
+    questionCount: config.questionCount,
+    timeLimitSec: config.timeLimitSec,
+    preGenerate: config.preGenerate,
     questions: [],                      // parsed quiz objects
-    answers: [],                        // user answer indices
+    answers: [],                        // user answer indices (-1 = unanswered/timed-out)
     currentIndex: 0,
     combo: 0,
     maxCombo: 0,
@@ -222,4 +235,23 @@ export function buildQuizUserPrompt(taskTitle, taskContext) {
     prompt += `\n\n【タスク文脈】\n${taskContext}`;
   }
   return prompt;
+}
+
+/**
+ * Check if the session is complete (all questions answered or limit reached).
+ */
+export function isSessionComplete(session) {
+  if (!session) return true;
+  const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single;
+  return session.currentIndex >= config.questionCount;
+}
+
+/**
+ * Format seconds into M:SS display string.
+ */
+export function formatTime(seconds) {
+  const s = Math.max(0, Math.floor(seconds));
+  const m = Math.floor(s / 60);
+  const ss = String(s % 60).padStart(2, '0');
+  return `${m}:${ss}`;
 }
