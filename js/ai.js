@@ -38,24 +38,26 @@ export function getActiveProviderLabel() {
 
 /**
  * Non-streaming AI call (provider-agnostic).
+ * @param {Array<{role: string, content: string}>} [history] - conversation history for multi-turn chat
  */
-export async function callAi({ userPrompt, systemPrompt, onRequireApiKey }) {
+export async function callAi({ userPrompt, systemPrompt, onRequireApiKey, history }) {
   const provider = resolveProvider();
 
   if (provider === 'openai') {
-    return callOpenAi({ userPrompt, systemPrompt, onRequireApiKey });
+    return callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, history });
   }
-  return callGemini({ userPrompt, systemPrompt, onRequireApiKey });
+  return callGemini({ userPrompt, systemPrompt, onRequireApiKey, history });
 }
 
 /**
  * Streaming AI call (provider-agnostic).
+ * @param {Array<{role: string, content: string}>} [history] - conversation history for multi-turn chat
  */
-export async function callAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta }) {
+export async function callAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history }) {
   const provider = resolveProvider();
 
   if (provider === 'openai') {
-    return callOpenAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta });
+    return callOpenAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history });
   }
-  return callGeminiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta });
+  return callGeminiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history });
 }

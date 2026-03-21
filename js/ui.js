@@ -13,9 +13,22 @@ import {
   setUserName,
   addXp,
   getXpSummary,
+  getStreakInfo,
+  addQuizResult,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
+import {
+  parseQuizResponse,
+  indexToLetter,
+  getComboMultiplier,
+  getComboLabel,
+  createQuizSession,
+  recordAnswer,
+  buildQuizSystemPrompt,
+  buildQuizUserPrompt,
+} from './quiz.js';
+import { initChat, resetChat } from './chat.js';
 
 let chartInstance = null;
 
@@ -128,6 +141,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     els.aiRetryBtn.classList.toggle('cursor-not-allowed', els.aiRetryBtn.disabled);
   }
 
+  /** Active quiz session (null when not in quiz mode) */
+  let quizSession = null;
+
+  /** Helper to get/set current parsed quiz (shared between initApp scope and module-level renderInteractiveQuiz) */
+  function getCurrentParsedQuiz() {
+    return window.__currentParsedQuiz || null;
+  }
+  function setCurrentParsedQuiz(q) {
+    window.__currentParsedQuiz = q;
+  }
+
   async function runAiRequest(req) {
     const exam = getExamById(req.examId);
     updateAiRetryButton({ visible: true, disabled: true });
@@ -142,6 +166,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
       return;
     }
+    // Quiz: generate but do NOT award XP yet — wait for user answer
     const ok = await generateQuiz({
       els,
       exam,
@@ -149,19 +174,121 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       taskTitle: req.taskTitle,
       taskContext: req.taskContext,
     });
-    if (ok) {
-      const result = addXp({ amount: XP_RULES.quiz, reason: 'quiz' });
-      if (result?.unlocked?.length) {
-        showMilestoneToast({ els, unlocked: result.unlocked });
-      }
-      renderXpDashboard({ els, exam: getExamById(req.examId), state });
-    }
+    // XP is awarded in handleQuizAnswer after user picks a choice
   }
 
   els.aiRetryBtn?.addEventListener('click', async () => {
     if (!lastAiRequest) return;
     await runAiRequest(lastAiRequest);
   });
+
+  // Quiz: "Next question" button
+  els.quizNextBtn?.addEventListener('click', async () => {
+    if (!lastAiRequest || lastAiRequest.type !== 'quiz') return;
+    await runAiRequest(lastAiRequest);
+  });
+
+  // Quiz: choice button click (event delegation on quizChoices)
+  els.quizChoices?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.quiz-choice-btn');
+    if (!btn || btn.disabled) return;
+    const answerIndex = parseInt(btn.dataset.choiceIndex, 10);
+    if (Number.isNaN(answerIndex)) return;
+    handleQuizAnswer({ els, answerIndex, exam: getExamById(state.examId), state });
+  });
+
+  function handleQuizAnswer({ els, answerIndex, exam, state: appState }) {
+    const quiz = getCurrentParsedQuiz();
+    if (!quiz) return;
+    const isCorrect = answerIndex === quiz.correctIndex;
+
+    // Track in session
+    if (!quizSession) {
+      quizSession = createQuizSession({ examId: appState.examId });
+    }
+    quizSession.questions[quizSession.currentIndex] = quiz;
+    const result = recordAnswer(quizSession, answerIndex, XP_RULES.quiz);
+
+    // Disable all choice buttons
+    const btns = els.quizChoices.querySelectorAll('.quiz-choice-btn');
+    btns.forEach((btn) => {
+      btn.disabled = true;
+      const idx = parseInt(btn.dataset.choiceIndex, 10);
+      if (idx === quiz.correctIndex) {
+        btn.classList.add('quiz-choice-correct');
+      }
+      if (idx === answerIndex && !isCorrect) {
+        btn.classList.add('quiz-choice-incorrect');
+        btn.classList.add('quiz-anim-incorrect');
+      }
+      if (idx === answerIndex && isCorrect) {
+        btn.classList.add('quiz-anim-correct');
+      }
+    });
+
+    // Update combo display
+    if (result.combo >= 3) {
+      els.quizComboDisplay?.classList.remove('hidden');
+      if (els.quizComboCount) els.quizComboCount.textContent = String(result.combo);
+      if (els.quizComboMultiplier) els.quizComboMultiplier.textContent = `×${result.multiplier}`;
+    }
+
+    // Show result banner
+    els.quizResult?.classList.remove('hidden');
+    if (els.quizResultBanner) {
+      els.quizResultBanner.className = isCorrect
+        ? 'rounded-lg p-4 mb-3 bg-green-50 border border-green-200'
+        : 'rounded-lg p-4 mb-3 bg-red-50 border border-red-200';
+    }
+    if (els.quizResultIcon) els.quizResultIcon.textContent = isCorrect ? '✅' : '❌';
+    if (els.quizResultText) {
+      els.quizResultText.textContent = isCorrect
+        ? `正解！ ${getComboLabel(result.combo)}`
+        : `不正解 — 正解は ${indexToLetter(quiz.correctIndex)}`;
+      els.quizResultText.className = isCorrect
+        ? 'font-bold text-sm text-green-800'
+        : 'font-bold text-sm text-red-800';
+    }
+    if (els.quizResultXp) {
+      els.quizResultXp.textContent = `+${result.xpEarned} XP`;
+      els.quizResultXp.className = 'ml-auto text-xs font-mono font-bold ' + (isCorrect ? 'text-green-700' : 'text-red-600');
+    }
+
+    // Show explanation
+    if (els.quizExplanation && quiz.explanation) {
+      const { html, usedMarkdown } = renderMarkdownToSafeHtml(quiz.explanation);
+      if (usedMarkdown) {
+        els.quizExplanation.innerHTML = html;
+      } else {
+        els.quizExplanation.textContent = quiz.explanation;
+      }
+    }
+
+    // Award XP
+    const xpResult = addXp({ amount: result.xpEarned, reason: 'quiz' });
+    if (xpResult?.unlocked?.length) {
+      showMilestoneToast({ els, unlocked: xpResult.unlocked });
+    }
+
+    // Store quiz result
+    addQuizResult({
+      examId: appState.examId,
+      taskId: lastAiRequest?.taskId || '',
+      isCorrect,
+      xpEarned: result.xpEarned,
+      answeredAt: new Date().toISOString(),
+    });
+
+    renderXpDashboard({ els, exam, state: appState });
+
+    // Show "Next question" button, hide retry
+    if (els.quizNextBtn) els.quizNextBtn.classList.remove('hidden');
+    if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
+
+    // Advance session index for next question
+    quizSession.currentIndex += 1;
+    setCurrentParsedQuiz(null);
+  }
 
   els.aiVoteGoodBtn?.addEventListener('click', () => {
     voteAi('good');
@@ -195,6 +322,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   wireProfileHandlers({ els, state, getExamById });
   wireToastHandlers({ els });
 
+  // Initialize chat widget
+  initChat({
+    els,
+    getExamById,
+    getState: () => state,
+    openSettingsModal: () => openSettingsModal(els),
+  });
+
   // 初期表示
   setExam(defaultExamId);
 
@@ -214,6 +349,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     renderXpDashboard({ els, exam, state });
     renderTabs({ els, exam, state, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderContent({ els, exam, state });
+
+    // Reset chat on exam change & update badge
+    resetChat();
+    if (els.chatExamBadge) els.chatExamBadge.textContent = exam?.code || '';
   }
 
   function switchDomain(domainId) {
@@ -383,6 +522,38 @@ function getElements() {
     aiProviderSwitch: document.getElementById('aiProviderSwitch'),
     geminiKeySection: document.getElementById('geminiKeySection'),
     openaiKeySection: document.getElementById('openaiKeySection'),
+
+    // Quiz interactive
+    quizArea: document.getElementById('quizArea'),
+    quizComboBar: document.getElementById('quizComboBar'),
+    quizSessionProgress: document.getElementById('quizSessionProgress'),
+    quizComboDisplay: document.getElementById('quizComboDisplay'),
+    quizComboCount: document.getElementById('quizComboCount'),
+    quizComboMultiplier: document.getElementById('quizComboMultiplier'),
+    quizQuestion: document.getElementById('quizQuestion'),
+    quizChoices: document.getElementById('quizChoices'),
+    quizResult: document.getElementById('quizResult'),
+    quizResultBanner: document.getElementById('quizResultBanner'),
+    quizResultIcon: document.getElementById('quizResultIcon'),
+    quizResultText: document.getElementById('quizResultText'),
+    quizResultXp: document.getElementById('quizResultXp'),
+    quizExplanation: document.getElementById('quizExplanation'),
+    quizNextBtn: document.getElementById('quizNextBtn'),
+
+    // Streak
+    streakCount: document.getElementById('streakCount'),
+    streakWeekDots: document.getElementById('streakWeekDots'),
+    streakMessage: document.getElementById('streakMessage'),
+
+    // Chat
+    chatFab: document.getElementById('chatFab'),
+    chatPanel: document.getElementById('chatPanel'),
+    chatCloseBtn: document.getElementById('chatCloseBtn'),
+    chatMessages: document.getElementById('chatMessages'),
+    chatInput: document.getElementById('chatInput'),
+    chatSendBtn: document.getElementById('chatSendBtn'),
+    chatSuggestions: document.getElementById('chatSuggestions'),
+    chatExamBadge: document.getElementById('chatExamBadge'),
   };
 }
 
@@ -717,6 +888,59 @@ function renderXpDashboard({ els, exam, state }) {
   if (els.xpProgressBar) {
     const pct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
     els.xpProgressBar.style.width = `${pct.toFixed(1)}%`;
+  }
+
+  // Streak display
+  renderStreakDisplay(els);
+}
+
+function renderStreakDisplay(els) {
+  const streak = getStreakInfo();
+  if (els.streakCount) {
+    els.streakCount.textContent = String(streak.current);
+  }
+  if (els.streakMessage) {
+    if (streak.hadActivityToday) {
+      els.streakMessage.textContent = streak.current >= 7
+        ? '素晴らしい！1週間連続学習達成 🎉'
+        : streak.current >= 3
+          ? `${streak.current}日連続！この調子で続けよう 💪`
+          : '今日もがんばってるね！';
+    } else {
+      els.streakMessage.textContent = streak.current > 0
+        ? '今日もアクセスしてストリークを守ろう！'
+        : '今日から連続学習をスタートしよう！';
+    }
+  }
+  if (els.streakWeekDots) {
+    // Render 7 dots: newest (today) on the right
+    const days = ['月', '火', '水', '木', '金', '土', '日'];
+    const today = new Date().getDay(); // 0=Sun
+    const dayLabels = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = (today - i + 7) % 7;
+      dayLabels.push(days[d === 0 ? 6 : d - 1]);
+    }
+    // Get activity from getXpSummary's weekXp or reconstruct
+    // Simple approach: use the streak info + hadActivityToday
+    const xpSummary = getXpSummary();
+    const state = typeof window !== 'undefined' && window.__studyState ? window.__studyState : null;
+
+    els.streakWeekDots.innerHTML = dayLabels.map((label, i) => {
+      // For now, show today as active if hadActivityToday, and fill based on streak
+      const daysAgo = 6 - i;
+      const isActive = streak.hadActivityToday
+        ? daysAgo < streak.current || (daysAgo === 0)
+        : daysAgo > 0 && daysAgo <= streak.current;
+      return `
+        <div class="flex flex-col items-center gap-0.5">
+          <div class="w-5 h-5 rounded-full ${isActive ? 'bg-orange-400' : 'bg-gray-200'} flex items-center justify-center">
+            ${isActive ? '<span class="text-white text-[9px]">✓</span>' : ''}
+          </div>
+          <span class="text-[9px] text-gray-400">${label}</span>
+        </div>
+      `.trim();
+    }).join('');
   }
 }
 
@@ -1637,6 +1861,11 @@ function showAiModal(els, title, isLoading) {
   els.modalTitle.textContent = title;
   openModal(els.aiModal);
 
+  // Always reset quiz interactive area on new modal open
+  if (els.quizArea) els.quizArea.classList.add('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+
   if (isLoading) {
     els.modalLoading.classList.remove('hidden');
     els.modalContent.textContent = '';
@@ -1819,48 +2048,112 @@ async function generateQuiz({ els, exam, taskTitle, taskContext }) {
   }
 
   const providerLabel = getActiveProviderLabel();
-  showAiModal(els, `模擬問題作成: ${taskTitle}`, true);
+  showAiModal(els, `模擬問題: ${taskTitle}`, true);
 
-  const systemPrompt =
-    `あなたはAWS認定試験のエキスパートです。${exam.code}（${exam.shortLabel}）レベルの4択問題を1問作成してください。`;
+  // Hide quiz-specific UI while loading
+  resetQuizUi(els);
 
-  const contextPrompt = taskContext
-    ? `\n\n【タスク文脈】\n${taskContext}`
-    : '';
+  const systemPrompt = buildQuizSystemPrompt(exam.code, exam.shortLabel);
+  const userPrompt = buildQuizUserPrompt(taskTitle, taskContext);
 
-  const userPrompt = `タスク: 「${taskTitle}」に関連する、実践的なシナリオベースの選択問題を1問作成してください。
+  let response = '';
+  let fullText = '';
 
-フォーマット:
-【問題文】
-[シナリオと質問]
-
-【選択肢】
-A. [選択肢]
-B. [選択肢]
-C. [選択肢]
-D. [選択肢]
-
-【正解と解説】
-正解: [記号]
-解説: [なぜ正解か/他がなぜ違うかを簡潔に]`;
-
-  let response = await callAiStream({
-    userPrompt,
-    systemPrompt: systemPrompt + contextPrompt,
-    onRequireApiKey: () => openSettingsModal(els),
-    onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
-  });
-
-  if (String(response || '').includes('ストリーミングに対応していない環境')) {
-    response = await callAi({
+  try {
+    response = await callAiStream({
       userPrompt,
-      systemPrompt: systemPrompt + contextPrompt,
+      systemPrompt,
       onRequireApiKey: () => openSettingsModal(els),
+      onTextDelta: (_delta, text) => {
+        fullText = text;
+        updateAiModalContentStreaming(els, text);
+      },
     });
+
+    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+      response = await callAi({
+        userPrompt,
+        systemPrompt,
+        onRequireApiKey: () => openSettingsModal(els),
+      });
+    }
+  } catch (err) {
+    updateAiModalContent(els, `エラーが発生しました: ${err.message || err}`);
+    return false;
   }
 
-  if (response) updateAiModalContent(els, response);
-  return isSuccessfulAiResponse(response);
+  if (!isSuccessfulAiResponse(response)) {
+    if (response) updateAiModalContent(els, response);
+    return false;
+  }
+
+  // Try to parse as interactive quiz
+  const parsed = parseQuizResponse(response);
+
+  if (parsed) {
+    // Render interactive quiz UI
+    renderInteractiveQuiz({ els, quiz: parsed });
+    return true;
+  }
+
+  // Fallback: show as plain markdown (old format)
+  updateAiModalContent(els, response);
+  return true;
+}
+
+function resetQuizUi(els) {
+  if (els.quizArea) els.quizArea.classList.add('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizComboDisplay) els.quizComboDisplay.classList.add('hidden');
+  if (els.quizChoices) els.quizChoices.innerHTML = '';
+  if (els.quizQuestion) els.quizQuestion.textContent = '';
+  if (els.quizExplanation) els.quizExplanation.innerHTML = '';
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+}
+
+function renderInteractiveQuiz({ els, quiz }) {
+  // Store reference for answer handling
+  // `currentParsedQuiz` is accessible via closure in initApp
+  if (typeof window !== 'undefined') {
+    window.__currentParsedQuiz = quiz;
+  }
+
+  els.modalLoading?.classList.add('hidden');
+  if (els.aiRetryBtn) {
+    els.aiRetryBtn.disabled = false;
+    els.aiRetryBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+  }
+
+  // Hide the plain-text content, show quiz area
+  if (els.modalContent) els.modalContent.innerHTML = '';
+  if (els.quizArea) els.quizArea.classList.remove('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+
+  // Render question
+  if (els.quizQuestion) {
+    els.quizQuestion.textContent = quiz.question;
+  }
+
+  // Render choices as buttons
+  if (els.quizChoices) {
+    els.quizChoices.innerHTML = quiz.choices.map((choice, i) => {
+      const letter = indexToLetter(i);
+      const choiceText = choice.startsWith(`${letter}.`) ? choice.substring(2).trim() : choice;
+      return `
+        <button type="button" class="quiz-choice-btn w-full text-left px-4 py-3 rounded-lg border border-gray-200 bg-white hover:border-indigo-400 text-sm transition flex items-start gap-3" data-choice-index="${i}">
+          <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-50 text-indigo-700 font-bold text-sm flex items-center justify-center">${escapeHtml(letter)}</span>
+          <span class="pt-0.5">${escapeHtml(choiceText)}</span>
+        </button>
+      `.trim();
+    }).join('');
+  }
+
+  // Set copy text
+  if (els.modalContent?.dataset) {
+    els.modalContent.dataset.aiCopyText = `${quiz.question}\n\n${quiz.choices.join('\n')}\n\n正解: ${indexToLetter(quiz.correctIndex)}\n${quiz.explanation}`;
+  }
+  setAiCopyButtonEnabled(els, true);
 }
 
 function isSuccessfulAiResponse(response) {

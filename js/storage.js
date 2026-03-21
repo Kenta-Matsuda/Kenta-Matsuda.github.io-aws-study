@@ -414,6 +414,112 @@ export function getXpSummary(examId) {
   };
 }
 
+// ─── Quiz History ───────────────────────────────────────────
+
+const QUIZ_HISTORY_STORAGE_KEY = 'asn_quiz_history_v1';
+const MAX_QUIZ_HISTORY = 500;
+
+function loadQuizHistory() {
+  try {
+    const raw = localStorage.getItem(QUIZ_HISTORY_STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveQuizHistory(history) {
+  // Keep only the most recent entries
+  const trimmed = Array.isArray(history) ? history.slice(0, MAX_QUIZ_HISTORY) : [];
+  localStorage.setItem(QUIZ_HISTORY_STORAGE_KEY, JSON.stringify(trimmed));
+}
+
+/**
+ * Record a quiz answer.
+ * @param {{ examId: string, domainId?: number, taskId?: string, isCorrect: boolean, xpEarned: number }} entry
+ */
+export function addQuizResult(entry) {
+  const history = loadQuizHistory();
+  history.unshift({
+    examId: String(entry.examId || ''),
+    domainId: entry.domainId ?? null,
+    taskId: String(entry.taskId || ''),
+    isCorrect: Boolean(entry.isCorrect),
+    xpEarned: Number(entry.xpEarned || 0),
+    answeredAt: new Date().toISOString(),
+  });
+  saveQuizHistory(history);
+}
+
+/**
+ * Get quiz performance analytics for a specific exam.
+ * @param {string} examId
+ * @returns {{ total: number, correct: number, accuracy: number, byDomain: Record<number, {total:number, correct:number, accuracy:number}>, recentTrend: boolean[] }}
+ */
+export function getQuizAnalytics(examId) {
+  const history = loadQuizHistory().filter((h) => h.examId === examId);
+  const total = history.length;
+  const correct = history.filter((h) => h.isCorrect).length;
+
+  // By domain
+  const byDomain = {};
+  for (const h of history) {
+    const did = h.domainId;
+    if (did == null) continue;
+    if (!byDomain[did]) byDomain[did] = { total: 0, correct: 0, accuracy: 0 };
+    byDomain[did].total += 1;
+    if (h.isCorrect) byDomain[did].correct += 1;
+  }
+  for (const d of Object.values(byDomain)) {
+    d.accuracy = d.total > 0 ? d.correct / d.total : 0;
+  }
+
+  // Recent 30 trend (newest first → reverse so [0] is oldest)
+  const recent30 = history.slice(0, 30).map((h) => h.isCorrect).reverse();
+
+  return {
+    total,
+    correct,
+    accuracy: total > 0 ? correct / total : 0,
+    byDomain,
+    recentTrend: recent30,
+  };
+}
+
+// ─── Streak Tracking ────────────────────────────────────────
+
+/**
+ * Calculate the current learning streak (consecutive days with XP activity).
+ * Uses the week ring buffer which already tracks daily XP.
+ * @returns {{ current: number, hadActivityToday: boolean }}
+ */
+export function getStreakInfo() {
+  const today = getLocalDayString();
+  const state = loadStudyState();
+  const ex = ensureXpState(state, today);
+  const offsets = weekRingToOffsets(ex.week, today);
+
+  // offsets[0] = today, offsets[1] = yesterday, ...
+  let current = 0;
+  // If today has XP, start counting from today
+  // If not, streak is "at risk" — check from yesterday
+  const startFrom = offsets[0] > 0 ? 0 : 1;
+  for (let i = startFrom; i < 7; i += 1) {
+    if (offsets[i] > 0) {
+      current += 1;
+    } else {
+      break;
+    }
+  }
+
+  return {
+    current,
+    hadActivityToday: offsets[0] > 0,
+  };
+}
+
 function showMessage(messageEl, text, colorClass) {
   messageEl.textContent = text;
   messageEl.className = `text-sm mb-4 ${colorClass}`;

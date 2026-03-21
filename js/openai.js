@@ -24,7 +24,7 @@ async function readErrorMessage(response) {
 /**
  * Non-streaming call to OpenAI Chat Completions API.
  */
-export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey }) {
+export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, history }) {
   const apiKey = getOpenAiApiKey();
   if (!apiKey) {
     onRequireApiKey?.();
@@ -34,6 +34,15 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey }) 
   const delays = [1000, 2000, 4000];
   const models = getModelCandidates();
   let lastError = null;
+
+  // Build messages array: system + history (if any) + current user message
+  const messages = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(history)) {
+    for (const msg of history) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+  }
+  messages.push({ role: 'user', content: userPrompt });
 
   for (const model of models) {
     for (let i = 0; i < 3; i += 1) {
@@ -46,10 +55,7 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey }) 
           },
           body: JSON.stringify({
             model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
+            messages,
             temperature: 0.7,
           }),
         });
@@ -100,7 +106,7 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey }) 
 /**
  * Streaming call to OpenAI Chat Completions API.
  */
-export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta }) {
+export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history }) {
   const apiKey = getOpenAiApiKey();
   if (!apiKey) {
     onRequireApiKey?.();
@@ -110,6 +116,15 @@ export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiK
   const delays = [1000, 2000, 4000];
   const models = getModelCandidates();
   let lastError = null;
+
+  // Build messages array: system + history (if any) + current user message
+  const messages = [{ role: 'system', content: systemPrompt }];
+  if (Array.isArray(history)) {
+    for (const msg of history) {
+      messages.push({ role: msg.role, content: msg.content });
+    }
+  }
+  messages.push({ role: 'user', content: userPrompt });
 
   for (const model of models) {
     for (let i = 0; i < 3; i += 1) {
@@ -123,10 +138,7 @@ export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiK
           },
           body: JSON.stringify({
             model,
-            messages: [
-              { role: 'system', content: systemPrompt },
-              { role: 'user', content: userPrompt },
-            ],
+            messages,
             temperature: 0.7,
             stream: true,
           }),
