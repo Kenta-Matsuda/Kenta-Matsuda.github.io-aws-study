@@ -8,12 +8,12 @@ export const DEFAULT_EXAM_ID = 'clf-c02';
 // The app will try these in order when calling the API.
 export const GEMINI_MODEL_CANDIDATES = [
 	// Prefer latest preview first (Google may change availability over time)
-	'gemini-2.5-flash',
+	'gemini-3.1-flash-lite-preview',
 
 	// Fallbacks
+	'gemini-2.5-flash',
 	'gemini-2.5-pro',
     'gemini-3-flash-preview',
-    'gemini-3-pro-preview',
     'gemini-3.1-pro-preview',
 ];
 
