@@ -28,7 +28,13 @@ import {
   getSessionSummary,
   buildQuizSystemPrompt,
   buildQuizUserPrompt,
+  buildSpeedQuizSystemPrompt,
+  buildMockQuizSystemPrompt,
+  buildGeneralQuizUserPrompt,
+  assignDomainTargets,
+  getExamLevel,
   QUIZ_MODE_CONFIG,
+  EXAM_MOCK_CONFIG,
   isSessionComplete,
   formatTime,
 } from './quiz.js';
@@ -178,6 +184,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       taskTitle: req.taskTitle,
       taskContext: req.taskContext,
       session: quizSession,
+      isDashboardQuiz: req.isDashboardQuiz,
     });
     if (ok && quizSession) {
       updateQuizProgress();
@@ -202,6 +209,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // For pre-generated modes, show next cached question
     if (quizSession.preGenerate && quizSession.questions[quizSession.currentIndex]) {
+      // Resume timer if paused (and not expired)
+      if (quizSession.timeLimitSec > 0 && !quizTimerExpired) {
+        resumeQuizTimer();
+      }
       renderInteractiveQuiz({ els, quiz: quizSession.questions[quizSession.currentIndex] });
       updateQuizProgress();
       return;
@@ -212,7 +223,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
 
   // --- Quiz Mode Selection ---
-  let selectedQuizMode = 'single';
+  let selectedQuizMode = 'quick5';
 
   // Mode card selection
   els.quizModeCards?.addEventListener('click', (e) => {
@@ -220,7 +231,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (!card) return;
     els.quizModeCards.querySelectorAll('.quiz-mode-card').forEach(c => c.classList.remove('selected'));
     card.classList.add('selected');
-    selectedQuizMode = card.dataset.quizMode || 'single';
+    selectedQuizMode = card.dataset.quizMode || 'quick5';
   });
 
   // Start button
@@ -244,23 +255,44 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
   });
 
+  // --- Dashboard Quiz Button ---
+  els.dashboardQuizBtn?.addEventListener('click', () => {
+    const exam = getExamById(state.examId);
+    lastAiRequest = {
+      type: 'quiz',
+      examId: state.examId,
+      taskId: '',
+      taskTitle: `${exam.code} 全ドメイン横断`,
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+    reflectAiVoteUi();
+    if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`;
+    openModal(els.quizModeModal);
+  });
+
   // --- Timer ---
   let quizTimerInterval = null;
   let quizTimerRemaining = 0;
+  let quizTimerPaused = false;
+  let quizTimerExpired = false;
 
   function startQuizTimer(totalSec) {
     quizTimerRemaining = totalSec;
+    quizTimerPaused = false;
+    quizTimerExpired = false;
     if (els.quizTimerDisplay) els.quizTimerDisplay.classList.remove('hidden');
     if (els.quizTimerValue) {
       els.quizTimerValue.textContent = formatTime(quizTimerRemaining);
-      els.quizTimerValue.classList.remove('quiz-timer-warning');
+      els.quizTimerValue.classList.remove('quiz-timer-warning', 'quiz-timer-overtime');
     }
 
     quizTimerInterval = setInterval(() => {
+      if (quizTimerPaused) return;
       quizTimerRemaining -= 1;
       if (els.quizTimerValue) {
         els.quizTimerValue.textContent = formatTime(quizTimerRemaining);
-        if (quizTimerRemaining <= 60) {
+        if (quizTimerRemaining <= 60 && quizTimerRemaining > 0) {
           els.quizTimerValue.classList.add('quiz-timer-warning');
         }
       }
@@ -269,6 +301,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         onQuizTimeUp();
       }
     }, 1000);
+  }
+
+  function pauseQuizTimer() {
+    quizTimerPaused = true;
+  }
+
+  function resumeQuizTimer() {
+    quizTimerPaused = false;
   }
 
   function stopQuizTimer() {
@@ -280,24 +320,20 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   function onQuizTimeUp() {
     if (!quizSession) return;
-    // Mark remaining questions as unanswered
-    const config = QUIZ_MODE_CONFIG[quizSession.mode] || QUIZ_MODE_CONFIG.single;
-    while (quizSession.currentIndex < config.questionCount) {
-      if (quizSession.answers[quizSession.currentIndex] === undefined) {
-        quizSession.answers[quizSession.currentIndex] = -1;
-        quizSession.combo = 0;
-      }
-      quizSession.currentIndex += 1;
+    // Overtime mode: don't auto-end, let user continue
+    quizTimerExpired = true;
+    if (els.quizTimerValue) {
+      els.quizTimerValue.textContent = '0:00';
+      els.quizTimerValue.classList.remove('quiz-timer-warning');
+      els.quizTimerValue.classList.add('quiz-timer-overtime');
     }
-    quizSession.finishedAt = Date.now();
-    showQuizSummary({ els, session: quizSession });
   }
 
   // --- Progress ---
   function updateQuizProgress() {
     if (!quizSession) return;
     const config = QUIZ_MODE_CONFIG[quizSession.mode] || QUIZ_MODE_CONFIG.single;
-    const total = config.questionCount;
+    const total = quizSession.questionCount;
     const current = quizSession.currentIndex;
 
     if (els.quizSessionProgress) {
@@ -317,10 +353,13 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // --- Pre-generation ---
   async function preGenerateQuestions({ els, session, request, config }) {
     const exam = getExamById(request.examId);
-    const total = config.questionCount;
+    const total = session.questionCount;
 
     // Open AI modal and show pre-generation overlay
-    showAiModal(els, `${config.label}: ${request.taskTitle}`, false);
+    showAiModal(els, `${config.label}: ${request.taskTitle}`, true);
+    // Clear any previous content (e.g. old explanation)
+    if (els.modalContent) els.modalContent.innerHTML = '';
+    if (els.modalLoading) els.modalLoading.classList.add('hidden');
     resetQuizUi(els);
     if (els.quizArea) els.quizArea.classList.remove('hidden');
     if (els.quizPregenOverlay) els.quizPregenOverlay.classList.remove('hidden');
@@ -332,13 +371,26 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.quizQuestion) els.quizQuestion.classList.add('hidden');
     if (els.quizChoices) els.quizChoices.classList.add('hidden');
 
-    const systemPrompt = buildQuizSystemPrompt(exam.code, exam.shortLabel);
+    const systemPrompt = session.mode === 'speed'
+      ? buildSpeedQuizSystemPrompt(exam.code, exam.shortLabel)
+      : session.mode === 'mock'
+        ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(request.examId))
+        : buildQuizSystemPrompt(exam.code, exam.shortLabel);
+
+    // For dashboard quiz, distribute questions across domains by weight
+    const domainTargets = request.isDashboardQuiz
+      ? assignDomainTargets(exam.domains, total)
+      : [];
 
     const generated = [];
     for (let i = 0; i < total; i++) {
-      const prevQuestions = generated.map(q => q.question).join('\n');
-      const userPrompt = buildQuizUserPrompt(request.taskTitle, request.taskContext)
-        + (prevQuestions ? `\n\n【重要】以下の問題とは異なる問題を作成してください:\n${prevQuestions}` : '');
+      // Only include last 5 questions for dedup to avoid oversized prompts
+      const recentQuestions = generated.slice(-5).map(q => q.question).join('\n');
+      const targetDomain = domainTargets[i] || null;
+      const userPrompt = (request.isDashboardQuiz
+        ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
+        : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + (recentQuestions ? `\n\n【重要】以下の問題とは異なる問題を作成してください:\n${recentQuestions}` : '');
 
       let response = '';
       try {
@@ -391,9 +443,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Hide pre-gen overlay, show quiz
     if (els.quizPregenOverlay) els.quizPregenOverlay.classList.add('hidden');
 
+    // Browser notification
+    if (Notification.permission === 'granted') {
+      new Notification('問題の準備ができました！', { body: `${generated.length}問のクイズを開始できます`, icon: 'assets/og/favicon.ico' });
+    } else if (Notification.permission !== 'denied') {
+      Notification.requestPermission().then(p => {
+        if (p === 'granted') new Notification('問題の準備ができました！', { body: `${generated.length}問のクイズを開始できます`, icon: 'assets/og/favicon.ico' });
+      });
+    }
+
     // Start timer
-    if (config.timeLimitSec > 0) {
-      startQuizTimer(config.timeLimitSec);
+    if (session.timeLimitSec > 0) {
+      startQuizTimer(session.timeLimitSec);
     }
 
     // Show first question
@@ -413,7 +474,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const btn = e.target.closest('[data-close-modal="aiModal"]');
     if (!btn) return;
     stopQuizTimer();
+    quizTimerExpired = false;
     quizSession = null;
+  });
+
+  // Explanation review toggle in quiz summary
+  els.quizSumExplanationsToggle?.addEventListener('click', () => {
+    const list = els.quizSumExplanationsList;
+    const arrow = els.quizSumExplanationsArrow;
+    if (!list) return;
+    const isHidden = list.classList.contains('hidden');
+    list.classList.toggle('hidden', !isHidden);
+    if (arrow) arrow.style.transform = isHidden ? 'rotate(180deg)' : '';
   });
 
   // Quiz: choice button click (event delegation on quizChoices)
@@ -436,6 +508,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
     quizSession.questions[quizSession.currentIndex] = quiz;
     const result = recordAnswer(quizSession, answerIndex, XP_RULES.quiz);
+
+    // Pause timer during explanation display
+    if (quizSession.timeLimitSec > 0 && !quizTimerExpired) {
+      pauseQuizTimer();
+    }
 
     // Disable all choice buttons
     const btns = els.quizChoices.querySelectorAll('.quiz-choice-btn');
@@ -519,11 +596,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         els.quizProgressFill.style.width = `${(quizSession.currentIndex / quizSession.questionCount) * 100}%`;
       }
       if (els.quizSessionProgress) {
-        const config = QUIZ_MODE_CONFIG[quizSession.mode] || QUIZ_MODE_CONFIG.single;
-        const remaining = config.questionCount - quizSession.currentIndex;
+        const remaining = quizSession.questionCount - quizSession.currentIndex;
         els.quizSessionProgress.textContent = remaining > 0
-          ? `${quizSession.currentIndex} / ${config.questionCount}`
-          : `${config.questionCount} / ${config.questionCount}`;
+          ? `${quizSession.currentIndex} / ${quizSession.questionCount}`
+          : `${quizSession.questionCount} / ${quizSession.questionCount}`;
       }
     }
 
@@ -684,9 +760,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (action === 'quiz') {
       lastAiRequest = { type: 'quiz', examId, taskId: btn.dataset.taskId || '', taskTitle: btn.dataset.taskTitle || '', taskContext };
       reflectAiVoteUi();
-      // Show mode selection modal instead of running immediately
-      if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `📚 ${lastAiRequest.taskTitle}`;
-      openModal(els.quizModeModal);
+      // Task-level quiz: direct single-question generation (no mode modal)
+      quizSession = createQuizSession({ examId, mode: 'single' });
+      quizSession.startedAt = Date.now();
+      await runAiRequest(lastAiRequest);
       return;
     }
 
@@ -836,6 +913,18 @@ function getElements() {
     quizSumCombo: document.getElementById('quizSumCombo'),
     quizSumTime: document.getElementById('quizSumTime'),
     quizSumTimeValue: document.getElementById('quizSumTimeValue'),
+    quizSumExplanations: document.getElementById('quizSumExplanations'),
+    quizSumExplanationsToggle: document.getElementById('quizSumExplanationsToggle'),
+    quizSumExplanationsArrow: document.getElementById('quizSumExplanationsArrow'),
+    quizSumExplanationsList: document.getElementById('quizSumExplanationsList'),
+
+    // Dashboard carousel
+    dashboardCarousel: document.getElementById('dashboardCarousel'),
+    carouselTrack: document.getElementById('carouselTrack'),
+    carouselDots: document.getElementById('carouselDots'),
+    carouselPrev: document.getElementById('carouselPrev'),
+    carouselNext: document.getElementById('carouselNext'),
+    dashboardQuizBtn: document.getElementById('dashboardQuizBtn'),
 
     // Streak
     streakCount: document.getElementById('streakCount'),
@@ -1189,6 +1278,85 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Streak display
   renderStreakDisplay(els);
+
+  // Request notification permission early
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
+  // Initialize carousel (only once)
+  initDashboardCarousel(els);
+}
+
+let carouselInitialized = false;
+
+function initDashboardCarousel(els) {
+  if (carouselInitialized) return;
+  const track = els.carouselTrack;
+  const dotsContainer = els.carouselDots;
+  const prevBtn = els.carouselPrev;
+  const nextBtn = els.carouselNext;
+  if (!track || !dotsContainer) return;
+
+  const slides = track.querySelectorAll('.dashboard-carousel-slide');
+  if (slides.length === 0) return;
+
+  carouselInitialized = true;
+  let currentIndex = 0;
+
+  // Determine visible slides based on viewport
+  function getVisibleCount() {
+    const w = window.innerWidth;
+    if (w >= 768) return 2;
+    return 1;
+  }
+
+  function getMaxIndex() {
+    return Math.max(0, slides.length - getVisibleCount());
+  }
+
+  function update() {
+    const visibleCount = getVisibleCount();
+    const pct = (100 / visibleCount) * currentIndex;
+    track.style.transform = `translateX(-${pct}%)`;
+
+    // Update dots
+    const maxIdx = getMaxIndex();
+    dotsContainer.innerHTML = '';
+    for (let i = 0; i <= maxIdx; i++) {
+      const dot = document.createElement('button');
+      dot.className = 'dashboard-carousel-dot' + (i === currentIndex ? ' active' : '');
+      dot.setAttribute('aria-label', `スライド ${i + 1}`);
+      dot.addEventListener('click', () => { currentIndex = i; update(); resetAutoSlide(); });
+      dotsContainer.appendChild(dot);
+    }
+
+    // Show/hide nav buttons
+    if (prevBtn) prevBtn.style.display = currentIndex <= 0 ? 'none' : '';
+    if (nextBtn) nextBtn.style.display = currentIndex >= maxIdx ? 'none' : '';
+  }
+
+  prevBtn?.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; update(); resetAutoSlide(); } });
+  nextBtn?.addEventListener('click', () => { if (currentIndex < getMaxIndex()) { currentIndex++; update(); resetAutoSlide(); } });
+
+  // Auto-slide every 5 seconds
+  let autoSlideTimer = setInterval(advance, 5000);
+  function advance() {
+    currentIndex = currentIndex < getMaxIndex() ? currentIndex + 1 : 0;
+    update();
+  }
+  function resetAutoSlide() {
+    clearInterval(autoSlideTimer);
+    autoSlideTimer = setInterval(advance, 5000);
+  }
+
+  // Re-calculate on resize
+  window.addEventListener('resize', () => {
+    if (currentIndex > getMaxIndex()) currentIndex = getMaxIndex();
+    update();
+  });
+
+  update();
 }
 
 function renderStreakDisplay(els) {
@@ -2348,14 +2516,14 @@ async function explainTerm({ els, exam, term, taskContext }) {
   return isSuccessfulAiResponse(response);
 }
 
-async function generateQuiz({ els, exam, taskTitle, taskContext, session }) {
+async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
   }
 
   const config = session ? QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single : null;
-  const modalTitle = config && config.questionCount > 1
+  const modalTitle = config && session && session.questionCount > 1
     ? `${config.label}: ${taskTitle}`
     : `模擬問題: ${taskTitle}`;
 
@@ -2364,8 +2532,12 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session }) {
   // Hide quiz-specific UI while loading
   resetQuizUi(els);
 
-  const systemPrompt = buildQuizSystemPrompt(exam.code, exam.shortLabel);
-  const userPrompt = buildQuizUserPrompt(taskTitle, taskContext);
+  const systemPrompt = (session && session.mode === 'mock')
+    ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(session.examId))
+    : buildQuizSystemPrompt(exam.code, exam.shortLabel);
+  const userPrompt = isDashboardQuiz
+    ? buildGeneralQuizUserPrompt(exam.code, null)
+    : buildQuizUserPrompt(taskTitle, taskContext);
 
   let response = '';
   let fullText = '';
@@ -2455,6 +2627,37 @@ function showQuizSummary({ els, session }) {
   }
 
   if (els.quizSummary) els.quizSummary.classList.remove('hidden');
+
+  // Explanation review: render all Q/A pairs
+  if (els.quizSumExplanations && session.questions.length > 1) {
+    els.quizSumExplanations.classList.remove('hidden');
+    if (els.quizSumExplanationsList) {
+      els.quizSumExplanationsList.innerHTML = session.questions.map((q, i) => {
+        if (!q) return '';
+        const userAnswer = session.answers[i];
+        const isCorrect = userAnswer === q.correctIndex;
+        const icon = userAnswer === -1 ? '⏭️' : isCorrect ? '✅' : '❌';
+        const userLetter = userAnswer >= 0 ? indexToLetter(userAnswer) : '未回答';
+        const correctLetter = indexToLetter(q.correctIndex);
+        return `
+          <div class="rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'} p-3">
+            <div class="flex items-start gap-2 mb-2">
+              <span class="text-sm">${icon}</span>
+              <div class="flex-1 min-w-0">
+                <div class="text-xs font-bold text-gray-500 mb-1">Q${i + 1}</div>
+                <div class="text-sm text-gray-800 font-medium">${escapeHtml(q.question)}</div>
+              </div>
+            </div>
+            <div class="text-xs text-gray-600 ml-6 mb-1">
+              あなたの回答: <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${userLetter}</span>
+              ${!isCorrect ? ` / 正解: <span class="font-bold text-green-700">${correctLetter}</span>` : ''}
+            </div>
+            ${q.explanation ? `<div class="text-xs text-gray-700 ml-6 mt-2 p-2 bg-white bg-opacity-60 rounded">${escapeHtml(q.explanation)}</div>` : ''}
+          </div>
+        `.trim();
+      }).join('');
+    }
+  }
 }
 
 function resetQuizUi(els) {
@@ -2475,6 +2678,11 @@ function resetQuizUi(els) {
   if (els.quizSumTime) els.quizSumTime.classList.add('hidden');
   if (els.quizModeLabel) els.quizModeLabel.textContent = '';
   if (els.quizSessionProgress) els.quizSessionProgress.textContent = '';
+
+  // Reset explanation review
+  if (els.quizSumExplanations) els.quizSumExplanations.classList.add('hidden');
+  if (els.quizSumExplanationsList) els.quizSumExplanationsList.innerHTML = '';
+  if (els.quizSumExplanationsArrow) els.quizSumExplanationsArrow.style.transform = '';
 }
 
 function renderInteractiveQuiz({ els, quiz }) {

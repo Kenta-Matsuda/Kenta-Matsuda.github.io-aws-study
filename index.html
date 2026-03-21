@@ -243,6 +243,77 @@
             background: #eef2ff;
         }
 
+        /* ── Dashboard Carousel ── */
+        .dashboard-carousel {
+            position: relative;
+            overflow: hidden;
+            padding: 0 6px;
+        }
+        .dashboard-carousel-track {
+            display: flex;
+            transition: transform 0.35s ease;
+        }
+        .dashboard-carousel-slide {
+            min-width: 100%;
+            box-sizing: border-box;
+            padding: 0 6px;
+        }
+        .dashboard-carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .dashboard-carousel-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #d1d5db;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: background 0.2s;
+        }
+        .dashboard-carousel-dot.active {
+            background: #6366f1;
+        }
+        .dashboard-carousel-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #e5e7eb;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 13px;
+            color: #6b7280;
+            z-index: 5;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: background 0.2s;
+        }
+        .dashboard-carousel-nav:hover { background: #f3f4f6; }
+        .dashboard-carousel-prev { left: 2px; }
+        .dashboard-carousel-next { right: 2px; }
+        @media (min-width: 768px) {
+            .dashboard-carousel-slide { min-width: 50%; }
+        }
+
+        /* ── Quiz Timer Overtime ── */
+        .quiz-timer-overtime {
+            color: #dc2626 !important;
+            font-weight: 800;
+        }
+        .quiz-timer-overtime::after {
+            content: ' 延長中';
+            font-size: 0.65em;
+            font-weight: 600;
+        }
+
         /* ── Quiz Timer ── */
         .quiz-timer {
             font-variant-numeric: tabular-nums;
@@ -488,51 +559,72 @@
                     </div>
                 </div>
 
-                <div class="mt-5 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">これまでの累積 XP</div>
-                        <div class="mt-1 flex items-end gap-2">
-                            <div id="xpTotal" class="text-3xl font-extrabold text-gray-900 font-mono">0</div>
-                            <div class="pb-1 text-sm font-bold text-gray-500 font-mono">(直近7日間 <span id="xpWeek">+0</span>)</div>
-                        </div>
-                        <div class="mt-3 text-[11px] font-bold text-gray-500 uppercase tracking-wide">直近の獲得</div>
-                        <div id="xpRecentActions" class="mt-1 space-y-1 text-xs text-gray-600"></div>
-                    </div>
-
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">学習ストリーク</div>
-                        <div class="mt-1 flex items-center gap-2">
-                            <span class="streak-flame text-2xl">🔥</span>
-                            <span id="streakCount" class="text-3xl font-extrabold text-gray-900 font-mono">0</span>
-                            <span class="text-sm font-bold text-gray-500">日連続</span>
-                        </div>
-                        <div class="mt-3">
-                            <div id="streakWeekDots" class="flex gap-1.5 mt-1">
-                                <!-- 7 dots for weekly streak visualization, filled by JS -->
-                            </div>
-                            <p id="streakMessage" class="text-xs text-gray-500 mt-2">今日も学習してストリークを伸ばそう！</p>
-                        </div>
-                    </div>
-
-                    <div class="rounded-lg border border-gray-200 bg-gray-50 p-4">
-                        <div class="flex items-center gap-2">
-                            <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">称号</div>
-                            <div id="xpTitleBadge" class="text-[11px] font-bold px-2 py-0.5 rounded border bg-white text-gray-800 border-gray-200">-</div>
-                        </div>
-                        <div class="mt-3 space-y-1 text-xs text-gray-600">
-                            <div class="flex items-center gap-2 min-w-0">
-                                <span class="whitespace-nowrap">次の称号：</span>
-                                <span id="xpNextTitle" class="min-w-0 truncate font-semibold text-gray-800">-</span>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="whitespace-nowrap">残り：</span>
-                                <span id="xpRemaining" class="whitespace-nowrap">0 XP</span>
+                <div id="dashboardCarousel" class="mt-6 dashboard-carousel">
+                    <button class="dashboard-carousel-nav dashboard-carousel-prev" id="carouselPrev" aria-label="前へ"><i class="fas fa-chevron-left"></i></button>
+                    <button class="dashboard-carousel-nav dashboard-carousel-next" id="carouselNext" aria-label="次へ"><i class="fas fa-chevron-right"></i></button>
+                    <div class="dashboard-carousel-track" id="carouselTrack">
+                        <!-- Slide 1: Quiz Challenge -->
+                        <div class="dashboard-carousel-slide">
+                            <div class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-5 md:p-6 h-full flex flex-col items-center justify-center text-center">
+                                <span class="text-4xl mb-3">🎯</span>
+                                <div class="text-base font-bold text-gray-800 mb-1">クイズチャレンジ</div>
+                                <p class="text-sm text-gray-500 mb-4">全ドメイン横断で実力を試そう</p>
+                                <button id="dashboardQuizBtn" type="button" class="sparkle-btn px-6 py-3 text-white rounded-lg text-sm font-bold transition shadow-md hover:shadow-lg flex items-center gap-2">
+                                    <i class="fas fa-gamepad"></i> チャレンジ開始
+                                </button>
                             </div>
                         </div>
-                        <div class="mt-2 h-2 rounded bg-gray-200 overflow-hidden">
-                            <div id="xpProgressBar" class="h-2 bg-orange-500" style="width: 0%"></div>
+                        <!-- Slide 2: XP -->
+                        <div class="dashboard-carousel-slide">
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
+                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">これまでの累積 XP</div>
+                                <div class="mt-2 flex items-end gap-3">
+                                    <div id="xpTotal" class="text-4xl font-extrabold text-gray-900 font-mono">0</div>
+                                    <div class="pb-1 text-sm font-bold text-gray-500 font-mono">(直近7日間 <span id="xpWeek">+0</span>)</div>
+                                </div>
+                                <div class="mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wide">直近の獲得</div>
+                                <div id="xpRecentActions" class="mt-2 space-y-1.5 text-xs text-gray-600"></div>
+                            </div>
+                        </div>
+                        <!-- Slide 3: Streak -->
+                        <div class="dashboard-carousel-slide">
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
+                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">学習ストリーク</div>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="streak-flame text-3xl">🔥</span>
+                                    <span id="streakCount" class="text-4xl font-extrabold text-gray-900 font-mono">0</span>
+                                    <span class="text-sm font-bold text-gray-500">日連続</span>
+                                </div>
+                                <div class="mt-4">
+                                    <div id="streakWeekDots" class="flex gap-2 mt-1"></div>
+                                    <p id="streakMessage" class="text-sm text-gray-500 mt-3">今日も学習してストリークを伸ばそう！</p>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 4: Title -->
+                        <div class="dashboard-carousel-slide">
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
+                                <div class="flex items-center gap-2">
+                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">称号</div>
+                                    <div id="xpTitleBadge" class="text-xs font-bold px-2.5 py-1 rounded-md border bg-white text-gray-800 border-gray-200">-</div>
+                                </div>
+                                <div class="mt-4 space-y-2 text-sm text-gray-600">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        <span class="whitespace-nowrap">次の称号：</span>
+                                        <span id="xpNextTitle" class="min-w-0 truncate font-semibold text-gray-800">-</span>
+                                    </div>
+                                    <div class="flex items-center gap-2">
+                                        <span class="whitespace-nowrap">残り：</span>
+                                        <span id="xpRemaining" class="whitespace-nowrap font-semibold">0 XP</span>
+                                    </div>
+                                </div>
+                                <div class="mt-4 h-2.5 rounded-full bg-gray-200 overflow-hidden">
+                                    <div id="xpProgressBar" class="h-2.5 bg-orange-500 rounded-full" style="width: 0%"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
+                    <div class="dashboard-carousel-dots" id="carouselDots"></div>
                 </div>
 
                 <div id="appBootError" class="hidden mt-4 p-3 bg-red-50 text-red-800 text-xs rounded border border-red-200">
@@ -574,15 +666,8 @@
             </div>
             <div class="p-5">
                 <p id="quizModeTaskLabel" class="text-sm text-gray-500 mb-4 truncate"></p>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="quizModeCards">
-                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4 selected" data-quiz-mode="single">
-                        <div class="flex items-center gap-2 mb-2">
-                            <span class="text-xl">🎯</span>
-                            <span class="font-bold text-gray-800 text-sm">1問チャレンジ</span>
-                        </div>
-                        <p class="text-xs text-gray-500">1問だけサクッと挑戦。スキマ時間に最適。</p>
-                    </div>
-                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="quick5">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="quizModeCards">
+                    <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4 selected" data-quiz-mode="quick5">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">⚡</span>
                             <span class="font-bold text-gray-800 text-sm">5問連続</span>
@@ -592,9 +677,9 @@
                     <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="speed">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">⏱️</span>
-                            <span class="font-bold text-gray-800 text-sm">スピードチャレンジ</span>
+                            <span class="font-bold text-gray-800 text-sm">スピードラン</span>
                         </div>
-                        <p class="text-xs text-gray-500">10問を制限時間内に。事前に全問題を生成してからスタート！</p>
+                        <p class="text-xs text-gray-500">10問を1問1答形式で。30秒で解ける短問！</p>
                         <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">⏰ 1問あたり30秒</div>
                     </div>
                     <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="mock">
@@ -602,8 +687,8 @@
                             <span class="text-xl">📝</span>
                             <span class="font-bold text-gray-800 text-sm">本番模擬試験</span>
                         </div>
-                        <p class="text-xs text-gray-500">15問の本番形式。事前に全問題を生成してからスタート！</p>
-                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">⏰ 合計25分</div>
+                        <p class="text-xs text-gray-500">本番同等の問題数・制限時間・難易度。AWS公式ドキュメントの引用付き解説。</p>
+                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">📋 試験別の本番形式</div>
                     </div>
                 </div>
             </div>
@@ -733,6 +818,14 @@
                                 <span class="text-xs font-bold text-gray-600">所要時間</span>
                             </div>
                             <span class="font-mono font-bold text-gray-800 text-sm" id="quizSumTimeValue">0:00</span>
+                        </div>
+                        <!-- Explanation Review -->
+                        <div id="quizSumExplanations" class="hidden">
+                            <button id="quizSumExplanationsToggle" type="button" class="w-full flex items-center justify-between bg-indigo-50 hover:bg-indigo-100 rounded-lg p-3 mb-2 transition-colors">
+                                <span class="text-sm font-bold text-indigo-700 flex items-center gap-2"><i class="fas fa-book-open"></i> 解説一覧</span>
+                                <i class="fas fa-chevron-down text-indigo-400 text-xs transition-transform" id="quizSumExplanationsArrow"></i>
+                            </button>
+                            <div id="quizSumExplanationsList" class="hidden space-y-3 max-h-96 overflow-y-auto"></div>
                         </div>
                     </div>
                 </div>
