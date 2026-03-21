@@ -13,9 +13,26 @@ import {
   setUserName,
   addXp,
   getXpSummary,
+  getStreakInfo,
+  addQuizResult,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
+import {
+  parseQuizResponse,
+  indexToLetter,
+  getComboMultiplier,
+  getComboLabel,
+  createQuizSession,
+  recordAnswer,
+  getSessionSummary,
+  buildQuizSystemPrompt,
+  buildQuizUserPrompt,
+  QUIZ_MODE_CONFIG,
+  isSessionComplete,
+  formatTime,
+} from './quiz.js';
+import { initChat, resetChat } from './chat.js';
 
 let chartInstance = null;
 
@@ -128,6 +145,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     els.aiRetryBtn.classList.toggle('cursor-not-allowed', els.aiRetryBtn.disabled);
   }
 
+  /** Active quiz session (null when not in quiz mode) */
+  let quizSession = null;
+
+  /** Helper to get/set current parsed quiz (shared between initApp scope and module-level renderInteractiveQuiz) */
+  function getCurrentParsedQuiz() {
+    return window.__currentParsedQuiz || null;
+  }
+  function setCurrentParsedQuiz(q) {
+    window.__currentParsedQuiz = q;
+  }
+
   async function runAiRequest(req) {
     const exam = getExamById(req.examId);
     updateAiRetryButton({ visible: true, disabled: true });
@@ -142,26 +170,393 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
       return;
     }
+    // Quiz: generate but do NOT award XP yet — wait for user answer
     const ok = await generateQuiz({
       els,
       exam,
       examId: req.examId,
       taskTitle: req.taskTitle,
       taskContext: req.taskContext,
+      session: quizSession,
     });
-    if (ok) {
-      const result = addXp({ amount: XP_RULES.quiz, reason: 'quiz' });
-      if (result?.unlocked?.length) {
-        showMilestoneToast({ els, unlocked: result.unlocked });
-      }
-      renderXpDashboard({ els, exam: getExamById(req.examId), state });
+    if (ok && quizSession) {
+      updateQuizProgress();
     }
+    // XP is awarded in handleQuizAnswer after user picks a choice
   }
 
   els.aiRetryBtn?.addEventListener('click', async () => {
     if (!lastAiRequest) return;
     await runAiRequest(lastAiRequest);
   });
+
+  // Quiz: "Next question" button
+  els.quizNextBtn?.addEventListener('click', async () => {
+    if (!lastAiRequest || lastAiRequest.type !== 'quiz') return;
+    if (!quizSession) return;
+
+    if (isSessionComplete(quizSession)) {
+      showQuizSummary({ els, session: quizSession });
+      return;
+    }
+
+    // For pre-generated modes, show next cached question
+    if (quizSession.preGenerate && quizSession.questions[quizSession.currentIndex]) {
+      renderInteractiveQuiz({ els, quiz: quizSession.questions[quizSession.currentIndex] });
+      updateQuizProgress();
+      return;
+    }
+
+    // Otherwise generate next question
+    await runAiRequest(lastAiRequest);
+  });
+
+  // --- Quiz Mode Selection ---
+  let selectedQuizMode = 'single';
+
+  // Mode card selection
+  els.quizModeCards?.addEventListener('click', (e) => {
+    const card = e.target.closest('.quiz-mode-card');
+    if (!card) return;
+    els.quizModeCards.querySelectorAll('.quiz-mode-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    selectedQuizMode = card.dataset.quizMode || 'single';
+  });
+
+  // Start button
+  els.quizModeStartBtn?.addEventListener('click', async () => {
+    if (!lastAiRequest || lastAiRequest.type !== 'quiz') return;
+    closeModal(els.quizModeModal);
+
+    const mode = selectedQuizMode;
+    const config = QUIZ_MODE_CONFIG[mode] || QUIZ_MODE_CONFIG.single;
+
+    // Create session
+    quizSession = createQuizSession({ examId: lastAiRequest.examId, mode });
+    quizSession.startedAt = Date.now();
+
+    if (config.preGenerate) {
+      // Pre-generate all questions, then start
+      await preGenerateQuestions({ els, session: quizSession, request: lastAiRequest, config });
+    } else {
+      // Generate first question immediately
+      await runAiRequest(lastAiRequest);
+    }
+  });
+
+  // --- Timer ---
+  let quizTimerInterval = null;
+  let quizTimerRemaining = 0;
+
+  function startQuizTimer(totalSec) {
+    quizTimerRemaining = totalSec;
+    if (els.quizTimerDisplay) els.quizTimerDisplay.classList.remove('hidden');
+    if (els.quizTimerValue) {
+      els.quizTimerValue.textContent = formatTime(quizTimerRemaining);
+      els.quizTimerValue.classList.remove('quiz-timer-warning');
+    }
+
+    quizTimerInterval = setInterval(() => {
+      quizTimerRemaining -= 1;
+      if (els.quizTimerValue) {
+        els.quizTimerValue.textContent = formatTime(quizTimerRemaining);
+        if (quizTimerRemaining <= 60) {
+          els.quizTimerValue.classList.add('quiz-timer-warning');
+        }
+      }
+      if (quizTimerRemaining <= 0) {
+        stopQuizTimer();
+        onQuizTimeUp();
+      }
+    }, 1000);
+  }
+
+  function stopQuizTimer() {
+    if (quizTimerInterval) {
+      clearInterval(quizTimerInterval);
+      quizTimerInterval = null;
+    }
+  }
+
+  function onQuizTimeUp() {
+    if (!quizSession) return;
+    // Mark remaining questions as unanswered
+    const config = QUIZ_MODE_CONFIG[quizSession.mode] || QUIZ_MODE_CONFIG.single;
+    while (quizSession.currentIndex < config.questionCount) {
+      if (quizSession.answers[quizSession.currentIndex] === undefined) {
+        quizSession.answers[quizSession.currentIndex] = -1;
+        quizSession.combo = 0;
+      }
+      quizSession.currentIndex += 1;
+    }
+    quizSession.finishedAt = Date.now();
+    showQuizSummary({ els, session: quizSession });
+  }
+
+  // --- Progress ---
+  function updateQuizProgress() {
+    if (!quizSession) return;
+    const config = QUIZ_MODE_CONFIG[quizSession.mode] || QUIZ_MODE_CONFIG.single;
+    const total = config.questionCount;
+    const current = quizSession.currentIndex;
+
+    if (els.quizSessionProgress) {
+      els.quizSessionProgress.textContent = `${current + 1} / ${total}`;
+    }
+    if (els.quizModeLabel) {
+      els.quizModeLabel.textContent = config.label;
+    }
+    if (total > 1) {
+      if (els.quizProgressBar) els.quizProgressBar.classList.remove('hidden');
+      if (els.quizProgressFill) {
+        els.quizProgressFill.style.width = `${((current) / total) * 100}%`;
+      }
+    }
+  }
+
+  // --- Pre-generation ---
+  async function preGenerateQuestions({ els, session, request, config }) {
+    const exam = getExamById(request.examId);
+    const total = config.questionCount;
+
+    // Open AI modal and show pre-generation overlay
+    showAiModal(els, `${config.label}: ${request.taskTitle}`, false);
+    resetQuizUi(els);
+    if (els.quizArea) els.quizArea.classList.remove('hidden');
+    if (els.quizPregenOverlay) els.quizPregenOverlay.classList.remove('hidden');
+    if (els.quizPregenStatus) els.quizPregenStatus.textContent = `0 / ${total} 問`;
+    if (els.quizPregenFill) els.quizPregenFill.style.width = '0%';
+
+    // Hide other quiz elements during pre-gen
+    if (els.quizComboBar) els.quizComboBar.classList.add('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.add('hidden');
+    if (els.quizChoices) els.quizChoices.classList.add('hidden');
+
+    const systemPrompt = buildQuizSystemPrompt(exam.code, exam.shortLabel);
+
+    const generated = [];
+    for (let i = 0; i < total; i++) {
+      const prevQuestions = generated.map(q => q.question).join('\n');
+      const userPrompt = buildQuizUserPrompt(request.taskTitle, request.taskContext)
+        + (prevQuestions ? `\n\n【重要】以下の問題とは異なる問題を作成してください:\n${prevQuestions}` : '');
+
+      let response = '';
+      try {
+        response = await callAiStream({
+          userPrompt,
+          systemPrompt,
+          onRequireApiKey: () => openSettingsModal(els),
+          onTextDelta: () => {},  // silent during pre-gen
+        });
+
+        if (String(response || '').includes('ストリーミングに対応していない環境')) {
+          response = await callAi({
+            userPrompt,
+            systemPrompt,
+            onRequireApiKey: () => openSettingsModal(els),
+          });
+        }
+      } catch (err) {
+        // retry once on error
+        try {
+          response = await callAi({
+            userPrompt,
+            systemPrompt,
+            onRequireApiKey: () => openSettingsModal(els),
+          });
+        } catch {
+          continue;
+        }
+      }
+
+      const parsed = parseQuizResponse(response);
+      if (parsed) {
+        generated.push(parsed);
+        session.questions[generated.length - 1] = parsed;
+      }
+
+      // Update progress
+      const done = generated.length;
+      if (els.quizPregenStatus) els.quizPregenStatus.textContent = `${done} / ${total} 問`;
+      if (els.quizPregenFill) els.quizPregenFill.style.width = `${(done / total) * 100}%`;
+    }
+
+    // If we couldn't generate enough, adjust session
+    if (generated.length === 0) {
+      updateAiModalContent(els, 'エラー: 問題を生成できませんでした。もう一度お試しください。');
+      return;
+    }
+    session.questionCount = generated.length;
+
+    // Hide pre-gen overlay, show quiz
+    if (els.quizPregenOverlay) els.quizPregenOverlay.classList.add('hidden');
+
+    // Start timer
+    if (config.timeLimitSec > 0) {
+      startQuizTimer(config.timeLimitSec);
+    }
+
+    // Show first question
+    session.startedAt = Date.now();
+    renderInteractiveQuiz({ els, quiz: session.questions[0] });
+    updateQuizProgress();
+
+    // Show combo bar and question/choices areas
+    const comboBar = els.quizArea?.querySelector('#quizComboBar');
+    if (comboBar) comboBar.classList.remove('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+    if (els.quizChoices) els.quizChoices.classList.remove('hidden');
+  }
+
+  // Clean up timer when AI modal is closed
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-close-modal="aiModal"]');
+    if (!btn) return;
+    stopQuizTimer();
+    quizSession = null;
+  });
+
+  // Quiz: choice button click (event delegation on quizChoices)
+  els.quizChoices?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.quiz-choice-btn');
+    if (!btn || btn.disabled) return;
+    const answerIndex = parseInt(btn.dataset.choiceIndex, 10);
+    if (Number.isNaN(answerIndex)) return;
+    handleQuizAnswer({ els, answerIndex, exam: getExamById(state.examId), state });
+  });
+
+  function handleQuizAnswer({ els, answerIndex, exam, state: appState }) {
+    const quiz = getCurrentParsedQuiz();
+    if (!quiz) return;
+    const isCorrect = answerIndex === quiz.correctIndex;
+
+    // Track in session
+    if (!quizSession) {
+      quizSession = createQuizSession({ examId: appState.examId });
+    }
+    quizSession.questions[quizSession.currentIndex] = quiz;
+    const result = recordAnswer(quizSession, answerIndex, XP_RULES.quiz);
+
+    // Disable all choice buttons
+    const btns = els.quizChoices.querySelectorAll('.quiz-choice-btn');
+    btns.forEach((btn) => {
+      btn.disabled = true;
+      const idx = parseInt(btn.dataset.choiceIndex, 10);
+      if (idx === quiz.correctIndex) {
+        btn.classList.add('quiz-choice-correct');
+      }
+      if (idx === answerIndex && !isCorrect) {
+        btn.classList.add('quiz-choice-incorrect');
+        btn.classList.add('quiz-anim-incorrect');
+      }
+      if (idx === answerIndex && isCorrect) {
+        btn.classList.add('quiz-anim-correct');
+      }
+    });
+
+    // Update combo display
+    if (result.combo >= 3) {
+      els.quizComboDisplay?.classList.remove('hidden');
+      if (els.quizComboCount) els.quizComboCount.textContent = String(result.combo);
+      if (els.quizComboMultiplier) els.quizComboMultiplier.textContent = `×${result.multiplier}`;
+    }
+
+    // Show result banner
+    els.quizResult?.classList.remove('hidden');
+    if (els.quizResultBanner) {
+      els.quizResultBanner.className = isCorrect
+        ? 'rounded-lg p-4 mb-3 bg-green-50 border border-green-200'
+        : 'rounded-lg p-4 mb-3 bg-red-50 border border-red-200';
+    }
+    if (els.quizResultIcon) els.quizResultIcon.textContent = isCorrect ? '✅' : '❌';
+    if (els.quizResultText) {
+      els.quizResultText.textContent = isCorrect
+        ? `正解！ ${getComboLabel(result.combo)}`
+        : `不正解 — 正解は ${indexToLetter(quiz.correctIndex)}`;
+      els.quizResultText.className = isCorrect
+        ? 'font-bold text-sm text-green-800'
+        : 'font-bold text-sm text-red-800';
+    }
+    if (els.quizResultXp) {
+      els.quizResultXp.textContent = `+${result.xpEarned} XP`;
+      els.quizResultXp.className = 'ml-auto text-xs font-mono font-bold ' + (isCorrect ? 'text-green-700' : 'text-red-600');
+    }
+
+    // Show explanation
+    if (els.quizExplanation && quiz.explanation) {
+      const { html, usedMarkdown } = renderMarkdownToSafeHtml(quiz.explanation);
+      if (usedMarkdown) {
+        els.quizExplanation.innerHTML = html;
+      } else {
+        els.quizExplanation.textContent = quiz.explanation;
+      }
+    }
+
+    // Award XP
+    const xpResult = addXp({ amount: result.xpEarned, reason: 'quiz' });
+    if (xpResult?.unlocked?.length) {
+      showMilestoneToast({ els, unlocked: xpResult.unlocked });
+    }
+
+    // Store quiz result
+    addQuizResult({
+      examId: appState.examId,
+      taskId: lastAiRequest?.taskId || '',
+      isCorrect,
+      xpEarned: result.xpEarned,
+      answeredAt: new Date().toISOString(),
+    });
+
+    renderXpDashboard({ els, exam, state: appState });
+
+    // Advance session index for next question
+    quizSession.currentIndex += 1;
+    setCurrentParsedQuiz(null);
+
+    // Update progress bar
+    if (quizSession.questionCount > 1) {
+      if (els.quizProgressFill) {
+        els.quizProgressFill.style.width = `${(quizSession.currentIndex / quizSession.questionCount) * 100}%`;
+      }
+      if (els.quizSessionProgress) {
+        const config = QUIZ_MODE_CONFIG[quizSession.mode] || QUIZ_MODE_CONFIG.single;
+        const remaining = config.questionCount - quizSession.currentIndex;
+        els.quizSessionProgress.textContent = remaining > 0
+          ? `${quizSession.currentIndex} / ${config.questionCount}`
+          : `${config.questionCount} / ${config.questionCount}`;
+      }
+    }
+
+    // Determine next action
+    const sessionDone = isSessionComplete(quizSession);
+
+    if (sessionDone) {
+      // Session complete — show summary after brief delay
+      quizSession.finishedAt = Date.now();
+      stopQuizTimer();
+      if (els.quizNextBtn) {
+        els.quizNextBtn.innerHTML = '<i class="fas fa-chart-bar"></i> 結果を見る';
+        els.quizNextBtn.classList.remove('hidden');
+      }
+      if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
+    } else if (quizSession.preGenerate) {
+      // Pre-generated mode (speed/mock): show "次の問題" button
+      if (els.quizNextBtn) {
+        els.quizNextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 次の問題';
+        els.quizNextBtn.classList.remove('hidden');
+      }
+      if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
+    } else {
+      // Sequential mode (single/quick5): show "次の問題" button
+      if (els.quizNextBtn) {
+        els.quizNextBtn.innerHTML = quizSession.mode === 'single'
+          ? '<i class="fas fa-redo"></i> もう1問'
+          : '<i class="fas fa-arrow-right"></i> 次の問題';
+        els.quizNextBtn.classList.remove('hidden');
+      }
+      if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
+    }
+  }
 
   els.aiVoteGoodBtn?.addEventListener('click', () => {
     voteAi('good');
@@ -195,6 +590,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   wireProfileHandlers({ els, state, getExamById });
   wireToastHandlers({ els });
 
+  // Initialize chat widget
+  initChat({
+    els,
+    getExamById,
+    getState: () => state,
+    openSettingsModal: () => openSettingsModal(els),
+  });
+
   // 初期表示
   setExam(defaultExamId);
 
@@ -214,6 +617,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     renderXpDashboard({ els, exam, state });
     renderTabs({ els, exam, state, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderContent({ els, exam, state });
+
+    // Reset chat on exam change & update badge
+    resetChat();
+    if (els.chatExamBadge) els.chatExamBadge.textContent = exam?.code || '';
   }
 
   function switchDomain(domainId) {
@@ -277,7 +684,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (action === 'quiz') {
       lastAiRequest = { type: 'quiz', examId, taskId: btn.dataset.taskId || '', taskTitle: btn.dataset.taskTitle || '', taskContext };
       reflectAiVoteUi();
-      await runAiRequest(lastAiRequest);
+      // Show mode selection modal instead of running immediately
+      if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `📚 ${lastAiRequest.taskTitle}`;
+      openModal(els.quizModeModal);
       return;
     }
 
@@ -383,6 +792,65 @@ function getElements() {
     aiProviderSwitch: document.getElementById('aiProviderSwitch'),
     geminiKeySection: document.getElementById('geminiKeySection'),
     openaiKeySection: document.getElementById('openaiKeySection'),
+
+    // Quiz interactive
+    quizArea: document.getElementById('quizArea'),
+    quizComboBar: document.getElementById('quizComboBar'),
+    quizSessionProgress: document.getElementById('quizSessionProgress'),
+    quizComboDisplay: document.getElementById('quizComboDisplay'),
+    quizComboCount: document.getElementById('quizComboCount'),
+    quizComboMultiplier: document.getElementById('quizComboMultiplier'),
+    quizQuestion: document.getElementById('quizQuestion'),
+    quizChoices: document.getElementById('quizChoices'),
+    quizResult: document.getElementById('quizResult'),
+    quizResultBanner: document.getElementById('quizResultBanner'),
+    quizResultIcon: document.getElementById('quizResultIcon'),
+    quizResultText: document.getElementById('quizResultText'),
+    quizResultXp: document.getElementById('quizResultXp'),
+    quizExplanation: document.getElementById('quizExplanation'),
+    quizNextBtn: document.getElementById('quizNextBtn'),
+
+    // Quiz mode modal
+    quizModeModal: document.getElementById('quizModeModal'),
+    quizModeCards: document.getElementById('quizModeCards'),
+    quizModeStartBtn: document.getElementById('quizModeStartBtn'),
+    quizModeTaskLabel: document.getElementById('quizModeTaskLabel'),
+
+    // Quiz timer / progress / pregen / summary
+    quizModeLabel: document.getElementById('quizModeLabel'),
+    quizTimerDisplay: document.getElementById('quizTimerDisplay'),
+    quizTimerValue: document.getElementById('quizTimerValue'),
+    quizProgressBar: document.getElementById('quizProgressBar'),
+    quizProgressFill: document.getElementById('quizProgressFill'),
+    quizPregenOverlay: document.getElementById('quizPregenOverlay'),
+    quizPregenStatus: document.getElementById('quizPregenStatus'),
+    quizPregenFill: document.getElementById('quizPregenFill'),
+    quizSummary: document.getElementById('quizSummary'),
+    quizSummaryEmoji: document.getElementById('quizSummaryEmoji'),
+    quizSummaryTitle: document.getElementById('quizSummaryTitle'),
+    quizSummarySubtitle: document.getElementById('quizSummarySubtitle'),
+    quizSumCorrect: document.getElementById('quizSumCorrect'),
+    quizSumTotal: document.getElementById('quizSumTotal'),
+    quizSumAccuracy: document.getElementById('quizSumAccuracy'),
+    quizSumXp: document.getElementById('quizSumXp'),
+    quizSumCombo: document.getElementById('quizSumCombo'),
+    quizSumTime: document.getElementById('quizSumTime'),
+    quizSumTimeValue: document.getElementById('quizSumTimeValue'),
+
+    // Streak
+    streakCount: document.getElementById('streakCount'),
+    streakWeekDots: document.getElementById('streakWeekDots'),
+    streakMessage: document.getElementById('streakMessage'),
+
+    // Chat
+    chatFab: document.getElementById('chatFab'),
+    chatPanel: document.getElementById('chatPanel'),
+    chatCloseBtn: document.getElementById('chatCloseBtn'),
+    chatMessages: document.getElementById('chatMessages'),
+    chatInput: document.getElementById('chatInput'),
+    chatSendBtn: document.getElementById('chatSendBtn'),
+    chatSuggestions: document.getElementById('chatSuggestions'),
+    chatExamBadge: document.getElementById('chatExamBadge'),
   };
 }
 
@@ -717,6 +1185,59 @@ function renderXpDashboard({ els, exam, state }) {
   if (els.xpProgressBar) {
     const pct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
     els.xpProgressBar.style.width = `${pct.toFixed(1)}%`;
+  }
+
+  // Streak display
+  renderStreakDisplay(els);
+}
+
+function renderStreakDisplay(els) {
+  const streak = getStreakInfo();
+  if (els.streakCount) {
+    els.streakCount.textContent = String(streak.current);
+  }
+  if (els.streakMessage) {
+    if (streak.hadActivityToday) {
+      els.streakMessage.textContent = streak.current >= 7
+        ? '素晴らしい！1週間連続学習達成 🎉'
+        : streak.current >= 3
+          ? `${streak.current}日連続！この調子で続けよう 💪`
+          : '今日もがんばってるね！';
+    } else {
+      els.streakMessage.textContent = streak.current > 0
+        ? '今日もアクセスしてストリークを守ろう！'
+        : '今日から連続学習をスタートしよう！';
+    }
+  }
+  if (els.streakWeekDots) {
+    // Render 7 dots: newest (today) on the right
+    const days = ['月', '火', '水', '木', '金', '土', '日'];
+    const today = new Date().getDay(); // 0=Sun
+    const dayLabels = [];
+    for (let i = 6; i >= 0; i--) {
+      const d = (today - i + 7) % 7;
+      dayLabels.push(days[d === 0 ? 6 : d - 1]);
+    }
+    // Get activity from getXpSummary's weekXp or reconstruct
+    // Simple approach: use the streak info + hadActivityToday
+    const xpSummary = getXpSummary();
+    const state = typeof window !== 'undefined' && window.__studyState ? window.__studyState : null;
+
+    els.streakWeekDots.innerHTML = dayLabels.map((label, i) => {
+      // For now, show today as active if hadActivityToday, and fill based on streak
+      const daysAgo = 6 - i;
+      const isActive = streak.hadActivityToday
+        ? daysAgo < streak.current || (daysAgo === 0)
+        : daysAgo > 0 && daysAgo <= streak.current;
+      return `
+        <div class="flex flex-col items-center gap-0.5">
+          <div class="w-5 h-5 rounded-full ${isActive ? 'bg-orange-400' : 'bg-gray-200'} flex items-center justify-center">
+            ${isActive ? '<span class="text-white text-[9px]">✓</span>' : ''}
+          </div>
+          <span class="text-[9px] text-gray-400">${label}</span>
+        </div>
+      `.trim();
+    }).join('');
   }
 }
 
@@ -1637,6 +2158,11 @@ function showAiModal(els, title, isLoading) {
   els.modalTitle.textContent = title;
   openModal(els.aiModal);
 
+  // Always reset quiz interactive area on new modal open
+  if (els.quizArea) els.quizArea.classList.add('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+
   if (isLoading) {
     els.modalLoading.classList.remove('hidden');
     els.modalContent.textContent = '';
@@ -1822,55 +2348,184 @@ async function explainTerm({ els, exam, term, taskContext }) {
   return isSuccessfulAiResponse(response);
 }
 
-async function generateQuiz({ els, exam, taskTitle, taskContext }) {
+async function generateQuiz({ els, exam, taskTitle, taskContext, session }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
   }
 
-  const providerLabel = getActiveProviderLabel();
-  showAiModal(els, `模擬問題作成: ${taskTitle}`, true);
+  const config = session ? QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single : null;
+  const modalTitle = config && config.questionCount > 1
+    ? `${config.label}: ${taskTitle}`
+    : `模擬問題: ${taskTitle}`;
 
-  const systemPrompt =
-    `あなたはAWS認定試験のエキスパートです。${exam.code}（${exam.shortLabel}）レベルの4択問題を1問作成してください。`;
+  showAiModal(els, modalTitle, true);
 
-  const contextPrompt = taskContext
-    ? `\n\n【タスク文脈】\n${taskContext}`
-    : '';
+  // Hide quiz-specific UI while loading
+  resetQuizUi(els);
 
-  const userPrompt = `タスク: 「${taskTitle}」に関連する、実践的なシナリオベースの選択問題を1問作成してください。
+  const systemPrompt = buildQuizSystemPrompt(exam.code, exam.shortLabel);
+  const userPrompt = buildQuizUserPrompt(taskTitle, taskContext);
 
-フォーマット:
-【問題文】
-[シナリオと質問]
+  let response = '';
+  let fullText = '';
 
-【選択肢】
-A. [選択肢]
-B. [選択肢]
-C. [選択肢]
-D. [選択肢]
-
-【正解と解説】
-正解: [記号]
-解説: [なぜ正解か/他がなぜ違うかを簡潔に]`;
-
-  let response = await callAiStream({
-    userPrompt,
-    systemPrompt: systemPrompt + contextPrompt,
-    onRequireApiKey: () => openSettingsModal(els),
-    onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
-  });
-
-  if (String(response || '').includes('ストリーミングに対応していない環境')) {
-    response = await callAi({
+  try {
+    response = await callAiStream({
       userPrompt,
-      systemPrompt: systemPrompt + contextPrompt,
+      systemPrompt,
       onRequireApiKey: () => openSettingsModal(els),
+      onTextDelta: (_delta, text) => {
+        fullText = text;
+        updateAiModalContentStreaming(els, text);
+      },
     });
+
+    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+      response = await callAi({
+        userPrompt,
+        systemPrompt,
+        onRequireApiKey: () => openSettingsModal(els),
+      });
+    }
+  } catch (err) {
+    updateAiModalContent(els, `エラーが発生しました: ${err.message || err}`);
+    return false;
   }
 
-  if (response) updateAiModalContent(els, response);
-  return isSuccessfulAiResponse(response);
+  if (!isSuccessfulAiResponse(response)) {
+    if (response) updateAiModalContent(els, response);
+    return false;
+  }
+
+  // Try to parse as interactive quiz
+  const parsed = parseQuizResponse(response);
+
+  if (parsed) {
+    // Render interactive quiz UI
+    renderInteractiveQuiz({ els, quiz: parsed });
+    return true;
+  }
+
+  // Fallback: show as plain markdown (old format)
+  updateAiModalContent(els, response);
+  return true;
+}
+
+function showQuizSummary({ els, session }) {
+  if (!session) return;
+  const summary = getSessionSummary(session);
+  const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single;
+
+  // Hide question area, show summary
+  if (els.quizQuestion) els.quizQuestion.classList.add('hidden');
+  if (els.quizChoices) els.quizChoices.classList.add('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+  if (els.quizProgressBar) els.quizProgressBar.classList.add('hidden');
+
+  // Emoji & title based on accuracy
+  const acc = summary.accuracy;
+  let emoji = '🎉';
+  let title = 'クイズ完了！';
+  if (acc >= 0.9) { emoji = '🏆'; title = '素晴らしい！'; }
+  else if (acc >= 0.7) { emoji = '🎉'; title = 'よくできました！'; }
+  else if (acc >= 0.5) { emoji = '💪'; title = 'まずまず！'; }
+  else { emoji = '📚'; title = '復習しよう！'; }
+
+  if (els.quizSummaryEmoji) els.quizSummaryEmoji.textContent = emoji;
+  if (els.quizSummaryTitle) els.quizSummaryTitle.textContent = title;
+  if (els.quizSummarySubtitle) els.quizSummarySubtitle.textContent = `${config.label} — ${summary.total}問完了`;
+
+  if (els.quizSumCorrect) els.quizSumCorrect.textContent = String(summary.correct);
+  if (els.quizSumTotal) els.quizSumTotal.textContent = String(summary.total);
+  if (els.quizSumAccuracy) els.quizSumAccuracy.textContent = `${Math.round(summary.accuracy * 100)}%`;
+  if (els.quizSumXp) els.quizSumXp.textContent = String(summary.totalXp);
+  if (els.quizSumCombo) els.quizSumCombo.textContent = String(summary.maxCombo);
+
+  // Time display
+  if (session.startedAt && session.finishedAt) {
+    const elapsed = Math.round((session.finishedAt - session.startedAt) / 1000);
+    if (els.quizSumTime) els.quizSumTime.classList.remove('hidden');
+    if (els.quizSumTimeValue) els.quizSumTimeValue.textContent = formatTime(elapsed);
+  } else if (config.timeLimitSec > 0 && session.startedAt) {
+    const elapsed = Math.round((Date.now() - session.startedAt) / 1000);
+    if (els.quizSumTime) els.quizSumTime.classList.remove('hidden');
+    if (els.quizSumTimeValue) els.quizSumTimeValue.textContent = formatTime(elapsed);
+  }
+
+  if (els.quizSummary) els.quizSummary.classList.remove('hidden');
+}
+
+function resetQuizUi(els) {
+  if (els.quizArea) els.quizArea.classList.add('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizComboDisplay) els.quizComboDisplay.classList.add('hidden');
+  if (els.quizChoices) els.quizChoices.innerHTML = '';
+  if (els.quizQuestion) els.quizQuestion.textContent = '';
+  if (els.quizExplanation) els.quizExplanation.innerHTML = '';
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+
+  // Reset mode-specific elements
+  if (els.quizPregenOverlay) els.quizPregenOverlay.classList.add('hidden');
+  if (els.quizTimerDisplay) els.quizTimerDisplay.classList.add('hidden');
+  if (els.quizProgressBar) els.quizProgressBar.classList.add('hidden');
+  if (els.quizProgressFill) els.quizProgressFill.style.width = '0%';
+  if (els.quizSummary) els.quizSummary.classList.add('hidden');
+  if (els.quizSumTime) els.quizSumTime.classList.add('hidden');
+  if (els.quizModeLabel) els.quizModeLabel.textContent = '';
+  if (els.quizSessionProgress) els.quizSessionProgress.textContent = '';
+}
+
+function renderInteractiveQuiz({ els, quiz }) {
+  // Store reference for answer handling
+  // `currentParsedQuiz` is accessible via closure in initApp
+  if (typeof window !== 'undefined') {
+    window.__currentParsedQuiz = quiz;
+  }
+
+  els.modalLoading?.classList.add('hidden');
+  if (els.aiRetryBtn) {
+    els.aiRetryBtn.disabled = false;
+    els.aiRetryBtn.classList.remove('opacity-60', 'cursor-not-allowed');
+  }
+
+  // Hide the plain-text content, show quiz area
+  if (els.modalContent) els.modalContent.innerHTML = '';
+  if (els.quizArea) els.quizArea.classList.remove('hidden');
+  if (els.quizResult) els.quizResult.classList.add('hidden');
+  if (els.quizNextBtn) els.quizNextBtn.classList.add('hidden');
+  if (els.quizSummary) els.quizSummary.classList.add('hidden');
+  if (els.quizComboDisplay) els.quizComboDisplay.classList.add('hidden');
+
+  // Make sure question/choices are visible (may have been hidden during pregen)
+  if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+  if (els.quizChoices) els.quizChoices.classList.remove('hidden');
+
+  // Render question
+  if (els.quizQuestion) {
+    els.quizQuestion.textContent = quiz.question;
+  }
+
+  // Render choices as buttons
+  if (els.quizChoices) {
+    els.quizChoices.innerHTML = quiz.choices.map((choice, i) => {
+      const letter = indexToLetter(i);
+      const choiceText = choice.startsWith(`${letter}.`) ? choice.substring(2).trim() : choice;
+      return `
+        <button type="button" class="quiz-choice-btn w-full text-left px-4 py-3 rounded-lg border border-gray-200 bg-white hover:border-indigo-400 text-sm transition flex items-start gap-3" data-choice-index="${i}">
+          <span class="flex-shrink-0 w-7 h-7 rounded-full bg-indigo-50 text-indigo-700 font-bold text-sm flex items-center justify-center">${escapeHtml(letter)}</span>
+          <span class="pt-0.5">${escapeHtml(choiceText)}</span>
+        </button>
+      `.trim();
+    }).join('');
+  }
+
+  // Set copy text
+  if (els.modalContent?.dataset) {
+    els.modalContent.dataset.aiCopyText = `${quiz.question}\n\n${quiz.choices.join('\n')}\n\n正解: ${indexToLetter(quiz.correctIndex)}\n${quiz.explanation}`;
+  }
+  setAiCopyButtonEnabled(els, true);
 }
 
 function isSuccessfulAiResponse(response) {
