@@ -1665,10 +1665,20 @@ function normalizeMarkdownForJapanese(markdown) {
   const CODE_SPAN_RE = /`+[^`]*?`+/g;
 
   function normalizeTextSegment(segment) {
-    return segment
+    let s = segment
       .replaceAll('\u200B', '')
       .replaceAll('\uFEFF', '')
+      .replaceAll('\u200C', '')
+      .replaceAll('\u2060', '')
       .replaceAll('＊', '*');
+
+    // Fix emphasis broken by spaces/invisible chars adjacent to Japanese brackets.
+    // CommonMark forbids whitespace right after opening ** or right before closing **.
+    // AI models sometimes output: ** 「text」 ** instead of **「text」**
+    s = s.replace(/(\*{2,3})[ \t\u00A0\u3000]+([「【（『])/g, '$1$2');
+    s = s.replace(/([」】）』])[ \t\u00A0\u3000]+(\*{2,3})/g, '$1$2');
+
+    return s;
   }
 
   function normalizeOutsideCode(segment) {
