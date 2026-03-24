@@ -15,6 +15,7 @@ import {
   getXpSummary,
   getStreakInfo,
   addQuizResult,
+  getQuizHistory,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
@@ -269,6 +270,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     reflectAiVoteUi();
     if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`;
     openModal(els.quizModeModal);
+  });
+
+  // --- Dashboard Quiz History Review Button ---
+  els.dashboardReviewBtn?.addEventListener('click', () => {
+    renderQuizHistoryModal({ els, examId: state.examId, exams, getExamById });
+    openModal(els.quizHistoryModal);
+  });
+
+  // Quiz history filter change
+  els.quizHistoryFilter?.addEventListener('change', () => {
+    const filterValue = els.quizHistoryFilter.value;
+    renderQuizHistoryList({ els, examId: filterValue, getExamById });
   });
 
   // --- Timer ---
@@ -582,6 +595,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       isCorrect,
       xpEarned: result.xpEarned,
       answeredAt: new Date().toISOString(),
+      question: quiz.question,
+      choices: quiz.choices,
+      correctIndex: quiz.correctIndex,
+      explanation: quiz.explanation,
+      userAnswer: answerIndex,
     });
 
     renderXpDashboard({ els, exam, state: appState });
@@ -925,6 +943,13 @@ function getElements() {
     carouselPrev: document.getElementById('carouselPrev'),
     carouselNext: document.getElementById('carouselNext'),
     dashboardQuizBtn: document.getElementById('dashboardQuizBtn'),
+    dashboardReviewBtn: document.getElementById('dashboardReviewBtn'),
+
+    // Quiz history review modal
+    quizHistoryModal: document.getElementById('quizHistoryModal'),
+    quizHistoryFilter: document.getElementById('quizHistoryFilter'),
+    quizHistoryList: document.getElementById('quizHistoryList'),
+    quizHistoryEmpty: document.getElementById('quizHistoryEmpty'),
 
     // Streak
     streakCount: document.getElementById('streakCount'),
@@ -2744,4 +2769,88 @@ function isSuccessfulAiResponse(response) {
   if (text === '回答を生成できませんでした。') return false;
   if (text.length < 80) return false;
   return true;
+}
+
+// ─── Quiz History Review ────────────────────────────────────
+
+function renderQuizHistoryModal({ els, examId, exams, getExamById }) {
+  // Populate filter dropdown
+  if (els.quizHistoryFilter) {
+    const currentVal = els.quizHistoryFilter.value;
+    els.quizHistoryFilter.innerHTML =
+      '<option value="">すべての試験</option>' +
+      exams.map(e => `<option value="${escapeHtml(e.id)}"${e.id === examId ? ' selected' : ''}>${escapeHtml(e.code)}</option>`).join('');
+    // Keep previous selection if modal was already open
+    if (currentVal && exams.some(e => e.id === currentVal)) {
+      els.quizHistoryFilter.value = currentVal;
+    }
+  }
+
+  const filterExamId = els.quizHistoryFilter?.value || '';
+  renderQuizHistoryList({ els, examId: filterExamId, getExamById });
+}
+
+function renderQuizHistoryList({ els, examId, getExamById }) {
+  if (!els.quizHistoryList) return;
+
+  const history = getQuizHistory(examId || undefined);
+  // Only show entries that have question content (older entries may not)
+  const reviewable = history.filter(h => h.question);
+
+  if (reviewable.length === 0) {
+    els.quizHistoryList.innerHTML = '';
+    if (els.quizHistoryEmpty) els.quizHistoryEmpty.classList.remove('hidden');
+    return;
+  }
+
+  if (els.quizHistoryEmpty) els.quizHistoryEmpty.classList.add('hidden');
+
+  els.quizHistoryList.innerHTML = reviewable.map((h, idx) => {
+    const isCorrect = h.isCorrect;
+    const icon = isCorrect ? '✅' : '❌';
+    const userLetter = h.userAnswer >= 0 ? indexToLetter(h.userAnswer) : '未回答';
+    const correctLetter = h.correctIndex >= 0 ? indexToLetter(h.correctIndex) : '?';
+
+    let examLabel = '';
+    try {
+      const exam = getExamById(h.examId);
+      examLabel = exam.code;
+    } catch { examLabel = h.examId; }
+
+    const dateStr = h.answeredAt ? new Date(h.answeredAt).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+
+    const choicesHtml = Array.isArray(h.choices) && h.choices.length > 0
+      ? h.choices.map((c, ci) => {
+          const letter = indexToLetter(ci);
+          const isUserPick = ci === h.userAnswer;
+          const isCorrectChoice = ci === h.correctIndex;
+          let cls = 'text-gray-600';
+          if (isCorrectChoice) cls = 'text-green-700 font-bold';
+          if (isUserPick && !isCorrect) cls = 'text-red-600 line-through';
+          if (isUserPick && isCorrect) cls = 'text-green-700 font-bold';
+          const choiceText = c.startsWith(`${letter}.`) ? c : `${letter}. ${c}`;
+          return `<div class="text-xs ${cls}">${escapeHtml(choiceText)}${isUserPick ? ' ← あなたの回答' : ''}${isCorrectChoice && !isUserPick ? ' ← 正解' : ''}</div>`;
+        }).join('')
+      : '';
+
+    return `
+      <details class="rounded-lg border ${isCorrect ? 'border-green-200' : 'border-red-200'} overflow-hidden">
+        <summary class="flex items-center gap-2 p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isCorrect ? 'bg-green-50' : 'bg-red-50'}">
+          <span class="text-sm flex-shrink-0">${icon}</span>
+          <span class="flex-1 min-w-0 text-sm text-gray-800 truncate">${escapeHtml(h.question)}</span>
+          <span class="flex-shrink-0 text-[10px] text-gray-400 whitespace-nowrap">${escapeHtml(examLabel)} ${escapeHtml(dateStr)}</span>
+        </summary>
+        <div class="p-3 bg-white border-t ${isCorrect ? 'border-green-100' : 'border-red-100'}">
+          <div class="text-sm text-gray-800 font-medium mb-3">${escapeHtml(h.question)}</div>
+          <div class="space-y-1 mb-3">${choicesHtml}</div>
+          <div class="text-xs text-gray-600 mb-2">
+            あなたの回答: <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${escapeHtml(userLetter)}</span>
+            ${!isCorrect ? ` / 正解: <span class="font-bold text-green-700">${escapeHtml(correctLetter)}</span>` : ''}
+            ${h.xpEarned ? ` / +${h.xpEarned} XP` : ''}
+          </div>
+          ${h.explanation ? `<div class="text-xs text-gray-700 p-2 bg-gray-50 rounded border border-gray-100">${escapeHtml(h.explanation)}</div>` : ''}
+        </div>
+      </details>
+    `.trim();
+  }).join('');
 }

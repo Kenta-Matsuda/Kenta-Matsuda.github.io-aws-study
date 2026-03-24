@@ -437,8 +437,8 @@ function saveQuizHistory(history) {
 }
 
 /**
- * Record a quiz answer.
- * @param {{ examId: string, domainId?: number, taskId?: string, isCorrect: boolean, xpEarned: number }} entry
+ * Record a quiz answer with full question content for later review.
+ * @param {{ examId: string, domainId?: number, taskId?: string, isCorrect: boolean, xpEarned: number, question?: string, choices?: string[], correctIndex?: number, explanation?: string, userAnswer?: number }} entry
  */
 export function addQuizResult(entry) {
   const history = loadQuizHistory();
@@ -449,8 +449,24 @@ export function addQuizResult(entry) {
     isCorrect: Boolean(entry.isCorrect),
     xpEarned: Number(entry.xpEarned || 0),
     answeredAt: new Date().toISOString(),
+    question: String(entry.question || ''),
+    choices: Array.isArray(entry.choices) ? entry.choices.map(c => String(c || '')) : [],
+    correctIndex: Number.isFinite(entry.correctIndex) ? entry.correctIndex : -1,
+    explanation: String(entry.explanation || ''),
+    userAnswer: Number.isFinite(entry.userAnswer) ? entry.userAnswer : -1,
   });
   saveQuizHistory(history);
+}
+
+/**
+ * Get all quiz history entries for review.
+ * @param {string} [examId] - Optional filter by exam ID.
+ * @returns {Array<{examId: string, domainId: number|null, taskId: string, isCorrect: boolean, xpEarned: number, answeredAt: string, question: string, choices: string[], correctIndex: number, explanation: string, userAnswer: number}>}
+ */
+export function getQuizHistory(examId) {
+  const history = loadQuizHistory();
+  if (examId) return history.filter(h => h.examId === examId);
+  return history;
 }
 
 /**
