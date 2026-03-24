@@ -2808,14 +2808,16 @@ function renderQuizHistoryList({ els, examId, getExamById }) {
   els.quizHistoryList.innerHTML = reviewable.map((h, idx) => {
     const isCorrect = h.isCorrect;
     const icon = isCorrect ? '✅' : '❌';
-    const userLetter = h.userAnswer >= 0 ? indexToLetter(h.userAnswer) : '未回答';
-    const correctLetter = h.correctIndex >= 0 ? indexToLetter(h.correctIndex) : '?';
+    const userLetter = h.userAnswer != null ? indexToLetter(h.userAnswer) : '未回答';
+    const correctLetter = h.correctIndex != null ? indexToLetter(h.correctIndex) : '?';
 
     let examLabel = '';
     try {
       const exam = getExamById(h.examId);
       examLabel = exam.code;
-    } catch { examLabel = h.examId; }
+    } catch { /* unknown examId — fall back to raw ID */
+      examLabel = h.examId;
+    }
 
     const dateStr = h.answeredAt ? new Date(h.answeredAt).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
 

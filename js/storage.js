@@ -451,9 +451,9 @@ export function addQuizResult(entry) {
     answeredAt: new Date().toISOString(),
     question: String(entry.question || ''),
     choices: Array.isArray(entry.choices) ? entry.choices.map(c => String(c || '')) : [],
-    correctIndex: Number.isFinite(entry.correctIndex) ? entry.correctIndex : -1,
+    correctIndex: Number.isFinite(entry.correctIndex) ? entry.correctIndex : null,
     explanation: String(entry.explanation || ''),
-    userAnswer: Number.isFinite(entry.userAnswer) ? entry.userAnswer : -1,
+    userAnswer: Number.isFinite(entry.userAnswer) ? entry.userAnswer : null,
   });
   saveQuizHistory(history);
 }
