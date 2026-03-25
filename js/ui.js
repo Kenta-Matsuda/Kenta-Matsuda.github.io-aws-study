@@ -960,6 +960,7 @@ function getElements() {
     chatFab: document.getElementById('chatFab'),
     chatPanel: document.getElementById('chatPanel'),
     chatCloseBtn: document.getElementById('chatCloseBtn'),
+    chatClearBtn: document.getElementById('chatClearBtn'),
     chatMessages: document.getElementById('chatMessages'),
     chatInput: document.getElementById('chatInput'),
     chatSendBtn: document.getElementById('chatSendBtn'),

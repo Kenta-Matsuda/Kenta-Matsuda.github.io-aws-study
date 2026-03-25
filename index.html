@@ -1081,7 +1081,10 @@
                     <span class="font-bold text-sm">AI チューター</span>
                     <span id="chatExamBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full"></span>
                 </div>
-                <button id="chatCloseBtn" type="button" class="text-white/70 hover:text-white"><i class="fas fa-times"></i></button>
+                <div class="flex items-center gap-2">
+                    <button id="chatClearBtn" type="button" class="text-white/70 hover:text-white" title="会話をクリア"><i class="fas fa-trash-alt text-xs"></i></button>
+                    <button id="chatCloseBtn" type="button" class="text-white/70 hover:text-white"><i class="fas fa-times"></i></button>
+                </div>
             </div>
             <div id="chatMessages" class="chat-messages">
                 <div class="chat-bubble chat-bubble-ai">
