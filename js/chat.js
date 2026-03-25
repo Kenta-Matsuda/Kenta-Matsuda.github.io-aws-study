@@ -34,6 +34,11 @@ export function initChat({ els, getExamById, getState, openSettingsModal }) {
     els.chatPanel.classList.add('hidden');
   });
 
+  // Clear conversation
+  els.chatClearBtn?.addEventListener('click', () => {
+    clearChat(els);
+  });
+
   // Send on Enter
   els.chatInput?.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
@@ -194,4 +199,15 @@ function scrollToBottom(container) {
  */
 export function resetChat() {
   history = [];
+}
+
+/**
+ * Clear chat history and messages in the UI.
+ */
+function clearChat(els) {
+  history = [];
+  if (els.chatMessages) {
+    els.chatMessages.innerHTML =
+      '<div class="chat-bubble chat-bubble-ai">こんにちは！AWS学習について何でも聞いてください。選択中の試験に関する質問に回答します 💡</div>';
+  }
 }
