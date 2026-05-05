@@ -299,8 +299,84 @@
         .dashboard-carousel-nav:hover { background: #f3f4f6; }
         .dashboard-carousel-prev { left: 2px; }
         .dashboard-carousel-next { right: 2px; }
+        .book-promo-card {
+            background: linear-gradient(135deg, #ff9900 0%, #f59e0b 52%, #1f2937 52%, #111827 100%);
+            color: #fff;
+        }
+        .book-promo-layout {
+            display: grid;
+            grid-template-columns: 72px minmax(0, 1fr);
+            gap: 14px;
+            align-items: center;
+            height: 100%;
+        }
+        .book-promo-cover {
+            width: 100%;
+            max-width: 124px;
+            aspect-ratio: 1080 / 1500;
+            object-fit: cover;
+            border-radius: 8px;
+            transform: translateY(-2px);
+            box-shadow: 0 22px 36px rgba(0,0,0,0.42), 0 0 0 3px rgba(255,255,255,0.92), 0 0 0 6px rgba(17,24,39,0.24);
+        }
+        .book-promo-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 6px;
+            background: rgba(17,24,39,0.94);
+            color: #fff;
+            padding: 4px 10px;
+            font-size: 11px;
+            font-weight: 800;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.18);
+        }
+        .book-promo-title {
+            font-size: 16px;
+            line-height: 1.16;
+            font-weight: 800;
+        }
+        .book-promo-title span {
+            display: block;
+            white-space: nowrap;
+        }
+        .book-promo-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            min-height: 40px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 800;
+            transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+        .book-promo-link:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 18px rgba(0,0,0,0.16);
+        }
+        .book-promo-amazon {
+            background: #ffad33;
+            color: #111827;
+            border: 1px solid rgba(255,255,255,0.45);
+        }
+        .book-promo-amazon:hover {
+            background: #ff9900;
+        }
+        @media (min-width: 420px) {
+            .book-promo-layout {
+                grid-template-columns: 92px minmax(0, 1fr);
+                gap: 16px;
+            }
+            .book-promo-title { font-size: 18px; }
+        }
+        @media (min-width: 640px) {
+            .book-promo-layout { grid-template-columns: 112px minmax(0, 1fr); }
+        }
         @media (min-width: 768px) {
             .dashboard-carousel-slide { min-width: 50%; }
+            .book-promo-layout { grid-template-columns: 124px minmax(0, 1fr); }
+            .book-promo-title { font-size: 20px; }
         }
 
         /* ── Quiz Timer Overtime ── */
@@ -563,7 +639,30 @@
                     <button class="dashboard-carousel-nav dashboard-carousel-prev" id="carouselPrev" aria-label="前へ"><i class="fas fa-chevron-left"></i></button>
                     <button class="dashboard-carousel-nav dashboard-carousel-next" id="carouselNext" aria-label="次へ"><i class="fas fa-chevron-right"></i></button>
                     <div class="dashboard-carousel-track" id="carouselTrack">
-                        <!-- Slide 1: Quiz Challenge -->
+                        <!-- Slide 1: Book Promo -->
+                        <div class="dashboard-carousel-slide">
+                            <div class="book-promo-card rounded-xl border border-orange-200 p-5 md:p-6 h-full overflow-hidden">
+                                <div class="book-promo-layout">
+                                    <img src="./assets/books/aws-zenkan-kouryakubon-cover.jpg" alt="AWS認定 全冠攻略本の表紙" class="book-promo-cover" loading="lazy">
+                                    <div class="min-w-0">
+                                        <div class="book-promo-badge">
+                                            <i class="fas fa-book-open"></i> 発売中
+                                        </div>
+                                        <div class="book-promo-title mt-3"><span>AWS認定</span><span>全冠攻略本</span></div>
+                                        <p class="mt-2 text-xs md:text-sm leading-relaxed text-orange-50/90">AWS認定全冠のノウハウを一冊に凝縮！</p>
+                                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <a href="https://amzn.asia/d/0hIOAXuc" target="_blank" rel="noopener noreferrer" class="book-promo-link book-promo-amazon" aria-label="AWS認定 全冠攻略本をAmazonで見る">
+                                                <i class="fa-brands fa-amazon"></i>
+                                            </a>
+                                            <a href="https://techbookfest.org/product/1Vy2rcDFtWJuK15ihfVwns" target="_blank" rel="noopener noreferrer" class="book-promo-link bg-green-500 text-white hover:bg-green-400" aria-label="AWS認定 全冠攻略本を技術書典で見る">
+                                                技術<br>書典
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Slide 2: Quiz Challenge -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-5 md:p-6 h-full flex flex-col items-center justify-center text-center">
                                 <span class="text-4xl mb-3">🎯</span>
@@ -579,7 +678,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Slide 2: XP -->
+                        <!-- Slide 3: XP -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">これまでの累積 XP</div>
@@ -591,7 +690,7 @@
                                 <div id="xpRecentActions" class="mt-2 space-y-1.5 text-xs text-gray-600"></div>
                             </div>
                         </div>
-                        <!-- Slide 3: Streak -->
+                        <!-- Slide 4: Streak -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">学習ストリーク</div>
@@ -606,7 +705,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Slide 4: Title -->
+                        <!-- Slide 5: Title -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="flex items-center gap-2">
@@ -1025,7 +1124,7 @@
 
     <!-- Quiz History Review Modal -->
     <div id="quizHistoryModal" class="modal" data-backdrop-close="true">
-        <div class="modal-content" style="max-width: 700px;">
+        <div class="modal-content" style="max-width: 800px;">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
                     <i class="fas fa-book-open text-indigo-500"></i> 過去の問題を見直す
@@ -1035,11 +1134,12 @@
                 </button>
             </div>
             <div class="p-5">
-                <div class="mb-4">
-                    <select id="quizHistoryFilter" class="w-full sm:w-auto px-3 py-2 border border-gray-200 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-300">
-                        <option value="">すべての試験</option>
-                    </select>
-                </div>
+                <!-- Exam Tab Selector -->
+                <div id="quizHistoryTabs" class="flex flex-wrap gap-1.5 mb-4 pb-3 border-b border-gray-100"></div>
+                <!-- Action Buttons -->
+                <div id="quizHistoryActions" class="flex flex-wrap gap-2 mb-4"></div>
+                <!-- Breadcrumb for drill-down -->
+                <div id="quizHistoryBreadcrumb" class="hidden flex items-center gap-2 mb-3 text-sm"></div>
                 <div id="quizHistoryEmpty" class="hidden text-center py-8">
                     <span class="text-3xl mb-2 block">📋</span>
                     <p class="text-gray-500 text-sm">まだ回答履歴がありません。</p>
@@ -1047,7 +1147,10 @@
                 </div>
                 <div id="quizHistoryList" class="space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end">
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
+                <button id="quizHistoryExportBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fas fa-download"></i> エクスポート
+                </button>
                 <button type="button" data-close-modal="quizHistoryModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
                     閉じる
                 </button>
