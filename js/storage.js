@@ -438,7 +438,7 @@ function saveQuizHistory(history) {
 
 /**
  * Record a quiz answer with full question content for later review.
- * @param {{ examId: string, domainId?: number, taskId?: string, isCorrect: boolean, xpEarned: number, question?: string, choices?: string[], correctIndex?: number, explanation?: string, userAnswer?: number }} entry
+ * @param {{ examId: string, domainId?: number, taskId?: string, isCorrect: boolean, xpEarned: number, question?: string, choices?: string[], correctIndex?: number, explanation?: string, userAnswer?: number, sessionId?: string, mode?: string, elapsedMs?: number }} entry
  */
 export function addQuizResult(entry) {
   const history = loadQuizHistory();
@@ -454,6 +454,9 @@ export function addQuizResult(entry) {
     correctIndex: Number.isFinite(entry.correctIndex) ? entry.correctIndex : null,
     explanation: String(entry.explanation || ''),
     userAnswer: Number.isFinite(entry.userAnswer) ? entry.userAnswer : null,
+    sessionId: String(entry.sessionId || ''),
+    mode: String(entry.mode || ''),
+    elapsedMs: Number.isFinite(entry.elapsedMs) ? entry.elapsedMs : null,
   });
   saveQuizHistory(history);
 }
@@ -467,6 +470,66 @@ export function getQuizHistory(examId) {
   const history = loadQuizHistory();
   if (examId) return history.filter(h => h.examId === examId);
   return history;
+}
+
+/**
+ * Export quiz history as markdown text for external tools (NotebookLM etc.).
+ * @param {string} [examId] - Optional filter by exam ID.
+ * @returns {string}
+ */
+export function exportQuizHistory(examId) {
+  const history = getQuizHistory(examId || undefined);
+  const reviewable = history.filter(h => h.question);
+  if (reviewable.length === 0) return '';
+
+  const lines = [];
+  lines.push('# AWS認定試験 学習履歴\n');
+  lines.push(`エクスポート日時: ${new Date().toLocaleString('ja-JP')}`);
+  if (examId) lines.push(`試験: ${examId}`);
+  const correctCount = reviewable.filter(h => h.isCorrect).length;
+  lines.push(`総問題数: ${reviewable.length} / 正答数: ${correctCount} / 正答率: ${reviewable.length > 0 ? Math.round(correctCount / reviewable.length * 100) : 0}%\n`);
+
+  // Group by sessionId (legacy entries without sessionId: group by date)
+  const sessions = new Map();
+  for (const h of reviewable) {
+    const key = h.sessionId || `date_${(h.answeredAt || '').slice(0, 10)}_${h.examId}`;
+    if (!sessions.has(key)) sessions.set(key, []);
+    sessions.get(key).push(h);
+  }
+
+  let sessionNum = 0;
+  for (const [, questions] of sessions) {
+    sessionNum++;
+    const sorted = [...questions].sort((a, b) => (a.answeredAt || '').localeCompare(b.answeredAt || ''));
+    const first = sorted[0];
+    const MODE_LABELS = { single: '模擬問題', quick5: '5問連続', speed: 'スピードラン', mock: '本番模擬試験' };
+    const modeLabel = MODE_LABELS[first.mode] || first.mode || '模擬問題';
+    const dateStr = first.answeredAt ? new Date(first.answeredAt).toLocaleString('ja-JP') : '';
+    const correct = sorted.filter(q => q.isCorrect).length;
+
+    lines.push('---\n');
+    lines.push(`## セッション ${sessionNum}: ${modeLabel} (${dateStr})`);
+    lines.push(`結果: ${correct}/${sorted.length} 正解\n`);
+
+    sorted.forEach((q, qi) => {
+      lines.push(`### 問題 ${qi + 1}`);
+      lines.push(q.question);
+      if (Array.isArray(q.choices)) {
+        q.choices.forEach((c, ci) => {
+          const letter = String.fromCharCode(65 + ci);
+          lines.push(`${letter}. ${c}`);
+        });
+      }
+      const userLetter = q.userAnswer != null ? String.fromCharCode(65 + q.userAnswer) : '未回答';
+      const correctLetter = q.correctIndex != null ? String.fromCharCode(65 + q.correctIndex) : '?';
+      lines.push(`\nあなたの回答: ${userLetter} / 正解: ${correctLetter} / ${q.isCorrect ? '✅ 正解' : '❌ 不正解'}`);
+      if (q.elapsedMs != null) lines.push(`所要時間: ${Math.round(q.elapsedMs / 1000)}秒`);
+      if (q.explanation) lines.push(`\n解説: ${q.explanation}`);
+      lines.push('');
+    });
+  }
+
+  return lines.join('\n');
 }
 
 /**

@@ -16,6 +16,7 @@ import {
   getStreakInfo,
   addQuizResult,
   getQuizHistory,
+  exportQuizHistory,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
@@ -245,6 +246,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // Create session
     quizSession = createQuizSession({ examId: lastAiRequest.examId, mode });
+    quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
     quizSession.startedAt = Date.now();
 
     if (config.preGenerate) {
@@ -274,14 +276,112 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   // --- Dashboard Quiz History Review Button ---
   els.dashboardReviewBtn?.addEventListener('click', () => {
+    reviewState.selectedExamId = state.examId;
+    reviewState.currentSessionId = null;
     renderQuizHistoryModal({ els, examId: state.examId, exams, getExamById });
     openModal(els.quizHistoryModal);
   });
 
-  // Quiz history filter change
-  els.quizHistoryFilter?.addEventListener('change', () => {
-    const filterValue = els.quizHistoryFilter.value;
-    renderQuizHistoryList({ els, examId: filterValue, getExamById });
+  // Review modal state (exposed to module-level render functions)
+  const reviewState = { selectedExamId: '', currentSessionId: null };
+  window.__reviewState = reviewState;
+
+  // Tab click delegation
+  els.quizHistoryTabs?.addEventListener('click', (e) => {
+    const tab = e.target.closest('[data-exam-tab]');
+    if (!tab) return;
+    reviewState.selectedExamId = tab.dataset.examTab;
+    reviewState.currentSessionId = null;
+    renderQuizHistoryContent({ els, exams, getExamById });
+  });
+
+  // Session card / back button click delegation
+  els.quizHistoryList?.addEventListener('click', (e) => {
+    const sessionCard = e.target.closest('[data-session-id]');
+    if (sessionCard) {
+      reviewState.currentSessionId = sessionCard.dataset.sessionId;
+      renderQuizHistoryContent({ els, exams, getExamById });
+      return;
+    }
+  });
+
+  els.quizHistoryBreadcrumb?.addEventListener('click', (e) => {
+    const backBtn = e.target.closest('[data-action="back-to-sessions"]');
+    if (backBtn) {
+      reviewState.currentSessionId = null;
+      renderQuizHistoryContent({ els, exams, getExamById });
+    }
+  });
+
+  // Retry wrong questions
+  els.quizHistoryActions?.addEventListener('click', (e) => {
+    const retryBtn = e.target.closest('[data-action="retry-wrong"]');
+    if (!retryBtn) return;
+
+    const examId = reviewState.selectedExamId || undefined;
+    const history = getQuizHistory(examId);
+    const wrongEntries = history.filter(h => h.question && !h.isCorrect);
+    if (wrongEntries.length === 0) return;
+
+    // Deduplicate by question text
+    const seen = new Set();
+    const unique = wrongEntries.filter(h => {
+      if (seen.has(h.question)) return false;
+      seen.add(h.question);
+      return true;
+    });
+
+    // Close review modal, open AI modal with pre-loaded questions
+    closeModal(els.quizHistoryModal);
+
+    const retryExamId = examId || unique[0].examId;
+    quizSession = createQuizSession({ examId: retryExamId, mode: 'quick5' });
+    quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    quizSession.questionCount = unique.length;
+    quizSession.questions = unique.map(h => ({
+      question: h.question,
+      choices: h.choices,
+      correctIndex: h.correctIndex,
+      explanation: h.explanation,
+    }));
+    quizSession.preGenerate = true;
+    quizSession.startedAt = Date.now();
+
+    const exam = getExamById(retryExamId);
+    showAiModal(els, `間違えた問題の解き直し（${unique.length}問）`, true);
+    if (els.modalContent) els.modalContent.innerHTML = '';
+    if (els.modalLoading) els.modalLoading.classList.add('hidden');
+    resetQuizUi(els);
+    if (els.quizArea) els.quizArea.classList.remove('hidden');
+
+    lastAiRequest = {
+      type: 'quiz',
+      examId: retryExamId,
+      taskId: '',
+      taskTitle: '間違えた問題の解き直し',
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+
+    renderInteractiveQuiz({ els, quiz: quizSession.questions[0] });
+    updateQuizProgress();
+    if (els.quizComboBar) els.quizComboBar.classList.remove('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+    if (els.quizChoices) els.quizChoices.classList.remove('hidden');
+  });
+
+  // Export button
+  els.quizHistoryExportBtn?.addEventListener('click', () => {
+    const examId = reviewState.selectedExamId || undefined;
+    const md = exportQuizHistory(examId);
+    if (!md) return;
+    const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quiz-history${examId ? '-' + examId : ''}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
   });
 
   // --- Timer ---
@@ -518,6 +618,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Track in session
     if (!quizSession) {
       quizSession = createQuizSession({ examId: appState.examId });
+      quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
     }
     quizSession.questions[quizSession.currentIndex] = quiz;
     const result = recordAnswer(quizSession, answerIndex, XP_RULES.quiz);
@@ -589,6 +690,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
 
     // Store quiz result
+    const elapsedMs = window.__questionShownAt ? Date.now() - window.__questionShownAt : null;
+    window.__questionShownAt = 0;
     addQuizResult({
       examId: appState.examId,
       taskId: lastAiRequest?.taskId || '',
@@ -600,6 +703,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       correctIndex: quiz.correctIndex,
       explanation: quiz.explanation,
       userAnswer: answerIndex,
+      sessionId: quizSession?.sessionId || '',
+      mode: quizSession?.mode || '',
+      elapsedMs,
     });
 
     renderXpDashboard({ els, exam, state: appState });
@@ -947,9 +1053,12 @@ function getElements() {
 
     // Quiz history review modal
     quizHistoryModal: document.getElementById('quizHistoryModal'),
-    quizHistoryFilter: document.getElementById('quizHistoryFilter'),
+    quizHistoryTabs: document.getElementById('quizHistoryTabs'),
+    quizHistoryActions: document.getElementById('quizHistoryActions'),
+    quizHistoryBreadcrumb: document.getElementById('quizHistoryBreadcrumb'),
     quizHistoryList: document.getElementById('quizHistoryList'),
     quizHistoryEmpty: document.getElementById('quizHistoryEmpty'),
+    quizHistoryExportBtn: document.getElementById('quizHistoryExportBtn'),
 
     // Streak
     streakCount: document.getElementById('streakCount'),
@@ -2755,6 +2864,9 @@ function renderInteractiveQuiz({ els, quiz }) {
     }).join('');
   }
 
+  // Track question shown time for elapsed measurement
+  window.__questionShownAt = Date.now();
+
   // Set copy text
   if (els.modalContent?.dataset) {
     els.modalContent.dataset.aiCopyText = `${quiz.question}\n\n${quiz.choices.join('\n')}\n\n正解: ${indexToLetter(quiz.correctIndex)}\n${quiz.explanation}`;
@@ -2774,86 +2886,193 @@ function isSuccessfulAiResponse(response) {
 
 // ─── Quiz History Review ────────────────────────────────────
 
-function renderQuizHistoryModal({ els, examId, exams, getExamById }) {
-  // Populate filter dropdown
-  if (els.quizHistoryFilter) {
-    const currentVal = els.quizHistoryFilter.value;
-    els.quizHistoryFilter.innerHTML =
-      '<option value="">すべての試験</option>' +
-      exams.map(e => `<option value="${escapeHtml(e.id)}"${e.id === examId ? ' selected' : ''}>${escapeHtml(e.code)}</option>`).join('');
-    // Keep previous selection if modal was already open
-    if (currentVal && exams.some(e => e.id === currentVal)) {
-      els.quizHistoryFilter.value = currentVal;
-    }
-  }
+const REVIEW_MODE_LABELS = { single: '模擬問題', quick5: '5問連続', speed: 'スピードラン', mock: '本番模擬試験' };
+const REVIEW_MODE_ICONS = { single: '📝', quick5: '⚡', speed: '⏱️', mock: '📋' };
 
-  const filterExamId = els.quizHistoryFilter?.value || '';
-  renderQuizHistoryList({ els, examId: filterExamId, getExamById });
+function formatElapsedMs(ms) {
+  if (ms == null) return '';
+  const sec = Math.round(ms / 1000);
+  if (sec < 60) return `${sec}秒`;
+  return `${Math.floor(sec / 60)}分${sec % 60}秒`;
 }
 
-function renderQuizHistoryList({ els, examId, getExamById }) {
+function groupHistoryBySessions(history) {
+  const sessions = new Map();
+  for (const h of history) {
+    if (!h.question) continue;
+    const key = h.sessionId || `date_${(h.answeredAt || '').slice(0, 10)}_${h.examId}`;
+    if (!sessions.has(key)) sessions.set(key, []);
+    sessions.get(key).push(h);
+  }
+  // Sort each session's entries by time ascending
+  const result = [];
+  for (const [sessionId, entries] of sessions) {
+    entries.sort((a, b) => (a.answeredAt || '').localeCompare(b.answeredAt || ''));
+    const first = entries[0];
+    const correct = entries.filter(e => e.isCorrect).length;
+    const modeKey = first.mode || '';
+    result.push({
+      sessionId,
+      examId: first.examId,
+      mode: modeKey,
+      modeLabel: REVIEW_MODE_LABELS[modeKey] || modeKey || '模擬問題',
+      modeIcon: REVIEW_MODE_ICONS[modeKey] || '📝',
+      date: first.answeredAt,
+      total: entries.length,
+      correct,
+      accuracy: entries.length > 0 ? Math.round(correct / entries.length * 100) : 0,
+      entries,
+    });
+  }
+  return result;
+}
+
+function renderQuizHistoryModal({ els, examId, exams, getExamById }) {
+  // Render tabs
+  if (els.quizHistoryTabs) {
+    const allTab = `<button data-exam-tab="" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${!examId ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">すべて</button>`;
+    const examTabs = exams.map(e =>
+      `<button data-exam-tab="${escapeHtml(e.id)}" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${e.id === examId ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">${escapeHtml(e.code)}</button>`
+    ).join('');
+    els.quizHistoryTabs.innerHTML = allTab + examTabs;
+  }
+
+  renderQuizHistoryContent({ els, exams, getExamById });
+}
+
+function renderQuizHistoryContent({ els, exams, getExamById }) {
   if (!els.quizHistoryList) return;
 
+  // Read state from the review modal state (stored on the calling scope)
+  const selectedExamId = els.quizHistoryTabs?.querySelector('.bg-indigo-600')?.dataset?.examTab;
+  const reviewState = window.__reviewState;
+  const examId = reviewState?.selectedExamId ?? selectedExamId ?? '';
+  const currentSessionId = reviewState?.currentSessionId ?? null;
+
+  // Update tab highlight
+  if (els.quizHistoryTabs) {
+    els.quizHistoryTabs.querySelectorAll('[data-exam-tab]').forEach(tab => {
+      const isActive = tab.dataset.examTab === examId;
+      tab.className = `px-3 py-1.5 rounded-full text-xs font-bold transition ${isActive ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}`;
+    });
+  }
+
   const history = getQuizHistory(examId || undefined);
-  // Only show entries that have question content (older entries may not)
   const reviewable = history.filter(h => h.question);
 
   if (reviewable.length === 0) {
     els.quizHistoryList.innerHTML = '';
     if (els.quizHistoryEmpty) els.quizHistoryEmpty.classList.remove('hidden');
+    if (els.quizHistoryActions) els.quizHistoryActions.innerHTML = '';
+    if (els.quizHistoryBreadcrumb) els.quizHistoryBreadcrumb.classList.add('hidden');
     return;
   }
-
   if (els.quizHistoryEmpty) els.quizHistoryEmpty.classList.add('hidden');
 
-  els.quizHistoryList.innerHTML = reviewable.map((h, idx) => {
-    const isCorrect = h.isCorrect;
-    const icon = isCorrect ? '✅' : '❌';
-    const userLetter = h.userAnswer != null ? indexToLetter(h.userAnswer) : '未回答';
-    const correctLetter = h.correctIndex != null ? indexToLetter(h.correctIndex) : '?';
+  const sessions = groupHistoryBySessions(reviewable);
 
-    let examLabel = '';
-    try {
-      const exam = getExamById(h.examId);
-      examLabel = exam.code;
-    } catch { /* unknown examId — fall back to raw ID */
-      examLabel = h.examId;
+  if (currentSessionId) {
+    // Drill-down: show questions for a specific session
+    const session = sessions.find(s => s.sessionId === currentSessionId);
+    if (!session) { return; }
+
+    if (els.quizHistoryActions) els.quizHistoryActions.innerHTML = '';
+    if (els.quizHistoryBreadcrumb) {
+      els.quizHistoryBreadcrumb.classList.remove('hidden');
+      const dateStr = session.date ? new Date(session.date).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      els.quizHistoryBreadcrumb.innerHTML = `
+        <button data-action="back-to-sessions" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"><i class="fas fa-arrow-left text-xs"></i> 戻る</button>
+        <span class="text-gray-400">/</span>
+        <span class="text-gray-700 font-medium">${session.modeIcon} ${escapeHtml(session.modeLabel)} (${escapeHtml(dateStr)})</span>
+      `;
     }
 
-    const dateStr = h.answeredAt ? new Date(h.answeredAt).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+    els.quizHistoryList.innerHTML = session.entries.map((h, idx) => {
+      const isCorrect = h.isCorrect;
+      const icon = isCorrect ? '✅' : '❌';
+      const userLetter = h.userAnswer != null ? indexToLetter(h.userAnswer) : '未回答';
+      const correctLetter = h.correctIndex != null ? indexToLetter(h.correctIndex) : '?';
+      const elapsed = formatElapsedMs(h.elapsedMs);
 
-    const choicesHtml = Array.isArray(h.choices) && h.choices.length > 0
-      ? h.choices.map((c, ci) => {
-          const letter = indexToLetter(ci);
-          const isUserPick = ci === h.userAnswer;
-          const isCorrectChoice = ci === h.correctIndex;
-          let cls = 'text-gray-600';
-          if (isCorrectChoice) cls = 'text-green-700 font-bold';
-          if (isUserPick && !isCorrect) cls = 'text-red-600 line-through';
-          if (isUserPick && isCorrect) cls = 'text-green-700 font-bold';
-          const choiceText = c.startsWith(`${letter}.`) ? c : `${letter}. ${c}`;
-          return `<div class="text-xs ${cls}">${escapeHtml(choiceText)}${isUserPick ? ' ← あなたの回答' : ''}${isCorrectChoice && !isUserPick ? ' ← 正解' : ''}</div>`;
-        }).join('')
-      : '';
+      const choicesHtml = Array.isArray(h.choices) && h.choices.length > 0
+        ? h.choices.map((c, ci) => {
+            const letter = indexToLetter(ci);
+            const isCorrectChoice = ci === h.correctIndex;
+            const isUserPick = ci === h.userAnswer;
+            let cls = 'text-gray-600';
+            if (isCorrectChoice) cls = 'text-green-700 font-bold';
+            if (isUserPick && !isCorrect) cls = 'text-red-600';
+            const choiceText = c.startsWith(`${letter}.`) ? c : `${letter}. ${c}`;
+            return `<div class="text-xs ${cls}">${escapeHtml(choiceText)}</div>`;
+          }).join('')
+        : '';
 
-    return `
-      <details class="rounded-lg border ${isCorrect ? 'border-green-200' : 'border-red-200'} overflow-hidden">
-        <summary class="flex items-center gap-2 p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isCorrect ? 'bg-green-50' : 'bg-red-50'}">
-          <span class="text-sm flex-shrink-0">${icon}</span>
-          <span class="flex-1 min-w-0 text-sm text-gray-800 truncate">${escapeHtml(h.question)}</span>
-          <span class="flex-shrink-0 text-[10px] text-gray-400 whitespace-nowrap">${escapeHtml(examLabel)} ${escapeHtml(dateStr)}</span>
-        </summary>
-        <div class="p-3 bg-white border-t ${isCorrect ? 'border-green-100' : 'border-red-100'}">
-          <div class="text-sm text-gray-800 font-medium mb-3">${escapeHtml(h.question)}</div>
-          <div class="space-y-1 mb-3">${choicesHtml}</div>
-          <div class="text-xs text-gray-600 mb-2">
-            あなたの回答: <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${escapeHtml(userLetter)}</span>
-            ${!isCorrect ? ` / 正解: <span class="font-bold text-green-700">${escapeHtml(correctLetter)}</span>` : ''}
-            ${h.xpEarned ? ` / +${h.xpEarned} XP` : ''}
+      // Bottom summary line with color
+      const answerSummary = `<div class="text-xs mt-2 px-2 py-1.5 rounded ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}">` +
+        `あなたの回答: <span class="font-bold">${escapeHtml(userLetter)}</span>` +
+        ` / 正解: <span class="font-bold">${escapeHtml(correctLetter)}</span>` +
+        (elapsed ? ` / <i class="fas fa-stopwatch text-[10px]"></i> ${escapeHtml(elapsed)}` : '') +
+        (h.xpEarned ? ` / +${h.xpEarned} XP` : '') +
+        `</div>`;
+
+      return `
+        <details class="rounded-lg border ${isCorrect ? 'border-green-200' : 'border-red-200'} overflow-hidden">
+          <summary class="flex items-center gap-2 p-3 cursor-pointer hover:bg-gray-50 transition-colors ${isCorrect ? 'bg-green-50' : 'bg-red-50'}">
+            <span class="text-xs text-gray-400 font-mono w-5 text-right flex-shrink-0">${idx + 1}</span>
+            <span class="text-sm flex-shrink-0">${icon}</span>
+            <span class="flex-1 min-w-0 text-sm text-gray-800 truncate">${escapeHtml(h.question)}</span>
+            ${elapsed ? `<span class="flex-shrink-0 text-[10px] text-gray-400 whitespace-nowrap"><i class="fas fa-stopwatch"></i> ${escapeHtml(elapsed)}</span>` : ''}
+          </summary>
+          <div class="p-3 bg-white border-t ${isCorrect ? 'border-green-100' : 'border-red-100'}">
+            <div class="text-sm text-gray-800 font-medium mb-3">${escapeHtml(h.question)}</div>
+            <div class="space-y-1 mb-2">${choicesHtml}</div>
+            ${answerSummary}
+            ${h.explanation ? `<div class="text-xs text-gray-700 p-2 mt-2 bg-gray-50 rounded border border-gray-100">${escapeHtml(h.explanation)}</div>` : ''}
           </div>
-          ${h.explanation ? `<div class="text-xs text-gray-700 p-2 bg-gray-50 rounded border border-gray-100">${escapeHtml(h.explanation)}</div>` : ''}
+        </details>
+      `.trim();
+    }).join('');
+
+  } else {
+    // Session list view
+    if (els.quizHistoryBreadcrumb) els.quizHistoryBreadcrumb.classList.add('hidden');
+
+    // Show action buttons
+    const wrongCount = reviewable.filter(h => !h.isCorrect).length;
+    if (els.quizHistoryActions) {
+      els.quizHistoryActions.innerHTML = wrongCount > 0
+        ? `<button data-action="retry-wrong" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5"><i class="fas fa-redo"></i> 間違えた問題を解き直す（${wrongCount}問）</button>`
+        : '';
+    }
+
+    els.quizHistoryList.innerHTML = sessions.map(s => {
+      const dateStr = s.date ? new Date(s.date).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      let examLabel = '';
+      try { examLabel = getExamById(s.examId).code; } catch { examLabel = s.examId; }
+
+      const accuracyColor = s.accuracy >= 80 ? 'text-green-600' : s.accuracy >= 50 ? 'text-yellow-600' : 'text-red-600';
+
+      return `
+        <div data-session-id="${escapeHtml(s.sessionId)}" class="rounded-lg border border-gray-200 p-3 cursor-pointer hover:bg-gray-50 hover:border-indigo-200 transition-all group">
+          <div class="flex items-center gap-3">
+            <span class="text-xl flex-shrink-0">${s.modeIcon}</span>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-0.5">
+                <span class="text-sm font-bold text-gray-800">${escapeHtml(s.modeLabel)}</span>
+                <span class="text-[10px] px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 font-medium">${escapeHtml(examLabel)}</span>
+              </div>
+              <div class="text-xs text-gray-400">${escapeHtml(dateStr)}</div>
+            </div>
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <div class="text-right">
+                <div class="text-sm font-bold ${accuracyColor}">${s.accuracy}%</div>
+                <div class="text-[10px] text-gray-400">${s.correct}/${s.total} 正解</div>
+              </div>
+              <i class="fas fa-chevron-right text-gray-300 group-hover:text-indigo-400 transition text-xs"></i>
+            </div>
+          </div>
         </div>
-      </details>
-    `.trim();
-  }).join('');
+      `.trim();
+    }).join('');
+  }
 }
