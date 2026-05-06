@@ -2307,6 +2307,8 @@ function highlightHtml(escapedText, termLower) {
 }
 
 // --- Feedback ---
+const FEEDBACK_MAX_LENGTH = 100;
+
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
 
@@ -2343,9 +2345,9 @@ function openFeedbackModal(els) {
 function updateFeedbackCharCount(els) {
   if (!els.feedbackCharCount || !els.feedbackTextarea) return;
   const len = (els.feedbackTextarea.value || '').length;
-  els.feedbackCharCount.textContent = `${len} / 1000`;
-  els.feedbackCharCount.classList.toggle('text-red-500', len > 950);
-  els.feedbackCharCount.classList.toggle('text-gray-400', len <= 950);
+  els.feedbackCharCount.textContent = `${len} / ${FEEDBACK_MAX_LENGTH}`;
+  els.feedbackCharCount.classList.toggle('text-orange-500', len > FEEDBACK_MAX_LENGTH * 0.95);
+  els.feedbackCharCount.classList.toggle('text-gray-400', len <= FEEDBACK_MAX_LENGTH * 0.95);
 }
 
 function submitFeedback(els) {
@@ -2356,8 +2358,8 @@ function submitFeedback(els) {
     showInlineMessage(els.feedbackMessage, 'フィードバック内容を入力してください。', 'text-red-600');
     return;
   }
-  if (text.length > 1000) {
-    showInlineMessage(els.feedbackMessage, '1000文字以内で入力してください。', 'text-red-600');
+  if (text.length > FEEDBACK_MAX_LENGTH) {
+    showInlineMessage(els.feedbackMessage, `${FEEDBACK_MAX_LENGTH}文字以内で入力してください。`, 'text-red-600');
     return;
   }
 
@@ -2381,20 +2383,12 @@ function sendFeedbackToGa({ category, text }) {
     const gtag = window.gtag;
     if (typeof gtag !== 'function') return;
 
-    // GA4 event parameters are limited to 100 chars per value for standard reporting,
-    // but custom events can send longer strings in exploration reports.
-    // Split long text into chunks for reliable capture.
-    const maxChunk = 500;
-    const chunks = [];
-    for (let i = 0; i < text.length; i += maxChunk) {
-      chunks.push(text.slice(i, i + maxChunk));
-    }
+    const feedbackText = String(text || '').slice(0, FEEDBACK_MAX_LENGTH);
 
     gtag('event', 'user_feedback', {
       feedback_category: category,
-      feedback_text: chunks[0] || '',
-      feedback_text_2: chunks[1] || '',
-      feedback_length: text.length,
+      feedback_text: feedbackText,
+      feedback_length: feedbackText.length,
     });
   } catch {
     // ignore
