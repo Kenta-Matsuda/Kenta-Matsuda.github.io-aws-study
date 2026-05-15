@@ -1175,6 +1175,31 @@
             </div>
         </div>
     </div>
+
+    <!-- Batch (Gemini 3) Progress Toast (fixed) -->
+    <div id="batchProgressToast" class="hidden fixed bottom-4 right-4 z-[1100] max-w-sm">
+        <div class="bg-white border border-indigo-200 shadow-lg rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div id="batchProgressIcon" class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-spinner fa-spin"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div id="batchProgressTitle" class="text-sm font-bold text-gray-900">本番模擬試験を生成中</div>
+                    <div id="batchProgressStatus" class="text-xs text-gray-600 mt-1">バッチAPIにリクエスト中…</div>
+                    <div id="batchProgressNote" class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 leading-snug">
+                        ⚠️ 完了まで数分〜数十分かかる場合があります。<br>
+                        このタブ／ブラウザを閉じると生成は中断されます。
+                    </div>
+                    <button id="batchProgressStartBtn" type="button" class="hidden mt-2 w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md py-2">
+                        クイズを開始する
+                    </button>
+                </div>
+                <button id="batchProgressCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
     <!-- Chat Widget -->
     <div class="chat-widget">
         <div id="chatPanel" class="chat-panel hidden">
