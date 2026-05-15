@@ -6,8 +6,9 @@
  * the appropriate module.
  */
 
-import { callGemini, callGeminiStream } from './gemini.js';
+import { callGemini, callGeminiStream, getPreferredGemini3Model } from './gemini.js';
 import { callOpenAi, callOpenAiStream } from './openai.js';
+import { callGeminiBatch } from './geminiBatch.js';
 import { getAiProvider, getApiKey, getOpenAiApiKey } from './storage.js';
 
 /**
@@ -36,6 +37,32 @@ export function getActiveProviderLabel() {
   return p === 'openai' ? 'OpenAI' : 'Gemini';
 }
 
+const BATCH_DISABLED_KEY = 'gemini_batch_unavailable';
+
+/** Mark Batch API as unavailable for the current API key (persists). */
+export function markAiBatchUnavailable() {
+  try { localStorage.setItem(BATCH_DISABLED_KEY, '1'); } catch { /* ignore */ }
+}
+
+/** Clear the "batch unavailable" flag (e.g. when API key changes). */
+export function clearAiBatchUnavailable() {
+  try { localStorage.removeItem(BATCH_DISABLED_KEY); } catch { /* ignore */ }
+}
+
+function isBatchKnownUnavailable() {
+  try { return localStorage.getItem(BATCH_DISABLED_KEY) === '1'; } catch { return false; }
+}
+
+/**
+ * Returns true when the current provider/model combination
+ * is eligible for the Gemini Batch API (Gemini provider + Gemini 3 model)
+ * AND the Batch API hasn't already been observed to be unavailable.
+ */
+export function isAiBatchEligible() {
+  if (isBatchKnownUnavailable()) return false;
+  return resolveProvider() === 'gemini' && Boolean(getPreferredGemini3Model());
+}
+
 /**
  * Non-streaming AI call (provider-agnostic).
  * @param {Array<{role: string, content: string}>} [history] - conversation history for multi-turn chat
@@ -60,4 +87,44 @@ export async function callAiStream({ userPrompt, systemPrompt, onRequireApiKey, 
     return callOpenAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history });
   }
   return callGeminiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history });
+}
+
+/**
+ * Batch AI call. Currently only supported for Gemini 3 family models
+ * (which is when the Batch API gives the best cost/throughput tradeoff).
+ *
+ * Returns null when the active provider/model is not eligible for batching,
+ * so callers can fall back to per-request calls.
+ *
+ * @param {Object} opts
+ * @param {Array<{userPrompt:string,systemPrompt:string,history?:Array}>} opts.requests
+ * @param {string} [opts.displayName]
+ * @param {(info:{state:string,done:number,total:number,failed:number,pending:number})=>void} [opts.onProgress]
+ * @param {() => void} [opts.onRequireApiKey]
+ * @param {() => boolean} [opts.shouldAbort]
+ * @returns {Promise<{ texts:(string|null)[], errors:(string|null)[], model:string } | null>}
+ */
+export async function callAiBatch({
+  requests,
+  displayName,
+  onProgress,
+  onRequireApiKey,
+  shouldAbort,
+}) {
+  const provider = resolveProvider();
+  if (provider !== 'gemini') return null;
+
+  const model = getPreferredGemini3Model();
+  if (!model) return null;
+
+  const result = await callGeminiBatch({
+    model,
+    requests,
+    displayName,
+    onProgress,
+    onRequireApiKey,
+    shouldAbort,
+  });
+  if (!result) return null;
+  return { ...result, model };
 }

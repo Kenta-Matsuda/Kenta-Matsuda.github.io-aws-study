@@ -18,6 +18,23 @@ function getModelCandidates() {
   return Array.from(new Set(list));
 }
 
+/**
+ * True when the given model id is in the Gemini 3 family
+ * (e.g. "gemini-3.1-flash-lite", "gemini-3-flash-preview").
+ */
+export function isGemini3Model(model) {
+  return /^gemini-3(\.|-|$)/i.test(String(model || '').trim());
+}
+
+/**
+ * Returns the first configured Gemini 3 model id, or null.
+ * Useful for routing to the Batch API which is only worth it
+ * for the (slower / pricier) Gemini 3 family.
+ */
+export function getPreferredGemini3Model() {
+  return getModelCandidates().find(isGemini3Model) || null;
+}
+
 async function readErrorMessage(response) {
   try {
     const data = await response.json();

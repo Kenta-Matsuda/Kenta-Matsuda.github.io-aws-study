@@ -1,4 +1,4 @@
-import { callAi, callAiStream, getActiveProviderLabel } from './ai.js';
+import { callAi, callAiStream, callAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import {
   getApiKey,
   saveApiKeyFromInput,
@@ -156,6 +156,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   /** Active quiz session (null when not in quiz mode) */
   let quizSession = null;
 
+  /** Background batch state (Gemini 3 mock generation) */
+  let batchInProgress = false;
+  let pendingBatchSession = null; // session ready to start when user clicks "クイズを開始する"
+  let pendingBatchRequest = null;
+
   /** Helper to get/set current parsed quiz (shared between initApp scope and module-level renderInteractiveQuiz) */
   function getCurrentParsedQuiz() {
     return window.__currentParsedQuiz || null;
@@ -239,10 +244,39 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // Start button
   els.quizModeStartBtn?.addEventListener('click', async () => {
     if (!lastAiRequest || lastAiRequest.type !== 'quiz') return;
-    closeModal(els.quizModeModal);
 
     const mode = selectedQuizMode;
     const config = QUIZ_MODE_CONFIG[mode] || QUIZ_MODE_CONFIG.single;
+
+    // ── Background Batch path ──
+    // 「本番形式の模擬問題（mock）」かつ Gemini 3 系モデル利用時は、
+    // Batch API で非同期生成し、完了をトーストで通知する。
+    if (mode === 'mock' && isAiBatchEligible()) {
+      // 進行中のバッチがあれば二重起動を防ぐ
+      if (batchInProgress) {
+        alert('既にバッチ生成が進行中です。完了するまでお待ちください。');
+        return;
+      }
+      const ok = window.confirm(
+        '本番模擬試験を「Gemini Batch API」で生成します。\n\n' +
+        '⚠️ 注意事項\n' +
+        '・完了まで数分〜最大数十分かかる場合があります\n' +
+        '・このタブ／ブラウザを閉じると生成は中断されます\n' +
+        '・完了したら画面右下に通知が表示されます\n\n' +
+        '続行しますか？'
+      );
+      if (!ok) return;
+      closeModal(els.quizModeModal);
+
+      // Create session (questions will be filled later)
+      const session = createQuizSession({ examId: lastAiRequest.examId, mode });
+      session.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      // Don't set startedAt yet — start when user clicks "クイズを開始する"
+      startMockBatchInBackground({ els, session, request: lastAiRequest, config });
+      return;
+    }
+
+    closeModal(els.quizModeModal);
 
     // Create session
     quizSession = createQuizSession({ examId: lastAiRequest.examId, mode });
@@ -581,6 +615,251 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
     if (els.quizChoices) els.quizChoices.classList.remove('hidden');
   }
+
+  // --- Background Batch (Gemini 3 mock) ---
+  function setBatchToastState(state, message) {
+    if (!els.batchProgressToast) return;
+    els.batchProgressToast.classList.remove('hidden');
+    if (els.batchProgressStatus && message) els.batchProgressStatus.textContent = message;
+
+    if (state === 'ready') {
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = '本番模擬試験の準備ができました';
+      if (els.batchProgressIcon) {
+        els.batchProgressIcon.className =
+          'w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0';
+        els.batchProgressIcon.innerHTML = '<i class="fas fa-check"></i>';
+      }
+      if (els.batchProgressNote) els.batchProgressNote.classList.add('hidden');
+      if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.remove('hidden');
+    } else if (state === 'error') {
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = '生成に失敗しました';
+      if (els.batchProgressIcon) {
+        els.batchProgressIcon.className =
+          'w-9 h-9 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0';
+        els.batchProgressIcon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+      }
+      if (els.batchProgressNote) els.batchProgressNote.classList.add('hidden');
+      if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.add('hidden');
+    } else {
+      // running
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = '本番模擬試験を生成中';
+      if (els.batchProgressIcon) {
+        els.batchProgressIcon.className =
+          'w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0';
+        els.batchProgressIcon.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+      }
+      if (els.batchProgressNote) els.batchProgressNote.classList.remove('hidden');
+      if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.add('hidden');
+    }
+  }
+
+  function hideBatchToast() {
+    els.batchProgressToast?.classList?.add('hidden');
+  }
+
+  function notifyBrowser(title, body) {
+    try {
+      if (typeof Notification === 'undefined') return;
+      if (Notification.permission === 'granted') {
+        new Notification(title, { body, icon: 'assets/og/favicon.ico' });
+      } else if (Notification.permission !== 'denied') {
+        Notification.requestPermission().then((p) => {
+          if (p === 'granted') new Notification(title, { body, icon: 'assets/og/favicon.ico' });
+        });
+      }
+    } catch { /* ignore */ }
+  }
+
+  async function startMockBatchInBackground({ els, session, request, config }) {
+    const exam = getExamById(request.examId);
+    const total = session.questionCount;
+
+    // Pre-request notification permission so the completion notice can fire
+    try {
+      if (typeof Notification !== 'undefined' && Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {});
+      }
+    } catch { /* ignore */ }
+
+    setBatchToastState('running', `バッチAPIにリクエスト中… (0 / ${total} 問)`);
+    batchInProgress = true;
+    pendingBatchSession = null;
+    pendingBatchRequest = null;
+
+    const systemPrompt = buildMockQuizSystemPrompt(
+      exam.code, exam.shortLabel, getExamLevel(request.examId)
+    );
+    const domainTargets = request.isDashboardQuiz
+      ? assignDomainTargets(exam.domains, total)
+      : [];
+
+    const batchRequests = [];
+    for (let i = 0; i < total; i++) {
+      const targetDomain = domainTargets[i] || null;
+      const userPrompt = request.isDashboardQuiz
+        ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
+        : buildQuizUserPrompt(request.taskTitle, request.taskContext);
+      batchRequests.push({ userPrompt, systemPrompt });
+    }
+
+    const stateLabelOf = (s) => {
+      switch (s) {
+        case 'JOB_STATE_PENDING':
+        case 'BATCH_STATE_PENDING':
+          return '待機中';
+        case 'JOB_STATE_RUNNING':
+        case 'BATCH_STATE_RUNNING':
+          return '生成中';
+        case 'JOB_STATE_SUCCEEDED':
+        case 'BATCH_STATE_SUCCEEDED':
+          return '完了';
+        default:
+          return s || '実行中';
+      }
+    };
+
+    let result = null;
+    try {
+      result = await callAiBatch({
+        requests: batchRequests,
+        displayName: `mock-${request.examId}-${Date.now()}`,
+        onRequireApiKey: () => openSettingsModal(els),
+        onProgress: ({ state, done, total: t, failed }) => {
+          const denom = t || total;
+          setBatchToastState(
+            'running',
+            `${stateLabelOf(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
+          );
+        },
+      });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.warn('[batch] failed:', err);
+      batchInProgress = false;
+
+      // Detect "Batch API not available for this API key" (typical for free-tier keys).
+      const msg = String(err?.message || '');
+      const isPreconditionFail = /precondition check failed/i.test(msg)
+        || /FAILED_PRECONDITION/i.test(msg)
+        || err?.status === 400 && /batch/i.test(msg);
+
+      if (isPreconditionFail) {
+        // Persist this finding so we don't bother the user with the Batch confirm next time.
+        markAiBatchUnavailable();
+        // Hide the batch toast and fall back to the regular blocking pre-gen flow,
+        // which already shows its own progress modal.
+        hideBatchToast();
+        try {
+          quizSession = session;
+          quizSession.startedAt = Date.now();
+          await preGenerateQuestions({ els, session: quizSession, request, config });
+        } catch (e2) {
+          // eslint-disable-next-line no-console
+          console.error('[batch->fallback] also failed:', e2);
+          setBatchToastState('error', `通常モードでの生成も失敗しました: ${e2?.message || '不明なエラー'}`);
+        }
+        return;
+      }
+
+      setBatchToastState(
+        'error',
+        `バッチAPIでの生成に失敗しました: ${msg || '不明なエラー'}`
+      );
+      notifyBrowser('生成に失敗しました', '本番模擬試験のバッチ生成でエラーが発生しました');
+      return;
+    }
+
+    batchInProgress = false;
+
+    if (!result || !Array.isArray(result.texts)) {
+      setBatchToastState('error', 'バッチAPIから結果を取得できませんでした');
+      return;
+    }
+
+    // Parse results
+    const generated = [];
+    for (const text of result.texts) {
+      if (!text) continue;
+      const parsed = parseQuizResponse(text);
+      if (parsed) generated.push(parsed);
+    }
+    if (generated.length === 0) {
+      setBatchToastState('error', '生成された問題を解析できませんでした');
+      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
+      return;
+    }
+
+    session.questions = generated;
+    session.questionCount = generated.length;
+    pendingBatchSession = session;
+    pendingBatchRequest = request;
+
+    setBatchToastState(
+      'ready',
+      `${generated.length} 問の準備が完了しました（モデル: ${result.model || 'gemini-3'}）`
+    );
+    notifyBrowser('問題の準備ができました！', `${generated.length} 問のクイズを開始できます`);
+  }
+
+  function startReadyMockSession() {
+    if (!pendingBatchSession || !pendingBatchRequest) return;
+
+    const session = pendingBatchSession;
+    const request = pendingBatchRequest;
+    pendingBatchSession = null;
+    pendingBatchRequest = null;
+
+    quizSession = session;
+    lastAiRequest = request;
+
+    const exam = getExamById(request.examId);
+    const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.mock;
+
+    // Open the AI modal and prepare the quiz UI (mirrors preGenerateQuestions tail).
+    showAiModal(els, `${config.label}: ${request.taskTitle}`, true);
+    if (els.modalContent) els.modalContent.innerHTML = '';
+    if (els.modalLoading) els.modalLoading.classList.add('hidden');
+    resetQuizUi(els);
+    if (els.quizArea) els.quizArea.classList.remove('hidden');
+    if (els.quizPregenOverlay) els.quizPregenOverlay.classList.add('hidden');
+
+    if (session.timeLimitSec > 0) {
+      startQuizTimer(session.timeLimitSec);
+    }
+
+    session.startedAt = Date.now();
+    renderInteractiveQuiz({ els, quiz: session.questions[0] });
+    updateQuizProgress();
+
+    const comboBar = els.quizArea?.querySelector('#quizComboBar');
+    if (comboBar) comboBar.classList.remove('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+    if (els.quizChoices) els.quizChoices.classList.remove('hidden');
+
+    hideBatchToast();
+  }
+
+  // Wire toast buttons
+  els.batchProgressStartBtn?.addEventListener('click', () => {
+    startReadyMockSession();
+  });
+  els.batchProgressCloseBtn?.addEventListener('click', () => {
+    if (batchInProgress) {
+      const ok = window.confirm(
+        'バッチ生成中です。閉じても生成は続行されますが、通知トーストは非表示になります。\n本当に閉じますか？'
+      );
+      if (!ok) return;
+    }
+    hideBatchToast();
+  });
+
+  // Warn before closing the tab while batch is in progress
+  window.addEventListener('beforeunload', (e) => {
+    if (!batchInProgress) return;
+    e.preventDefault();
+    e.returnValue = '';
+    return '';
+  });
 
   // Clean up timer when AI modal is closed
   document.addEventListener('click', (e) => {
@@ -970,6 +1249,14 @@ function getElements() {
     milestoneToast: document.getElementById('milestoneToast'),
     milestoneToastText: document.getElementById('milestoneToastText'),
     milestoneToastCloseBtn: document.getElementById('milestoneToastCloseBtn'),
+
+    batchProgressToast: document.getElementById('batchProgressToast'),
+    batchProgressIcon: document.getElementById('batchProgressIcon'),
+    batchProgressTitle: document.getElementById('batchProgressTitle'),
+    batchProgressStatus: document.getElementById('batchProgressStatus'),
+    batchProgressNote: document.getElementById('batchProgressNote'),
+    batchProgressStartBtn: document.getElementById('batchProgressStartBtn'),
+    batchProgressCloseBtn: document.getElementById('batchProgressCloseBtn'),
 
     settingsModal: document.getElementById('settingsModal'),
     settingsBtn: document.getElementById('settingsBtn'),

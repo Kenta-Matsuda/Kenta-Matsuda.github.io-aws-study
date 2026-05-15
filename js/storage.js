@@ -12,6 +12,7 @@ export function resetAppStorage() {
   localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
   localStorage.removeItem(AI_PROVIDER_STORAGE_KEY);
   localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
+  try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
 }
 
 export function getApiKey() {
@@ -27,12 +28,15 @@ export function saveApiKeyFromInput({ inputEl, messageEl, onSuccess }) {
   }
 
   localStorage.setItem(API_KEY_STORAGE_KEY, key);
+  // Reset "batch unavailable" cache since the new key may be on a higher tier.
+  try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
   showMessage(messageEl, 'APIキーを保存しました。', 'text-green-500');
   onSuccess?.();
 }
 
 export function clearApiKey({ inputEl, messageEl }) {
   localStorage.removeItem(API_KEY_STORAGE_KEY);
+  try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
   inputEl.value = '';
   showMessage(messageEl, 'APIキーを削除しました。', 'text-gray-500');
 }
