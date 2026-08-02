@@ -534,13 +534,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     const generated = [];
     for (let i = 0; i < total; i++) {
-      // Only include last 5 questions for dedup to avoid oversized prompts
-      const recentQuestions = generated.slice(-5).map(q => q.question).join('\n');
+      // Build dedup hint: list topics/services already covered to avoid repetition
+      const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
       const targetDomain = domainTargets[i] || null;
+      const dedupSuffix = recentTopics
+        ? `\n\n【重要】以下の問題とは異なるAWSサービス・トピックで出題してください（同じサービスの繰り返しは禁止）:\n${recentTopics}`
+        : '';
       const userPrompt = (request.isDashboardQuiz
         ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
-        + (recentQuestions ? `\n\n【重要】以下の問題とは異なる問題を作成してください:\n${recentQuestions}` : '');
+        + dedupSuffix;
 
       let response = '';
       try {
@@ -1866,7 +1869,7 @@ function renderSkillRadarChart({ els, exam, state }) {
 
   if (!hasData) {
     if (els.skillRadarEmpty) els.skillRadarEmpty.classList.remove('hidden');
-    if (els.skillRadarChartContainer) els.skillRadarChart.style.display = 'none';
+    if (els.skillRadarChartContainer) els.skillRadarChartContainer.style.display = 'none';
     if (skillRadarChartInstance) {
       skillRadarChartInstance.destroy();
       skillRadarChartInstance = null;
@@ -1875,7 +1878,7 @@ function renderSkillRadarChart({ els, exam, state }) {
   }
 
   if (els.skillRadarEmpty) els.skillRadarEmpty.classList.add('hidden');
-  els.skillRadarChart.style.display = '';
+  if (els.skillRadarChartContainer) els.skillRadarChartContainer.style.display = '';
 
   const labels = exam.domains.map((d) => d.jpTitle);
   const dataValues = exam.domains.map((d) => {
