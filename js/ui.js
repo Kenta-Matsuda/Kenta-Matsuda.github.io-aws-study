@@ -1867,18 +1867,10 @@ function renderSkillRadarChart({ els, exam, state }) {
   // Check if there's any quiz data
   const hasData = Object.keys(byDomain).length > 0;
 
-  if (!hasData) {
-    if (els.skillRadarEmpty) els.skillRadarEmpty.classList.remove('hidden');
-    if (els.skillRadarChartContainer) els.skillRadarChartContainer.style.display = 'none';
-    if (skillRadarChartInstance) {
-      skillRadarChartInstance.destroy();
-      skillRadarChartInstance = null;
-    }
-    return;
+  // Always show the chart container; show empty message overlay when no data
+  if (els.skillRadarEmpty) {
+    els.skillRadarEmpty.classList.toggle('hidden', hasData);
   }
-
-  if (els.skillRadarEmpty) els.skillRadarEmpty.classList.add('hidden');
-  if (els.skillRadarChartContainer) els.skillRadarChartContainer.style.display = '';
 
   const labels = exam.domains.map((d) => d.jpTitle);
   const dataValues = exam.domains.map((d) => {
