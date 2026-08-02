@@ -17,6 +17,9 @@ import {
   addQuizResult,
   getQuizHistory,
   exportQuizHistory,
+  getTheme,
+  setTheme,
+  getEffectiveTheme,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
@@ -1066,6 +1069,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   wireGlobalUiHandlers({ els, state });
 
+  // Apply theme on boot
+  applyTheme();
+  wireThemeSwitch(els);
+  reflectThemeToggleIcon(els);
+
   wireProfileHandlers({ els, state, getExamById });
   wireToastHandlers({ els });
 
@@ -1280,6 +1288,8 @@ function getElements() {
     aiProviderSwitch: document.getElementById('aiProviderSwitch'),
     geminiKeySection: document.getElementById('geminiKeySection'),
     openaiKeySection: document.getElementById('openaiKeySection'),
+    themeToggleBtn: document.getElementById('themeToggleBtn'),
+    themeToggleIcon: document.getElementById('themeToggleIcon'),
 
     // Quiz interactive
     quizArea: document.getElementById('quizArea'),
@@ -2735,6 +2745,49 @@ function reflectProviderUi(els) {
   }
   if (els.openaiKeySection) {
     els.openaiKeySection.classList.toggle('opacity-40', provider !== 'openai');
+  }
+}
+
+// --- Theme (Dark Mode) ---
+function applyTheme() {
+  const effective = getEffectiveTheme();
+  if (effective === 'dark') {
+    document.documentElement.classList.add('dark');
+  } else {
+    document.documentElement.classList.remove('dark');
+  }
+}
+
+function reflectThemeToggleIcon(els) {
+  if (!els.themeToggleIcon) return;
+  const current = getTheme();
+  // Update icon: sun for light, moon for dark, laptop for system
+  els.themeToggleIcon.className = current === 'dark'
+    ? 'fas fa-moon text-yellow-300 group-hover:text-yellow-200'
+    : current === 'light'
+      ? 'fas fa-sun text-yellow-300 group-hover:text-yellow-200'
+      : 'fas fa-laptop text-gray-300 group-hover:text-white';
+}
+
+function wireThemeSwitch(els) {
+  if (!els.themeToggleBtn) return;
+
+  // Cycle through: light → dark → system → light ...
+  els.themeToggleBtn.addEventListener('click', () => {
+    const current = getTheme();
+    const next = current === 'light' ? 'dark' : current === 'dark' ? 'system' : 'light';
+    setTheme(next);
+    applyTheme();
+    reflectThemeToggleIcon(els);
+  });
+
+  // Listen for OS theme changes (relevant when preference is 'system')
+  if (typeof window !== 'undefined' && window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+      if (getTheme() === 'system') {
+        applyTheme();
+      }
+    });
   }
 }
 

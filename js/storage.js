@@ -3,6 +3,7 @@ import { getMilestoneStatus, getNewlyUnlockedMilestones } from './milestones.js'
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
 const OPENAI_KEY_STORAGE_KEY = 'openai_api_key';
 const AI_PROVIDER_STORAGE_KEY = 'ai_provider'; // 'gemini' | 'openai'
+const THEME_STORAGE_KEY = 'asn_theme'; // 'light' | 'dark' | 'system'
 
 const STUDY_STATE_STORAGE_KEY = 'asn_study_state_v1';
 
@@ -11,6 +12,7 @@ export function resetAppStorage() {
   localStorage.removeItem(API_KEY_STORAGE_KEY);
   localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
   localStorage.removeItem(AI_PROVIDER_STORAGE_KEY);
+  localStorage.removeItem(THEME_STORAGE_KEY);
   localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
   try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
 }
@@ -601,6 +603,42 @@ export function getStreakInfo() {
     current,
     hadActivityToday: offsets[0] > 0,
   };
+}
+
+// ─── Theme (Dark Mode) ──────────────────────────────────────
+
+/**
+ * Get stored theme preference.
+ * @returns {'light' | 'dark' | 'system'}
+ */
+export function getTheme() {
+  const v = localStorage.getItem(THEME_STORAGE_KEY);
+  if (v === 'dark' || v === 'light') return v;
+  return 'system';
+}
+
+/**
+ * Save theme preference.
+ * @param {'light' | 'dark' | 'system'} theme
+ */
+export function setTheme(theme) {
+  const v = theme === 'dark' || theme === 'light' ? theme : 'system';
+  localStorage.setItem(THEME_STORAGE_KEY, v);
+  return v;
+}
+
+/**
+ * Resolve the effective theme (accounting for system preference).
+ * @returns {'light' | 'dark'}
+ */
+export function getEffectiveTheme() {
+  const pref = getTheme();
+  if (pref === 'dark' || pref === 'light') return pref;
+  // 'system' → check OS preference
+  if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  return 'light';
 }
 
 function showMessage(messageEl, text, colorClass) {
