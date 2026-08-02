@@ -197,29 +197,54 @@ export const SAP_C02 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'IP アドレス範囲が重複するネットワークの接続',
+                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/connecting-networks-with-overlapping-ip-ranges/',
+                  note: 'Networking Blog: Advanced (Level 300)',
+                  recommend: true,
+                },
+                {
+                  title: 'VPC 共有の重要な考慮事項とベストプラクティス',
+                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/vpc-sharing-key-considerations-and-best-practices/',
+                  note: 'Networking Blog: Intermediate (Level 200)',
+                },
+              ],
+            },
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Transit Gateway Deep Dive',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Transit%20Gateway%20deep%20dive',
+                  note: 'PDF | Youtube: 2025/01',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS Transit Gateway',
-                  url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/tgw/what-is-transit-gateway.html',
-                  note: 'Transit Gateway の概要と使い方',
+                  title: 'スケーラブルで安全なマルチ VPC ネットワークインフラストラクチャの構築',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/building-scalable-secure-multi-vpc-network-infrastructure/welcome.html',
+                  note: 'ホワイトペーパー: Transit Gateway / VPC ピアリング / PrivateLink の選択',
                   recommend: true,
                 },
-              ],
-            },
-            {
-              key: 'blogs',
-              label: 'AWS ブログ',
-              iconClass: 'fab fa-aws',
-              iconColorClass: 'text-orange-400',
-              items: [
                 {
-                  title: 'AWS ネットワーキング＆コンテンツ配信ブログ',
-                  url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/',
-                  note: 'ネットワーキング関連の最新情報',
+                  title: 'ハイブリッド接続',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/hybrid-connectivity/hybrid-connectivity.html',
+                  note: 'ホワイトペーパー: Direct Connect / VPN の設計パターン',
                 },
               ],
             },
@@ -254,15 +279,35 @@ export const SAP_C02 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'マルチアカウント環境で SCP をさらに活用する',
+                  url: 'https://aws.amazon.com/blogs/security/get-more-out-of-service-control-policies-in-a-multi-account-environment/',
+                  note: 'Security Blog: Advanced (Level 300)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS Control Tower',
+                  title: 'AWS Control Tower ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/controltower/latest/userguide/what-is-control-tower.html',
                   note: 'マルチアカウント環境のガバナンス',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Security Reference Architecture',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  note: 'Prescriptive Guidance: セキュリティリファレンスアーキテクチャ',
                   recommend: true,
                 },
               ],
@@ -294,21 +339,35 @@ export const SAP_C02 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS の DR アーキテクチャ パート III: パイロットライトとウォームスタンバイ',
+                  url: 'https://aws.amazon.com/jp/blogs/news/disaster-recovery-dr-architecture-on-aws-part-iii-pilot-light-and-warm-standby/',
+                  note: 'Architecture Blog: Advanced (Level 300)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS での災害対策',
+                  title: 'AWS でのワークロードの災害復旧',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html',
-                  note: 'DR 戦略のホワイトペーパー',
+                  note: 'ホワイトペーパー: 4つのDR戦略と選択基準',
                   recommend: true,
                 },
                 {
-                  title: 'AWS 信頼性の柱',
-                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/welcome.html',
-                  note: 'Well-Architected 信頼性のベストプラクティス',
+                  title: 'データベースの DR 戦略',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-database-disaster-recovery/welcome.html',
+                  note: 'Prescriptive Guidance: データベース固有のDR設計',
                 },
               ],
             },
@@ -344,15 +403,20 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS マルチアカウント戦略',
+                  title: 'AWS 環境の整理（マルチアカウント戦略）',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/organizing-your-aws-environment/organizing-your-aws-environment.html',
-                  note: 'マルチアカウント環境のベストプラクティス',
+                  note: 'ホワイトペーパー: OU構造・アカウント分離の設計',
                   recommend: true,
                 },
                 {
-                  title: 'AWS Control Tower',
-                  url: 'https://docs.aws.amazon.com/ja_jp/controltower/latest/userguide/what-is-control-tower.html',
-                  note: 'マルチアカウント環境のガバナンス',
+                  title: 'AWS Organizations ベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/organizations/latest/userguide/orgs_best-practices.html',
+                  note: 'マルチアカウントガバナンスの基本',
+                },
+                {
+                  title: 'AWS Security Reference Architecture: IAM リソース',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/iam-resources.html',
+                  note: 'Prescriptive Guidance: 組織全体のアクセス管理',
                 },
               ],
             },
@@ -447,10 +511,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS でのデプロイ戦略',
+                  title: 'CI/CD のデプロイ手法',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/practicing-continuous-integration-continuous-delivery/deployment-methods.html',
-                  note: 'デプロイ手法の比較',
+                  note: 'ホワイトペーパー: B/G・カナリア・ローリングの比較',
                   recommend: true,
+                },
+                {
+                  title: 'AWS CodeDeploy によるデプロイ戦略',
+                  url: 'https://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/deployment-configurations.html',
+                  note: 'デプロイ設定の詳細（Lambda / ECS / EC2）',
                 },
               ],
             },
@@ -485,15 +554,29 @@ export const SAP_C02 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS の DR アーキテクチャ パート III: パイロットライトとウォームスタンバイ',
+                  url: 'https://aws.amazon.com/jp/blogs/news/disaster-recovery-dr-architecture-on-aws-part-iii-pilot-light-and-warm-standby/',
+                  note: 'Architecture Blog: Advanced (Level 300)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS での災害対策',
+                  title: 'AWS でのワークロードの災害復旧',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-workloads-on-aws.html',
-                  note: 'DR 戦略のホワイトペーパー',
+                  note: 'ホワイトペーパー: DR 戦略の全体像',
                   recommend: true,
                 },
               ],
@@ -538,10 +621,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS セキュリティの柱',
+                  title: 'AWS Well-Architected - セキュリティの柱',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/security-pillar/welcome.html',
-                  note: 'Well-Architected セキュリティのベストプラクティス',
+                  note: 'Defense in Depth・暗号化・インシデント対応の設計原則',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Security Reference Architecture',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  note: 'Prescriptive Guidance: 組織全体のセキュリティ設計',
                 },
               ],
             },
@@ -583,10 +671,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS 信頼性の柱',
+                  title: 'AWS Well-Architected - 信頼性の柱',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/welcome.html',
-                  note: 'Well-Architected 信頼性のベストプラクティス',
+                  note: '高可用性・フェイルオーバー・自己修復の設計原則',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Route 53 ルーティングポリシー',
+                  url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/routing-policy.html',
+                  note: 'フェイルオーバー・レイテンシー・地理的ルーティング',
                 },
               ],
             },
@@ -625,10 +718,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS パフォーマンス効率の柱',
+                  title: 'AWS Well-Architected - パフォーマンス効率の柱',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/performance-efficiency-pillar/welcome.html',
-                  note: 'Well-Architected パフォーマンスのベストプラクティス',
+                  note: 'キャッシュ・リードレプリカ・ライトサイジングの設計原則',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon ElastiCache キャッシュ戦略',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/Strategies.html',
+                  note: 'Lazy Loading / Write-Through パターン',
                 },
               ],
             },
@@ -721,10 +819,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS 運用上の優秀性の柱',
+                  title: 'AWS Well-Architected - 運用上の優秀性の柱',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/operational-excellence-pillar/welcome.html',
-                  note: 'Well-Architected 運用のベストプラクティス',
+                  note: 'モニタリング・自動化・障害対応の設計原則',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Systems Manager ユーザーガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/what-is-systems-manager.html',
+                  note: '構成管理・パッチ管理・ランブックの自動化',
                 },
               ],
             },
@@ -954,10 +1057,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS クラウド移行',
-                  url: 'https://aws.amazon.com/jp/cloud-migration/',
-                  note: '移行戦略とツールの概要',
+                  title: 'AWS への移行のベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/welcome.html',
+                  note: 'Prescriptive Guidance: 7Rの評価と移行計画',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Migration Hub',
+                  url: 'https://docs.aws.amazon.com/ja_jp/migrationhub/latest/ug/whatishub.html',
+                  note: '移行の追跡と進捗管理',
                 },
               ],
             },
@@ -999,10 +1107,15 @@ export const SAP_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS Database Migration Service',
+                  title: 'AWS Database Migration Service ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/dms/latest/userguide/Welcome.html',
-                  note: 'データベース移行の概要',
+                  note: '異種間・同種間データベース移行',
                   recommend: true,
+                },
+                {
+                  title: 'AWS クラウド移行のデータ転送サービス',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/data-migration-tools.html',
+                  note: 'Prescriptive Guidance: DataSync / Snow Family / Transfer Family の選定',
                 },
               ],
             },
@@ -1045,8 +1158,13 @@ export const SAP_C02 = {
                 {
                   title: 'AWS でのモダナイゼーション',
                   url: 'https://aws.amazon.com/jp/modern-apps/',
-                  note: 'モダナイゼーション戦略の概要',
+                  note: 'コンテナ化・サーバーレス化の戦略',
                   recommend: true,
+                },
+                {
+                  title: 'コンテナ化されたマイクロサービスの分解',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-decomposing-monoliths/welcome.html',
+                  note: 'Prescriptive Guidance: モノリスの分解パターン',
                 },
               ],
             },

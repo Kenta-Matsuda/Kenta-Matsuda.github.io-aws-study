@@ -196,29 +196,55 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'マルチアカウント環境でサービスコントロールポリシー (SCP) をさらに活用する',
+                  url: 'https://aws.amazon.com/blogs/security/get-more-out-of-service-control-policies-in-a-multi-account-environment/',
+                  note: 'Security Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS IAM Identity Center 導入 説明編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20IAM%20Identity%20Center%20%E5%B0%8E%E5%85%A5%20%E8%AA%AC%E6%98%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2026/04',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Identity and Access Management (IAM) Part1',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Identity%20and%20Access%20Management%20(IAM)%20Part1',
+                  note: 'PDF | Youtube: 2019/01',
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS IAM ベストプラクティス',
+                  title: 'IAM でのセキュリティのベストプラクティス',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html',
-                  note: 'IAM のセキュリティベストプラクティス',
+                  note: 'IAM ユーザーガイド: セキュリティベストプラクティス',
                   recommend: true,
                 },
-              ],
-            },
-            {
-              key: 'blogs',
-              label: 'AWS ブログ',
-              iconClass: 'fab fa-aws',
-              iconColorClass: 'text-orange-400',
-              items: [
                 {
-                  title: 'AWS Organizations を使ったマルチアカウント管理',
-                  url: 'https://aws.amazon.com/jp/organizations/',
-                  note: '組織管理の概要',
+                  title: 'マルチアカウント環境のベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/organizations/latest/userguide/orgs_best-practices.html',
+                  note: 'AWS Organizations: マルチアカウント設計の基本',
+                  recommend: true,
                 },
               ],
             },
@@ -255,16 +281,35 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon VPC',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
+                  note: 'PDF | Youtube: 2020/10',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS セキュリティのベストプラクティス',
+                  title: 'AWS Well-Architected Framework - セキュリティの柱',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/security-pillar/welcome.html',
-                  note: 'Well-Architected セキュリティの柱',
+                  note: 'ネットワーク保護・アプリケーション保護の設計原則',
                   recommend: true,
+                },
+                {
+                  title: 'VPC のセキュリティのベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/vpc-security-best-practices.html',
+                  note: 'セキュリティグループ・NACL・サブネット設計',
                 },
               ],
             },
@@ -299,6 +344,20 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Key Management Service Part.2 発展編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/04',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -307,8 +366,13 @@ export const SAA_C03 = {
                 {
                   title: 'Amazon S3 セキュリティのベストプラクティス',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/security-best-practices.html',
-                  note: 'S3 のセキュリティ設定',
+                  note: 'バケットポリシー・暗号化・アクセス制御',
                   recommend: true,
+                },
+                {
+                  title: 'AWS KMS ベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-kms-best-practices/introduction.html',
+                  note: 'Prescriptive Guidance: 暗号化キー管理',
                 },
               ],
             },
@@ -371,16 +435,35 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'イベント駆動型アーキテクチャの組織への実装ベストプラクティス',
+                  url: 'https://aws.amazon.com/blogs/architecture/best-practices-for-implementing-event-driven-architectures-in-your-organization/',
+                  note: 'Architecture Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS Well-Architected - 信頼性の柱',
+                  title: 'AWS Well-Architected Framework - 信頼性の柱',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/welcome.html',
-                  note: '信頼性設計のベストプラクティス',
+                  note: '疎結合・スケーラビリティの設計原則',
                   recommend: true,
+                },
+                {
+                  title: 'イベント駆動型アーキテクチャとは',
+                  url: 'https://aws.amazon.com/what-is/eda/',
+                  note: 'EDA の概念・パターンの解説',
                 },
               ],
             },
@@ -427,16 +510,35 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS のディザスタリカバリ (DR) アーキテクチャ、パート III: パイロットライトとウォームスタンバイ',
+                  url: 'https://aws.amazon.com/jp/blogs/news/disaster-recovery-dr-architecture-on-aws-part-iii-pilot-light-and-warm-standby/',
+                  note: 'Architecture Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS での高可用性アーキテクチャ',
-                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/plan-for-disaster-recovery-dr.html',
-                  note: 'DR 計画のベストプラクティス',
+                  title: 'AWS でのワークロードの災害復旧: クラウドでの復旧',
+                  url: 'https://docs.aws.amazon.com/whitepapers/latest/disaster-recovery-workloads-on-aws/disaster-recovery-options-in-the-cloud.html',
+                  note: 'ホワイトペーパー: 4つのDR戦略の比較（RPO/RTO別）',
                   recommend: true,
+                },
+                {
+                  title: 'Well-Architected: DR 計画のベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/plan-for-disaster-recovery-dr.html',
+                  note: '信頼性の柱: 復旧戦略の定義',
                 },
               ],
             },
@@ -475,16 +577,40 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon S3 Express One Zone',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20S3%20Express%20One%20Zone',
+                  note: 'PDF | Youtube: 2024/05',
+                },
+                {
+                  title: 'Amazon Elastic Block Store (Amazon EBS) 基礎編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Elastic%20Block%20Store(Amazon%20EBS)%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/12',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS ストレージサービスの選択',
-                  url: 'https://aws.amazon.com/jp/products/storage/',
-                  note: 'ストレージの比較と選択',
+                  title: 'AWS Well-Architected Framework - パフォーマンス効率の柱',
+                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/performance-efficiency-pillar/welcome.html',
+                  note: 'ストレージアーキテクチャの選定基準',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon S3 パフォーマンスの最適化',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/optimizing-performance.html',
+                  note: 'S3 のスループット最適化テクニック',
                 },
               ],
             },
@@ -521,6 +647,20 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Fargate 入門',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Fargate%20%E5%85%A5%E9%96%80',
+                  note: 'PDF | Youtube: 2024/10',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -529,8 +669,13 @@ export const SAA_C03 = {
                 {
                   title: 'Amazon EC2 インスタンスタイプ',
                   url: 'https://aws.amazon.com/jp/ec2/instance-types/',
-                  note: 'インスタンスタイプの比較',
+                  note: 'インスタンスファミリーの選定基準',
                   recommend: true,
+                },
+                {
+                  title: 'AWS コンピューティングサービスの選択',
+                  url: 'https://aws.amazon.com/jp/getting-started/decision-guides/compute-on-aws-how-to-choose/',
+                  note: 'EC2 / Lambda / Fargate / ECS の使い分け',
                 },
               ],
             },
@@ -569,16 +714,40 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon DynamoDB – How it works',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20DynamoDB%20%E2%80%93%20How%20it%20works',
+                  note: 'PDF | Youtube: 2023/12',
+                  recommend: true,
+                },
+                {
+                  title: 'Amazon Aurora 概要編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Aurora%20%E6%A6%82%E8%A6%81%E7%B7%A8',
+                  note: 'PDF | Youtube: 2025/06',
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS データベースサービスの選択',
-                  url: 'https://aws.amazon.com/jp/products/databases/',
-                  note: 'データベースの比較と選択',
+                  title: 'AWS データベースサービスの選択ガイド',
+                  url: 'https://aws.amazon.com/jp/getting-started/decision-guides/databases-on-aws-how-to-choose/',
+                  note: 'RDS / Aurora / DynamoDB / ElastiCache の使い分け',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon ElastiCache キャッシュ戦略',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/Strategies.html',
+                  note: 'キャッシュパターン（Lazy Loading / Write-Through）',
                 },
               ],
             },
@@ -611,16 +780,35 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon CloudFront（基礎編）',
+                  url: 'https://aws.amazon.com/jp/blogs/news/2025-07-aws-blackbelt/#:~:text=Amazon%20CloudFront%EF%BC%88%E5%9F%BA%E7%A4%8E%E7%B7%A8%EF%BC%89',
+                  note: 'PDF | Youtube: 2025/07',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS ネットワーキングサービス',
-                  url: 'https://aws.amazon.com/jp/products/networking/',
-                  note: 'ネットワーキングサービスの概要',
+                  title: 'Amazon VPC 接続オプション',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-vpc-connectivity-options/welcome.html',
+                  note: 'ホワイトペーパー: VPC 接続パターンの比較',
                   recommend: true,
+                },
+                {
+                  title: 'Elastic Load Balancing の製品比較',
+                  url: 'https://aws.amazon.com/jp/elasticloadbalancing/features/',
+                  note: 'ALB / NLB / GWLB の使い分け',
                 },
               ],
             },
@@ -667,10 +855,20 @@ export const SAA_C03 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS 分析サービス',
+                  title: 'AWS データレイクと分析サービス',
                   url: 'https://aws.amazon.com/jp/big-data/datalakes-and-analytics/',
-                  note: '分析サービスの概要',
+                  note: '分析パイプラインの全体像',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Kinesis Data Streams 開発者ガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/streams/latest/dev/introduction.html',
+                  note: 'ストリーミングデータ取り込みの基本',
+                },
+                {
+                  title: 'AWS Glue 開発者ガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/what-is-glue.html',
+                  note: 'ETL ジョブ・データカタログの構築',
                 },
               ],
             },
@@ -726,6 +924,34 @@ export const SAA_C03 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Amazon S3 ライフサイクルを使用して非カレントバージョンを削減しストレージコストを低減する',
+                  url: 'https://aws.amazon.com/blogs/storage/reduce-storage-costs-with-fewer-noncurrent-versions-using-amazon-s3-lifecycle/',
+                  note: 'Storage Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon S3 コスト最適化編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Simple%20Storage%20Service%20(Amazon%20S3)%20%E3%82%B3%E3%82%B9%E3%83%88%E6%9C%80%E9%81%A9%E5%8C%96%E7%B7%A8',
+                  note: 'PDF | Youtube: 2023/06',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -734,8 +960,13 @@ export const SAA_C03 = {
                 {
                   title: 'Amazon S3 ストレージクラス',
                   url: 'https://aws.amazon.com/jp/s3/storage-classes/',
-                  note: 'ストレージクラスの料金比較',
+                  note: 'ストレージクラスの料金比較・ユースケース',
                   recommend: true,
+                },
+                {
+                  title: 'Well-Architected: データ保持ポリシーの実装',
+                  url: 'https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/cost_decomissioning_resources_data_retention.html',
+                  note: 'コスト最適化の柱: ライフサイクルポリシー設計',
                 },
               ],
             },
@@ -783,10 +1014,21 @@ export const SAA_C03 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'Amazon EC2 料金',
+                  title: 'Amazon EC2 料金体系',
                   url: 'https://aws.amazon.com/jp/ec2/pricing/',
-                  note: '購入オプションの比較',
+                  note: 'オンデマンド・リザーブド・スポット・Savings Plans の比較',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Well-Architected Framework - コスト最適化の柱',
+                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/cost-optimization-pillar/welcome.html',
+                  note: 'コスト効率の高いリソース選定の設計原則',
+                  recommend: true,
+                },
+                {
+                  title: 'スポットインスタンスのベストプラクティス',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AWSEC2/latest/UserGuide/spot-best-practices.html',
+                  note: 'スポットの中断対応とアーキテクチャ設計',
                 },
               ],
             },
@@ -832,10 +1074,15 @@ export const SAA_C03 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS データベースサービス',
-                  url: 'https://aws.amazon.com/jp/products/databases/',
-                  note: 'データベースサービスの料金比較',
+                  title: 'AWS データベースサービスの選択ガイド',
+                  url: 'https://aws.amazon.com/jp/getting-started/decision-guides/databases-on-aws-how-to-choose/',
+                  note: 'ユースケース別のデータベース選定（コスト観点含む）',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Aurora Serverless v2',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/AuroraUserGuide/aurora-serverless-v2.html',
+                  note: '可変ワークロードのコスト最適化',
                 },
               ],
             },
@@ -881,10 +1128,20 @@ export const SAA_C03 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS データ転送料金',
+                  title: 'AWS データ転送料金の概要',
                   url: 'https://aws.amazon.com/jp/ec2/pricing/on-demand/#Data_Transfer',
-                  note: 'データ転送コストの詳細',
+                  note: 'リージョン間・AZ間・インターネット向けの転送コスト',
                   recommend: true,
+                },
+                {
+                  title: 'VPC エンドポイント',
+                  url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/vpc-endpoints.html',
+                  note: 'NAT Gateway コスト削減のためのPrivateLink活用',
+                },
+                {
+                  title: 'AWS の料金の仕組み（ホワイトペーパー）',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/welcome.html',
+                  note: 'データ転送コストの全体像を把握',
                 },
               ],
             },

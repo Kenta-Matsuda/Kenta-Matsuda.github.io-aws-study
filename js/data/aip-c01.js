@@ -190,6 +190,12 @@ export const AIP_C01 = {
                   note: 'GenAI ソリューションの設計と構築',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon Bedrock API リファレンス',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/APIReference/welcome.html',
+                  note: 'InvokeModel / Converse API',
+                  recommend: true,
+                },
               ],
             },
           ],
@@ -212,6 +218,20 @@ export const AIP_C01 = {
             'モデルライフサイクル管理',
           ],
           resources: [
+            {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock を活用した RAG チャットボットアーキテクチャのハードニング',
+                  url: 'https://aws.amazon.com/jp/blogs/news/hardening-the-rag-chatbot-architecture-powered-by-amazon-bedrock-blueprint-for-secure-design-and-anti-pattern-migration/',
+                  note: 'Security Blog: Advanced (Level 300)',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -293,6 +313,11 @@ export const AIP_C01 = {
                   note: 'ベクトルストアとナレッジベースの構築',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon OpenSearch Service 開発者ガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/what-is.html',
+                  note: 'ベクトル検索とk-NNインデックス',
+                },
               ],
             },
           ],
@@ -328,6 +353,12 @@ export const AIP_C01 = {
                   title: 'Amazon Bedrock での RAG 実装',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/knowledge-base-retrieve-generate.html',
                   note: '検索拡張生成 (RAG) の設計と実装',
+                  recommend: true,
+                },
+                {
+                  title: 'RAG のオプションとアーキテクチャ',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/retrieval-augmented-generation-options/welcome.html',
+                  note: 'Prescriptive Guidance: RAG 設計パターンの包括的ガイド',
                   recommend: true,
                 },
               ],
@@ -366,6 +397,11 @@ export const AIP_C01 = {
                   note: 'プロンプトテンプレートの作成と管理',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon Bedrock Prompt Flows',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/flows.html',
+                  note: 'プロンプトチェーンとワークフローの構築',
+                },
               ],
             },
           ],
@@ -402,6 +438,7 @@ export const AIP_C01 = {
             'Strands Agents',
           ],
           resources: [
+            {key:'blogs', label:'AWS Blogs', iconClass:'fas fa-book', iconColorClass:'text-orange-500', items:[{title:'Amazon Bedrock ナレッジベースによる RAG の実装', url:'https://aws.amazon.com/jp/blogs/news/amazon-bedrock-knowledge-bases-now-supports-advanced-parsing-chunking-and-query-reformulation-giving-higher-accuracy-for-rag-based-applications/', note:'AWS News Blog: Intermediate (Level 200)', recommend:true},{title:'Strands Agents SDK: エージェントアーキテクチャとオブザーバビリティの技術的深堤り', url:'https://aws.amazon.com/jp/blogs/machine-learning/strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/', note:'ML Blog: Advanced (Level 300)', recommend:true}]},
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -412,6 +449,12 @@ export const AIP_C01 = {
                   title: 'Amazon Bedrock Agents',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/agents.html',
                   note: 'エージェンティック AI の構築とツール統合',
+                  recommend: true,
+                },
+                {
+                  title: 'Strands Agents SDK ドキュメント',
+                  url: 'https://strandsagents.com/latest/documentation/docs/',
+                  note: 'オープンソース AI エージェント SDK',
                   recommend: true,
                 },
               ],
@@ -445,6 +488,12 @@ export const AIP_C01 = {
                   title: 'Amazon Bedrock プロビジョンドスループット',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/prov-throughput.html',
                   note: 'モデルデプロイとスループットの管理',
+                  recommend: true,
+                },
+                {
+                  title: 'Amazon Bedrock Agents',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/agents.html',
+                  note: 'エージェントのオーケストレーション',
                   recommend: true,
                 },
               ],
@@ -481,6 +530,11 @@ export const AIP_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html',
                   note: 'API 統合とエンタープライズ接続',
                   recommend: true,
+                },
+                {
+                  title: 'サーバーレス AI アーキテクチャの設計',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/agentic-ai-serverless/designing-serverless-ai-architectures.html',
+                  note: 'Prescriptive Guidance: イベント駆動 + サーバーレス AI 設計',
                 },
               ],
             },
@@ -586,15 +640,29 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'RAG インジェストパイプラインのセキュリティ確保: フィルタリングメカニズム',
+                  url: 'https://aws.amazon.com/blogs/security/securing-the-rag-ingestion-pipeline-filtering-mechanisms/',
+                  note: 'Security Blog: Advanced (Level 300)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'Amazon Bedrock ガードレール',
+                  title: 'Amazon Bedrock Guardrails',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/guardrails.html',
-                  note: '入出力の安全コントロールとコンテンツフィルタリング',
+                  note: 'コンテンツフィルタリング・安全性制御',
                   recommend: true,
                 },
               ],
@@ -629,6 +697,11 @@ export const AIP_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/security.html',
                   note: 'データセキュリティとプライバシー保護',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Bedrock のデータ保護',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/data-protection.html',
+                  note: '暗号化・データ保持・ VPC エンドポイント',
                 },
               ],
             },
@@ -741,6 +814,11 @@ export const AIP_C01 = {
                   note: 'トークン価格とコスト最適化の理解',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon Bedrock プロビジョンドスループット',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/prov-throughput.html',
+                  note: 'プロビジョンドスループットによるコスト最適化',
+                },
               ],
             },
           ],
@@ -813,6 +891,11 @@ export const AIP_C01 = {
                   note: 'GenAI アプリケーションのモニタリング',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon Bedrock モデル呼び出しログ',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-invocation-logging.html',
+                  note: 'トークン使用量・応答品質のモニタリング',
+                },
               ],
             },
           ],
@@ -862,6 +945,11 @@ export const AIP_C01 = {
                   note: 'FM の品質評価とベンチマーク',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon Bedrock モデル評価ジョブ',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-evaluation-jobs.html',
+                  note: '自動・人間評価のワークフロー構築',
+                },
               ],
             },
           ],
@@ -896,6 +984,11 @@ export const AIP_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/xray/latest/devguide/aws-xray.html',
                   note: 'GenAI アプリケーションのトレーシングとデバッグ',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Bedrock のトラブルシューティング',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/troubleshooting.html',
+                  note: 'API エラー・スロットリング・タイムアウトの対処',
                 },
               ],
             },

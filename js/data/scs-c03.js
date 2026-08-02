@@ -186,6 +186,20 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'Amazon CloudWatch と AWS X-Ray で MTTR を短縮する',
+                  url: 'https://aws.amazon.com/jp/blogs/mt/lowering-mttr-with-amazon-cloudwatch-and-aws-x-ray/',
+                  note: 'Management Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -228,6 +242,20 @@ export const SCS_C03 = {
             'VPC フローログ',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS CloudTrail 基礎編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudTrail%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/09',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -406,6 +434,20 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon VPC',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
+                  note: 'PDF | Youtube: 2020/10',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -558,6 +600,12 @@ export const SCS_C03 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/what-is-amazon-cognito.html',
                   note: 'アプリケーションの認証・ユーザー管理',
                 },
+                {
+                  title: 'IAM ポリシーの評価ロジック',
+                  url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_evaluation-logic.html',
+                  note: 'ポリシー評価の仕組みを理解（Specialty必須）',
+                  recommend: true,
+                },
               ],
             },
           ],
@@ -632,6 +680,20 @@ export const SCS_C03 = {
             'AWS Client VPN',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Key Management Service Part.2 発展編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/04',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -780,6 +842,12 @@ export const SCS_C03 = {
                   title: 'AWS Control Tower ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/controltower/latest/userguide/what-is-control-tower.html',
                   note: 'マルチアカウントのガバナンス・コントロール',
+                },
+                {
+                  title: 'AWS Security Reference Architecture',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  note: 'Prescriptive Guidance: マルチアカウントセキュリティ設計',
+                  recommend: true,
                 },
               ],
             },
