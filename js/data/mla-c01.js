@@ -190,6 +190,20 @@ export const MLA_C01 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'SageMaker Feature Store を使用した特徴量管理のベストプラクティス',
+                  url: 'https://aws.amazon.com/blogs/machine-learning/understanding-the-key-capabilities-of-amazon-sagemaker-feature-store/',
+                  note: 'ML Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -205,6 +219,11 @@ export const MLA_C01 = {
                   title: 'AWS Glue 開発者ガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/what-is-glue.html',
                   note: 'ETL ジョブによるデータ取り込み',
+                },
+                {
+                  title: 'Amazon SageMaker Data Wrangler',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/data-wrangler.html',
+                  note: 'データ前処理の視覚的ツール',
                 },
               ],
             },
@@ -248,6 +267,11 @@ export const MLA_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/data-wrangler.html',
                   note: 'データ変換と特徴量エンジニアリング',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Glue DataBrew ユーザーガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/databrew/latest/dg/what-is.html',
+                  note: 'ノーコードのデータ変換ツール',
                 },
               ],
             },
@@ -342,13 +366,18 @@ export const MLA_C01 = {
                 {
                   title: 'Amazon SageMaker 組み込みアルゴリズム',
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/algos.html',
-                  note: 'アルゴリズムの選択と適用',
+                  note: 'アルゴリズム選択ガイド',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/what-is-bedrock.html',
                   note: '基盤モデルの選択と利用',
+                },
+                {
+                  title: 'Amazon SageMaker JumpStart',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/studio-jumpstart.html',
+                  note: '事前トレーニング済みモデルとソリューションテンプレート',
                 },
               ],
             },
@@ -389,6 +418,19 @@ export const MLA_C01 = {
             'SageMaker Model Registry',
           ],
           resources: [
+            {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'MLOps: バッチ推論のモデルモニタリングと再トレーニング',
+                  url: 'https://aws.amazon.com/jp/blogs/machine-learning/mlops-for-batch-inference-with-model-monitoring-and-retraining-using-amazon-sagemaker-hashicorp-terraform-and-gitlab-ci-cd/',
+                  note: 'ML Blog: Advanced (Level 300)',
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -444,6 +486,11 @@ export const MLA_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/train-debugger.html',
                   note: 'モデル収束のデバッグと評価メトリクスの分析',
                   recommend: true,
+                },
+                {
+                  title: 'SageMaker Clarify バイアス検出',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/clarify-detect-post-training-bias.html',
+                  note: 'トレーニング後バイアスの検出と解釈性',
                 },
               ],
             },
@@ -502,6 +549,12 @@ export const MLA_C01 = {
                   note: 'エンドポイントのデプロイと管理',
                   recommend: true,
                 },
+                {
+                  title: 'SageMaker エンドポイントのデプロイ',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/deploy-model.html',
+                  note: 'リアルタイム/バッチ推論の設定',
+                  recommend: true,
+                },
               ],
             },
           ],
@@ -545,6 +598,12 @@ export const MLA_C01 = {
                   title: 'SageMaker Pipelines',
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/pipelines.html',
                   note: 'ML ワークフローのオーケストレーション',
+                  recommend: true,
+                },
+                {
+                  title: 'SageMaker AI エンドポイントのオートスケーリング',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/endpoint-auto-scaling.html',
+                  note: '推論エンドポイントのスケーリング設定',
                   recommend: true,
                 },
               ],
@@ -593,6 +652,11 @@ export const MLA_C01 = {
                   note: 'ML パイプラインの構築と自動化',
                   recommend: true,
                 },
+                {
+                  title: 'SageMaker MLOps プロジェクトテンプレート',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/sagemaker-projects-templates.html',
+                  note: 'CI/CD プロジェクトのクイックスタート',
+                },
               ],
             },
           ],
@@ -640,7 +704,7 @@ export const MLA_C01 = {
                 {
                   title: 'SageMaker Model Monitor',
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/model-monitor.html',
-                  note: 'モデルドリフトの検出とモニタリング',
+                  note: 'モデル品質のドリフト検出',
                   recommend: true,
                 },
               ],
@@ -693,6 +757,11 @@ export const MLA_C01 = {
                   note: 'ML インフラのモニタリングとアラーム設定',
                   recommend: true,
                 },
+                {
+                  title: 'SageMaker AI Inference Recommender',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/inference-recommender.html',
+                  note: 'インスタンスタイプのライトサイジング推奨',
+                },
               ],
             },
           ],
@@ -734,6 +803,11 @@ export const MLA_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/security.html',
                   note: 'IAM ロール・VPC 設定・暗号化のベストプラクティス',
                   recommend: true,
+                },
+                {
+                  title: 'SageMaker の VPC 内デプロイ',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/infrastructure-connect-to-resources.html',
+                  note: 'VPC エンドポイントとネットワーク分離',
                 },
               ],
             },

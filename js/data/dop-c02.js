@@ -189,6 +189,34 @@ export const DOP_C02 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS CodeCommit/CodeBuild/CodeDeploy/CodePipeline で完全な CI/CD',
+                  url: 'https://aws.amazon.com/blogs/devops/complete-ci-cd-with-aws-codecommit-aws-codebuild-aws-codedeploy-and-aws-codepipeline/',
+                  note: 'DevOps Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS CodePipeline 基礎編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CodePipeline%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2025/12',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -379,6 +407,25 @@ export const DOP_C02 = {
             'AWS AppConfig',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS CloudFormation#1 基礎編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2023/07',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS CloudFormation DeepDive 編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%20DeepDive%20%E7%B7%A8',
+                  note: 'PDF | Youtube: 2023/10',
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -676,6 +723,20 @@ export const DOP_C02 = {
             'AWS KMS',
           ],
           resources: [
+            {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS ネイティブな CloudWatch と X-Ray を使用したサーバーレスモダンアプリケーションのオブザーバビリティ',
+                  url: 'https://aws.amazon.com/jp/blogs/news/observability-using-native-amazon-cloudwatch-and-aws-x-ray-for-serverless-modern-applications/',
+                  note: 'Management Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -982,6 +1043,12 @@ export const DOP_C02 = {
                   title: 'AWS IAM Identity Center ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/singlesignon/latest/userguide/what-is.html',
                   note: 'マルチアカウントの ID フェデレーション管理',
+                },
+                {
+                  title: 'AWS Security Reference Architecture',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  note: 'Prescriptive Guidance: 組織全体のセキュリティ設計',
+                  recommend: true,
                 },
               ],
             },

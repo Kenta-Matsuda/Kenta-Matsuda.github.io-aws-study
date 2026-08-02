@@ -353,6 +353,12 @@ export const AIF_C01 = {
                   note: '生成 AI プラットフォームの概要',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon Bedrock ユーザーガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/what-is-bedrock.html',
+                  note: '基盤モデルの活用方法',
+                  recommend: true,
+                },
               ],
             },
           ],
@@ -488,9 +494,9 @@ export const AIF_C01 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'Amazon Bedrock Knowledge Bases',
+                  title: 'Amazon Bedrock のナレッジベース',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/knowledge-base.html',
-                  note: 'RAG の構築方法',
+                  note: 'RAG パターンの実装',
                   recommend: true,
                 },
               ],

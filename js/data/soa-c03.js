@@ -184,6 +184,20 @@ export const SOA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon CloudWatch Part1 Observability の基本・メトリクス・アラーム編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20CloudWatch%20Part1%20Observability%20%E3%81%AE%E5%9F%BA%E6%9C%AC',
+                  note: 'PDF | Youtube: 2026/05',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -223,6 +237,20 @@ export const SOA_C03 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'イベント駆動型のネットワーク自動化',
+                  url: 'https://aws.amazon.com/blogs/mt/automating-operational-events-with-aws-systems-manager/',
+                  note: 'Management Blog: Intermediate (Level 200)',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -232,6 +260,12 @@ export const SOA_C03 = {
                   title: 'AWS Systems Manager ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/what-is-systems-manager.html',
                   note: 'ランブックによる修復の自動化',
+                  recommend: true,
+                },
+                {
+                  title: 'EventBridge ルールを使用して CloudWatch アラームに応答する Systems Manager Automation を実行する',
+                  url: 'https://aws.amazon.com/jp/blogs/mt/use-amazon-eventbridge-rules-to-run-aws-systems-manager-automation-in-response-to-cloudwatch-alarms/',
+                  note: 'Management Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -322,6 +356,11 @@ export const SOA_C03 = {
                   note: 'スケーリングポリシーとメカニズムの設定',
                   recommend: true,
                 },
+                {
+                  title: 'Auto Scaling ユーザーガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html',
+                  note: 'スケーリングポリシーの設計',
+                },
               ],
             },
           ],
@@ -352,6 +391,12 @@ export const SOA_C03 = {
                   title: 'Elastic Load Balancing ユーザーガイド',
                   url: 'https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/userguide/what-is-load-balancing.html',
                   note: 'ロードバランシングとヘルスチェックの設定',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Backup 開発者ガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/aws-backup/latest/devguide/whatisbackup.html',
+                  note: 'バックアッププランの設計と実装',
                   recommend: true,
                 },
               ],
@@ -426,6 +471,20 @@ export const SOA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS CloudFormation#1 基礎編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2023/07',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -474,6 +533,11 @@ export const SOA_C03 = {
                   note: 'ランブックによる運用タスクの自動化',
                   recommend: true,
                 },
+                {
+                  title: 'Amazon ECS 開発者ガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/Welcome.html',
+                  note: 'コンテナデプロイとサービス管理',
+                },
               ],
             },
           ],
@@ -517,7 +581,7 @@ export const SOA_C03 = {
                 {
                   title: 'IAM でのセキュリティのベストプラクティス',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html',
-                  note: 'IAM ポリシー設計とアクセス管理',
+                  note: '最小権限・MFA・ロール設計',
                   recommend: true,
                 },
               ],
@@ -545,6 +609,20 @@ export const SOA_C03 = {
             'Amazon Inspector',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Key Management Service Part.2 発展編',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/04',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -598,6 +676,20 @@ export const SOA_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon VPC',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
+                  note: 'PDF | Youtube: 2020/10',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -647,6 +739,12 @@ export const SOA_C03 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/Welcome.html',
                   note: 'DNS ルーティングポリシーの設定',
                 },
+                {
+                  title: 'Amazon Route 53 開発者ガイド',
+                  url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/Welcome.html',
+                  note: 'DNS ルーティングとヘルスチェック',
+                  recommend: true,
+                },
               ],
             },
           ],
@@ -682,6 +780,11 @@ export const SOA_C03 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/flow-logs.html',
                   note: 'ネットワークトラフィックのログ収集と分析',
                   recommend: true,
+                },
+                {
+                  title: 'VPC エンドポイント',
+                  url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/vpc-endpoints.html',
+                  note: 'プライベート接続とコスト削減',
                 },
               ],
             },
