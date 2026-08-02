@@ -16,6 +16,7 @@ import {
   getStreakInfo,
   addQuizResult,
   getQuizHistory,
+  getQuizAnalytics,
   exportQuizHistory,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
@@ -1352,6 +1353,11 @@ function getElements() {
     streakWeekDots: document.getElementById('streakWeekDots'),
     streakMessage: document.getElementById('streakMessage'),
 
+    // Skill Radar Chart
+    skillRadarChart: document.getElementById('skillRadarChart'),
+    skillRadarChartContainer: document.getElementById('skillRadarChartContainer'),
+    skillRadarEmpty: document.getElementById('skillRadarEmpty'),
+
     // Chat
     chatFab: document.getElementById('chatFab'),
     chatPanel: document.getElementById('chatPanel'),
@@ -1708,6 +1714,9 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Initialize carousel (only once)
   initDashboardCarousel(els);
+
+  // Update skill radar chart
+  renderSkillRadarChart({ els, exam, state });
 }
 
 let carouselInitialized = false;
@@ -1828,6 +1837,123 @@ function renderStreakDisplay(els) {
         </div>
       `.trim();
     }).join('');
+  }
+}
+
+// ─── Skill Radar Chart ──────────────────────────────────────
+
+let skillRadarChartInstance = null;
+
+function renderSkillRadarChart({ els, exam, state }) {
+  if (!els.skillRadarChart || !exam?.domains?.length) return;
+
+  const analytics = getQuizAnalytics(state.examId);
+  const byDomain = analytics.byDomain || {};
+
+  // Check if there's any quiz data
+  const hasData = Object.keys(byDomain).length > 0;
+
+  if (!hasData) {
+    if (els.skillRadarEmpty) els.skillRadarEmpty.classList.remove('hidden');
+    if (els.skillRadarChartContainer) els.skillRadarChart.style.display = 'none';
+    if (skillRadarChartInstance) {
+      skillRadarChartInstance.destroy();
+      skillRadarChartInstance = null;
+    }
+    return;
+  }
+
+  if (els.skillRadarEmpty) els.skillRadarEmpty.classList.add('hidden');
+  els.skillRadarChart.style.display = '';
+
+  const labels = exam.domains.map((d) => d.jpTitle);
+  const dataValues = exam.domains.map((d) => {
+    const domainData = byDomain[d.id];
+    return domainData ? Math.round(domainData.accuracy * 100) : 0;
+  });
+  const totalCounts = exam.domains.map((d) => {
+    const domainData = byDomain[d.id];
+    return domainData ? domainData.total : 0;
+  });
+  const borderColors = exam.domains.map((d) => d.color || '#6366f1');
+  const bgColors = exam.domains.map((d) => {
+    // Convert hex to rgba with 0.2 alpha
+    const hex = d.color || '#6366f1';
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.2)`;
+  });
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: '正答率 (%)',
+        data: dataValues,
+        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+        borderColor: '#6366f1',
+        borderWidth: 2,
+        pointBackgroundColor: borderColors,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            const idx = ctx.dataIndex;
+            const count = totalCounts[idx] || 0;
+            return `正答率: ${ctx.raw}%（${count}問回答）`;
+          },
+        },
+      },
+    },
+    scales: {
+      r: {
+        beginAtZero: true,
+        max: 100,
+        min: 0,
+        ticks: {
+          stepSize: 25,
+          font: { size: 9 },
+          backdropColor: 'transparent',
+        },
+        pointLabels: {
+          font: { size: 10, weight: '600' },
+          color: '#6b7280',
+        },
+        grid: {
+          color: 'rgba(107, 114, 128, 0.15)',
+        },
+        angleLines: {
+          color: 'rgba(107, 114, 128, 0.15)',
+        },
+      },
+    },
+  };
+
+  const ctx = els.skillRadarChart.getContext('2d');
+
+  if (skillRadarChartInstance) {
+    skillRadarChartInstance.data = chartData;
+    skillRadarChartInstance.options = chartOptions;
+    skillRadarChartInstance.update();
+  } else {
+    skillRadarChartInstance = new Chart(ctx, {
+      type: 'radar',
+      data: chartData,
+      options: chartOptions,
+    });
   }
 }
 
