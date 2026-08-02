@@ -193,6 +193,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       taskContext: req.taskContext,
       session: quizSession,
       isDashboardQuiz: req.isDashboardQuiz,
+      domainId: typeof state.currentDomainId === 'number' ? state.currentDomainId : null,
     });
     if (ok && quizSession) {
       updateQuizProgress();
@@ -378,6 +379,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       choices: h.choices,
       correctIndex: h.correctIndex,
       explanation: h.explanation,
+      domainId: h.domainId ?? null,
     }));
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
@@ -571,6 +573,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
       const parsed = parseQuizResponse(response);
       if (parsed) {
+        parsed.domainId = targetDomain?.id ?? null;
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
       }
@@ -779,10 +782,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // Parse results
     const generated = [];
-    for (const text of result.texts) {
+    for (let i = 0; i < result.texts.length; i++) {
+      const text = result.texts[i];
       if (!text) continue;
       const parsed = parseQuizResponse(text);
-      if (parsed) generated.push(parsed);
+      if (parsed) {
+        parsed.domainId = domainTargets[i]?.id ?? null;
+        generated.push(parsed);
+      }
     }
     if (generated.length === 0) {
       setBatchToastState('error', '生成された問題を解析できませんでした');
@@ -972,8 +979,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Store quiz result
     const elapsedMs = window.__questionShownAt ? Date.now() - window.__questionShownAt : null;
     window.__questionShownAt = 0;
+    // Determine domainId: from pre-generated question, or from current domain tab
+    const quizDomainId = quiz.domainId
+      ?? (typeof appState.currentDomainId === 'number' ? appState.currentDomainId : null);
     addQuizResult({
       examId: appState.examId,
+      domainId: quizDomainId,
       taskId: lastAiRequest?.taskId || '',
       isCorrect,
       xpEarned: result.xpEarned,
@@ -3058,7 +3069,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   return isSuccessfulAiResponse(response);
 }
 
-async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz }) {
+async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz, domainId }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
@@ -3116,6 +3127,7 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
   const parsed = parseQuizResponse(response);
 
   if (parsed) {
+    parsed.domainId = domainId ?? null;
     // Render interactive quiz UI
     renderInteractiveQuiz({ els, quiz: parsed });
     return true;
