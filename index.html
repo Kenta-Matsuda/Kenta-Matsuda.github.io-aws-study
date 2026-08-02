@@ -13,6 +13,17 @@
         <meta property="og:title" content="AWS Study Navigator">
         <meta property="og:description" content="AWS認定の学習を、XPと称号で積み上げる学習ナビ。">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = { darkMode: 'class' };
+    </script>
+    <script>
+      // Apply theme immediately to prevent FOUC
+      (function() {
+        var theme = localStorage.getItem('asn_theme');
+        var isDark = theme === 'dark' || (theme !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (isDark) document.documentElement.classList.add('dark');
+      })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="./assets/vendor/marked.min.js" onerror="this.onerror=null;this.src='https://cdn.jsdelivr.net/npm/marked/marked.min.js'"></script>
@@ -20,10 +31,64 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
+        /* ── Theme CSS Variables ── */
+        :root {
+            --color-bg: #f8fafc;
+            --color-bg-card: #ffffff;
+            --color-bg-secondary: #f9fafb;
+            --color-bg-tertiary: #f3f4f6;
+            --color-text: #1f2937;
+            --color-text-secondary: #4b5563;
+            --color-text-muted: #6b7280;
+            --color-border: #e5e7eb;
+            --color-border-light: #f3f4f6;
+            --color-shadow: rgba(0, 0, 0, 0.1);
+            --color-modal-backdrop: rgba(0, 0, 0, 0.5);
+            --color-modal-bg: #fefefe;
+            --color-input-bg: #ffffff;
+            --color-input-border: #d1d5db;
+            --color-scrollbar-track: #f1f1f1;
+            --color-scrollbar-thumb: #cbd5e1;
+            --color-scrollbar-thumb-hover: #94a3b8;
+            --color-code-bg: #f3f4f6;
+            --color-pre-bg: #111827;
+            --color-pre-text: #e5e7eb;
+            --color-blockquote-bg: #fffbeb;
+            --color-blockquote-text: #92400e;
+            --color-blockquote-border: #f59e0b;
+        }
+
+        html.dark {
+            --color-bg: #0f172a;
+            --color-bg-card: #1e293b;
+            --color-bg-secondary: #1e293b;
+            --color-bg-tertiary: #334155;
+            --color-text: #e2e8f0;
+            --color-text-secondary: #94a3b8;
+            --color-text-muted: #64748b;
+            --color-border: #334155;
+            --color-border-light: #1e293b;
+            --color-shadow: rgba(0, 0, 0, 0.4);
+            --color-modal-backdrop: rgba(0, 0, 0, 0.7);
+            --color-modal-bg: #1e293b;
+            --color-input-bg: #334155;
+            --color-input-border: #475569;
+            --color-scrollbar-track: #1e293b;
+            --color-scrollbar-thumb: #475569;
+            --color-scrollbar-thumb-hover: #64748b;
+            --color-code-bg: #334155;
+            --color-pre-bg: #0f172a;
+            --color-pre-text: #e2e8f0;
+            --color-blockquote-bg: #422006;
+            --color-blockquote-text: #fde68a;
+            --color-blockquote-border: #d97706;
+        }
+
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #f8fafc;
-            color: #1f2937;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .chart-container {
@@ -41,14 +106,14 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: var(--color-scrollbar-track);
         }
         ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
+            background: var(--color-scrollbar-thumb);
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: var(--color-scrollbar-thumb-hover);
         }
 
         .card-hover {
@@ -72,16 +137,16 @@
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: var(--color-modal-backdrop);
             backdrop-filter: blur(4px);
         }
 
         .modal-content {
-            background-color: #fefefe;
+            background-color: var(--color-modal-bg);
             margin: 10% auto;
             padding: 0;
             border-radius: 12px;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            box-shadow: 0 20px 25px -5px var(--color-shadow), 0 10px 10px -5px var(--color-shadow);
             width: 90%;
             max-width: 700px;
             position: relative;
@@ -121,23 +186,23 @@
         .ai-response-area blockquote {
             margin: 0.75rem 0;
             padding: 0.5rem 0.75rem;
-            border-left: 4px solid #f59e0b;
-            background: #fffbeb;
-            color: #92400e;
+            border-left: 4px solid var(--color-blockquote-border);
+            background: var(--color-blockquote-bg);
+            color: var(--color-blockquote-text);
             border-radius: 8px;
         }
         .ai-response-area code {
             font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
             font-size: 0.95em;
-            background: #f3f4f6;
+            background: var(--color-code-bg);
             padding: 0.1rem 0.3rem;
             border-radius: 6px;
         }
         .ai-response-area pre {
             margin: 0.75rem 0;
             padding: 0.75rem;
-            background: #111827;
-            color: #e5e7eb;
+            background: var(--color-pre-bg);
+            color: var(--color-pre-text);
             border-radius: 10px;
             overflow: auto;
         }
@@ -541,6 +606,205 @@
             border-bottom-left-radius: 4px;
         }
         .chat-bubble-ai .ai-response-area { font-size: 14px; }
+
+        /* ── Dark Mode Overrides ── */
+        html.dark .aws-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        html.dark .card-hover:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+        }
+        html.dark .chat-panel {
+            background: #1e293b;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        html.dark .chat-bubble-ai {
+            background: #334155;
+            color: #e2e8f0;
+        }
+        html.dark .quiz-choice-correct {
+            background: #064e3b !important;
+            border-color: #10b981 !important;
+            color: #a7f3d0 !important;
+        }
+        html.dark .quiz-choice-incorrect {
+            background: #450a0a !important;
+            border-color: #f87171 !important;
+            color: #fecaca !important;
+        }
+        html.dark .quiz-mode-card:hover {
+            border-color: #818cf8;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+        }
+        html.dark .quiz-mode-card.selected {
+            border-color: #818cf8;
+            background: #312e81;
+        }
+        html.dark .dashboard-carousel-nav {
+            background: rgba(30, 41, 59, 0.9);
+            border-color: #475569;
+            color: #94a3b8;
+        }
+        html.dark .dashboard-carousel-nav:hover { background: #334155; }
+        html.dark .dashboard-carousel-dot { background: #475569; }
+        html.dark .dashboard-carousel-dot.active { background: #818cf8; }
+        html.dark .recommend-card {
+            border-color: #92400e;
+            background: linear-gradient(135deg, rgba(120, 53, 15, 0.95), rgba(30, 41, 59, 0.95), rgba(146, 64, 14, 0.95));
+        }
+
+        /* Dark mode: override common Tailwind bg/text/border utilities */
+        html.dark .bg-white { background-color: var(--color-bg-card) !important; }
+        html.dark .bg-gray-50 { background-color: var(--color-bg-secondary) !important; }
+        html.dark .bg-gray-100 { background-color: var(--color-bg-tertiary) !important; }
+        html.dark .border-gray-100,
+        html.dark .border-gray-200 { border-color: var(--color-border) !important; }
+        html.dark .text-gray-800,
+        html.dark .text-gray-900 { color: #e2e8f0 !important; }
+        html.dark .text-gray-700 { color: #cbd5e0 !important; }
+        html.dark .text-gray-600 { color: #94a3b8 !important; }
+        html.dark .text-gray-500 { color: #64748b !important; }
+        html.dark .text-gray-400 { color: #64748b !important; }
+        html.dark .text-gray-300 { color: #94a3b8 !important; }
+        html.dark .bg-gray-200 { background-color: #475569 !important; }
+        html.dark .bg-gray-200:hover,
+        html.dark .hover\:bg-gray-300:hover { background-color: #64748b !important; }
+        html.dark .hover\:bg-gray-100:hover { background-color: #334155 !important; }
+        html.dark .hover\:bg-gray-50:hover { background-color: var(--color-bg-secondary) !important; }
+        html.dark .hover\:bg-gray-200:hover { background-color: #475569 !important; }
+        html.dark .bg-gradient-to-br.from-indigo-50.to-purple-50 {
+            background: linear-gradient(to bottom right, #312e81, #3b0764) !important;
+        }
+        html.dark .bg-indigo-50 { background-color: #312e81 !important; }
+        html.dark .hover\:bg-indigo-100:hover { background-color: #3730a3 !important; }
+
+        /* Dark mode: inputs */
+        html.dark .shadow.appearance-none.border.rounded {
+            background-color: var(--color-input-bg);
+            border-color: var(--color-input-border);
+            color: var(--color-text);
+        }
+        html.dark input,
+        html.dark select,
+        html.dark textarea {
+            background-color: var(--color-input-bg);
+            border-color: var(--color-input-border);
+            color: var(--color-text);
+        }
+        html.dark input::placeholder,
+        html.dark textarea::placeholder {
+            color: #64748b;
+        }
+
+        /* Dark mode: footer */
+        html.dark footer.bg-gray-800 {
+            background-color: #0f172a !important;
+        }
+
+        /* Dark mode: specific card borders */
+        html.dark .border-indigo-200 { border-color: #4338ca !important; }
+        html.dark .border-orange-200 { border-color: #92400e !important; }
+        html.dark .bg-orange-100 { background-color: #451a03 !important; }
+        html.dark .text-orange-700 { color: #fdba74 !important; }
+        html.dark .bg-amber-50 { background-color: #451a03 !important; }
+        html.dark .text-amber-800 { color: #fde68a !important; }
+        html.dark .border-amber-200 { border-color: #92400e !important; }
+        html.dark .bg-red-50 { background-color: #450a0a !important; }
+        html.dark .text-red-800 { color: #fca5a5 !important; }
+        html.dark .border-red-200 { border-color: #991b1b !important; }
+
+        /* Dark mode: gradients used in card headers */
+        html.dark .bg-gradient-to-r.from-gray-50.to-white,
+        html.dark [class*="bg-gradient-to-r"][class*="from-gray-50"][class*="to-white"] {
+            background: linear-gradient(to right, #1e293b, var(--color-bg-card)) !important;
+        }
+        html.dark .bg-gradient-to-r.from-orange-50.to-white,
+        html.dark [class*="bg-gradient-to-r"][class*="from-orange-50"][class*="to-white"] {
+            background: linear-gradient(to right, #431407, var(--color-bg-card)) !important;
+        }
+
+        /* Dark mode: links */
+        html.dark .text-blue-700 { color: #93c5fd !important; }
+        html.dark .text-blue-600 { color: #93c5fd !important; }
+        html.dark .text-blue-500 { color: #60a5fa !important; }
+        html.dark a.text-blue-500 { color: #60a5fa !important; }
+        html.dark .hover\:text-blue-500:hover { color: #93c5fd !important; }
+        html.dark .ai-response-area a { color: #60a5fa; }
+
+        /* Dark mode: purple (explain buttons, indigo text) */
+        html.dark .text-purple-600 { color: #c4b5fd !important; }
+        html.dark .text-purple-500 { color: #a78bfa !important; }
+        html.dark .bg-purple-50 { background-color: #2e1065 !important; }
+        html.dark .border-purple-200 { border-color: #6d28d9 !important; }
+        html.dark .hover\:bg-purple-100:hover { background-color: #3b0764 !important; }
+
+        /* Dark mode: indigo text/bg (buttons, badges) */
+        html.dark .text-indigo-700 { color: #a5b4fc !important; }
+        html.dark .text-indigo-600 { color: #a5b4fc !important; }
+        html.dark .text-indigo-500 { color: #818cf8 !important; }
+        html.dark .bg-indigo-600 { background-color: #4338ca !important; }
+        html.dark .hover\:bg-indigo-700:hover { background-color: #3730a3 !important; }
+
+        /* Dark mode: green */
+        html.dark .text-green-500 { color: #34d399 !important; }
+
+        /* Dark mode: orange (おススメ badge, step cards) */
+        html.dark .text-orange-700 { color: #fdba74 !important; }
+        html.dark .text-orange-900 { color: #fed7aa !important; }
+        html.dark .bg-orange-100 { background-color: #431407 !important; }
+        html.dark .bg-orange-50 { background-color: #431407 !important; }
+        html.dark .border-orange-200 { border-color: #9a3412 !important; }
+        html.dark .text-orange-500 { color: #fb923c !important; }
+
+        /* Dark mode: amber (description boxes) */
+        html.dark .bg-amber-50 { background-color: #422006 !important; }
+        html.dark .text-amber-900 { color: #fde68a !important; }
+        html.dark .text-amber-700 { color: #fbbf24 !important; }
+        html.dark .border-amber-200 { border-color: #92400e !important; }
+
+        /* Dark mode: teal/emerald (feedback button) */
+        html.dark .text-teal-500 { color: #2dd4bf !important; }
+
+        /* Dark mode: shadow adjustments */
+        html.dark .shadow-sm { box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.3) !important; }
+        html.dark .shadow-md { box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -2px rgba(0, 0, 0, 0.3) !important; }
+        html.dark .shadow-lg { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -4px rgba(0, 0, 0, 0.3) !important; }
+
+        /* Dark mode: recommend card text inside */
+        html.dark .recommend-card .text-blue-700 { color: #bfdbfe !important; }
+        html.dark .recommend-card .text-gray-500 { color: #94a3b8 !important; }
+        html.dark .recommend-card .text-gray-400 { color: #64748b !important; }
+        html.dark .recommend-card .text-orange-700 { color: #fdba74 !important; }
+        html.dark .recommend-card .bg-orange-100 { background-color: rgba(154, 52, 18, 0.6) !important; }
+        html.dark .recommend-card .border-orange-200 { border-color: #b45309 !important; }
+
+        /* Dark mode: blog cards (non-recommend) with bg-white */
+        html.dark .border-gray-100 { border-color: #334155 !important; }
+
+        /* Dark mode: vote buttons inline (darker bg-white) */
+        html.dark [data-vote-group] button { 
+            background-color: var(--color-bg-tertiary) !important;
+            border-color: #475569 !important;
+            color: #94a3b8 !important;
+        }
+        html.dark [data-vote-group] button[aria-pressed="true"] {
+            background-color: #e2e8f0 !important;
+            color: #1e293b !important;
+            border-color: #e2e8f0 !important;
+        }
+
+        /* Dark mode: domain tabs */
+        html.dark .border-b.border-gray-200 { border-color: #334155 !important; }
+
+        /* Dark mode: header subtitle link */
+        html.dark header a.underline { color: #94a3b8 !important; }
+        html.dark header a.underline:hover { color: #e2e8f0 !important; }
+
+        /* Dark mode: quiz history and feedback modal selects */
+        html.dark select.bg-white { background-color: var(--color-input-bg) !important; }
+
+        /* Dark mode: highlight search term */
+        html.dark .bg-yellow-200 { background-color: #854d0e !important; color: #fef9c3 !important; }
     </style>
 </head>
 <!-- Google tag (gtag.js) -->
@@ -580,6 +844,11 @@
                                 <div id="examSwitcher" class="p-2 flex flex-wrap gap-2" aria-label="Exam Switcher"></div>
                             </div>
                         </div>
+
+                        <button id="themeToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="テーマ切替">
+                            <span class="block text-xs text-gray-400 group-hover:text-white">Theme</span>
+                            <i id="themeToggleIcon" class="fas fa-moon text-gray-300 group-hover:text-white"></i>
+                        </button>
 
                         <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="API Key Settings">
                             <span class="block text-xs text-gray-400 group-hover:text-white">API Key</span>
