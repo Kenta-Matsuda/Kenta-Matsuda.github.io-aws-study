@@ -16,6 +16,7 @@ import {
   getStreakInfo,
   addQuizResult,
   getQuizHistory,
+  getQuizAnalytics,
   exportQuizHistory,
   getTheme,
   setTheme,
@@ -195,6 +196,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       taskContext: req.taskContext,
       session: quizSession,
       isDashboardQuiz: req.isDashboardQuiz,
+      domainId: typeof state.currentDomainId === 'number' ? state.currentDomainId : null,
     });
     if (ok && quizSession) {
       updateQuizProgress();
@@ -380,6 +382,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       choices: h.choices,
       correctIndex: h.correctIndex,
       explanation: h.explanation,
+      domainId: h.domainId ?? null,
     }));
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
@@ -534,13 +537,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     const generated = [];
     for (let i = 0; i < total; i++) {
-      // Only include last 5 questions for dedup to avoid oversized prompts
-      const recentQuestions = generated.slice(-5).map(q => q.question).join('\n');
+      // Build dedup hint: list topics/services already covered to avoid repetition
+      const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
       const targetDomain = domainTargets[i] || null;
+      const dedupSuffix = recentTopics
+        ? `\n\n【重要】以下の問題とは異なるAWSサービス・トピックで出題してください（同じサービスの繰り返しは禁止）:\n${recentTopics}`
+        : '';
       const userPrompt = (request.isDashboardQuiz
         ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
-        + (recentQuestions ? `\n\n【重要】以下の問題とは異なる問題を作成してください:\n${recentQuestions}` : '');
+        + dedupSuffix;
 
       let response = '';
       try {
@@ -573,6 +579,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
       const parsed = parseQuizResponse(response);
       if (parsed) {
+        parsed.domainId = targetDomain?.id ?? null;
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
       }
@@ -781,10 +788,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // Parse results
     const generated = [];
-    for (const text of result.texts) {
+    for (let i = 0; i < result.texts.length; i++) {
+      const text = result.texts[i];
       if (!text) continue;
       const parsed = parseQuizResponse(text);
-      if (parsed) generated.push(parsed);
+      if (parsed) {
+        parsed.domainId = domainTargets[i]?.id ?? null;
+        generated.push(parsed);
+      }
     }
     if (generated.length === 0) {
       setBatchToastState('error', '生成された問題を解析できませんでした');
@@ -974,8 +985,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Store quiz result
     const elapsedMs = window.__questionShownAt ? Date.now() - window.__questionShownAt : null;
     window.__questionShownAt = 0;
+    // Determine domainId: from pre-generated question, or from current domain tab
+    const quizDomainId = quiz.domainId
+      ?? (typeof appState.currentDomainId === 'number' ? appState.currentDomainId : null);
     addQuizResult({
       examId: appState.examId,
+      domainId: quizDomainId,
       taskId: lastAiRequest?.taskId || '',
       isCorrect,
       xpEarned: result.xpEarned,
@@ -1362,6 +1377,12 @@ function getElements() {
     streakWeekDots: document.getElementById('streakWeekDots'),
     streakMessage: document.getElementById('streakMessage'),
 
+    // Skill Radar Chart
+    skillRadarChart: document.getElementById('skillRadarChart'),
+    skillRadarChartContainer: document.getElementById('skillRadarChartContainer'),
+    skillRadarEmpty: document.getElementById('skillRadarEmpty'),
+    skillRadarLegend: document.getElementById('skillRadarLegend'),
+
     // Chat
     chatFab: document.getElementById('chatFab'),
     chatPanel: document.getElementById('chatPanel'),
@@ -1718,6 +1739,9 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Initialize carousel (only once)
   initDashboardCarousel(els);
+
+  // Update skill radar chart
+  renderSkillRadarChart({ els, exam, state });
 }
 
 let carouselInitialized = false;
@@ -1838,6 +1862,128 @@ function renderStreakDisplay(els) {
         </div>
       `.trim();
     }).join('');
+  }
+}
+
+// ─── Skill Radar Chart ──────────────────────────────────────
+
+let skillRadarChartInstance = null;
+
+function renderSkillRadarChart({ els, exam, state }) {
+  if (!els.skillRadarChart || !exam?.domains?.length) return;
+
+  const analytics = getQuizAnalytics(state.examId);
+  const byDomain = analytics.byDomain || {};
+
+  // Check if there's any quiz data
+  const hasData = Object.keys(byDomain).length > 0;
+
+  // Always show the chart container; show empty message overlay when no data
+  if (els.skillRadarEmpty) {
+    els.skillRadarEmpty.classList.toggle('hidden', hasData);
+  }
+
+  // Use short labels (D1, D2...) to fit within carousel
+  const labels = exam.domains.map((d) => `D${d.id}`);
+  const fullNames = exam.domains.map((d) => d.jpTitle);
+  const dataValues = exam.domains.map((d) => {
+    const domainData = byDomain[d.id];
+    return domainData ? Math.round(domainData.accuracy * 100) : 0;
+  });
+  const totalCounts = exam.domains.map((d) => {
+    const domainData = byDomain[d.id];
+    return domainData ? domainData.total : 0;
+  });
+  const borderColors = exam.domains.map((d) => d.color || '#6366f1');
+  const bgColors = exam.domains.map((d) => {
+    // Convert hex to rgba with 0.2 alpha
+    const hex = d.color || '#6366f1';
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, 0.2)`;
+  });
+
+  const chartData = {
+    labels,
+    datasets: [
+      {
+        label: '正答率 (%)',
+        data: dataValues,
+        backgroundColor: 'rgba(99, 102, 241, 0.15)',
+        borderColor: '#6366f1',
+        borderWidth: 2,
+        pointBackgroundColor: borderColors,
+        pointBorderColor: '#fff',
+        pointBorderWidth: 1,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+      },
+    ],
+  };
+
+  const chartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: (items) => {
+            const idx = items[0]?.dataIndex;
+            return idx != null ? fullNames[idx] : '';
+          },
+          label: (ctx) => {
+            const idx = ctx.dataIndex;
+            const count = totalCounts[idx] || 0;
+            return `正答率: ${ctx.raw}%（${count}問回答）`;
+          },
+        },
+      },
+    },
+    scales: {
+      r: {
+        beginAtZero: true,
+        max: 100,
+        min: 0,
+        ticks: {
+          stepSize: 25,
+          font: { size: 9 },
+          backdropColor: 'transparent',
+        },
+        pointLabels: {
+          font: { size: 11, weight: '700' },
+          color: '#6b7280',
+        },
+        grid: {
+          color: 'rgba(107, 114, 128, 0.15)',
+        },
+        angleLines: {
+          color: 'rgba(107, 114, 128, 0.15)',
+        },
+      },
+    },
+  };
+
+  const ctx = els.skillRadarChart.getContext('2d');
+
+  if (skillRadarChartInstance) {
+    skillRadarChartInstance.data = chartData;
+    skillRadarChartInstance.options = chartOptions;
+    skillRadarChartInstance.update();
+  } else {
+    skillRadarChartInstance = new Chart(ctx, {
+      type: 'radar',
+      data: chartData,
+      options: chartOptions,
+    });
+  }
+
+  // Render legend below chart
+  if (els.skillRadarLegend) {
+    els.skillRadarLegend.innerHTML = exam.domains.map((d) =>
+      `<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${d.color || '#6366f1'}"></span><span class="text-gray-600">D${d.id}: ${d.jpTitle}</span></span>`
+    ).join('');
   }
 }
 
@@ -2985,7 +3131,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   return isSuccessfulAiResponse(response);
 }
 
-async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz }) {
+async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz, domainId }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
@@ -3043,6 +3189,7 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
   const parsed = parseQuizResponse(response);
 
   if (parsed) {
+    parsed.domainId = domainId ?? null;
     // Render interactive quiz UI
     renderInteractiveQuiz({ els, quiz: parsed });
     return true;

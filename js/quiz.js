@@ -260,7 +260,7 @@ export function buildQuizSystemPrompt(examCode, examShortLabel) {
     '  "explanation": "正解の理由と、他の選択肢が不正解である理由の簡潔な解説"\n' +
     '}\n' +
     '```\n' +
-    '実践的なシナリオベースの問題を作成してください。'
+    '実践的なシナリオベースの問題を作成してください。毎回異なるAWSサービスやトピックを扱い、同じサービスを繰り返さないでください。'
   );
 }
 
@@ -304,14 +304,14 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
 export function buildGeneralQuizUserPrompt(examCode, targetDomain) {
   if (targetDomain) {
     const name = targetDomain.jpTitle || targetDomain.title;
-    let prompt = `${examCode}試験のドメイン「${name}」の出題範囲から問題を1問、指定のJSON形式で作成してください。`;
+    let prompt = `${examCode}試験のドメイン「${name}」の出題範囲から問題を1問、指定のJSON形式で作成してください。前回と異なるAWSサービス・トピックを扱ってください。`;
     if (targetDomain.tasks && targetDomain.tasks.length > 0) {
       const taskNames = targetDomain.tasks.map(t => t.jpTitle || t.title).join('、');
-      prompt += `\nこのドメインには以下のタスクがあります: ${taskNames}\nこの中からランダムに1つ選んで出題してください。`;
+      prompt += `\nこのドメインには以下のタスクがあります: ${taskNames}\nこの中からランダムに1つ選んで出題してください。前の問題と同じタスクを選ばないでください。`;
     }
     return prompt;
   }
-  return `${examCode}試験の出題範囲から、ランダムなドメイン・トピックに関する問題を1問、指定のJSON形式で作成してください。毎回異なるドメインやトピックから出題してください。`;
+  return `${examCode}試験の出題範囲から、ランダムなドメイン・トピックに関する問題を1問、指定のJSON形式で作成してください。毎回異なるドメインやトピック・AWSサービスから出題し、同じサービスの問題を繰り返さないでください。`;
 }
 
 /**
