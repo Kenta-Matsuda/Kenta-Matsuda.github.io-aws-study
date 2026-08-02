@@ -1371,6 +1371,7 @@ function getElements() {
     skillRadarChart: document.getElementById('skillRadarChart'),
     skillRadarChartContainer: document.getElementById('skillRadarChartContainer'),
     skillRadarEmpty: document.getElementById('skillRadarEmpty'),
+    skillRadarLegend: document.getElementById('skillRadarLegend'),
 
     // Chat
     chatFab: document.getElementById('chatFab'),
@@ -1872,7 +1873,9 @@ function renderSkillRadarChart({ els, exam, state }) {
     els.skillRadarEmpty.classList.toggle('hidden', hasData);
   }
 
-  const labels = exam.domains.map((d) => d.jpTitle);
+  // Use short labels (D1, D2...) to fit within carousel
+  const labels = exam.domains.map((d) => `D${d.id}`);
+  const fullNames = exam.domains.map((d) => d.jpTitle);
   const dataValues = exam.domains.map((d) => {
     const domainData = byDomain[d.id];
     return domainData ? Math.round(domainData.accuracy * 100) : 0;
@@ -1916,6 +1919,10 @@ function renderSkillRadarChart({ els, exam, state }) {
       legend: { display: false },
       tooltip: {
         callbacks: {
+          title: (items) => {
+            const idx = items[0]?.dataIndex;
+            return idx != null ? fullNames[idx] : '';
+          },
           label: (ctx) => {
             const idx = ctx.dataIndex;
             const count = totalCounts[idx] || 0;
@@ -1935,7 +1942,7 @@ function renderSkillRadarChart({ els, exam, state }) {
           backdropColor: 'transparent',
         },
         pointLabels: {
-          font: { size: 10, weight: '600' },
+          font: { size: 11, weight: '700' },
           color: '#6b7280',
         },
         grid: {
@@ -1960,6 +1967,13 @@ function renderSkillRadarChart({ els, exam, state }) {
       data: chartData,
       options: chartOptions,
     });
+  }
+
+  // Render legend below chart
+  if (els.skillRadarLegend) {
+    els.skillRadarLegend.innerHTML = exam.domains.map((d) =>
+      `<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${d.color || '#6366f1'}"></span><span class="text-gray-600">D${d.id}: ${d.jpTitle}</span></span>`
+    ).join('');
   }
 }
 
