@@ -297,6 +297,22 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
   });
 
+  // --- Main CTA Button ---
+  els.mainCtaBtn?.addEventListener('click', () => {
+    const exam = getExamById(state.examId);
+    lastAiRequest = {
+      type: 'quiz',
+      examId: state.examId,
+      taskId: '',
+      taskTitle: `${exam.code} 全ドメイン横断`,
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+    reflectAiVoteUi();
+    if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`;
+    openModal(els.quizModeModal);
+  });
+
   // --- Dashboard Quiz Button ---
   els.dashboardQuizBtn?.addEventListener('click', () => {
     const exam = getExamById(state.examId);
@@ -1383,6 +1399,14 @@ function getElements() {
     skillRadarEmpty: document.getElementById('skillRadarEmpty'),
     skillRadarLegend: document.getElementById('skillRadarLegend'),
 
+    // Main CTA
+    mainCtaSection: document.getElementById('mainCtaSection'),
+    mainCtaBtn: document.getElementById('mainCtaBtn'),
+    mainCtaSubtext: document.getElementById('mainCtaSubtext'),
+    mainCtaExamBadge: document.getElementById('mainCtaExamBadge'),
+    mainCtaStreak: document.getElementById('mainCtaStreak'),
+    mainCtaStreakCount: document.getElementById('mainCtaStreakCount'),
+
     // Chat
     chatFab: document.getElementById('chatFab'),
     chatPanel: document.getElementById('chatPanel'),
@@ -1731,6 +1755,15 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Streak display
   renderStreakDisplay(els);
+
+  // Update Main CTA section
+  if (els.mainCtaExamBadge && exam) {
+    els.mainCtaExamBadge.textContent = `${exam.code}`;
+  }
+  const streakInfo = getStreakInfo();
+  if (els.mainCtaStreakCount) {
+    els.mainCtaStreakCount.textContent = String(streakInfo.current);
+  }
 
   // Request notification permission early
   if ('Notification' in window && Notification.permission === 'default') {

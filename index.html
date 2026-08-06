@@ -723,6 +723,11 @@
             background: linear-gradient(to right, #431407, var(--color-bg-card)) !important;
         }
 
+        /* Dark mode: Main CTA */
+        html.dark #mainCtaSection {
+            background: linear-gradient(to bottom right, #312e81, #581c87) !important;
+        }
+
         /* Dark mode: links */
         html.dark .text-blue-700 { color: #93c5fd !important; }
         html.dark .text-blue-600 { color: #93c5fd !important; }
@@ -885,6 +890,19 @@
         <!-- Right Content: Domain Explorer -->
         <section class="lg:col-span-8 xl:col-span-9 space-y-6">
             
+            <!-- Main CTA: 今日の学習を始める -->
+            <div id="mainCtaSection" class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-xl shadow-lg p-8 text-center">
+                <h2 class="text-2xl font-bold text-white mb-2">今日の学習を始めよう</h2>
+                <p id="mainCtaSubtext" class="text-indigo-100 text-sm mb-6">選択中の試験でクイズに挑戦しましょう</p>
+                <button id="mainCtaBtn" type="button" class="inline-flex items-center gap-3 px-8 py-4 bg-white hover:bg-gray-50 text-indigo-700 rounded-xl text-lg font-bold transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 active:translate-y-0">
+                    <i class="fas fa-play-circle text-2xl"></i> 学習を開始する
+                </button>
+                <div class="mt-4 flex items-center justify-center gap-4 text-indigo-200 text-xs">
+                    <span id="mainCtaExamBadge" class="bg-white/20 px-3 py-1 rounded-full font-bold"></span>
+                    <span id="mainCtaStreak" class="flex items-center gap-1"><i class="fas fa-fire"></i> <span id="mainCtaStreakCount">0</span>日連続</span>
+                </div>
+            </div>
+
             <!-- Context Header for Right Section -->
             <div id="xpDashboard" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
