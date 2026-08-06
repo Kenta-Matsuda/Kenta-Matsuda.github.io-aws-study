@@ -725,6 +725,14 @@
 
         /* Dark mode: links */
         html.dark .text-blue-700 { color: #93c5fd !important; }
+
+        /* Dark mode: Daily Highlight */
+        html.dark #dailyHighlight {
+            background: linear-gradient(to right, #312e81, #3b0764) !important;
+            border-color: #4338ca !important;
+        }
+        html.dark #dailyHighlight .text-indigo-600 { color: #a5b4fc !important; }
+        html.dark #dailyHighlight .text-gray-800 { color: #e2e8f0 !important; }
         html.dark .text-blue-600 { color: #93c5fd !important; }
         html.dark .text-blue-500 { color: #60a5fa !important; }
         html.dark a.text-blue-500 { color: #60a5fa !important; }
@@ -901,6 +909,17 @@
                         <button id="tweetBtn" type="button" class="px-3 py-2 bg-black hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition duration-150 flex items-center gap-2 whitespace-nowrap shadow-sm hover:shadow-md active:shadow-sm active:translate-y-px focus:outline-none focus:ring-2 focus:ring-black/30">
                             Xに投稿
                         </button>
+                    </div>
+                </div>
+
+                <!-- Daily Highlight (物語化パネル) -->
+                <div id="dailyHighlight" class="hidden mt-5 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50 to-purple-50 p-4">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-shrink-0 text-2xl" id="highlightEmoji">✨</div>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-1">今日のハイライト</div>
+                            <p id="highlightText" class="text-sm text-gray-800 font-medium leading-relaxed">-</p>
+                        </div>
                     </div>
                 </div>
 
@@ -1515,6 +1534,9 @@
             <i class="fas fa-comments"></i>
         </button>
     </div>
+
+    <!-- Confetti Canvas for celebrations -->
+    <canvas id="confettiCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;"></canvas>
 
     <script type="module" src="./js/app.js"></script>
     <script>

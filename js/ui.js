@@ -1377,6 +1377,12 @@ function getElements() {
     streakWeekDots: document.getElementById('streakWeekDots'),
     streakMessage: document.getElementById('streakMessage'),
 
+    // Daily Highlight (narrative)
+    dailyHighlight: document.getElementById('dailyHighlight'),
+    highlightEmoji: document.getElementById('highlightEmoji'),
+    highlightText: document.getElementById('highlightText'),
+    confettiCanvas: document.getElementById('confettiCanvas'),
+
     // Skill Radar Chart
     skillRadarChart: document.getElementById('skillRadarChart'),
     skillRadarChartContainer: document.getElementById('skillRadarChartContainer'),
@@ -1693,6 +1699,10 @@ function showMilestoneToast({ els, unlocked }) {
   if (!latest) return;
   els.milestoneToastText.textContent = `「${latest.title}」を解放（${latest.xp} XP）`;
   els.milestoneToast.classList.remove('hidden');
+
+  // Launch confetti celebration!
+  launchConfetti(els.confettiCanvas);
+
   window.clearTimeout?.(els.__milestoneToastTimer);
   els.__milestoneToastTimer = window.setTimeout(() => {
     hideMilestoneToast({ els });
@@ -1742,6 +1752,9 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Update skill radar chart
   renderSkillRadarChart({ els, exam, state });
+
+  // Render daily highlight (narrative)
+  renderDailyHighlight({ els, exam, state });
 }
 
 let carouselInitialized = false;
@@ -1863,6 +1876,154 @@ function renderStreakDisplay(els) {
       `.trim();
     }).join('');
   }
+}
+
+// ─── Daily Highlight (物語化) ────────────────────────────────
+
+function generateDailyHighlight({ exam, analytics, streakInfo, xpSummary }) {
+  const highlights = [];
+
+  // Check streak milestones
+  if (streakInfo.current >= 7) {
+    highlights.push({ emoji: '🔥', text: `${streakInfo.current}日連続学習中！素晴らしい継続力です。この習慣があなたの合格を支えています。` });
+  } else if (streakInfo.current >= 3) {
+    highlights.push({ emoji: '💪', text: `${streakInfo.current}日連続で学習を続けています。着実に力がついてきています！` });
+  }
+
+  // Check if there are good domains
+  if (analytics && analytics.total > 0) {
+    const domains = exam?.domains || [];
+    let bestDomain = null;
+    let bestAcc = 0;
+    let worstDomain = null;
+    let worstAcc = 1;
+
+    for (const d of domains) {
+      const stats = analytics.byDomain[d.id];
+      if (!stats || stats.total < 3) continue;
+      if (stats.accuracy > bestAcc) { bestAcc = stats.accuracy; bestDomain = d; }
+      if (stats.accuracy < worstAcc) { worstAcc = stats.accuracy; worstDomain = d; }
+    }
+
+    if (bestDomain && bestAcc >= 0.8) {
+      const name = bestDomain.shortName || bestDomain.jpTitle || bestDomain.title || '';
+      highlights.push({ emoji: '🌟', text: `「${name}」の正答率は${Math.round(bestAcc * 100)}%！しっかり理解できていますね。` });
+    }
+
+    if (worstDomain && worstAcc < 0.5 && bestDomain) {
+      const name = worstDomain.shortName || worstDomain.jpTitle || worstDomain.title || '';
+      highlights.push({ emoji: '📈', text: `「${name}」を重点復習すれば、合格がぐっと近づきます。あと少しです！` });
+    }
+
+    // Overall progress
+    const accuracy = analytics.accuracy;
+    if (accuracy >= 0.8) {
+      highlights.push({ emoji: '🏆', text: `全体正答率${Math.round(accuracy * 100)}%！合格圏内の実力です。自信を持ってください！` });
+    } else if (accuracy >= 0.6) {
+      highlights.push({ emoji: '✨', text: `正答率${Math.round(accuracy * 100)}%まで到達。合格ラインまであと一歩です！` });
+    }
+
+    // Total questions milestone
+    if (analytics.total >= 100) {
+      highlights.push({ emoji: '🎯', text: `累計${analytics.total}問に回答！膨大な演習量が本番での自信になります。` });
+    } else if (analytics.total >= 50) {
+      highlights.push({ emoji: '📚', text: `もう${analytics.total}問もこなしました。着実に知識が積み上がっています。` });
+    }
+  }
+
+  // XP milestone
+  if (xpSummary.totalXp >= 500) {
+    highlights.push({ emoji: '⭐', text: `累計${xpSummary.totalXp} XPを獲得！学習者としての成長が数字に表れています。` });
+  }
+
+  // Default if nothing to highlight
+  if (highlights.length === 0) {
+    if (streakInfo.hadActivityToday) {
+      return { emoji: '👍', text: '今日もアクセスありがとうございます。一歩ずつ前進していきましょう！' };
+    }
+    return { emoji: '🌅', text: '今日の学習で、未来の自分に投資しましょう。小さな一歩が大きな成果につながります。' };
+  }
+
+  // Pick the most relevant one (random from top highlights for variety)
+  const idx = Math.floor(Math.random() * Math.min(highlights.length, 2));
+  return highlights[idx];
+}
+
+function renderDailyHighlight({ els, exam, state }) {
+  if (!els.dailyHighlight) return;
+
+  const analytics = getQuizAnalytics(exam.id);
+  const streakInfo = getStreakInfo();
+  const xpSummary = getXpSummary();
+
+  const highlight = generateDailyHighlight({ exam, analytics, streakInfo, xpSummary });
+
+  if (highlight) {
+    els.dailyHighlight.classList.remove('hidden');
+    if (els.highlightEmoji) els.highlightEmoji.textContent = highlight.emoji;
+    if (els.highlightText) els.highlightText.textContent = highlight.text;
+  }
+}
+
+// ─── Confetti Animation ─────────────────────────────────────
+
+function launchConfetti(canvasEl) {
+  if (!canvasEl) return;
+  const ctx = canvasEl.getContext('2d');
+  if (!ctx) return;
+
+  canvasEl.width = window.innerWidth;
+  canvasEl.height = window.innerHeight;
+
+  const particles = [];
+  const colors = ['#6366f1', '#a855f7', '#f59e0b', '#10b981', '#ef4444', '#3b82f6', '#ec4899'];
+
+  for (let i = 0; i < 120; i++) {
+    particles.push({
+      x: Math.random() * canvasEl.width,
+      y: Math.random() * canvasEl.height - canvasEl.height,
+      vx: (Math.random() - 0.5) * 4,
+      vy: Math.random() * 3 + 2,
+      size: Math.random() * 6 + 3,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      rotation: Math.random() * 360,
+      rotationSpeed: (Math.random() - 0.5) * 10,
+      opacity: 1,
+    });
+  }
+
+  let frame = 0;
+  const maxFrames = 150;
+
+  function animate() {
+    frame++;
+    if (frame > maxFrames) {
+      ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+      return;
+    }
+
+    ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
+
+    for (const p of particles) {
+      p.x += p.vx;
+      p.vy += 0.1;
+      p.y += p.vy;
+      p.rotation += p.rotationSpeed;
+      p.opacity = Math.max(0, 1 - (frame / maxFrames));
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate((p.rotation * Math.PI) / 180);
+      ctx.globalAlpha = p.opacity;
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+      ctx.restore();
+    }
+
+    requestAnimationFrame(animate);
+  }
+
+  animate();
 }
 
 // ─── Skill Radar Chart ──────────────────────────────────────
