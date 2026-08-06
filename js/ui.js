@@ -184,6 +184,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
           showMilestoneToast({ els, unlocked: result.unlocked });
         }
         renderXpDashboard({ els, exam: getExamById(req.examId), state });
+        renderLearningStatus({ els, exam: getExamById(req.examId), state });
       }
       return;
     }
@@ -1006,6 +1007,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     });
 
     renderXpDashboard({ els, exam, state: appState });
+    renderLearningStatus({ els, exam, state: appState });
 
     // Advance session index for next question
     quizSession.currentIndex += 1;
@@ -1117,6 +1119,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
     renderChart({ els, exam, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderXpDashboard({ els, exam, state });
+    renderLearningStatus({ els, exam, state });
     renderTabs({ els, exam, state, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderContent({ els, exam, state });
 
@@ -1241,6 +1244,16 @@ function getElements() {
 
     // XP Dashboard
     xpDashboard: document.getElementById('xpDashboard'),
+
+    // Learning Status Panel
+    learningStatusPanel: document.getElementById('learningStatusPanel'),
+    statusExamBadge: document.getElementById('statusExamBadge'),
+    statusProgress: document.getElementById('statusProgress'),
+    statusAccuracy: document.getElementById('statusAccuracy'),
+    statusProgressBar: document.getElementById('statusProgressBar'),
+    nextActionPanel: document.getElementById('nextActionPanel'),
+    nextActionText: document.getElementById('nextActionText'),
+
     xpUserLine: document.getElementById('xpUserLine'),
     xpTotal: document.getElementById('xpTotal'),
     xpRecentActions: document.getElementById('xpRecentActions'),
@@ -1701,6 +1714,90 @@ function showMilestoneToast({ els, unlocked }) {
 
 function hideMilestoneToast({ els }) {
   els.milestoneToast?.classList?.add('hidden');
+}
+
+function computeNextAction({ exam, analytics, streakInfo }) {
+  if (!analytics || analytics.total === 0) {
+    return `${exam.code} の学習を始めましょう`;
+  }
+
+  // Find weakest domain
+  const domains = exam.domains || [];
+  let weakestDomain = null;
+  let weakestAccuracy = 1;
+  for (const d of domains) {
+    const domainStats = analytics.byDomain[d.id];
+    if (domainStats && domainStats.total >= 3 && domainStats.accuracy < weakestAccuracy) {
+      weakestAccuracy = domainStats.accuracy;
+      weakestDomain = d;
+    }
+  }
+
+  // Check recent trend (last 10)
+  const recent10 = analytics.recentTrend.slice(-10);
+  const recentCorrect = recent10.filter(Boolean).length;
+  const recentAccuracy = recent10.length > 0 ? recentCorrect / recent10.length : 0;
+
+  if (recentAccuracy >= 0.8 && analytics.accuracy >= 0.7) {
+    return '好調です！新しいドメインに挑戦しましょう';
+  }
+
+  if (weakestDomain && weakestAccuracy < 0.5) {
+    const name = weakestDomain.shortName || weakestDomain.name || `ドメイン${weakestDomain.id}`;
+    return `苦手な「${name}」を重点復習しましょう`;
+  }
+
+  if (!streakInfo.hadActivityToday) {
+    return '今日の学習をスタートしましょう！';
+  }
+
+  if (analytics.total < 20) {
+    return 'まずは20問を目標に挑戦しましょう';
+  }
+
+  if (weakestDomain) {
+    const name = weakestDomain.shortName || weakestDomain.name || `ドメイン${weakestDomain.id}`;
+    return `「${name}」の理解を深めましょう`;
+  }
+
+  return '全ドメイン横断でチャレンジしましょう';
+}
+
+function renderLearningStatus({ els, exam, state }) {
+  if (!els.learningStatusPanel) return;
+
+  const analytics = getQuizAnalytics(exam.id);
+  const streakInfo = getStreakInfo();
+
+  // Update exam badge
+  if (els.statusExamBadge) {
+    els.statusExamBadge.textContent = exam.code;
+  }
+
+  // Calculate progress: based on total questions answered vs a target (e.g., 100 questions per exam)
+  const TARGET_QUESTIONS = 100;
+  const progressPct = Math.min(100, Math.round((analytics.total / TARGET_QUESTIONS) * 100));
+  if (els.statusProgress) {
+    els.statusProgress.textContent = `${progressPct}%`;
+  }
+  if (els.statusProgressBar) {
+    els.statusProgressBar.style.width = `${progressPct}%`;
+  }
+
+  // Accuracy
+  if (els.statusAccuracy) {
+    if (analytics.total > 0) {
+      els.statusAccuracy.textContent = `${Math.round(analytics.accuracy * 100)}%`;
+    } else {
+      els.statusAccuracy.textContent = '-%';
+    }
+  }
+
+  // Next action recommendation
+  const nextAction = computeNextAction({ exam, analytics, streakInfo });
+  if (els.nextActionText) {
+    els.nextActionText.textContent = nextAction;
+  }
 }
 
 function renderXpDashboard({ els, exam, state }) {
