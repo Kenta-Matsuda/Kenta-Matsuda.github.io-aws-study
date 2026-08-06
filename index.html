@@ -723,6 +723,15 @@
             background: linear-gradient(to right, #431407, var(--color-bg-card)) !important;
         }
 
+        /* Dark mode: Learning Status Panel */
+        html.dark #nextActionPanel {
+            background: linear-gradient(to right, #422006, #431407) !important;
+            border-color: #92400e !important;
+        }
+        html.dark #nextActionPanel .text-amber-500 { color: #fbbf24 !important; }
+        html.dark #nextActionPanel .text-amber-700 { color: #fde68a !important; }
+        html.dark #nextActionPanel .text-amber-900 { color: #fed7aa !important; }
+
         /* Dark mode: links */
         html.dark .text-blue-700 { color: #93c5fd !important; }
         html.dark .text-blue-600 { color: #93c5fd !important; }
@@ -884,6 +893,42 @@
 
         <!-- Right Content: Domain Explorer -->
         <section class="lg:col-span-8 xl:col-span-9 space-y-6">
+
+            <!-- Learning Status Panel -->
+            <div id="learningStatusPanel" class="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <!-- Current status -->
+                    <div class="flex items-center gap-4 min-w-0">
+                        <div class="flex-shrink-0 w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center">
+                            <i class="fas fa-book-reader text-indigo-600 text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">選択中</span>
+                                <span id="statusExamBadge" class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md">-</span>
+                            </div>
+                            <div class="flex items-center gap-3 mt-1">
+                                <span class="text-sm text-gray-700">学習進捗: <strong id="statusProgress" class="text-indigo-600">0%</strong></span>
+                                <span class="text-sm text-gray-700">正答率: <strong id="statusAccuracy" class="text-emerald-600">-%</strong></span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Next action recommendation -->
+                    <div id="nextActionPanel" class="flex items-center gap-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg px-4 py-3 min-w-0">
+                        <div class="flex-shrink-0 text-amber-500">
+                            <i class="fas fa-lightbulb text-lg"></i>
+                        </div>
+                        <div class="min-w-0">
+                            <div class="text-xs font-bold text-amber-700 uppercase tracking-wide">次の1手</div>
+                            <p id="nextActionText" class="text-sm text-amber-900 font-medium truncate mt-0.5">学習を始めましょう</p>
+                        </div>
+                    </div>
+                </div>
+                <!-- Progress bar -->
+                <div class="mt-4 h-2 rounded-full bg-gray-100 overflow-hidden">
+                    <div id="statusProgressBar" class="h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+            </div>
             
             <!-- Context Header for Right Section -->
             <div id="xpDashboard" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
