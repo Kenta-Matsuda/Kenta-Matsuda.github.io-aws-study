@@ -107,6 +107,8 @@ export function getPublicExams() {
 export function resolveExamFromHash(hash) {
   if (!hash) return null;
   const normalized = hash.toLowerCase().replace(/^#/, '');
+  // Special: beginner guide
+  if (normalized === 'beginner') return '__beginner__';
   // Try short code first
   if (EXAM_HASH_MAP[normalized]) return EXAM_HASH_MAP[normalized];
   // Try full exam ID

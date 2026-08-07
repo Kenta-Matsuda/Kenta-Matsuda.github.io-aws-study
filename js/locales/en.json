@@ -29,7 +29,8 @@
     "langToggle": "Language"
   },
   "sidebar": {
-    "title": "Select Exam"
+    "title": "Select Exam",
+    "beginnerGuide": "First-time AWS Certification"
   },
   "dashboard": {
     "title": "Study Dashboard",

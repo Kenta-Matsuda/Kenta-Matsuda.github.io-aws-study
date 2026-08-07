@@ -1323,6 +1323,32 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
 
   function setExam(examId) {
+    // Special: Beginner guide (not a real exam)
+    if (examId === '__beginner__') {
+      state.examId = '__beginner__';
+      state.currentDomainId = null;
+
+      // Update URL hash
+      const newHash = '#beginner';
+      if (location.hash !== newHash) {
+        history.replaceState(null, '', newHash);
+      }
+
+      // Update header
+      if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
+      if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
+
+      // Hide chart and domain tabs, show content
+      if (els.examWeightChart) els.examWeightChart.closest('.bg-white')?.classList.add('hidden');
+      if (els.domainLegend) els.domainLegend.closest('.bg-white')?.classList.add('hidden');
+      if (els.domainTabs) els.domainTabs.innerHTML = '';
+      renderContent({ els, exam: { domains: [], steps: [] }, state });
+
+      // Update sidebar active state
+      updateSidebarActiveState({ els, examId });
+      return;
+    }
+
     const exam = getExamById(examId);
 
     state.examId = examId;
@@ -1335,6 +1361,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (location.hash !== newHash) {
       history.replaceState(null, '', newHash);
     }
+
+    // Restore chart visibility if hidden by beginner guide
+    if (els.examWeightChart) els.examWeightChart.closest('.bg-white')?.classList.remove('hidden');
+    if (els.domainLegend) els.domainLegend.closest('.bg-white')?.classList.remove('hidden');
 
     renderExamMeta({ els, exam });
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
@@ -1441,6 +1471,23 @@ function renderExamSidebar({ els, exams, state, onSelect }) {
   const locale = getLocale();
   container.innerHTML = '';
 
+  // Special: Beginner guide item
+  const beginnerItem = document.createElement('div');
+  beginnerItem.className = 'exam-sidebar-item beginner-guide-item' + (state.examId === '__beginner__' ? ' active' : '');
+  beginnerItem.dataset.examId = '__beginner__';
+  beginnerItem.innerHTML = `<i class="fas fa-hand-holding-heart text-pink-500 text-sm"></i><span class="truncate">${t('sidebar.beginnerGuide')}</span>`;
+  beginnerItem.addEventListener('click', () => {
+    onSelect('__beginner__');
+    els.examSidebar?.classList.remove('open');
+    els.sidebarBackdrop?.classList.add('hidden');
+  });
+  container.appendChild(beginnerItem);
+
+  // Separator
+  const sep = document.createElement('hr');
+  sep.className = 'my-3 border-gray-200';
+  container.appendChild(sep);
+
   for (const category of EXAM_CATEGORIES) {
     const categoryExams = category.examIds
       .map(id => exams.find(e => e.id === id))
@@ -1462,7 +1509,7 @@ function renderExamSidebar({ els, exams, state, onSelect }) {
       item.innerHTML = `<span class="exam-code">${exam.code}</span><span class="truncate">${exam.shortLabel}</span>`;
       item.addEventListener('click', () => {
         onSelect(exam.id);
-        // Close mobile sidebar
+        // Close sidebar
         els.examSidebar?.classList.remove('open');
         els.sidebarBackdrop?.classList.add('hidden');
       });
@@ -2958,6 +3005,12 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
 function renderContent({ els, exam, state }) {
   els.contentArea.innerHTML = '';
 
+  // Special: Beginner guide (common resources)
+  if (state.examId === '__beginner__') {
+    renderBeginnerGuide({ els, state });
+    return;
+  }
+
   if (!exam.domains || exam.domains.length === 0) {
     els.contentArea.innerHTML = `
       <div class="text-center py-12 text-gray-500">
@@ -3133,9 +3186,6 @@ function renderExamResources({ els, exam, state }) {
     renderStepCard({ els, step, stepIndex: String(stepIndex), state, term });
     stepIndex++;
   }
-
-  // Render common resources section
-  renderCommonResources({ els, state, term });
 }
 
 function renderStepCard({ els, step, stepIndex, state, term }) {
@@ -3221,19 +3271,21 @@ function renderStepCard({ els, step, stepIndex, state, term }) {
   els.contentArea.appendChild(card);
 }
 
-function renderCommonResources({ els, state, term }) {
-  // Common resources section header
-  const sectionHeader = document.createElement('div');
-  sectionHeader.innerHTML = `
-    <div class="flex items-center gap-2 mb-4 mt-10">
-      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-blue-500"><i class="fas fa-globe mr-1"></i>${t('roadmap.commonTitle')}</span>
+function renderBeginnerGuide({ els, state }) {
+  const term = '';
+
+  // Header
+  const headerEl = document.createElement('div');
+  headerEl.innerHTML = `
+    <div class="flex items-center gap-2 mb-4">
+      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-blue-500"><i class="fas fa-graduation-cap mr-1"></i>${t('roadmap.commonTitle')}</span>
       <h2 class="text-xl font-bold text-gray-800">${t('roadmap.commonTitle')}</h2>
     </div>
     <p class="text-gray-600 mb-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
       ${escapeHtml(t('roadmap.commonDescription'))}
     </p>
   `;
-  els.contentArea.appendChild(sectionHeader);
+  els.contentArea.appendChild(headerEl);
 
   // Render each common step
   let stepIndex = 1;

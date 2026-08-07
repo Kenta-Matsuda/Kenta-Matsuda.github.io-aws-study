@@ -29,7 +29,8 @@
     "langToggle": "言語"
   },
   "sidebar": {
-    "title": "試験を選択"
+    "title": "試験を選択",
+    "beginnerGuide": "初めてAWS認定を受験する"
   },
   "dashboard": {
     "title": "学習ダッシュボード",
