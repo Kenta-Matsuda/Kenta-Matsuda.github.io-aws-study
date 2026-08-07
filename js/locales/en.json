@@ -30,6 +30,7 @@
   },
   "dashboard": {
     "title": "Study Dashboard",
+    "dailyHighlight": "Today's Highlight",
     "domainRatio": "Domain Question Ratio",
     "feedback": "Send Feedback",
     "defaultGreeting": "Let's build up your learning progress.",
@@ -116,7 +117,9 @@
     "summarySubtitle": "{{label}} — {{total}} questions completed",
     "timerOvertime": " overtime",
     "generateBtn": "Generate Quiz",
-    "explainBtn": "Explain"
+    "explainBtn": "Explain",
+    "smartReview": "Smart Review",
+    "smartReviewDesc": "Auto-generated from weak areas and past mistakes. Efficiently overcome weaknesses!"
   },
   "quizHistory": {
     "title": "Review Past Questions",
@@ -284,6 +287,12 @@
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",
     "recommend": "Recommended"
+  },
+  "learningStatus": {
+    "selected": "Selected",
+    "progress": "Progress:",
+    "accuracy": "Accuracy:",
+    "nextAction": "Next Step"
   },
   "aiDisclaimer": "Note: AI-generated results may not always be accurate (may contain errors). For important decisions, verify with primary sources such as AWS official documentation.",
   "footer": {

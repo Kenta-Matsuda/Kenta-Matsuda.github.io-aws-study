@@ -30,6 +30,7 @@
   },
   "dashboard": {
     "title": "学習ダッシュボード",
+    "dailyHighlight": "今日のハイライト",
     "domainRatio": "ドメイン別出題比率",
     "feedback": "フィードバックを送る",
     "defaultGreeting": "学習の総量を積み上げていきましょう。",
@@ -116,7 +117,9 @@
     "summarySubtitle": "{{label}} — {{total}}問完了",
     "timerOvertime": " 延長中",
     "generateBtn": "模擬問題を作成",
-    "explainBtn": "解説"
+    "explainBtn": "解説",
+    "smartReview": "スマート復習",
+    "smartReviewDesc": "苦手問題・過去の間違いから自動出題。効率的に弱点を克服！"
   },
   "quizHistory": {
     "title": "過去の問題を見直す",
@@ -284,6 +287,12 @@
     "knowledge": "必要な知識・スキル",
     "keyPoints": "ポイント",
     "recommend": "おススメ"
+  },
+  "learningStatus": {
+    "selected": "選択中",
+    "progress": "学習進捗:",
+    "accuracy": "正答率:",
+    "nextAction": "次の1手"
   },
   "aiDisclaimer": "※注意: AIの生成結果は必ずしも正しくありません（誤りを含む可能性があります）。重要な判断は、AWS公式ドキュメント等の一次情報で確認してください。",
   "footer": {

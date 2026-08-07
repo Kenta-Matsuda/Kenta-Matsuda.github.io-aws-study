@@ -358,7 +358,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       quizSession._isSmartReview = true;
 
       const exam = getExamById(lastAiRequest.examId);
-      showAiModal(els, `スマート復習（${reviewQuestions.length}問）`, true);
+      showAiModal(els, getLocale() === 'ja' ? `スマート復習（${reviewQuestions.length}問）` : `Smart Review (${reviewQuestions.length} questions)`, true);
       if (els.modalContent) els.modalContent.innerHTML = '';
       if (els.modalLoading) els.modalLoading.classList.add('hidden');
       resetQuizUi(els);
@@ -427,18 +427,20 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       type: 'quiz',
       examId: state.examId,
       taskId: '',
-      taskTitle: `${exam.code} 全ドメイン横断`,
+      taskTitle: getLocale() === 'ja' ? `${exam.code} 全ドメイン横断` : `${exam.code} All Domains`,
       taskContext: '',
       isDashboardQuiz: true,
     };
     reflectAiVoteUi();
-    if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`;
+    if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = getLocale() === 'ja'
+      ? `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`
+      : `${exam.code} (${exam.shortLabel}) Cross-Domain Quiz`;
     // Update smart review count
     if (els.smartReviewCount) {
       const reviewQ = getSmartReviewCombined(state.examId);
       els.smartReviewCount.textContent = reviewQ.length > 0
-        ? `📊 ${reviewQ.length}問の復習対象あり`
-        : '📊 復習対象なし（まずクイズに挑戦！）';
+        ? (getLocale() === 'ja' ? `📊 ${reviewQ.length}問の復習対象あり` : `📊 ${reviewQ.length} questions to review`)
+        : (getLocale() === 'ja' ? '📊 復習対象なし（まずクイズに挑戦！）' : '📊 No questions to review (try a quiz first!)');
     }
     openModal(els.quizModeModal);
   });
@@ -518,7 +520,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     quizSession.startedAt = Date.now();
 
     const exam = getExamById(retryExamId);
-    showAiModal(els, `間違えた問題の解き直し（${unique.length}問）`, true);
+    showAiModal(els, getLocale() === 'ja' ? `間違えた問題の解き直し（${unique.length}問）` : `Retry Incorrect Questions (${unique.length})`, true);
     if (els.modalContent) els.modalContent.innerHTML = '';
     if (els.modalLoading) els.modalLoading.classList.add('hidden');
     resetQuizUi(els);
@@ -573,10 +575,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.scheduleReviewBtn) {
       els.scheduleReviewBtn.disabled = true;
       els.scheduleReviewBtn.classList.add('opacity-60', 'cursor-not-allowed');
-      els.scheduleReviewBtn.innerHTML = '<i class="fas fa-check"></i> 復習スケジュールに登録しました';
+      els.scheduleReviewBtn.innerHTML = getLocale() === 'ja'
+        ? '<i class="fas fa-check"></i> 復習スケジュールに登録しました'
+        : '<i class="fas fa-check"></i> Added to review schedule';
     }
     if (els.scheduleReviewMsg) {
-      els.scheduleReviewMsg.textContent = `${wrongQuestions.length}問を明日の復習に登録しました`;
+      els.scheduleReviewMsg.textContent = getLocale() === 'ja'
+        ? `${wrongQuestions.length}問を明日の復習に登録しました`
+        : `${wrongQuestions.length} questions scheduled for tomorrow's review`;
       els.scheduleReviewMsg.classList.remove('hidden');
     }
   });
@@ -633,7 +639,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Overtime mode: don't auto-end, let user continue
     quizTimerExpired = true;
     if (els.quizTimerValue) {
-      els.quizTimerValue.textContent = '0:00';
+      els.quizTimerValue.textContent = `0:00${t('quiz.timerOvertime')}`;
       els.quizTimerValue.classList.remove('quiz-timer-warning');
       els.quizTimerValue.classList.add('quiz-timer-overtime');
     }
@@ -673,7 +679,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     resetQuizUi(els);
     if (els.quizArea) els.quizArea.classList.remove('hidden');
     if (els.quizPregenOverlay) els.quizPregenOverlay.classList.remove('hidden');
-    if (els.quizPregenStatus) els.quizPregenStatus.textContent = `0 / ${total} 問`;
+    if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? `0 / ${total} 問` : `0 / ${total}`;
     if (els.quizPregenFill) els.quizPregenFill.style.width = '0%';
 
     // Hide other quiz elements during pre-gen
@@ -743,7 +749,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
       // Update progress
       const done = generated.length;
-      if (els.quizPregenStatus) els.quizPregenStatus.textContent = `${done} / ${total} 問`;
+      if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? `${done} / ${total} 問` : `${done} / ${total}`;
       if (els.quizPregenFill) els.quizPregenFill.style.width = `${(done / total) * 100}%`;
     }
 
@@ -759,10 +765,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // Browser notification
     if (Notification.permission === 'granted') {
-      new Notification('問題の準備ができました！', { body: `${generated.length}問のクイズを開始できます`, icon: 'assets/og/favicon.ico' });
+      new Notification(
+        getLocale() === 'ja' ? '問題の準備ができました！' : 'Questions are ready!',
+        { body: getLocale() === 'ja' ? `${generated.length}問のクイズを開始できます` : `${generated.length} quiz questions ready to start`, icon: 'assets/og/favicon.ico' }
+      );
     } else if (Notification.permission !== 'denied') {
       Notification.requestPermission().then(p => {
-        if (p === 'granted') new Notification('問題の準備ができました！', { body: `${generated.length}問のクイズを開始できます`, icon: 'assets/og/favicon.ico' });
+        if (p === 'granted') new Notification(
+          getLocale() === 'ja' ? '問題の準備ができました！' : 'Questions are ready!',
+          { body: getLocale() === 'ja' ? `${generated.length}問のクイズを開始できます` : `${generated.length} quiz questions ready to start`, icon: 'assets/og/favicon.ico' }
+        );
       });
     }
 
@@ -790,7 +802,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.batchProgressStatus && message) els.batchProgressStatus.textContent = message;
 
     if (state === 'ready') {
-      if (els.batchProgressTitle) els.batchProgressTitle.textContent = '本番模擬試験の準備ができました';
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = getLocale() === 'ja' ? '本番模擬試験の準備ができました' : t('batch.ready');
       if (els.batchProgressIcon) {
         els.batchProgressIcon.className =
           'w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0';
@@ -799,7 +811,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.batchProgressNote) els.batchProgressNote.classList.add('hidden');
       if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.remove('hidden');
     } else if (state === 'error') {
-      if (els.batchProgressTitle) els.batchProgressTitle.textContent = '生成に失敗しました';
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = getLocale() === 'ja' ? '生成に失敗しました' : t('batch.failed');
       if (els.batchProgressIcon) {
         els.batchProgressIcon.className =
           'w-9 h-9 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0';
@@ -809,7 +821,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.add('hidden');
     } else {
       // running
-      if (els.batchProgressTitle) els.batchProgressTitle.textContent = '本番模擬試験を生成中';
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = getLocale() === 'ja' ? '本番模擬試験を生成中' : t('batch.generating');
       if (els.batchProgressIcon) {
         els.batchProgressIcon.className =
           'w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0';
@@ -848,7 +860,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
     } catch { /* ignore */ }
 
-    setBatchToastState('running', `バッチAPIにリクエスト中… (0 / ${total} 問)`);
+    setBatchToastState('running', getLocale() === 'ja' ? `バッチAPIにリクエスト中… (0 / ${total} 問)` : `${t('batch.requesting')} (0 / ${total})`);
     batchInProgress = true;
     pendingBatchSession = null;
     pendingBatchRequest = null;
@@ -870,18 +882,19 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
 
     const stateLabelOf = (s) => {
+      const isJa = getLocale() === 'ja';
       switch (s) {
         case 'JOB_STATE_PENDING':
         case 'BATCH_STATE_PENDING':
-          return '待機中';
+          return isJa ? '待機中' : t('batch.stateWaiting');
         case 'JOB_STATE_RUNNING':
         case 'BATCH_STATE_RUNNING':
-          return '生成中';
+          return isJa ? '生成中' : t('batch.stateGenerating');
         case 'JOB_STATE_SUCCEEDED':
         case 'BATCH_STATE_SUCCEEDED':
-          return '完了';
+          return isJa ? '完了' : t('batch.stateComplete');
         default:
-          return s || '実行中';
+          return s || (isJa ? '実行中' : 'Running');
       }
     };
 
@@ -895,7 +908,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
           const denom = t || total;
           setBatchToastState(
             'running',
-            `${stateLabelOf(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
+            getLocale() === 'ja'
+              ? `${stateLabelOf(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
+              : `${stateLabelOf(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
           );
         },
       });
@@ -2845,7 +2860,7 @@ function renderContent({ els, exam, state }) {
           <div>
             <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">${t('roadmap.taskStatement', { id: escapeHtml(task.id) })}</div>
             <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(task))}</h3>
-            <p class="text-sm text-gray-500 mt-1">${escapeHtml(getLocale() === 'ja' ? task.title : (task.jpTitle || ''))}</p>
+            ${getLocale() === 'ja' ? `<p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>` : ''}
             ${descriptionHtml}
           </div>
           <div class="flex justify-end">
@@ -2971,7 +2986,7 @@ function renderExamResources({ els, exam, state }) {
         <div class="flex-1 min-w-0">
           <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Step ${escapeHtml(step.id)}</div>
           <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(step))}</h3>
-          <p class="text-sm text-gray-500 mt-0.5">${escapeHtml(getLocale() === 'ja' ? step.title : (step.jpTitle || ''))}</p>
+          ${getLocale() === 'ja' ? `<p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>` : ''}
         </div>
       </div>
       ${stepDescHtml}
@@ -3129,10 +3144,10 @@ function renderBlogCard({ blog, term, context }) {
         </a>
         <div class="flex items-center gap-2">
           <div data-vote-group class="flex items-center gap-1">
-            <button type="button" data-action="vote" data-vote="good" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${goodClass}" aria-pressed="${goodSelected ? 'true' : 'false'}" title="役に立った">
+            <button type="button" data-action="vote" data-vote="good" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${goodClass}" aria-pressed="${goodSelected ? 'true' : 'false'}" title="${getLocale() === 'ja' ? '役に立った' : 'Helpful'}">
               <i class="fa-regular fa-thumbs-up"></i>
             </button>
-            <button type="button" data-action="vote" data-vote="bad" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${badClass}" aria-pressed="${badSelected ? 'true' : 'false'}" title="微妙 / 改善してほしい">
+            <button type="button" data-action="vote" data-vote="bad" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${badClass}" aria-pressed="${badSelected ? 'true' : 'false'}" title="${getLocale() === 'ja' ? '微妙 / 改善してほしい' : 'Not helpful'}">
               <i class="fa-regular fa-thumbs-down"></i>
             </button>
           </div>
