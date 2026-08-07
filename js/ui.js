@@ -1292,7 +1292,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   onLocaleChange(() => {
     translateStaticElements();
     const exam = getExamById(state.examId);
+    renderExamMeta({ els, exam });
     renderXpDashboard({ els, exam, state });
+    renderLearningStatus({ els, exam, state });
+    renderDailyHighlight({ els, exam, state });
+    renderChart({ els, exam, onDomainSelect: (domainId) => switchDomain(domainId) });
+    renderTabs({ els, exam, state, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderContent({ els, exam, state });
   });
 
