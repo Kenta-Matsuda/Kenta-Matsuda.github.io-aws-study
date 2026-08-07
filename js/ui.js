@@ -21,6 +21,8 @@ import {
   getTheme,
   setTheme,
   getEffectiveTheme,
+  getSmartReviewCombined,
+  addReviewSchedule,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
@@ -254,6 +256,44 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const mode = selectedQuizMode;
     const config = QUIZ_MODE_CONFIG[mode] || QUIZ_MODE_CONFIG.single;
 
+    // ── Smart Review path ──
+    if (mode === 'smartReview') {
+      const reviewQuestions = getSmartReviewCombined(lastAiRequest.examId);
+      if (reviewQuestions.length === 0) {
+        alert('復習対象の問題がまだありません。まずはクイズに挑戦しましょう！');
+        return;
+      }
+      closeModal(els.quizModeModal);
+
+      quizSession = createQuizSession({ examId: lastAiRequest.examId, mode: 'quick5' });
+      quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+      quizSession.questionCount = reviewQuestions.length;
+      quizSession.questions = reviewQuestions.map(h => ({
+        question: h.question,
+        choices: h.choices,
+        correctIndex: h.correctIndex,
+        explanation: h.explanation,
+        domainId: h.domainId ?? null,
+      }));
+      quizSession.preGenerate = true;
+      quizSession.startedAt = Date.now();
+      quizSession._isSmartReview = true;
+
+      const exam = getExamById(lastAiRequest.examId);
+      showAiModal(els, `スマート復習（${reviewQuestions.length}問）`, true);
+      if (els.modalContent) els.modalContent.innerHTML = '';
+      if (els.modalLoading) els.modalLoading.classList.add('hidden');
+      resetQuizUi(els);
+      if (els.quizArea) els.quizArea.classList.remove('hidden');
+
+      renderInteractiveQuiz({ els, quiz: quizSession.questions[0] });
+      updateQuizProgress();
+      if (els.quizComboBar) els.quizComboBar.classList.remove('hidden');
+      if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+      if (els.quizChoices) els.quizChoices.classList.remove('hidden');
+      return;
+    }
+
     // ── Background Batch path ──
     // 「本番形式の模擬問題（mock）」かつ Gemini 3 系モデル利用時は、
     // Batch API で非同期生成し、完了をトーストで通知する。
@@ -311,6 +351,13 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     };
     reflectAiVoteUi();
     if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`;
+    // Update smart review count
+    if (els.smartReviewCount) {
+      const reviewQ = getSmartReviewCombined(state.examId);
+      els.smartReviewCount.textContent = reviewQ.length > 0
+        ? `📊 ${reviewQ.length}問の復習対象あり`
+        : '📊 復習対象なし（まずクイズに挑戦！）';
+    }
     openModal(els.quizModeModal);
   });
 
@@ -423,6 +470,33 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     a.download = `quiz-history${examId ? '-' + examId : ''}.md`;
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  // --- Schedule Review Button ---
+  els.scheduleReviewBtn?.addEventListener('click', () => {
+    if (!quizSession) return;
+    const wrongQuestions = quizSession.questions.filter((q, i) => q && quizSession.answers[i] !== q.correctIndex);
+    if (wrongQuestions.length === 0) return;
+
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    tomorrow.setHours(9, 0, 0, 0);
+
+    addReviewSchedule({
+      examId: quizSession.examId,
+      questionKeys: wrongQuestions.map(q => q.question.trim().slice(0, 100)),
+      scheduledFor: tomorrow.toISOString(),
+    });
+
+    if (els.scheduleReviewBtn) {
+      els.scheduleReviewBtn.disabled = true;
+      els.scheduleReviewBtn.classList.add('opacity-60', 'cursor-not-allowed');
+      els.scheduleReviewBtn.innerHTML = '<i class="fas fa-check"></i> 復習スケジュールに登録しました';
+    }
+    if (els.scheduleReviewMsg) {
+      els.scheduleReviewMsg.textContent = `${wrongQuestions.length}問を明日の復習に登録しました`;
+      els.scheduleReviewMsg.classList.remove('hidden');
+    }
   });
 
   // --- Timer ---
@@ -1366,6 +1440,10 @@ function getElements() {
     quizSumExplanationsToggle: document.getElementById('quizSumExplanationsToggle'),
     quizSumExplanationsArrow: document.getElementById('quizSumExplanationsArrow'),
     quizSumExplanationsList: document.getElementById('quizSumExplanationsList'),
+    quizSumScheduleReview: document.getElementById('quizSumScheduleReview'),
+    scheduleReviewBtn: document.getElementById('scheduleReviewBtn'),
+    scheduleReviewMsg: document.getElementById('scheduleReviewMsg'),
+    smartReviewCount: document.getElementById('smartReviewCount'),
 
     // Dashboard carousel
     dashboardCarousel: document.getElementById('dashboardCarousel'),
@@ -3370,6 +3448,13 @@ function showQuizSummary({ els, session }) {
         `.trim();
       }).join('');
     }
+  }
+
+  // Show "Schedule Review" button if there were wrong answers
+  const wrongQuestions = session.questions.filter((q, i) => q && session.answers[i] !== q.correctIndex);
+  if (els.quizSumScheduleReview && wrongQuestions.length > 0) {
+    els.quizSumScheduleReview.classList.remove('hidden');
+    if (els.scheduleReviewMsg) els.scheduleReviewMsg.classList.add('hidden');
   }
 }
 

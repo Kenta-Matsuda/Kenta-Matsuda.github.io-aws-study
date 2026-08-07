@@ -1095,7 +1095,7 @@
             </div>
             <div class="p-5">
                 <p id="quizModeTaskLabel" class="text-sm text-gray-500 mb-4 truncate"></p>
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="quizModeCards">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="quizModeCards">
                     <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4 selected" data-quiz-mode="quick5">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">⚡</span>
@@ -1118,6 +1118,14 @@
                         </div>
                         <p class="text-xs text-gray-500">本番同等の問題数・制限時間・難易度。AWS公式ドキュメントの引用付き解説。</p>
                         <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">📋 試験別の本番形式</div>
+                    </div>
+                    <div class="quiz-mode-card rounded-xl bg-white border border-emerald-200 p-4" data-quiz-mode="smartReview">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="text-xl">🧠</span>
+                            <span class="font-bold text-gray-800 text-sm">スマート復習</span>
+                        </div>
+                        <p class="text-xs text-gray-500">苦手問題・過去の間違いから自動出題。効率的に弱点を克服！</p>
+                        <div class="mt-1.5 text-[10px] text-emerald-600 font-bold" id="smartReviewCount">📊 復習対象を分析中...</div>
                     </div>
                 </div>
             </div>
@@ -1255,6 +1263,13 @@
                                 <i class="fas fa-chevron-down text-indigo-400 text-xs transition-transform" id="quizSumExplanationsArrow"></i>
                             </button>
                             <div id="quizSumExplanationsList" class="hidden space-y-3 max-h-96 overflow-y-auto"></div>
+                        </div>
+                        <!-- Schedule Review Button -->
+                        <div id="quizSumScheduleReview" class="hidden mt-4">
+                            <button id="scheduleReviewBtn" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold transition-colors">
+                                <i class="fas fa-calendar-plus"></i> 間違えた問題を明日復習する
+                            </button>
+                            <p id="scheduleReviewMsg" class="hidden text-xs text-emerald-600 mt-2 text-center"></p>
                         </div>
                     </div>
                 </div>

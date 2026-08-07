@@ -646,3 +646,148 @@ function showMessage(messageEl, text, colorClass) {
   messageEl.className = `text-sm mb-4 ${colorClass}`;
   messageEl.classList.remove('hidden');
 }
+
+
+// ─── Smart Review (復習の自動化) ────────────────────────────
+
+const REVIEW_SCHEDULE_KEY = 'asn_review_schedule_v1';
+
+/**
+ * Get questions the user got wrong, grouped by how recently they were missed.
+ * @param {string} examId
+ * @returns {{ weakServices: Array, oldMistakes: Array, weakDomainQuestions: Array }}
+ */
+export function getSmartReviewQuestions(examId) {
+  const history = loadQuizHistory().filter(h => h.examId === examId && h.question);
+  const now = Date.now();
+  const SEVEN_DAYS_MS = 7 * 24 * 60 * 60 * 1000;
+
+  // All wrong answers
+  const wrongEntries = history.filter(h => !h.isCorrect);
+
+  // Deduplicate by question text, keeping most recent attempt
+  const questionMap = new Map();
+  for (const h of wrongEntries) {
+    const key = h.question.trim();
+    if (!questionMap.has(key) || new Date(h.answeredAt) > new Date(questionMap.get(key).answeredAt)) {
+      questionMap.set(key, h);
+    }
+  }
+  const uniqueWrong = [...questionMap.values()];
+
+  // 1. Old mistakes: questions answered wrong 7+ days ago (spaced repetition)
+  const oldMistakes = uniqueWrong.filter(h => {
+    const answeredTime = new Date(h.answeredAt).getTime();
+    return (now - answeredTime) >= SEVEN_DAYS_MS;
+  }).slice(0, 10);
+
+  // 2. Weak domains: find domains with worst accuracy, get wrong questions from those
+  const domainStats = {};
+  for (const h of history) {
+    if (h.domainId == null) continue;
+    if (!domainStats[h.domainId]) domainStats[h.domainId] = { total: 0, wrong: 0 };
+    domainStats[h.domainId].total += 1;
+    if (!h.isCorrect) domainStats[h.domainId].wrong += 1;
+  }
+  const weakDomains = Object.entries(domainStats)
+    .filter(([, s]) => s.total >= 3)
+    .sort((a, b) => (b[1].wrong / b[1].total) - (a[1].wrong / a[1].total))
+    .slice(0, 3)
+    .map(([id]) => Number(id));
+
+  const weakDomainQuestions = uniqueWrong
+    .filter(h => h.domainId != null && weakDomains.includes(h.domainId))
+    .slice(0, 10);
+
+  // 3. Weak services: most frequently wrong question topics
+  const wrongCounts = {};
+  for (const h of wrongEntries) {
+    const key = h.question.trim();
+    wrongCounts[key] = (wrongCounts[key] || 0) + 1;
+  }
+  const weakServices = [...questionMap.entries()]
+    .sort((a, b) => (wrongCounts[b[0]] || 0) - (wrongCounts[a[0]] || 0))
+    .slice(0, 10)
+    .map(([, h]) => h);
+
+  return { weakServices, oldMistakes, weakDomainQuestions };
+}
+
+/**
+ * Get combined smart review questions (merged and deduplicated).
+ * @param {string} examId
+ * @returns {Array}
+ */
+export function getSmartReviewCombined(examId) {
+  const { weakServices, oldMistakes, weakDomainQuestions } = getSmartReviewQuestions(examId);
+  const seen = new Set();
+  const combined = [];
+
+  for (const list of [oldMistakes, weakDomainQuestions, weakServices]) {
+    for (const h of list) {
+      const key = h.question.trim();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      combined.push(h);
+    }
+  }
+  return combined.slice(0, 15);
+}
+
+/**
+ * Schedule a review reminder (stored in localStorage).
+ * @param {{ examId: string, questionKeys: string[], scheduledFor: string }} entry
+ */
+export function addReviewSchedule(entry) {
+  const schedules = loadReviewSchedules();
+  schedules.push({
+    id: 'rev_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+    examId: entry.examId,
+    questionKeys: entry.questionKeys || [],
+    scheduledFor: entry.scheduledFor,
+    createdAt: new Date().toISOString(),
+    completed: false,
+  });
+  // Keep max 50 schedules
+  if (schedules.length > 50) schedules.splice(0, schedules.length - 50);
+  localStorage.setItem(REVIEW_SCHEDULE_KEY, JSON.stringify(schedules));
+}
+
+/**
+ * Get pending review schedules that are due.
+ * @param {string} [examId]
+ * @returns {Array}
+ */
+export function getDueReviewSchedules(examId) {
+  const schedules = loadReviewSchedules();
+  const now = new Date().toISOString();
+  return schedules.filter(s =>
+    !s.completed &&
+    s.scheduledFor <= now &&
+    (!examId || s.examId === examId)
+  );
+}
+
+/**
+ * Mark a review schedule as completed.
+ * @param {string} scheduleId
+ */
+export function completeReviewSchedule(scheduleId) {
+  const schedules = loadReviewSchedules();
+  const found = schedules.find(s => s.id === scheduleId);
+  if (found) {
+    found.completed = true;
+    localStorage.setItem(REVIEW_SCHEDULE_KEY, JSON.stringify(schedules));
+  }
+}
+
+function loadReviewSchedules() {
+  try {
+    const raw = localStorage.getItem(REVIEW_SCHEDULE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
