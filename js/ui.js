@@ -2934,11 +2934,13 @@ function reflectThemeToggleIcon(els) {
   if (!els.themeToggleIcon) return;
   const current = getTheme();
   // Update icon: sun for light, moon for dark, laptop for system
-  els.themeToggleIcon.className = current === 'dark'
+  // Use setAttribute because Font Awesome may replace <i> with <svg> (SVG className is read-only)
+  const newClass = current === 'dark'
     ? 'fas fa-moon text-yellow-300 group-hover:text-yellow-200'
     : current === 'light'
       ? 'fas fa-sun text-yellow-300 group-hover:text-yellow-200'
       : 'fas fa-laptop text-gray-300 group-hover:text-white';
+  els.themeToggleIcon.setAttribute('class', newClass);
 }
 
 function wireThemeSwitch(els) {
