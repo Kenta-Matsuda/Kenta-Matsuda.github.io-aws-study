@@ -28,3 +28,19 @@ export const OPENAI_MODEL_CANDIDATES = [
 	'gpt-5-mini',
 	'gpt-5',
 ];
+
+
+// AI信頼性設定: ハルシネーション防止のための制約
+export const AI_RELIABILITY_CONFIG = {
+  // AI回答に必ず含めるべき参照ソースのドメイン
+  trustedSourceDomains: [
+    'docs.aws.amazon.com',
+    'aws.amazon.com',
+    'repost.aws',
+    'd1.awsstatic.com',
+  ],
+  // 解説内にURL参照がない場合に追加する注記
+  noSourceDisclaimer: '※ 正確な情報はAWS公式ドキュメントで確認してください。',
+  // AIの温度パラメータ (低い=より保守的な回答)
+  temperature: 0.3,
+};
