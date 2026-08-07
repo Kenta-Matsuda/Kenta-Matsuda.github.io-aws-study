@@ -4,6 +4,7 @@ export const AIF_C01 = {
   shortLabel: 'AIF',
   title: 'AWS Certified AI Practitioner',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -13,23 +14,37 @@ export const AIF_C01 = {
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
         '初めて受験する方へ：申し込みサイトが英語表記だったり手順が分かりにくい場合があります。下記の「初めての試験申し込みガイド」を参考に、落ち着いて進めましょう。',
       ],
+      descriptionEn: [
+        'Register for the AWS Certification exam. You can take the exam online or at a test center through Pearson VUE.',
+        'For first-time test takers: The registration site may be confusing. Refer to the "First-Time Registration Guide" below and proceed step by step.',
+      ],
       knowledge: [
         'AWS Training & Certification でアカウントを作成（または既存のAmazonアカウントでサインイン）',
         '試験言語・受験方法（テストセンター or オンライン）を選択',
         '受験料の支払い（クレジットカード）を完了',
         'オンライン受験の場合はシステムテストを事前に実施しておくと安心',
       ],
+      knowledgeEn: [
+        'Create an account on AWS Training & Certification (or sign in with an existing Amazon account)',
+        'Select the exam language and delivery method (test center or online)',
+        'Complete payment of the exam fee (credit card)',
+        'For online exams, run the system test in advance for peace of mind',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified AI Practitioner 公式ページ',
+              titleEn: 'AWS Certified AI Practitioner Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-ai-practitioner/',
+              urlEn: 'https://aws.amazon.com/certification/certified-ai-practitioner/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information on exam overview, passing criteria, and exam scope',
               recommend: true,
             },
           ],
@@ -37,13 +52,16 @@ export const AIF_C01 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification?p=cert&c=ai&z=1',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for the AWS Certification exam here (official registration site)',
               recommend: true,
             },
           ],
@@ -51,19 +69,25 @@ export const AIF_C01 = {
         {
           key: 'beginner-guide',
           label: '初めての試験申し込みガイド',
+          labelEn: 'First-Time Registration Guide',
           iconClass: 'fas fa-hand-holding-heart',
           iconColorClass: 'text-pink-500',
           items: [
             {
               title: '【YouTube】AWS認定試験の申し込み手順（日本語解説）',
+              titleEn: '[YouTube] AWS Certification Exam Registration Steps',
               url: 'https://www.youtube.com/results?search_query=AWS%E8%AA%8D%E5%AE%9A%E8%A9%A6%E9%A8%93+%E7%94%B3%E3%81%97%E8%BE%BC%E3%81%BF+%E6%89%8B%E9%A0%86',
               note: 'YouTube で申し込み手順を動画で確認できます',
+              noteEn: 'Watch registration steps on YouTube',
               recommend: true,
             },
             {
               title: 'AWS認定試験の予約方法（公式ポリシーページ）',
+              titleEn: 'How to Schedule an AWS Certification Exam (Official Policy Page)',
               url: 'https://aws.amazon.com/jp/certification/policies/before-testing/',
+              urlEn: 'https://aws.amazon.com/certification/policies/before-testing/',
               note: 'アカウント作成から予約完了までの手順を公式が解説',
+              noteEn: 'Official guide from account creation to reservation completion',
             },
           ],
         },
@@ -76,17 +100,24 @@ export const AIF_C01 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the exam guide (PDF) to understand the scope, scoring breakdown, and question format. Grasp the overall learning picture before moving on to each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified AI Practitioner 試験ガイド (PDF)',
+              titleEn: 'AWS Certified AI Practitioner Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-ai-practitioner/AWS-Certified-AI-Practitioner_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-ai-practitioner/AWS-Certified-AI-Practitioner_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Check exam scope, question distribution, and sample questions',
               recommend: true,
             },
           ],
@@ -100,23 +131,31 @@ export const AIF_C01 = {
       description: [
         'AWS Skill Builder の無料コースで、AI/ML の基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational AI/ML knowledge with free courses on AWS Skill Builder. There are also courses specifically designed for exam preparation.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified AI Practitioner',
+              titleEn: 'Exam Prep Standard Course: AWS Certified AI Practitioner',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/19554/exam-prep-standard-course-aws-certified-ai-practitioner-aif-c01',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam prep course (free)',
               recommend: true,
             },
             {
               title: 'AWS AI Practitioner Essentials',
+              titleEn: 'AWS AI Practitioner Essentials',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/19559/aws-ai-practitioner-essentials',
               note: 'AWS Skill Builder: AI基礎コース（無料）',
+              noteEn: 'AWS Skill Builder: AI fundamentals course (free)',
               recommend: true,
             },
           ],
@@ -131,6 +170,10 @@ export const AIF_C01 = {
         'このアプリの Domain 1〜5 タブに切り替えて、各ドメインのタスクごとに用意されたブログ・Black Belt・公式ドキュメントを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to the Domain 1-5 tabs in this app and read through the blogs, Black Belt materials, and official documentation prepared for each domain task.',
+        'You can also deepen your understanding by using AI explanations and AI practice questions.',
+      ],
       knowledge: [
         'Domain 1: AI と ML の基礎（20%）',
         'Domain 2: 生成 AI の基礎（24%）',
@@ -138,17 +181,28 @@ export const AIF_C01 = {
         'Domain 4: 責任ある AI のガイドライン（14%）',
         'Domain 5: AI ソリューションのセキュリティ、コンプライアンス、ガバナンス（14%）',
       ],
+      knowledgeEn: [
+        'Domain 1: Fundamentals of AI and ML (20%)',
+        'Domain 2: Fundamentals of Generative AI (24%)',
+        'Domain 3: Applications of Foundation Models (28%)',
+        'Domain 4: Guidelines for Responsible AI (14%)',
+        'Domain 5: Security, Compliance, and Governance for AI Solutions (14%)',
+      ],
       resources: [
         {
           key: 'whitepapers',
           label: 'ホワイトペーパー・ガイド',
+          labelEn: 'Whitepapers & Guides',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-gray-600',
           items: [
             {
               title: 'AWS での機械学習',
+              titleEn: 'Machine Learning on AWS',
               url: 'https://aws.amazon.com/jp/machine-learning/',
+              urlEn: 'https://aws.amazon.com/machine-learning/',
               note: 'AWS の AI/ML サービス概要',
+              noteEn: 'Overview of AWS AI/ML services',
               recommend: true,
             },
           ],
@@ -162,17 +216,23 @@ export const AIF_C01 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve exam-like questions with the official practice question set to check your understanding. If you find weak domains, go back to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'AWS Certification 公式練習問題集',
+              titleEn: 'AWS Certification Official Practice Question Set',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/19790/aws-certified-ai-practitioner-official-practice-question-set-aif-c01-english',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -188,6 +248,7 @@ export const AIF_C01 = {
       weight: 20,
       color: '#3b82f6',
       description: 'このドメインでは、AI/ML の基本概念、用語、ユースケース、および AWS の AI/ML サービスに関する知識が問われます。',
+      descriptionEn: 'This domain tests knowledge of basic AI/ML concepts, terminology, use cases, and AWS AI/ML services.',
       tasks: [
         {
           id: '1.1',
@@ -202,6 +263,15 @@ export const AIF_C01 = {
             '- AI モデルに含まれるさまざまなタイプのデータ (ラベル付きとラベルなし、表形式、時系列、画像、テキスト、構造化データと非構造化データなど) について説明する。',
             '- 教師あり学習、教師なし学習、強化学習について説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 1.1: Explain basic AI concepts and terminologies.',
+            'Scope:',
+            '- Define basic AI terms (AI, ML, deep learning, neural networks, computer vision, natural language processing (NLP), model, algorithm, training and inference, bias, fairness, fit, large language models (LLMs), etc.).',
+            '- Describe the similarities and differences between AI, ML, GenAI, and deep learning.',
+            '- Describe different types of inference (batch, real-time, etc.).',
+            '- Describe different types of data in AI models (labeled and unlabeled, tabular, time-series, image, text, structured and unstructured, etc.).',
+            '- Describe supervised learning, unsupervised learning, and reinforcement learning.',
+          ],
           knowledge: [
             'AI / ML / 深層学習',
             'ニューラルネットワーク',
@@ -212,17 +282,31 @@ export const AIF_C01 = {
             '教師あり学習 / 教師なし学習 / 強化学習',
             '構造化データ / 非構造化データ',
           ],
+          knowledgeEn: [
+            'AI / ML / Deep Learning',
+            'Neural Networks',
+            'Computer Vision',
+            'Natural Language Processing (NLP)',
+            'Large Language Models (LLMs)',
+            'Batch Inference / Real-Time Inference',
+            'Supervised Learning / Unsupervised Learning / Reinforcement Learning',
+            'Structured Data / Unstructured Data',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS の AI/ML サービス',
+                  titleEn: 'AWS AI/ML Services',
                   url: 'https://aws.amazon.com/jp/machine-learning/',
+                  urlEn: 'https://aws.amazon.com/machine-learning/',
                   note: 'AI/ML サービスの全体像',
+                  noteEn: 'Overview of AI/ML services',
                   recommend: true,
                 },
               ],
@@ -242,6 +326,15 @@ export const AIF_C01 = {
             '- 実際の AI 応用例 (コンピュータビジョン、NLP、音声認識、レコメンデーションシステム、不正検出、予測など) を特定する。',
             '- AWS のマネージド AI/ML サービス (Amazon SageMaker AI、Amazon Transcribe、Amazon Translate、Amazon Comprehend、Amazon Lex、Amazon Polly など) の機能を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 1.2: Identify practical use cases for AI.',
+            'Scope:',
+            '- Recognize application areas where AI/ML can provide value (assisting human decision-making, solution scalability, automation, etc.).',
+            '- Identify situations where AI/ML solutions are not appropriate (cost-benefit analysis, situations requiring specific outcomes rather than predictions, etc.).',
+            '- Determine appropriate ML techniques for specific use cases (regression, classification, clustering, etc.).',
+            '- Identify real-world AI applications (computer vision, NLP, speech recognition, recommendation systems, fraud detection, forecasting, etc.).',
+            '- Describe capabilities of AWS managed AI/ML services (Amazon SageMaker AI, Amazon Transcribe, Amazon Translate, Amazon Comprehend, Amazon Lex, Amazon Polly, etc.).',
+          ],
           knowledge: [
             'Amazon SageMaker AI',
             'Amazon Transcribe',
@@ -252,17 +345,31 @@ export const AIF_C01 = {
             '回帰 / 分類 / クラスタリング',
             'コンピュータビジョン / NLP / 音声認識',
           ],
+          knowledgeEn: [
+            'Amazon SageMaker AI',
+            'Amazon Transcribe',
+            'Amazon Translate',
+            'Amazon Comprehend',
+            'Amazon Lex',
+            'Amazon Polly',
+            'Regression / Classification / Clustering',
+            'Computer Vision / NLP / Speech Recognition',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS AI サービスのユースケース',
+                  titleEn: 'AWS AI Services Use Cases',
                   url: 'https://aws.amazon.com/jp/machine-learning/ai-services/',
+                  urlEn: 'https://aws.amazon.com/machine-learning/ai-services/',
                   note: 'AIサービスの活用事例',
+                  noteEn: 'AI service use case examples',
                   recommend: true,
                 },
               ],
@@ -283,6 +390,16 @@ export const AIF_C01 = {
             '- ML 運用 (MLOps) の基本概念 (実験、反復可能なプロセス、スケーラブルなシステム、技術的負債の管理、本番稼働の準備、モデルモニタリング、モデルの再トレーニングなど) を説明する。',
             '- ML モデルを評価するためのモデルパフォーマンスメトリクス [正解率、曲線下面積 (AUC)、F1 スコアなど] とビジネスメトリクス [ユーザーあたりのコスト、開発コスト、顧客からのフィードバック、投資収益率 (ROI) など] を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 1.3: Describe the ML development lifecycle.',
+            'Scope:',
+            '- Describe the components of an ML pipeline (data collection, exploratory data analysis (EDA), data preprocessing, feature engineering, model training, hyperparameter tuning, evaluation, deployment, monitoring, etc.).',
+            '- Describe sources of ML models (open-source pre-trained models, custom models for training, etc.).',
+            '- Describe methods for using models in production (managed API services, self-hosted APIs, etc.).',
+            '- Identify AWS services and features for each stage of the ML pipeline (SageMaker AI, SageMaker Data Wrangler, SageMaker Feature Store, SageMaker Model Monitor, etc.).',
+            '- Describe basic concepts of ML operations (MLOps) (experimentation, repeatable processes, scalable systems, managing technical debt, production readiness, model monitoring, model retraining, etc.).',
+            '- Describe model performance metrics (accuracy, area under the curve (AUC), F1 score, etc.) and business metrics (cost per user, development cost, customer feedback, return on investment (ROI), etc.) for evaluating ML models.',
+          ],
           knowledge: [
             'ML パイプライン',
             'データ前処理 / 特徴量エンジニアリング',
@@ -293,17 +410,31 @@ export const AIF_C01 = {
             'MLOps (ML 運用)',
             'モデルパフォーマンスメトリクス (正解率、AUC、F1 スコア)',
           ],
+          knowledgeEn: [
+            'ML Pipeline',
+            'Data Preprocessing / Feature Engineering',
+            'Amazon SageMaker AI',
+            'SageMaker Data Wrangler',
+            'SageMaker Feature Store',
+            'SageMaker Model Monitor',
+            'MLOps (ML Operations)',
+            'Model Performance Metrics (Accuracy, AUC, F1 Score)',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon SageMaker',
+                  titleEn: 'Amazon SageMaker',
                   url: 'https://aws.amazon.com/jp/sagemaker/',
+                  urlEn: 'https://aws.amazon.com/sagemaker/',
                   note: 'ML プラットフォームの概要',
+                  noteEn: 'Overview of the ML platform',
                   recommend: true,
                 },
               ],
@@ -319,6 +450,7 @@ export const AIF_C01 = {
       weight: 24,
       color: '#8b5cf6',
       description: 'このドメインでは、生成 AI の基本概念、基盤モデル、プロンプトエンジニアリング、および Amazon Bedrock に関する知識が問われます。',
+      descriptionEn: 'This domain tests knowledge of generative AI fundamentals, foundation models, prompt engineering, and Amazon Bedrock.',
       tasks: [
         {
           id: '2.1',
@@ -331,6 +463,13 @@ export const AIF_C01 = {
             '- GenAI モデルの潜在的なユースケース (画像・動画・音声の生成、要約、AI アシスタント、翻訳、コード生成、カスタマーサービスエージェント、検索、レコメンデーションエンジンなど) を特定する。',
             '- 基盤モデルのライフサイクル (データ選択、モデル選択、事前トレーニング、ファインチューニング、評価、デプロイ、フィードバックなど) を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 2.1: Explain the basic concepts of generative AI.',
+            'Scope:',
+            '- Define basic GenAI concepts (tokens, chunking, embeddings, vectors, prompt engineering, transformer-based LLMs, foundation models (FMs), multimodal models, diffusion models, etc.).',
+            '- Identify potential use cases for GenAI models (image/video/audio generation, summarization, AI assistants, translation, code generation, customer service agents, search, recommendation engines, etc.).',
+            '- Describe the foundation model lifecycle (data selection, model selection, pre-training, fine-tuning, evaluation, deployment, feedback, etc.).',
+          ],
           knowledge: [
             'トークン / チャンク化 / 埋め込み / ベクトル',
             'プロンプトエンジニアリング',
@@ -340,23 +479,39 @@ export const AIF_C01 = {
             '拡散モデル',
             'FM ライフサイクル',
           ],
+          knowledgeEn: [
+            'Tokens / Chunking / Embeddings / Vectors',
+            'Prompt Engineering',
+            'Transformer-based LLMs',
+            'Foundation Models (FMs)',
+            'Multimodal Models',
+            'Diffusion Models',
+            'FM Lifecycle',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
                   url: 'https://aws.amazon.com/jp/bedrock/',
+                  urlEn: 'https://aws.amazon.com/bedrock/',
                   note: '生成 AI プラットフォームの概要',
+                  noteEn: 'Overview of the generative AI platform',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock ユーザーガイド',
+                  titleEn: 'Amazon Bedrock User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/what-is-bedrock.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html',
                   note: '基盤モデルの活用方法',
+                  noteEn: 'How to use foundation models',
                   recommend: true,
                 },
               ],
@@ -375,6 +530,14 @@ export const AIF_C01 = {
             '- GenAI モデルを選択する際に考慮すべき要素 (モデルタイプ、パフォーマンス要件、機能、制約、コンプライアンスなど) を特定する。',
             '- GenAI アプリケーションのビジネス価値とメトリクス (クロスドメインのパフォーマンス、効率性、コンバージョン率、ユーザーあたりの平均収益、正解率、顧客生涯価値など) を見極める。',
           ],
+          descriptionEn: [
+            'Task Statement 2.2: Understand the capabilities and limitations of GenAI for solving business problems.',
+            'Scope:',
+            '- Describe the advantages of GenAI (adaptability, responsiveness, simplicity, etc.).',
+            '- Identify the disadvantages of GenAI solutions (hallucinations, interpretability, inaccuracy, nondeterminism, etc.).',
+            '- Identify factors to consider when selecting a GenAI model (model type, performance requirements, capabilities, constraints, compliance, etc.).',
+            '- Determine the business value and metrics of GenAI applications (cross-domain performance, efficiency, conversion rate, average revenue per user, accuracy, customer lifetime value, etc.).',
+          ],
           knowledge: [
             'GenAI の利点 (適応性・応答性・シンプルさ)',
             'ハルシネーション',
@@ -382,23 +545,37 @@ export const AIF_C01 = {
             'モデル選択の考慮要素',
             'ビジネスメトリクス (コンバージョン率、正解率、ROI)',
           ],
+          knowledgeEn: [
+            'Advantages of GenAI (Adaptability, Responsiveness, Simplicity)',
+            'Hallucinations',
+            'Nondeterminism',
+            'Model Selection Considerations',
+            'Business Metrics (Conversion Rate, Accuracy, ROI)',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock の基盤モデル',
+                  titleEn: 'Amazon Bedrock Foundation Models',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/models-supported.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/models-supported.html',
                   note: '利用可能なモデルと選択基準',
+                  noteEn: 'Available models and selection criteria',
                   recommend: true,
                 },
                 {
                   title: '生成 AI のユースケース',
+                  titleEn: 'Generative AI Use Cases',
                   url: 'https://aws.amazon.com/jp/generative-ai/use-cases/',
+                  urlEn: 'https://aws.amazon.com/generative-ai/use-cases/',
                   note: 'ビジネスにおける生成 AI の活用事例',
+                  noteEn: 'Generative AI use cases in business',
                 },
               ],
             },
@@ -416,6 +593,14 @@ export const AIF_C01 = {
             '- GenAI アプリケーションの AWS インフラストラクチャの利点 (セキュリティ、コンプライアンス、責任、安全性など) を説明する。',
             '- AWS の GenAI サービスの、コストに対するトレードオフ (応答性、可用性、冗長性、パフォーマンス、リージョン展開、トークンベースの料金設定、プロビジョンスループット、カスタムモデルなど) を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 2.3: Describe AWS infrastructure and technologies for building GenAI applications.',
+            'Scope:',
+            '- Identify AWS services and features for developing GenAI applications (Amazon SageMaker JumpStart, Amazon Bedrock PartyRock, Amazon Q, Amazon Bedrock Data Automation, etc.).',
+            '- Describe benefits of building applications using AWS GenAI services (accessibility, low barrier to entry, efficiency, cost-effectiveness, speed to market, ability to meet business objectives, etc.).',
+            '- Describe the advantages of AWS infrastructure for GenAI applications (security, compliance, responsibility, safety, etc.).',
+            '- Describe cost tradeoffs of AWS GenAI services (responsiveness, availability, redundancy, performance, regional deployment, token-based pricing, provisioned throughput, custom models, etc.).',
+          ],
           knowledge: [
             'Amazon SageMaker Jumpstart',
             'Amazon Bedrock',
@@ -425,28 +610,47 @@ export const AIF_C01 = {
             'トークンベースの料金設定',
             'プロビジョンスループット',
           ],
+          knowledgeEn: [
+            'Amazon SageMaker JumpStart',
+            'Amazon Bedrock',
+            'Amazon Bedrock PartyRock',
+            'Amazon Q',
+            'Amazon Bedrock Data Automation',
+            'Token-based Pricing',
+            'Provisioned Throughput',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
                   url: 'https://aws.amazon.com/jp/bedrock/',
+                  urlEn: 'https://aws.amazon.com/bedrock/',
                   note: '生成 AI プラットフォームの概要',
+                  noteEn: 'Overview of the generative AI platform',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Q',
+                  titleEn: 'Amazon Q',
                   url: 'https://aws.amazon.com/jp/q/',
+                  urlEn: 'https://aws.amazon.com/q/',
                   note: 'AI アシスタントの概要',
+                  noteEn: 'Overview of the AI assistant',
                 },
                 {
                   title: 'Amazon SageMaker JumpStart',
+                  titleEn: 'Amazon SageMaker JumpStart',
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/studio-jumpstart.html',
+                  urlEn: 'https://docs.aws.amazon.com/sagemaker/latest/dg/studio-jumpstart.html',
                   note: '事前学習済みモデルの活用',
+                  noteEn: 'Using pre-trained models',
                 },
               ],
             },
@@ -461,6 +665,7 @@ export const AIF_C01 = {
       weight: 28,
       color: '#22c55e',
       description: 'このドメインでは、基盤モデルのファインチューニング、RAG、エージェント、および AWS サービスを使用した AI アプリケーションの構築に関する知識が問われます。',
+      descriptionEn: 'This domain tests knowledge of foundation model fine-tuning, RAG, agents, and building AI applications using AWS services.',
       tasks: [
         {
           id: '3.1',
@@ -476,6 +681,16 @@ export const AIF_C01 = {
             '- FM をカスタマイズするためのさまざまなアプローチ (事前トレーニング、ファインチューニング、コンテキスト内学習、RAG など) のコスト面でのトレードオフを説明する。',
             '- マルチステップのタスクにおけるエージェントのロール (Amazon Bedrock エージェント、エージェンティック AI、モデルコンテキストプロトコルなど) を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 3.1: Describe design considerations for foundation model applications.',
+            'Scope:',
+            '- Identify selection criteria for choosing pre-trained models (cost, modality, latency, multilingual, model size, model complexity, customization, input/output length, prompt caching, etc.).',
+            '- Describe how inference parameters affect model responses (temperature, input/output length, etc.).',
+            '- Define Retrieval Augmented Generation (RAG) and how it is used in business (Amazon Bedrock Knowledge Bases, etc.).',
+            '- Identify AWS services that help store embeddings in vector databases (Amazon OpenSearch Service, Amazon Aurora, Amazon Neptune, Amazon RDS for PostgreSQL, etc.).',
+            '- Describe cost tradeoffs of different approaches to customizing FMs (pre-training, fine-tuning, in-context learning, RAG, etc.).',
+            '- Describe the role of agents in multi-step tasks (Amazon Bedrock Agents, agentic AI, Model Context Protocol, etc.).',
+          ],
           knowledge: [
             '検索拡張生成 (RAG)',
             'Amazon Bedrock ナレッジベース',
@@ -486,17 +701,31 @@ export const AIF_C01 = {
             'ファインチューニング / コンテキスト内学習',
             '推論パラメータ (温度など)',
           ],
+          knowledgeEn: [
+            'Retrieval Augmented Generation (RAG)',
+            'Amazon Bedrock Knowledge Bases',
+            'Vector Databases',
+            'Embeddings',
+            'Amazon Bedrock Agents',
+            'Agentic AI',
+            'Fine-tuning / In-context Learning',
+            'Inference Parameters (Temperature, etc.)',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock のナレッジベース',
+                  titleEn: 'Amazon Bedrock Knowledge Bases',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/knowledge-base.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html',
                   note: 'RAG パターンの実装',
+                  noteEn: 'Implementing the RAG pattern',
                   recommend: true,
                 },
               ],
@@ -515,6 +744,14 @@ export const AIF_C01 = {
             '- プロンプトエンジニアリングの利点とベストプラクティス (応答品質の向上、実験、ガードレール、発見、具体性と簡潔さ、複数のコメントの使用) を特定し、説明する。',
             '- プロンプトエンジニアリングの潜在的なリスクと制限 (露出、ポイズニング、ハイジャック、ジェイルブレイクなど) を定義する。',
           ],
+          descriptionEn: [
+            'Task Statement 3.2: Choose effective prompt engineering techniques.',
+            'Scope:',
+            '- Define prompt engineering concepts and components (context, instructions, negative prompts, model latent space, prompt routing, etc.).',
+            '- Define prompt engineering techniques (chain-of-thought, zero-shot, single-shot, few-shot, prompt templates).',
+            '- Identify and describe benefits and best practices of prompt engineering (improving response quality, experimentation, guardrails, discovery, specificity and conciseness, using multiple comments).',
+            '- Define potential risks and limitations of prompt engineering (exposure, poisoning, hijacking, jailbreaking, etc.).',
+          ],
           knowledge: [
             'プロンプトエンジニアリング',
             '思考の連鎖',
@@ -524,17 +761,30 @@ export const AIF_C01 = {
             'ガードレール',
             'プロンプトインジェクション / ジェイルブレイク',
           ],
+          knowledgeEn: [
+            'Prompt Engineering',
+            'Chain-of-Thought',
+            'Zero-shot / Single-shot / Few-shot',
+            'Prompt Templates',
+            'Prompt Routing',
+            'Guardrails',
+            'Prompt Injection / Jailbreaking',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock Guardrails',
+                  titleEn: 'Amazon Bedrock Guardrails',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/guardrails.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html',
                   note: 'AI 出力の安全性制御',
+                  noteEn: 'AI output safety controls',
                   recommend: true,
                 },
               ],
@@ -552,6 +802,13 @@ export const AIF_C01 = {
             '- FM をファインチューニングするための方法 (指示のチューニング、特定分野へのモデルの適応、転移学習、継続的な事前トレーニングなど) を定義する。',
             '- FM をファインチューニングするためのデータの準備方法 [データキュレーション、ガバナンス、サイズ、ラベル付け、代表性、人間からのフィードバックによる強化学習 (RLHF) など] を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 3.3: Describe the training and fine-tuning process for foundation models.',
+            'Scope:',
+            '- Describe key elements of FM training (pre-training, fine-tuning, continued pre-training, distillation, etc.).',
+            '- Define methods for fine-tuning FMs (instruction tuning, domain adaptation, transfer learning, continued pre-training, etc.).',
+            '- Describe how to prepare data for fine-tuning FMs (data curation, governance, size, labeling, representativeness, reinforcement learning from human feedback (RLHF), etc.).',
+          ],
           knowledge: [
             '事前トレーニング / ファインチューニング',
             '継続的な事前チューニング',
@@ -561,17 +818,30 @@ export const AIF_C01 = {
             'RLHF (人間からのフィードバックによる強化学習)',
             'データキュレーション / ラベル付け',
           ],
+          knowledgeEn: [
+            'Pre-training / Fine-tuning',
+            'Continued Pre-training',
+            'Distillation',
+            'Instruction Tuning',
+            'Transfer Learning',
+            'RLHF (Reinforcement Learning from Human Feedback)',
+            'Data Curation / Labeling',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock カスタムモデル',
+                  titleEn: 'Amazon Bedrock Custom Models',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/custom-models.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html',
                   note: 'モデルのカスタマイズ方法',
+                  noteEn: 'How to customize models',
                   recommend: true,
                 },
               ],
@@ -590,6 +860,14 @@ export const AIF_C01 = {
             '- FM がビジネス目標 (生産性、ユーザーエンゲージメント、タスクエンジニアリングなど) を効果的に満たしているかどうかを判断する。',
             '- FM を使用して構築されたアプリケーションのパフォーマンスを評価するためのアプローチ (RAG、エージェント、ワークフローなど) を特定する。',
           ],
+          descriptionEn: [
+            'Task Statement 3.4: Describe methods to evaluate FM performance.',
+            'Scope:',
+            '- Identify techniques for evaluating FM performance (human evaluation, benchmark datasets, Amazon Bedrock model evaluation, etc.).',
+            '- Identify relevant metrics for evaluating FM performance (Recall-Oriented Understudy for Gisting Evaluation (ROUGE), Bilingual Evaluation Understudy (BLEU), BERTScore, etc.).',
+            '- Determine whether an FM is effectively meeting business objectives (productivity, user engagement, task engineering, etc.).',
+            '- Identify approaches for evaluating the performance of applications built using FMs (RAG, agents, workflows, etc.).',
+          ],
           knowledge: [
             'ROUGE (要約評価メトリクス)',
             'BLEU (翻訳評価メトリクス)',
@@ -598,17 +876,29 @@ export const AIF_C01 = {
             '人間による評価',
             'ベンチマークデータセット',
           ],
+          knowledgeEn: [
+            'ROUGE (Summarization Evaluation Metric)',
+            'BLEU (Translation Evaluation Metric)',
+            'BERTScore',
+            'Amazon Bedrock Model Evaluation',
+            'Human Evaluation',
+            'Benchmark Datasets',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock モデル評価',
+                  titleEn: 'Amazon Bedrock Model Evaluation',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-evaluation.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html',
                   note: 'FM の評価方法とメトリクス',
+                  noteEn: 'FM evaluation methods and metrics',
                   recommend: true,
                 },
               ],
@@ -624,6 +914,7 @@ export const AIF_C01 = {
       weight: 14,
       color: '#ef4444',
       description: 'このドメインでは、AI の公平性、透明性、プライバシー、安全性、および責任ある AI 開発に関する知識が問われます。',
+      descriptionEn: 'This domain tests knowledge of AI fairness, transparency, privacy, safety, and responsible AI development.',
       tasks: [
         {
           id: '4.1',
@@ -640,6 +931,17 @@ export const AIF_C01 = {
             '- バイアスと分散の影響 (人口統計グループへの影響、不正確さ、オーバーフィット、アンダーフィットなど) を説明する。',
             '- バイアス、信頼性、真実性を検出およびモニタリングするためのツール [ラベル品質の分析、人間による監査、サブグループ分析、Amazon SageMaker Clarify、SageMaker Model Monitor、Amazon Augmented AI (Amazon A2I) など] について説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 4.1: Explain the development of AI systems that are responsible.',
+            'Scope:',
+            '- Identify characteristics of responsible AI (bias, fairness, inclusivity, robustness, safety, veracity, etc.).',
+            '- Describe the use of tools to identify responsible AI characteristics (Amazon Bedrock Guardrails, etc.).',
+            '- Define responsible practices for model selection (environmental considerations, sustainability, etc.).',
+            '- Identify legal risks of using GenAI (intellectual property infringement claims, biased model outputs, loss of customer trust, end-user risks, hallucinations, etc.).',
+            '- Identify dataset characteristics (inclusivity, diversity, curated data sources, balanced datasets, etc.).',
+            '- Describe the effects of bias and variance (impact on demographic groups, inaccuracy, overfitting, underfitting, etc.).',
+            '- Describe tools for detecting and monitoring bias, reliability, and truthfulness (label quality analysis, human auditing, subgroup analysis, Amazon SageMaker Clarify, SageMaker Model Monitor, Amazon Augmented AI (Amazon A2I), etc.).',
+          ],
           knowledge: [
             '公平性 (Fairness)',
             '包括性 (Inclusivity)',
@@ -650,28 +952,48 @@ export const AIF_C01 = {
             'Amazon Augmented AI (Amazon A2I)',
             'バイアスと分散の影響',
           ],
+          knowledgeEn: [
+            'Fairness',
+            'Inclusivity',
+            'Robustness',
+            'Amazon Bedrock Guardrails',
+            'Amazon SageMaker Clarify',
+            'SageMaker Model Monitor',
+            'Amazon Augmented AI (Amazon A2I)',
+            'Effects of Bias and Variance',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS での責任ある AI',
+                  titleEn: 'Responsible AI on AWS',
                   url: 'https://aws.amazon.com/jp/machine-learning/responsible-ai/',
+                  urlEn: 'https://aws.amazon.com/machine-learning/responsible-ai/',
                   note: '責任ある AI の取り組み',
+                  noteEn: 'Responsible AI initiatives',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock Guardrails',
+                  titleEn: 'Amazon Bedrock Guardrails',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/guardrails.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html',
                   note: '責任ある AI の制御機能',
+                  noteEn: 'Responsible AI control features',
                 },
                 {
                   title: 'Amazon SageMaker Clarify',
+                  titleEn: 'Amazon SageMaker Clarify',
                   url: 'https://aws.amazon.com/jp/sagemaker/clarify/',
+                  urlEn: 'https://aws.amazon.com/sagemaker/clarify/',
                   note: 'バイアス検出と説明可能性',
+                  noteEn: 'Bias detection and explainability',
                 },
               ],
             },
@@ -689,6 +1011,14 @@ export const AIF_C01 = {
             '- モデルの安全性と透明性の間のトレードオフ (解釈可能性とパフォーマンスを測定するなど) を特定する。',
             '- 説明可能な AI のための人間中心設計の原則を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 4.2: Recognize the importance of transparent and explainable models.',
+            'Scope:',
+            '- Describe the differences between transparent, explainable models and opaque, unexplainable models.',
+            '- Describe tools for identifying transparent and explainable models (SageMaker Model Cards, open-source models, data, licenses, etc.).',
+            '- Identify tradeoffs between model safety and transparency (measuring interpretability vs. performance, etc.).',
+            '- Describe human-centered design principles for explainable AI.',
+          ],
           knowledge: [
             '説明可能性 (Explainability)',
             '解釈可能性 (Interpretability)',
@@ -697,23 +1027,38 @@ export const AIF_C01 = {
             '人間中心設計の原則',
             '透明性とパフォーマンスのトレードオフ',
           ],
+          knowledgeEn: [
+            'Explainability',
+            'Interpretability',
+            'SageMaker Model Cards',
+            'Open-source Models',
+            'Human-centered Design Principles',
+            'Transparency vs. Performance Tradeoffs',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon SageMaker Model Cards',
+                  titleEn: 'Amazon SageMaker Model Cards',
                   url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/model-cards.html',
+                  urlEn: 'https://docs.aws.amazon.com/sagemaker/latest/dg/model-cards.html',
                   note: 'モデルの透明性と文書化',
+                  noteEn: 'Model transparency and documentation',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock モデル評価',
+                  titleEn: 'Amazon Bedrock Model Evaluation',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-evaluation.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/model-evaluation.html',
                   note: 'モデル評価と改善',
+                  noteEn: 'Model evaluation and improvement',
                 },
               ],
             },
@@ -728,6 +1073,7 @@ export const AIF_C01 = {
       weight: 14,
       color: '#f59e0b',
       description: 'このドメインでは、AI ソリューションにおけるデータの保護、アクセス制御、コンプライアンス要件への対応に関する知識が問われます。',
+      descriptionEn: 'This domain tests knowledge of data protection, access control, and compliance requirements for AI solutions.',
       tasks: [
         {
           id: '5.1',
@@ -741,6 +1087,14 @@ export const AIF_C01 = {
             '- セキュアなデータエンジニアリングのベストプラクティス (データ品質の評価、プライバシー強化技術の実装、データアクセス制御、データの完全性など) を説明する。',
             '- AI システムのセキュリティとプライバシーに関する考慮事項 (アプリケーションセキュリティ、脅威検出、脆弱性管理、インフラストラクチャ保護、プロンプトインジェクション、保管中および転送中の暗号化など) を説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 5.1: Explain methods to secure AI systems.',
+            'Scope:',
+            '- Identify AWS services and features for securing AI systems (IAM roles, policies, and permissions; encryption; Amazon Macie; AWS PrivateLink; AWS Shared Responsibility Model, etc.).',
+            '- Describe concepts of source citation and data provenance documentation (data lineage, data cataloging, Amazon SageMaker Model Cards, etc.).',
+            '- Describe best practices for secure data engineering (data quality assessment, implementing privacy-enhancing technologies, data access controls, data integrity, etc.).',
+            '- Describe security and privacy considerations for AI systems (application security, threat detection, vulnerability management, infrastructure protection, prompt injection, encryption at rest and in transit, etc.).',
+          ],
           knowledge: [
             'IAM ロール・ポリシー',
             'データ暗号化 (転送中・保管中)',
@@ -751,23 +1105,40 @@ export const AIF_C01 = {
             'データリネージュ',
             'SageMaker Model Cards',
           ],
+          knowledgeEn: [
+            'IAM Roles and Policies',
+            'Data Encryption (In Transit and At Rest)',
+            'Amazon Macie',
+            'AWS PrivateLink',
+            'AWS Shared Responsibility Model',
+            'Prompt Injection Mitigation',
+            'Data Lineage',
+            'SageMaker Model Cards',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock セキュリティ',
+                  titleEn: 'Amazon Bedrock Security',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/security.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/security.html',
                   note: 'Bedrock のセキュリティ設定',
+                  noteEn: 'Bedrock security settings',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Macie',
+                  titleEn: 'Amazon Macie',
                   url: 'https://aws.amazon.com/jp/macie/',
+                  urlEn: 'https://aws.amazon.com/macie/',
                   note: '機密データの検出と保護',
+                  noteEn: 'Sensitive data discovery and protection',
                 },
               ],
             },
@@ -784,6 +1155,13 @@ export const AIF_C01 = {
             '- データガバナンス戦略 (データライフサイクル、ログ記録、レジデンシー、モニタリング、観察、保持など) を説明する。',
             '- ガバナンスプロトコル (ポリシー、レビューサイクル、レビュー戦略、生成 AI セキュリティスコーピングマトリックスなどのガバナンスフレームワーク、透明性基準、チームトレーニング要件など) に従うためのプロセスを説明する。',
           ],
+          descriptionEn: [
+            'Task Statement 5.2: Recognize governance and compliance regulations for AI systems.',
+            'Scope:',
+            '- Identify AWS services and features that support governance and regulatory compliance (AWS Config, Amazon Inspector, AWS Audit Manager, AWS Artifact, AWS CloudTrail, AWS Trusted Advisor, etc.).',
+            '- Describe data governance strategies (data lifecycle, logging, residency, monitoring, observability, retention, etc.).',
+            '- Describe processes for following governance protocols (policies, review cycles, review strategies, governance frameworks such as the Generative AI Security Scoping Matrix, transparency standards, team training requirements, etc.).',
+          ],
           knowledge: [
             'AWS Config',
             'Amazon Inspector',
@@ -794,23 +1172,40 @@ export const AIF_C01 = {
             '生成 AI セキュリティスコーピングマトリックス',
             'データガバナンス戦略',
           ],
+          knowledgeEn: [
+            'AWS Config',
+            'Amazon Inspector',
+            'AWS Audit Manager',
+            'AWS Artifact',
+            'AWS CloudTrail',
+            'AWS Trusted Advisor',
+            'Generative AI Security Scoping Matrix',
+            'Data Governance Strategies',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon SageMaker ML Governance',
+                  titleEn: 'Amazon SageMaker ML Governance',
                   url: 'https://aws.amazon.com/jp/sagemaker/ml-governance/',
+                  urlEn: 'https://aws.amazon.com/sagemaker/ml-governance/',
                   note: 'ML ガバナンスの概要',
+                  noteEn: 'Overview of ML governance',
                   recommend: true,
                 },
                 {
                   title: 'AWS Audit Manager',
+                  titleEn: 'AWS Audit Manager',
                   url: 'https://aws.amazon.com/jp/audit-manager/',
+                  urlEn: 'https://aws.amazon.com/audit-manager/',
                   note: '監査とコンプライアンス管理',
+                  noteEn: 'Audit and compliance management',
                 },
               ],
             },

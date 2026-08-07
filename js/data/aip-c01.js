@@ -4,6 +4,7 @@ export const AIP_C01 = {
   shortLabel: 'AIP',
   title: 'AWS Certified Generative AI Developer - Professional',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -12,17 +13,24 @@ export const AIP_C01 = {
       description: [
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
       ],
+      descriptionEn: [
+        'Register for the AWS certification exam. You can take the exam online or at a test center through Pearson VUE.',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified Generative AI Developer - Professional 公式ページ',
+              titleEn: 'AWS Certified Generative AI Developer - Professional Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-generative-ai-developer-professional/',
+              urlEn: 'https://aws.amazon.com/certification/certified-generative-ai-developer-professional/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information on exam overview, passing criteria, and scope',
               recommend: true,
             },
           ],
@@ -30,13 +38,16 @@ export const AIP_C01 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for the AWS certification exam here (official registration site)',
               recommend: true,
             },
           ],
@@ -50,17 +61,24 @@ export const AIP_C01 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the Exam Guide (PDF) to understand the exam scope, scoring weights, and question formats. Grasp the big picture before diving into each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified Generative AI Developer - Professional 試験ガイド (PDF)',
+              titleEn: 'AWS Certified Generative AI Developer - Professional Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-ai-professional/AWS-Certified-Generative-AI-Developer-Professional_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-ai-professional/AWS-Certified-Generative-AI-Developer-Professional_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Review exam scope, question ratios, and sample questions',
               recommend: true,
             },
           ],
@@ -74,17 +92,23 @@ export const AIP_C01 = {
       description: [
         'AWS Skill Builder の無料コースで、生成 AI 分野の基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational generative AI knowledge with free courses on AWS Skill Builder. Exam-specific preparation courses are also available.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified Generative AI Developer - Professional',
+              titleEn: 'Exam Prep Standard Course: AWS Certified Generative AI Developer - Professional',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/22657/exam-prep-standard-course-aws-certified-generative-ai-developer-professional-aip-c01',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
             },
           ],
@@ -99,6 +123,10 @@ export const AIP_C01 = {
         'このアプリの Domain 1〜5 タブに切り替えて、各ドメインのタスクごとに用意されたリソースを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to Domain 1-5 tabs in this app and study the resources prepared for each domain task.',
+        'You can also use AI explanations and AI practice questions to deepen your understanding.',
+      ],
       knowledge: [
         'Domain 1: 基盤モデルの統合、データ管理、コンプライアンス（31%）',
         'Domain 2: 実装と統合（26%）',
@@ -106,23 +134,37 @@ export const AIP_C01 = {
         'Domain 4: GenAI アプリケーションの運用効率と最適化（12%）',
         'Domain 5: テスト、検証、トラブルシューティング（11%）',
       ],
+      knowledgeEn: [
+        'Domain 1: Foundation Model Integration, Data Management, and Compliance (31%)',
+        'Domain 2: Implementation and Integration (26%)',
+        'Domain 3: AI Safety, Security, and Governance (20%)',
+        'Domain 4: Operational Efficiency and Optimization of GenAI Applications (12%)',
+        'Domain 5: Testing, Validation, and Troubleshooting (11%)',
+      ],
       resources: [
         {
           key: 'whitepapers',
           label: 'ホワイトペーパー・ガイド',
+          labelEn: 'Whitepapers & Guides',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-gray-600',
           items: [
             {
               title: 'AWS Well-Architected Generative AI Lens',
+              titleEn: 'AWS Well-Architected Generative AI Lens',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
               note: '生成 AI ワークロードのベストプラクティス',
+              noteEn: 'Best practices for generative AI workloads',
               recommend: true,
             },
             {
               title: 'Amazon Bedrock ユーザーガイド',
+              titleEn: 'Amazon Bedrock User Guide',
               url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/what-is-bedrock.html',
+              urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html',
               note: 'Bedrock の包括的なリファレンス',
+              noteEn: 'Comprehensive reference for Bedrock',
             },
           ],
         },
@@ -135,17 +177,23 @@ export const AIP_C01 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve exam-like questions from the official practice question set to check your understanding. If you find weak domains, go back to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
+              titleEn: 'AWS Certification Official Practice Question Set',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/22654/aws-certified-generative-ai-developer-professional-official-practice-question-set-aip-c01-japanese',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -161,6 +209,7 @@ export const AIP_C01 = {
       weight: 31,
       color: '#3b82f6',
       description: 'このドメインでは、GenAI ソリューションの設計、FM の選定と設定、データ検証パイプライン、ベクトルストア、検索メカニズム、プロンプトエンジニアリング戦略に関するスキルが問われます。',
+      descriptionEn: 'This domain tests skills related to designing GenAI solutions, selecting and configuring FMs, data validation pipelines, vector stores, retrieval mechanisms, and prompt engineering strategies.',
       tasks: [
         {
           id: '1.1',
@@ -172,28 +221,46 @@ export const AIP_C01 = {
             'スキル 1.1.2: 本格的なデプロイに進む前に概念実証の技術的実装を開発し、実現可能性、パフォーマンス特性、ビジネス価値を検証する (Amazon Bedrock の使用など)。',
             'スキル 1.1.3: 標準化された技術コンポーネントを作成し、複数のデプロイシナリオにわたって一貫した実装を確保する (AWS Well-Architected フレームワーク、AWS WA Tool Generative AI Lens の使用など)。',
           ],
+          descriptionEn: [
+            'Task 1.1: Analyze requirements and design GenAI solutions.',
+            'Skill 1.1.1: Create comprehensive architecture designs aligned with specific business needs and technical constraints (including use of appropriate FMs, integration patterns, and deployment strategies).',
+            'Skill 1.1.2: Develop proof-of-concept technical implementations to validate feasibility, performance characteristics, and business value before proceeding to full-scale deployment (including use of Amazon Bedrock).',
+            'Skill 1.1.3: Create standardized technical components and ensure consistent implementation across multiple deployment scenarios (including use of AWS Well-Architected Framework, AWS WA Tool Generative AI Lens).',
+          ],
           knowledge: [
             'Amazon Bedrock',
             'Well-Architected フレームワーク',
             'GenAI アーキテクチャ設計',
           ],
+          knowledgeEn: [
+            'Amazon Bedrock',
+            'Well-Architected Framework',
+            'GenAI architecture design',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock ユーザーガイド',
+                  titleEn: 'Amazon Bedrock User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/what-is-bedrock.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/what-is-bedrock.html',
                   note: 'GenAI ソリューションの設計と構築',
+                  noteEn: 'Designing and building GenAI solutions',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock API リファレンス',
+                  titleEn: 'Amazon Bedrock API Reference',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/APIReference/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html',
                   note: 'InvokeModel / Converse API',
+                  noteEn: 'InvokeModel / Converse API',
                   recommend: true,
                 },
               ],
@@ -211,23 +278,40 @@ export const AIP_C01 = {
             'スキル 1.2.3: 耐障害性の高い AI システムを設計し、サービス中断中も継続的に運用できるようにする (AWS Step Functions サーキットブレーカーパターン、リージョンの可用性が限られているモデルに対する Amazon Bedrock クロスリージョン推論、クロスリージョンモデルのデプロイ、グレースフルデグラデーション戦略の使用など)。',
             'スキル 1.2.4: FM カスタマイズデプロイとライフサイクル管理を実装する [Amazon SageMaker AI を使用したドメイン固有のファインチューニングされたモデルのデプロイ、モデルデプロイのための低ランク適応 (LoRA) やアダプターなどパラメータ効率の高い適応手法、SageMaker Model Registry を使用したバージョニングとカスタマイズ済みモデルのデプロイ、自動デプロイパイプラインを使用したモデルの更新、デプロイが失敗した場合のロールバック戦略、モデルの廃止と交換のためのライフサイクル管理の使用など]。',
           ],
+          descriptionEn: [
+            'Task 1.2: Select and configure FMs.',
+            'Skill 1.2.1: Evaluate and select FMs, optimally aligning them with specific business use cases and technical requirements (including use of performance benchmarks, capability analysis, and limitation assessments).',
+            'Skill 1.2.2: Create flexible architecture patterns that enable dynamic model selection and provider switching without code changes (including use of AWS Lambda, Amazon API Gateway, AWS AppConfig).',
+            'Skill 1.2.3: Design fault-tolerant AI systems that ensure continuous operation during service disruptions (including use of AWS Step Functions circuit breaker patterns, Amazon Bedrock cross-region inference for models with limited regional availability, cross-region model deployment, graceful degradation strategies).',
+            'Skill 1.2.4: Implement FM customization deployment and lifecycle management [including deployment of domain-specific fine-tuned models using Amazon SageMaker AI, parameter-efficient adaptation techniques such as Low-Rank Adaptation (LoRA) and adapters for model deployment, versioning and deployment of customized models using SageMaker Model Registry, model updates using automated deployment pipelines, rollback strategies for failed deployments, lifecycle management for model retirement and replacement].',
+          ],
           knowledge: [
             'Amazon Bedrock',
             'Amazon SageMaker AI',
             'LoRA',
             'モデルライフサイクル管理',
           ],
+          knowledgeEn: [
+            'Amazon Bedrock',
+            'Amazon SageMaker AI',
+            'LoRA',
+            'Model lifecycle management',
+          ],
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Amazon Bedrock を活用した RAG チャットボットアーキテクチャのハードニング',
+                  titleEn: 'Hardening the RAG chatbot architecture powered by Amazon Bedrock',
                   url: 'https://aws.amazon.com/jp/blogs/news/hardening-the-rag-chatbot-architecture-powered-by-amazon-bedrock-blueprint-for-secure-design-and-anti-pattern-migration/',
+                  urlEn: 'https://aws.amazon.com/blogs/news/hardening-the-rag-chatbot-architecture-powered-by-amazon-bedrock-blueprint-for-secure-design-and-anti-pattern-migration/',
                   note: 'Security Blog: Advanced (Level 300)',
+                  noteEn: 'Security Blog: Advanced (Level 300)',
                   recommend: true,
                 },
               ],
@@ -235,13 +319,17 @@ export const AIP_C01 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock カスタムモデル',
+                  titleEn: 'Amazon Bedrock Custom Models',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/custom-models.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/custom-models.html',
                   note: 'FM のファインチューニングとカスタマイズ',
+                  noteEn: 'Fine-tuning and customizing FMs',
                   recommend: true,
                 },
               ],
@@ -259,23 +347,40 @@ export const AIP_C01 = {
             'スキル 1.3.3: モデル固有の要件に従って FM 推論用の入力データをフォーマットする (Amazon Bedrock API リクエストには JSON フォーマット、SageMaker AI エンドポイントには構造化データ前処理、ダイアログベースのアプリケーションには会話フォーマットの使用など)。',
             'スキル 1.3.4: 入力データの品質を高めて、FM の応答の品質と一貫性を向上させる (Amazon Bedrock を使用したテキストの再フォーマット、Amazon Comprehend を使用したエンティティの抽出、Lambda 関数を使用したデータの正規化など)。',
           ],
+          descriptionEn: [
+            'Task 1.3: Implement data validation and processing pipelines for FM consumption.',
+            'Skill 1.3.1: Create comprehensive data validation workflows to ensure data meets quality standards for FM consumption (including use of AWS Glue Data Quality, SageMaker Data Wrangler, custom Lambda functions, Amazon CloudWatch metrics).',
+            'Skill 1.3.2: Create data processing workflows that handle complex data types such as text, images, audio, and tabular data with processing requirements specific to FM consumption (including use of Amazon Bedrock multimodal models, SageMaker Processing, AWS Transcribe, advanced multimodal pipeline architectures).',
+            'Skill 1.3.3: Format input data for FM inference according to model-specific requirements (including use of JSON format for Amazon Bedrock API requests, structured data preprocessing for SageMaker AI endpoints, conversation format for dialog-based applications).',
+            'Skill 1.3.4: Enhance input data quality to improve FM response quality and consistency (including use of Amazon Bedrock for text reformatting, Amazon Comprehend for entity extraction, Lambda functions for data normalization).',
+          ],
           knowledge: [
             'AWS Glue Data Quality',
             'SageMaker Data Wrangler',
             'Amazon Comprehend',
             'マルチモーダルデータ処理',
           ],
+          knowledgeEn: [
+            'AWS Glue Data Quality',
+            'SageMaker Data Wrangler',
+            'Amazon Comprehend',
+            'Multimodal data processing',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Glue Data Quality',
+                  titleEn: 'AWS Glue Data Quality',
                   url: 'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/glue-data-quality.html',
+                  urlEn: 'https://docs.aws.amazon.com/glue/latest/dg/glue-data-quality.html',
                   note: 'データ検証パイプラインの構築',
+                  noteEn: 'Building data validation pipelines',
                   recommend: true,
                 },
               ],
@@ -294,29 +399,50 @@ export const AIP_C01 = {
             'スキル 1.4.4: AWS のサービスを使用して、リソースに接続するための統合コンポーネントを作成する (ドキュメント管理システム、ナレッジベース、GenAI アプリケーションの包括的なデータ統合のための社内 Wiki など)。',
             'スキル 1.4.5: データ管理システムを設計してデプロイし、ベクトルストアに FM 拡張のための正確な最新情報が含まれるようにする (増分更新メカニズム、リアルタイム変更検出システム、自動同期ワークフロー、定期更新パイプラインの使用など)。',
           ],
+          descriptionEn: [
+            'Task 1.4: Design and implement vector store solutions.',
+            'Skill 1.4.1: Create advanced vector database architectures specialized for FM augmentation, enabling efficient semantic search beyond traditional search capabilities (including hierarchical organization using Amazon Bedrock Knowledge Bases, topic-based segmentation using Amazon OpenSearch Service and Neural plugin for Amazon Bedrock integration, Amazon RDS and Amazon S3 document repositories, metadata and embeddings using Amazon DynamoDB and vector databases).',
+            'Skill 1.4.2: Develop comprehensive metadata frameworks to improve search precision and context awareness of FM interactions (including document timestamps using S3 object metadata, author information using custom attributes, domain classification using tag systems).',
+            'Skill 1.4.3: Implement high-performance vector database architectures to optimize semantic search performance for FM retrieval at scale (including use of OpenSearch sharding strategies, domain-specific multi-index approaches, hierarchical indexing techniques).',
+            'Skill 1.4.4: Create integration components to connect to resources using AWS services (including document management systems, knowledge bases, internal wikis for comprehensive data integration of GenAI applications).',
+            'Skill 1.4.5: Design and deploy data management systems to ensure vector stores contain accurate and up-to-date information for FM augmentation (including use of incremental update mechanisms, real-time change detection systems, automated synchronization workflows, periodic update pipelines).',
+          ],
           knowledge: [
             'Amazon Bedrock ナレッジベース',
             'Amazon OpenSearch Service',
             'ベクトルデータベース',
             'セマンティック検索',
           ],
+          knowledgeEn: [
+            'Amazon Bedrock Knowledge Bases',
+            'Amazon OpenSearch Service',
+            'Vector databases',
+            'Semantic search',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock ナレッジベース',
+                  titleEn: 'Amazon Bedrock Knowledge Bases',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/knowledge-base.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html',
                   note: 'ベクトルストアとナレッジベースの構築',
+                  noteEn: 'Building vector stores and knowledge bases',
                   recommend: true,
                 },
                 {
                   title: 'Amazon OpenSearch Service 開発者ガイド',
+                  titleEn: 'Amazon OpenSearch Service Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/opensearch-service/latest/developerguide/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html',
                   note: 'ベクトル検索とk-NNインデックス',
+                  noteEn: 'Vector search and k-NN indexes',
                 },
               ],
             },
@@ -335,6 +461,15 @@ export const AIP_C01 = {
             'スキル 1.5.5: 高度なクエリ処理システムを開発し、FM 拡張の検索効率と結果品質を向上させる (Amazon Bedrock を使用したクエリ拡張、Lambda 関数を使用したクエリ分解、Step Functions を使用したクエリ変換など)。',
             'スキル 1.5.6: 一貫性のあるアクセスメカニズムを作成し、FM とのシームレスな統合を有効にする [関数呼び出しインターフェイスを使用したベクトル検索、モデルコンテキストプロトコル (MCP) クライアントを使用したベクトルクエリ、標準化された API パターンを使用した検索拡張など]。',
           ],
+          descriptionEn: [
+            'Task 1.5: Design retrieval mechanisms for FM augmentation.',
+            'Skill 1.5.1: Develop effective document segmentation approaches to optimize retrieval performance for FM context augmentation (including use of Amazon Bedrock chunking capabilities, Lambda functions implementing fixed-size chunks, custom processing for hierarchical chunking based on content structure).',
+            'Skill 1.5.2: Select and configure optimal embedding solutions to create efficient vector representations for semantic search (including use of Amazon Titan Embeddings based on dimensions and domain fit, evaluation of Amazon Bedrock embedding model performance characteristics, Lambda functions for batch embedding generation).',
+            'Skill 1.5.3: Deploy and configure vector search solutions to enable semantic search capabilities for FM augmentation (including use of OpenSearch Service with vector search capabilities, Amazon Aurora with pgvector extension, Amazon Bedrock Knowledge Bases with managed vector store capabilities).',
+            'Skill 1.5.4: Create advanced retrieval architectures to improve the relevance and accuracy of retrieved information for FM context (including use of semantic search with OpenSearch, hybrid search combining keywords and vectors, Amazon Bedrock reranker models).',
+            'Skill 1.5.5: Develop advanced query processing systems to improve retrieval efficiency and result quality for FM augmentation (including use of Amazon Bedrock for query expansion, Lambda functions for query decomposition, Step Functions for query transformation).',
+            'Skill 1.5.6: Create consistent access mechanisms to enable seamless integration with FMs [including vector search using function calling interfaces, vector queries using Model Context Protocol (MCP) clients, retrieval augmentation using standardized API patterns].',
+          ],
           knowledge: [
             'RAG',
             'チャンク戦略',
@@ -342,23 +477,36 @@ export const AIP_C01 = {
             'ハイブリッド検索',
             'MCP',
           ],
+          knowledgeEn: [
+            'RAG',
+            'Chunking strategies',
+            'Amazon Titan Embeddings',
+            'Hybrid search',
+            'MCP',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock での RAG 実装',
+                  titleEn: 'RAG Implementation with Amazon Bedrock',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/knowledge-base-retrieve-generate.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base-retrieve-generate.html',
                   note: '検索拡張生成 (RAG) の設計と実装',
+                  noteEn: 'Design and implementation of Retrieval-Augmented Generation (RAG)',
                   recommend: true,
                 },
                 {
                   title: 'RAG のオプションとアーキテクチャ',
+                  titleEn: 'RAG Options and Architectures',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/retrieval-augmented-generation-options/welcome.html',
                   note: 'Prescriptive Guidance: RAG 設計パターンの包括的ガイド',
+                  noteEn: 'Prescriptive Guidance: Comprehensive guide to RAG design patterns',
                   recommend: true,
                 },
               ],
@@ -378,29 +526,51 @@ export const AIP_C01 = {
             'スキル 1.6.5: FM のパフォーマンスを強化して、基本のプロンプト手法を超えてプロンプトを繰り返し改良し、応答品質を改善する (構造化された入力コンポーネント、出力フォーマットの仕様、思考連鎖指示パターン、フィードバックループの使用など)。',
             'スキル 1.6.6: FM で高度なタスクを処理する複雑なプロンプトシステムを設計する (Amazon Bedrock Prompt Flows を使用した順次プロンプトチェーン、モデル応答に基づく条件分岐、再利用可能なプロンプトコンポーネント、統合された前処理と後処理のステップなど)。',
           ],
+          descriptionEn: [
+            'Task 1.6: Implement prompt engineering strategies and governance for FM interactions.',
+            'Skill 1.6.1: Create effective model instruction frameworks to control FM behavior and output (including use of Amazon Bedrock Prompt Management for role definition application, Amazon Bedrock Guardrails for responsible AI guidelines, template configuration for response formatting).',
+            'Skill 1.6.2: Build interactive AI systems that maintain context and improve user interactions with FMs (including use of Step Functions for clarification workflows, Amazon Comprehend for intent recognition, DynamoDB for conversation history storage).',
+            'Skill 1.6.3: Implement comprehensive prompt management and governance systems to ensure consistency and monitoring of FM operations (including use of Amazon Bedrock Prompt Management for parameterized templates and approval workflows, Amazon S3 for template repository storage, AWS CloudTrail for usage tracking, Amazon CloudWatch Logs for access logging).',
+            'Skill 1.6.4: Develop quality assurance systems to ensure FM prompt effectiveness and reliability (including use of Lambda functions for expected output validation, Step Functions for edge case testing, CloudWatch for prompt regression testing).',
+            'Skill 1.6.5: Enhance FM performance by iteratively refining prompts beyond basic prompting techniques to improve response quality (including use of structured input components, output format specifications, chain-of-thought instruction patterns, feedback loops).',
+            'Skill 1.6.6: Design complex prompt systems to handle advanced tasks with FMs (including use of Amazon Bedrock Prompt Flows for sequential prompt chains, conditional branching based on model responses, reusable prompt components, integrated pre-processing and post-processing steps).',
+          ],
           knowledge: [
             'プロンプトエンジニアリング',
             'Amazon Bedrock Prompt Management',
             'Amazon Bedrock ガードレール',
             '思考連鎖',
           ],
+          knowledgeEn: [
+            'Prompt engineering',
+            'Amazon Bedrock Prompt Management',
+            'Amazon Bedrock Guardrails',
+            'Chain-of-thought',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock Prompt Management',
+                  titleEn: 'Amazon Bedrock Prompt Management',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/prompt-management.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/prompt-management.html',
                   note: 'プロンプトテンプレートの作成と管理',
+                  noteEn: 'Creating and managing prompt templates',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock Prompt Flows',
+                  titleEn: 'Amazon Bedrock Prompt Flows',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/flows.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html',
                   note: 'プロンプトチェーンとワークフローの構築',
+                  noteEn: 'Building prompt chains and workflows',
                 },
               ],
             },
@@ -415,6 +585,7 @@ export const AIP_C01 = {
       weight: 26,
       color: '#f97316',
       description: 'このドメインでは、エージェンティック AI ソリューション、モデルデプロイ戦略、エンタープライズ統合、FM API 統合、アプリケーション統合パターンに関するスキルが問われます。',
+      descriptionEn: 'This domain tests skills related to agentic AI solutions, model deployment strategies, enterprise integration, FM API integration, and application integration patterns.',
       tasks: [
         {
           id: '2.1',
@@ -430,6 +601,16 @@ export const AIP_C01 = {
             'スキル 2.1.6: FM 機能を拡張し、信頼性の高いツール運用を実現するためのインテリジェントツール統合を実装する (Strands API を使用したカスタム挙動の実装、標準化された関数定義、Lambda 関数を使用したエラー処理とパラメータ検証の実装など)。',
             'スキル 2.1.7: FM 機能を強化するモデル拡張フレームワークを開発する (Lambda 関数を使用した、軽量なツールアクセスを提供するステートレス MCP サーバーの実装、Amazon ECS を使用した、複雑なツールを提供する MCP サーバーの実装、MCP クライアントライブラリを使用した一貫性のあるアクセスパターンの確保など)。',
           ],
+          descriptionEn: [
+            'Task 2.1: Implement agentic AI solutions and tool integration.',
+            'Skill 2.1.1: Develop intelligent autonomous systems with appropriate memory and state management capabilities (including multi-agent systems using Strands Agents and AWS Agent Squad, agent-tool interactions using MCP).',
+            'Skill 2.1.2: Create advanced problem-solving systems that enable FMs to decompose and solve complex problems following structured reasoning steps (including implementation of ReAct patterns and chain-of-thought reasoning approaches using Step Functions).',
+            'Skill 2.1.3: Develop protected AI workflows to ensure control of FM behavior (including implementation of stop conditions using Step Functions, timeout mechanisms using Lambda functions, resource boundaries using IAM policies, failure mitigation using circuit breakers).',
+            'Skill 2.1.4: Create advanced model tuning systems that optimize performance across multiple capabilities (including execution of complex tasks using specialized FMs, custom aggregation logic for model ensembles, model selection frameworks).',
+            'Skill 2.1.5: Develop collaborative AI systems that leverage human expertise to enhance FM capabilities (including orchestration of review and approval processes using Step Functions, implementation of feedback collection mechanisms using API Gateway, human augmentation patterns).',
+            'Skill 2.1.6: Implement intelligent tool integration to extend FM capabilities and enable reliable tool operations (including implementation of custom behaviors using Strands API, standardized function definitions, error handling and parameter validation using Lambda functions).',
+            'Skill 2.1.7: Develop model augmentation frameworks to enhance FM capabilities (including implementation of stateless MCP servers providing lightweight tool access using Lambda functions, MCP servers providing complex tools using Amazon ECS, ensuring consistent access patterns using MCP client libraries).',
+          ],
           knowledge: [
             'エージェンティック AI',
             'MCP',
@@ -437,24 +618,37 @@ export const AIP_C01 = {
             'マルチエージェントシステム',
             'Strands Agents',
           ],
+          knowledgeEn: [
+            'Agentic AI',
+            'MCP',
+            'ReAct pattern',
+            'Multi-agent systems',
+            'Strands Agents',
+          ],
           resources: [
-            {key:'blogs', label:'AWS Blogs', iconClass:'fas fa-book', iconColorClass:'text-orange-500', items:[{title:'Amazon Bedrock ナレッジベースによる RAG の実装', url:'https://aws.amazon.com/jp/blogs/news/amazon-bedrock-knowledge-bases-now-supports-advanced-parsing-chunking-and-query-reformulation-giving-higher-accuracy-for-rag-based-applications/', note:'AWS News Blog: Intermediate (Level 200)', recommend:true},{title:'Strands Agents SDK: エージェントアーキテクチャとオブザーバビリティの技術的深堤り', url:'https://aws.amazon.com/jp/blogs/machine-learning/strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/', note:'ML Blog: Advanced (Level 300)', recommend:true}]},
+            {key:'blogs', label:'AWS Blogs', labelEn:'AWS Blog', iconClass:'fas fa-book', iconColorClass:'text-orange-500', items:[{title:'Amazon Bedrock ナレッジベースによる RAG の実装', titleEn:'RAG implementation with Amazon Bedrock Knowledge Bases', url:'https://aws.amazon.com/jp/blogs/news/amazon-bedrock-knowledge-bases-now-supports-advanced-parsing-chunking-and-query-reformulation-giving-higher-accuracy-for-rag-based-applications/', urlEn:'https://aws.amazon.com/blogs/news/amazon-bedrock-knowledge-bases-now-supports-advanced-parsing-chunking-and-query-reformulation-giving-higher-accuracy-for-rag-based-applications/', note:'AWS News Blog: Intermediate (Level 200)', noteEn:'AWS News Blog: Intermediate (Level 200)', recommend:true},{title:'Strands Agents SDK: エージェントアーキテクチャとオブザーバビリティの技術的深堤り', titleEn:'Strands Agents SDK: A technical deep dive into agent architectures and observability', url:'https://aws.amazon.com/jp/blogs/machine-learning/strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/', urlEn:'https://aws.amazon.com/blogs/machine-learning/strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/', note:'ML Blog: Advanced (Level 300)', noteEn:'ML Blog: Advanced (Level 300)', recommend:true}]},
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock Agents',
+                  titleEn: 'Amazon Bedrock Agents',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/agents.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html',
                   note: 'エージェンティック AI の構築とツール統合',
+                  noteEn: 'Building agentic AI and tool integration',
                   recommend: true,
                 },
                 {
                   title: 'Strands Agents SDK ドキュメント',
+                  titleEn: 'Strands Agents SDK Documentation',
                   url: 'https://strandsagents.com/latest/documentation/docs/',
                   note: 'オープンソース AI エージェント SDK',
+                  noteEn: 'Open source AI agent SDK',
                   recommend: true,
                 },
               ],
@@ -471,29 +665,48 @@ export const AIP_C01 = {
             'スキル 2.2.2: 従来の ML デプロイとは異なる大規模言語モデル (LLM) 特有の課題に対処することで FM ソリューションをデプロイする (メモリ要件、GPU 使用率、トークン処理容量について最適化されたコンテナベースのデプロイパターンの実装、特化型のモデルロード戦略の遵守など)。',
             'スキル 2.2.3: GenAI ワークロードのパフォーマンスとリソース要件のバランスを取るように最適化された FM デプロイアプローチを策定する (適切なモデルの選択、特定のタスク向けに事前トレーニングされた小規模なモデルの使用、ルーチンクエリ実行のための API ベースのモデルカスケードの使用など)。',
           ],
+          descriptionEn: [
+            'Task 2.2: Implement model deployment strategies.',
+            'Skill 2.2.1: Deploy FMs based on specific application needs and performance requirements (including on-demand invocation using Lambda functions, Amazon Bedrock provisioned throughput configuration, hybrid solution implementation using SageMaker AI endpoints).',
+            'Skill 2.2.2: Deploy FM solutions by addressing Large Language Model (LLM)-specific challenges that differ from traditional ML deployments (including implementation of container-based deployment patterns optimized for memory requirements, GPU utilization, and token processing capacity, adherence to specialized model loading strategies).',
+            'Skill 2.2.3: Formulate optimized FM deployment approaches that balance performance and resource requirements for GenAI workloads (including appropriate model selection, use of smaller pre-trained models for specific tasks, API-based model cascades for routine query execution).',
+          ],
           knowledge: [
             'Amazon Bedrock プロビジョンドスループット',
             'SageMaker AI エンドポイント',
             'LLM デプロイ',
             'モデルカスケード',
           ],
+          knowledgeEn: [
+            'Amazon Bedrock provisioned throughput',
+            'SageMaker AI endpoints',
+            'LLM deployment',
+            'Model cascades',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock プロビジョンドスループット',
+                  titleEn: 'Amazon Bedrock Provisioned Throughput',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/prov-throughput.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/prov-throughput.html',
                   note: 'モデルデプロイとスループットの管理',
+                  noteEn: 'Model deployment and throughput management',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock Agents',
+                  titleEn: 'Amazon Bedrock Agents',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/agents.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html',
                   note: 'エージェントのオーケストレーション',
+                  noteEn: 'Agent orchestration',
                   recommend: true,
                 },
               ],
@@ -512,29 +725,49 @@ export const AIP_C01 = {
             'スキル 2.3.4: FM へのアクセスを有効にするとともに管轄区域を横断したデータコンプライアンスを確保する環境横断型 AI ソリューションを開発する (AWS Outposts を使用したオンプレミスデータ統合、AWS Wavelength を使用したエッジデプロイの実行、クラウドとオンプレミスのリソース間のセキュアなルーティングの使用など)。',
             'スキル 2.3.5: エンタープライズ環境にセキュアで規制に準拠した消費パターンを実装するための CI/CD パイプラインと GenAI ゲートウェイアーキテクチャを実装する (AWS CodePipeline、AWS CodeBuild、GenAI コンポーネントの継続的デプロイとテストのためのセキュリティスキャンとロールバックをサポートする自動テストフレームワーク、一元化された抽象化レイヤー、オブザーバビリティと制御メカニズムの使用など)。',
           ],
+          descriptionEn: [
+            'Task 2.3: Design and implement enterprise integration architectures.',
+            'Skill 2.3.1: Create enterprise connectivity solutions that seamlessly incorporate FM capabilities into existing enterprise environments (including API-based integration with legacy systems, event-driven architectures implementing loose coupling, data synchronization patterns).',
+            'Skill 2.3.2: Develop integrated AI capabilities that enhance existing applications with GenAI features (including microservices integration using API Gateway, webhook handlers using Lambda functions, event-driven integration using Amazon EventBridge).',
+            'Skill 2.3.3: Create secure access frameworks that ensure appropriate security controls (including identity federation between FM services and enterprise systems, role-based access control for model and data access, least-privilege API access to FMs).',
+            'Skill 2.3.4: Develop cross-environment AI solutions that enable access to FMs while ensuring data compliance across jurisdictions (including on-premises data integration using AWS Outposts, edge deployments using AWS Wavelength, secure routing between cloud and on-premises resources).',
+            'Skill 2.3.5: Implement CI/CD pipelines and GenAI gateway architectures for secure and regulation-compliant consumption patterns in enterprise environments (including AWS CodePipeline, AWS CodeBuild, automated testing frameworks supporting security scanning and rollback for continuous deployment and testing of GenAI components, centralized abstraction layers, observability and control mechanisms).',
+          ],
           knowledge: [
             'API Gateway',
             'Amazon EventBridge',
             'CI/CD パイプライン',
             'エンタープライズ統合',
           ],
+          knowledgeEn: [
+            'API Gateway',
+            'Amazon EventBridge',
+            'CI/CD pipelines',
+            'Enterprise integration',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon API Gateway 開発者ガイド',
+                  titleEn: 'Amazon API Gateway Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html',
                   note: 'API 統合とエンタープライズ接続',
+                  noteEn: 'API integration and enterprise connectivity',
                   recommend: true,
                 },
                 {
                   title: 'サーバーレス AI アーキテクチャの設計',
+                  titleEn: 'Designing Serverless AI Architectures',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/agentic-ai-serverless/designing-serverless-ai-architectures.html',
                   note: 'Prescriptive Guidance: イベント駆動 + サーバーレス AI 設計',
+                  noteEn: 'Prescriptive Guidance: Event-driven + serverless AI design',
                 },
               ],
             },
@@ -551,23 +784,40 @@ export const AIP_C01 = {
             'スキル 2.4.3: 信頼性の高い運用を確保するための耐障害性の高い FM システムを作成する (AWS SDK を使用したエクスポネンシャルバックオフ、API Gateway を使用したレート制限の管理、グレースフルデグラデーションのためのフォールバックメカニズム、AWS X-Ray を使用したサービス境界をまたぐオブザーバビリティの提供など)。',
             'スキル 2.4.4: モデル選択を最適化するインテリジェントなモデルルーティングシステムを開発する (アプリケーションコードを使用した静的ルーティング構成の実装、Step Functions を使用した特化型 FM への動的コンテンツベースのルーティング、メトリクスに基づいたインテリジェントなモデルルーティング、API Gateway とリクエスト変換を使用したルーティングロジック)。',
           ],
+          descriptionEn: [
+            'Task 2.4: Implement FM API integrations.',
+            'Skill 2.4.1: Create flexible model interaction systems (including management of synchronous requests from various compute environments using Amazon Bedrock API, asynchronous processing using language-specific AWS SDKs and Amazon SQS, request validation for custom API clients using API Gateway).',
+            'Skill 2.4.2: Develop real-time AI interaction systems that provide immediate feedback from FMs (including incremental response delivery using Amazon Bedrock streaming API, real-time text generation using WebSocket or server-sent events, chunked transfer encoding implementation using API Gateway).',
+            'Skill 2.4.3: Create fault-tolerant FM systems to ensure reliable operations (including exponential backoff using AWS SDK, rate limit management using API Gateway, fallback mechanisms for graceful degradation, observability across service boundaries using AWS X-Ray).',
+            'Skill 2.4.4: Develop intelligent model routing systems to optimize model selection (including static routing configuration using application code, dynamic content-based routing to specialized FMs using Step Functions, intelligent model routing based on metrics, routing logic using API Gateway and request transformation).',
+          ],
           knowledge: [
             'Amazon Bedrock API',
             'ストリーミング応答',
             'AWS X-Ray',
             'モデルルーティング',
           ],
+          knowledgeEn: [
+            'Amazon Bedrock API',
+            'Streaming responses',
+            'AWS X-Ray',
+            'Model routing',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock API リファレンス',
+                  titleEn: 'Amazon Bedrock API Reference',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/APIReference/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html',
                   note: 'Bedrock API の呼び出しとストリーミング',
+                  noteEn: 'Bedrock API invocation and streaming',
                   recommend: true,
                 },
               ],
@@ -587,7 +837,22 @@ export const AIP_C01 = {
             'スキル 2.5.5: 高度な AI 機能を実装する高度な GenAI アプリケーションを開発する (Strands Agents と AWS Agent Squad を使用した AWS ネイティブオーケストレーション、Step Functions を使用したエージェント設計パターンのオーケストレーション、Amazon Bedrock を使用したプロンプトチェーンパターンの管理など)。',
             'スキル 2.5.6: FM アプリケーションのトラブルシューティング効率を向上させる (CloudWatch Logs Insights を使用したプロンプトと応答の分析、X-Ray を使用した FM API コールのトレース、Amazon Q Developer を使用した GenAI 固有のエラーパターン認識の実装など)。',
           ],
+          descriptionEn: [
+            'Task 2.5: Implement application integration patterns and development tools.',
+            'Skill 2.5.1: Create FM API interfaces that address specific requirements of GenAI workloads (including handling streaming responses using API Gateway, token limit management, handling model timeouts using retry strategies).',
+            'Skill 2.5.2: Develop accessible AI interfaces to facilitate FM adoption and integration (including declarative UI component development using AWS Amplify, API-first development approaches using OpenAPI specifications, no-code workflow builders using Amazon Bedrock Prompt Flows).',
+            'Skill 2.5.3: Create business system enhancements [including Customer Relationship Management (CRM) enhancement implementation using Lambda functions, document processing system orchestration using Step Functions, internal knowledge tools using Amazon Q Business data sources, automated data processing workflow management using Amazon Bedrock Data Automation].',
+            'Skill 2.5.4: Enhance developer productivity to accelerate development workflows for GenAI applications (including code generation and refactoring using Amazon Q Developer, code suggestions for API assistance, AI component testing, performance optimization).',
+            'Skill 2.5.5: Develop advanced GenAI applications implementing sophisticated AI capabilities (including AWS-native orchestration using Strands Agents and AWS Agent Squad, agent design pattern orchestration using Step Functions, prompt chain pattern management using Amazon Bedrock).',
+            'Skill 2.5.6: Improve troubleshooting efficiency for FM applications (including prompt and response analysis using CloudWatch Logs Insights, FM API call tracing using X-Ray, GenAI-specific error pattern recognition implementation using Amazon Q Developer).',
+          ],
           knowledge: [
+            'AWS Amplify',
+            'Amazon Q Developer',
+            'Amazon Q Business',
+            'Amazon Bedrock Prompt Flows',
+          ],
+          knowledgeEn: [
             'AWS Amplify',
             'Amazon Q Developer',
             'Amazon Q Business',
@@ -597,13 +862,17 @@ export const AIP_C01 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Q Developer',
+                  titleEn: 'Amazon Q Developer',
                   url: 'https://docs.aws.amazon.com/ja_jp/amazonq/latest/qdeveloper-ug/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/amazonq/latest/qdeveloper-ug/what-is.html',
                   note: 'AI コーディングアシスタントの活用',
+                  noteEn: 'Leveraging AI coding assistant',
                   recommend: true,
                 },
               ],
@@ -619,6 +888,7 @@ export const AIP_C01 = {
       weight: 20,
       color: '#22c55e',
       description: 'このドメインでは、入力・出力の安全コントロール、データセキュリティとプライバシー、AI ガバナンスとコンプライアンス、責任ある AI の原則に関するスキルが問われます。',
+      descriptionEn: 'This domain tests skills related to input/output safety controls, data security and privacy, AI governance and compliance, and responsible AI principles.',
       tasks: [
         {
           id: '3.1',
@@ -632,23 +902,40 @@ export const AIP_C01 = {
             'スキル 3.1.4: FM の誤用に対する包括的な保護を提供する多層防御安全システムを作成する (Amazon Comprehend を使用した前処理フィルターの開発、Amazon Bedrock を使用したモデルベースのガードレールの実装、Lambda 関数を使用した後処理検証の実行、API Gateway を使用した API 応答フィルタリングの実装など)。',
             'スキル 3.1.5: 敵対的な入力やセキュリティの脆弱性から保護する高度な脅威検出を実装する (プロンプトインジェクションとジェイルブレイクの検出メカニズム、入力サニタイズとコンテンツフィルター、安全分類ツール、自動化された敵対的テストワークフローの使用など)。',
           ],
+          descriptionEn: [
+            'Task 3.1: Implement input and output safety controls.',
+            'Skill 3.1.1: Develop comprehensive content safety systems to prevent harmful user inputs to FMs (including content filtering using Amazon Bedrock Guardrails, custom moderation workflow implementation using Step Functions and Lambda functions, real-time validation mechanisms).',
+            'Skill 3.1.2: Create content safety frameworks to prevent harmful outputs (including response filtering using Amazon Bedrock Guardrails, FM evaluation specialized for content moderation and toxicity detection, ensuring deterministic results using Text-to-SQL conversion).',
+            'Skill 3.1.3: Develop accuracy validation systems to reduce hallucinations in FM responses (including grounded response generation and fact-checking using Amazon Bedrock Knowledge Bases, confidence scoring and semantic similarity search, structured output using JSON schemas).',
+            'Skill 3.1.4: Create defense-in-depth safety systems providing comprehensive protection against FM misuse (including preprocessing filter development using Amazon Comprehend, model-based guardrail implementation using Amazon Bedrock, post-processing validation using Lambda functions, API response filtering using API Gateway).',
+            'Skill 3.1.5: Implement advanced threat detection to protect against adversarial inputs and security vulnerabilities (including prompt injection and jailbreak detection mechanisms, input sanitization and content filters, safety classification tools, automated adversarial testing workflows).',
+          ],
           knowledge: [
             'Amazon Bedrock ガードレール',
             'ハルシネーション対策',
             'プロンプトインジェクション防御',
             'コンテンツモデレーション',
           ],
+          knowledgeEn: [
+            'Amazon Bedrock Guardrails',
+            'Hallucination mitigation',
+            'Prompt injection defense',
+            'Content moderation',
+          ],
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'RAG インジェストパイプラインのセキュリティ確保: フィルタリングメカニズム',
+                  titleEn: 'Securing the RAG ingestion pipeline: filtering mechanisms',
                   url: 'https://aws.amazon.com/blogs/security/securing-the-rag-ingestion-pipeline-filtering-mechanisms/',
                   note: 'Security Blog: Advanced (Level 300)',
+                  noteEn: 'Security Blog: Advanced (Level 300)',
                   recommend: true,
                 },
               ],
@@ -656,13 +943,17 @@ export const AIP_C01 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock Guardrails',
+                  titleEn: 'Amazon Bedrock Guardrails',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/guardrails.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html',
                   note: 'コンテンツフィルタリング・安全性制御',
+                  noteEn: 'Content filtering and safety controls',
                   recommend: true,
                 },
               ],
@@ -679,29 +970,48 @@ export const AIP_C01 = {
             'スキル 3.2.2: FM インタラクション中に機密情報を保護するプライバシー保護システムを開発する [Amazon Comprehend と Amazon Macie を使用した個人を特定できる情報 (PII) の検出、Amazon Bedrock のネイティブデータプライバシー機能の使用、Amazon Bedrock ガードレールを使用した出力のフィルタリング、Amazon S3 ライフサイクル設定を使用したデータ保持ポリシーの実装など]。',
             'スキル 3.2.3: FM の有用性と有効性を維持しながらユーザーのプライバシーを保護する、プライバシー保護に重点を置いた AI システムを作成する (データマスキング手法、Amazon Comprehend の PII 検出、機密情報の匿名化戦略、Amazon Bedrock ガードレールの使用など)。',
           ],
+          descriptionEn: [
+            'Task 3.2: Implement data security and privacy controls.',
+            'Skill 3.2.1: Develop protected AI environments ensuring comprehensive security for FM deployments (including network isolation using VPC endpoints, secure data access pattern enforcement using IAM policies, fine-grained data access using AWS Lake Formation, data access monitoring using CloudWatch).',
+            'Skill 3.2.2: Develop privacy-preserving systems that protect sensitive information during FM interactions [including Personally Identifiable Information (PII) detection using Amazon Comprehend and Amazon Macie, native data privacy features of Amazon Bedrock, output filtering using Amazon Bedrock Guardrails, data retention policy implementation using Amazon S3 lifecycle configuration].',
+            'Skill 3.2.3: Create privacy-focused AI systems that protect user privacy while maintaining FM usefulness and effectiveness (including data masking techniques, Amazon Comprehend PII detection, sensitive information anonymization strategies, Amazon Bedrock Guardrails).',
+          ],
           knowledge: [
             'VPC エンドポイント',
             'AWS Lake Formation',
             'Amazon Macie',
             'PII 検出',
           ],
+          knowledgeEn: [
+            'VPC endpoints',
+            'AWS Lake Formation',
+            'Amazon Macie',
+            'PII detection',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock のセキュリティ',
+                  titleEn: 'Amazon Bedrock Security',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/security.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/security.html',
                   note: 'データセキュリティとプライバシー保護',
+                  noteEn: 'Data security and privacy protection',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Bedrock のデータ保護',
+                  titleEn: 'Amazon Bedrock Data Protection',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/data-protection.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/data-protection.html',
                   note: '暗号化・データ保持・ VPC エンドポイント',
+                  noteEn: 'Encryption, data retention, and VPC endpoints',
                 },
               ],
             },
@@ -718,23 +1028,40 @@ export const AIP_C01 = {
             'スキル 3.3.3: FM の実装を一貫して監視するために、組織ガバナンスシステムを構築する (組織のポリシー、規制要件、責任ある AI の原則に沿った包括的なフレームワークの使用など)。',
             'スキル 3.3.4: 安全監査と規制への準備をサポートする継続的なモニタリングと高度なガバナンスコントロールを実装する (誤用、ドリフト、ポリシー違反の自動検出、バイアスドリフトモニタリング、自動アラートと修復ワークフロー、トークンレベルのリダクション、応答ロギング、AI 出力ポリシーフィルターの使用など)。',
           ],
+          descriptionEn: [
+            'Task 3.3: Implement AI governance and compliance mechanisms.',
+            'Skill 3.3.1: Develop compliance frameworks ensuring regulatory compliance for FM deployments (including programmatic model card development using SageMaker AI, automated data lineage tracking using AWS Glue, metadata tagging for systematic data source attribution, comprehensive decision logging using CloudWatch Logs).',
+            'Skill 3.3.2: Implement data source tracking to maintain traceability for GenAI applications (including data source registration using AWS Glue Data Catalog, metadata tagging for source attribution of FM-generated content, audit logging using CloudTrail).',
+            'Skill 3.3.3: Build organizational governance systems for consistent monitoring of FM implementations (including comprehensive frameworks aligned with organizational policies, regulatory requirements, and responsible AI principles).',
+            'Skill 3.3.4: Implement continuous monitoring and advanced governance controls to support safety audits and regulatory readiness (including automated detection of misuse, drift, and policy violations, bias drift monitoring, automated alerts and remediation workflows, token-level redaction, response logging, AI output policy filters).',
+          ],
           knowledge: [
             'モデルカード',
             'AWS Glue Data Catalog',
             'データリネージュ',
             'コンプライアンスフレームワーク',
           ],
+          knowledgeEn: [
+            'Model cards',
+            'AWS Glue Data Catalog',
+            'Data lineage',
+            'Compliance frameworks',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Bedrock モデル呼び出しログ',
+                  titleEn: 'Amazon Bedrock Model Invocation Logging',
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/model-invocation-logging.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/model-invocation-logging.html',
                   note: '監査ログとコンプライアンスモニタリング',
+                  noteEn: 'Audit logging and compliance monitoring',
                   recommend: true,
                 },
               ],
@@ -751,23 +1078,39 @@ export const AIP_C01 = {
             'スキル 3.4.2: バイアスのない FM 出力を確保する公平性評価を適用する (CloudWatch、Amazon Bedrock Prompt Management、Amazon Bedrock Prompt Flows で事前定義された公平性メトリクスを使用した体系的な A/B テストの実行、Amazon Bedrock で LLM-as-a-judge ソリューションを使用した自動モデル評価の実行など)。',
             'スキル 3.4.3: 責任ある AI プラクティスを遵守するためのポリシー準拠 AI システムを開発する (ポリシー要件に基づく Amazon Bedrock ガードレールの使用、モデルカードを使用した FM の制限のドキュメント化、Lambda 関数を使用した自動コンプライアンスチェックの実行など)。',
           ],
+          descriptionEn: [
+            'Task 3.4: Implement responsible AI principles.',
+            'Skill 3.4.1: Develop transparent AI systems in FM outputs (including user-facing explanations using reasoning displays, confidence metrics collection and uncertainty quantification using CloudWatch, evidence presentation for source attribution, reasoning traces using Amazon Bedrock agent traces).',
+            'Skill 3.4.2: Apply fairness evaluations to ensure unbiased FM outputs (including systematic A/B testing using predefined fairness metrics in CloudWatch, Amazon Bedrock Prompt Management, and Amazon Bedrock Prompt Flows, automated model evaluation using LLM-as-a-judge solutions in Amazon Bedrock).',
+            'Skill 3.4.3: Develop policy-compliant AI systems to adhere to responsible AI practices (including Amazon Bedrock Guardrails based on policy requirements, FM limitation documentation using model cards, automated compliance checks using Lambda functions).',
+          ],
           knowledge: [
             '責任ある AI',
             'バイアス検出',
             'LLM-as-a-judge',
             '公平性メトリクス',
           ],
+          knowledgeEn: [
+            'Responsible AI',
+            'Bias detection',
+            'LLM-as-a-judge',
+            'Fairness metrics',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS 責任ある AI',
+                  titleEn: 'AWS Responsible AI',
                   url: 'https://aws.amazon.com/jp/ai/responsible-ai/',
+                  urlEn: 'https://aws.amazon.com/ai/responsible-ai/',
                   note: 'AWS の責任ある AI の原則と実践',
+                  noteEn: 'AWS responsible AI principles and practices',
                   recommend: true,
                 },
               ],

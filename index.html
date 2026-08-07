@@ -450,7 +450,7 @@
             font-weight: 800;
         }
         .quiz-timer-overtime::after {
-            content: ' 延長中';
+            content: '';
             font-size: 0.65em;
             font-weight: 600;
         }
@@ -917,12 +917,12 @@
                         </div>
                         <div class="min-w-0">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide">選択中</span>
+                                <span class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="learningStatus.selected">Selected</span>
                                 <span id="statusExamBadge" class="text-xs font-bold bg-indigo-100 text-indigo-700 px-2 py-0.5 rounded-md">-</span>
                             </div>
                             <div class="flex items-center gap-3 mt-1">
-                                <span class="text-sm text-gray-700">学習進捗: <strong id="statusProgress" class="text-indigo-600">0%</strong></span>
-                                <span class="text-sm text-gray-700">正答率: <strong id="statusAccuracy" class="text-emerald-600">-%</strong></span>
+                                <span class="text-sm text-gray-700"><span data-i18n="learningStatus.progress">Progress:</span> <strong id="statusProgress" class="text-indigo-600">0%</strong></span>
+                                <span class="text-sm text-gray-700"><span data-i18n="learningStatus.accuracy">Accuracy:</span> <strong id="statusAccuracy" class="text-emerald-600">-%</strong></span>
                             </div>
                         </div>
                     </div>
@@ -932,8 +932,8 @@
                             <i class="fas fa-lightbulb text-lg"></i>
                         </div>
                         <div class="min-w-0">
-                            <div class="text-xs font-bold text-amber-700 uppercase tracking-wide">次の1手</div>
-                            <p id="nextActionText" class="text-sm text-amber-900 font-medium truncate mt-0.5">学習を始めましょう</p>
+                            <div class="text-xs font-bold text-amber-700 uppercase tracking-wide" data-i18n="learningStatus.nextAction">Next Step</div>
+                            <p id="nextActionText" class="text-sm text-amber-900 font-medium truncate mt-0.5"></p>
                         </div>
                     </div>
                 </div>
@@ -967,7 +967,7 @@
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0 text-2xl" id="highlightEmoji">✨</div>
                         <div class="min-w-0 flex-1">
-                            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-1">今日のハイライト</div>
+                            <div class="text-xs font-bold text-indigo-600 uppercase tracking-wide mb-1" data-i18n="dashboard.dailyHighlight">Today's Highlight</div>
                             <p id="highlightText" class="text-sm text-gray-800 font-medium leading-relaxed">-</p>
                         </div>
                     </div>
@@ -1145,10 +1145,10 @@
                     <div class="quiz-mode-card rounded-xl bg-white border border-emerald-200 p-4" data-quiz-mode="smartReview">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">🧠</span>
-                            <span class="font-bold text-gray-800 text-sm">スマート復習</span>
+                            <span class="font-bold text-gray-800 text-sm" data-i18n="quiz.smartReview">Smart Review</span>
                         </div>
-                        <p class="text-xs text-gray-500">苦手問題・過去の間違いから自動出題。効率的に弱点を克服！</p>
-                        <div class="mt-1.5 text-[10px] text-emerald-600 font-bold" id="smartReviewCount">📊 復習対象を分析中...</div>
+                        <p class="text-xs text-gray-500" data-i18n="quiz.smartReviewDesc">Auto-generated from weak areas and past mistakes. Efficiently overcome weaknesses!</p>
+                        <div class="mt-1.5 text-[10px] text-emerald-600 font-bold" id="smartReviewCount"></div>
                     </div>
                 </div>
             </div>
@@ -1188,7 +1188,7 @@
                         <div class="text-center py-8">
                             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
                             <p class="text-gray-700 font-bold text-sm mb-2" data-i18n="quiz.generating">Generating questions...</p>
-                            <p id="quizPregenStatus" class="text-gray-500 text-xs mb-4">0 / 10 問</p>
+                            <p id="quizPregenStatus" class="text-gray-500 text-xs mb-4">0 / 10</p>
                             <div class="quiz-pregen-bar max-w-xs mx-auto">
                                 <div id="quizPregenFill" class="quiz-pregen-fill" style="width: 0%"></div>
                             </div>
@@ -1379,12 +1379,11 @@
                     <p class="text-gray-500 text-xs mt-2" data-i18n="settings.openaiKeyHelp">
                         Get a key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">OpenAI Platform</a>.
                     </p>
-                    <div class="mt-2 p-2.5 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
+                    <div id="openaiWarningBlock" class="mt-2 p-2.5 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
                         <i class="fas fa-triangle-exclamation mr-1"></i>
-                        <strong>ご注意：</strong>
-                        OpenAI API は<strong>有料</strong>です（利用量に応じて課金されます）。<br>
-                        18歳未満の方は<strong>保護者の同意・監督のもと</strong>でご利用ください。<br>
-                        詳しくは <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline font-medium">OpenAI 利用規約</a> をご確認ください。
+                        <strong data-i18n="settings.openaiWarningLabel">Note:</strong>
+                        <span data-i18n="settings.openaiWarningText">OpenAI API is paid (charged per usage). Users under 18 must use it under parental consent and supervision.</span><br>
+                        <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline font-medium" data-i18n="settings.openaiWarningLinkText">OpenAI Terms of Use</a>
                     </div>
                 </div>
 

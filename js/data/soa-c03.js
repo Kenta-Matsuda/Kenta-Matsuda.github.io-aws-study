@@ -4,6 +4,7 @@ export const SOA_C03 = {
   shortLabel: 'SOA',
   title: 'AWS Certified CloudOps Engineer - Associate',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -12,17 +13,24 @@ export const SOA_C03 = {
       description: [
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
       ],
+      descriptionEn: [
+        'Register for the AWS certification exam. You can take the exam online or at a test center through Pearson VUE.',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified CloudOps Engineer - Associate 公式ページ',
+              titleEn: 'AWS Certified CloudOps Engineer - Associate Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-sysops-admin-associate/',
+              urlEn: 'https://aws.amazon.com/certification/certified-sysops-admin-associate/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information on exam overview, passing criteria, and scope',
               recommend: true,
             },
           ],
@@ -30,13 +38,16 @@ export const SOA_C03 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for the AWS certification exam here (official registration site)',
               recommend: true,
             },
           ],
@@ -50,17 +61,24 @@ export const SOA_C03 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the Exam Guide (PDF) to understand the exam scope, scoring weights, and question formats. Grasp the big picture before diving into each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified CloudOps Engineer - Associate 試験ガイド (PDF)',
+              titleEn: 'AWS Certified CloudOps Engineer - Associate Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-sysops-associate/AWS-Certified-SysOps-Administrator-Associate_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-sysops-associate/AWS-Certified-SysOps-Administrator-Associate_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Review exam scope, question ratios, and sample questions',
               recommend: true,
             },
           ],
@@ -74,17 +92,23 @@ export const SOA_C03 = {
       description: [
         'AWS Skill Builder の無料コースで、クラウド運用分野の基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational cloud operations knowledge with free courses on AWS Skill Builder. Exam-specific preparation courses are also available.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified SysOps Administrator - Associate',
+              titleEn: 'Exam Prep Standard Course: AWS Certified SysOps Administrator - Associate',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/9313/exam-prep-standard-course-aws-certified-sysops-administrator-associate-soa-c02',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
             },
           ],
@@ -99,6 +123,10 @@ export const SOA_C03 = {
         'このアプリの Domain 1〜5 タブに切り替えて、各ドメインのタスクごとに用意されたリソースを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to Domain 1-5 tabs in this app to study the resources prepared for each domain task.',
+        'You can also use AI explanations and AI practice questions to deepen your understanding.',
+      ],
       knowledge: [
         'Domain 1: モニタリング、ログ記録、分析、修復、パフォーマンスの最適化（22%）',
         'Domain 2: 信頼性と事業の継続性（22%）',
@@ -106,23 +134,37 @@ export const SOA_C03 = {
         'Domain 4: セキュリティとコンプライアンス（16%）',
         'Domain 5: ネットワークとコンテンツ配信（18%）',
       ],
+      knowledgeEn: [
+        'Domain 1: Monitoring, Logging, Analysis, Remediation, and Performance Optimization (22%)',
+        'Domain 2: Reliability and Business Continuity (22%)',
+        'Domain 3: Deployment, Provisioning, and Automation (22%)',
+        'Domain 4: Security and Compliance (16%)',
+        'Domain 5: Networking and Content Delivery (18%)',
+      ],
       resources: [
         {
           key: 'whitepapers',
           label: 'ホワイトペーパー・ガイド',
+          labelEn: 'Whitepapers & Guides',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-gray-600',
           items: [
             {
               title: 'AWS Well-Architected Framework',
+              titleEn: 'AWS Well-Architected Framework',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/framework/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html',
               note: 'ホワイトペーパー: 6つの柱の詳細解説',
+              noteEn: 'Whitepaper: Detailed explanation of the six pillars',
               recommend: true,
             },
             {
               title: 'AWS Well-Architected - 運用上の優秀性の柱',
+              titleEn: 'AWS Well-Architected - Operational Excellence Pillar',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/operational-excellence-pillar/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/operational-excellence-pillar/welcome.html',
               note: 'クラウド運用のベストプラクティス',
+              noteEn: 'Best practices for cloud operations',
             },
           ],
         },
@@ -135,17 +177,23 @@ export const SOA_C03 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve practice questions similar to the real exam to check your understanding. If you find weak domains, go back to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
+              titleEn: 'AWS Certification Official Practice Question Set',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/12555/aws-certified-sysops-administrator-associate-official-practice-question-set-soa-c02-japanese',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -161,6 +209,7 @@ export const SOA_C03 = {
       weight: 22,
       color: '#3b82f6',
       description: 'このドメインでは、AWS のモニタリング・ログ記録サービスの実装、メトリクスを使用した問題の修復、コンピューティング・ストレージ・データベースのパフォーマンス最適化に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to implementing AWS monitoring and logging services, remediating issues using metrics, and optimizing performance of compute, storage, and database resources.',
       tasks: [
         {
           id: '1.1',
@@ -174,6 +223,14 @@ export const SOA_C03 = {
             '- スキル 1.1.4: 複数のアカウントと複数の AWS リージョンにわたる AWS リソースのメトリクスとアラームを表示する、カスタマイズ可能で共有可能な CloudWatch ダッシュボードを作成、実装、管理する。',
             '- スキル 1.1.5: Amazon Simple Notification Service (Amazon SNS) に通知を送信し、Amazon SNS に通知を送信するアラームを呼び出すように AWS サービスを設定する。',
           ],
+          descriptionEn: [
+            'Task 1.1: Implement metrics, alarms, and filters by using AWS monitoring and logging services.',
+            '- Skill 1.1.1: Configure AWS monitoring and logging using AWS services (such as Amazon CloudWatch, AWS CloudTrail, and Amazon Managed Service for Prometheus).',
+            '- Skill 1.1.2: Configure and manage the CloudWatch agent to collect metrics and logs from Amazon EC2 instances, Amazon ECS clusters, or Amazon EKS clusters.',
+            '- Skill 1.1.3: Configure, identify, and troubleshoot CloudWatch alarms that can invoke AWS services directly or through Amazon EventBridge (such as creating composite alarms and identifying invocable actions).',
+            '- Skill 1.1.4: Create, implement, and manage customizable and shareable CloudWatch dashboards that display metrics and alarms for AWS resources across multiple accounts and multiple AWS Regions.',
+            '- Skill 1.1.5: Configure AWS services to send notifications to Amazon SNS and invoke alarms that send notifications to Amazon SNS.',
+          ],
           knowledge: [
             'Amazon CloudWatch',
             'AWS CloudTrail',
@@ -182,17 +239,29 @@ export const SOA_C03 = {
             'Amazon EventBridge',
             'Amazon SNS',
           ],
+          knowledgeEn: [
+            'Amazon CloudWatch',
+            'AWS CloudTrail',
+            'Amazon Managed Service for Prometheus',
+            'CloudWatch agent',
+            'Amazon EventBridge',
+            'Amazon SNS',
+          ],
           resources: [
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'Amazon CloudWatch Part1 Observability の基本・メトリクス・アラーム編',
+                  titleEn: 'Amazon CloudWatch Part1 Observability Basics, Metrics & Alarms',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20CloudWatch%20Part1%20Observability%20%E3%81%AE%E5%9F%BA%E6%9C%AC',
+                  urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20CloudWatch%20Part1%20Observability%20%E3%81%AE%E5%9F%BA%E6%9C%AC',
                   note: 'PDF | Youtube: 2026/05',
+                  noteEn: 'PDF | YouTube: 2026/05',
                   recommend: true,
                 },
               ],
@@ -200,19 +269,26 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon CloudWatch ユーザーガイド',
+                  titleEn: 'Amazon CloudWatch User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html',
                   note: 'メトリクス・アラーム・ダッシュボードの設定',
+                  noteEn: 'Configure metrics, alarms, and dashboards',
                   recommend: true,
                 },
                 {
                   title: 'AWS CloudTrail ユーザーガイド',
+                  titleEn: 'AWS CloudTrail User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/awscloudtrail/latest/userguide/cloudtrail-user-guide.html',
+                  urlEn: 'https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html',
                   note: 'API 呼び出しのログ記録と監査',
+                  noteEn: 'Logging and auditing API calls',
                 },
               ],
             },
@@ -228,6 +304,12 @@ export const SOA_C03 = {
             '- スキル 1.2.2: イベントの送信、エンリッチ、配信に EventBridge を使用し、イベントバスルールに関する問題のトラブルシューティングを行う。',
             '- スキル 1.2.3: カスタムおよび事前定義済みの Systems Manager Automation ランブックを (AWS SDK やカスタムスクリプトなどで) 作成または実行して、AWS でのタスクを自動化し、プロセスを合理化する。',
           ],
+          descriptionEn: [
+            'Task 1.2: Identify and remediate issues based on monitoring and availability metrics.',
+            '- Skill 1.2.1: Analyze performance metrics and automate remediation strategies using AWS services and features (such as CloudWatch, AWS User Notifications, AWS Lambda, AWS Systems Manager, CloudTrail, and auto scaling).',
+            '- Skill 1.2.2: Use EventBridge to send, enrich, and deliver events, and troubleshoot issues with event bus rules.',
+            '- Skill 1.2.3: Create or run custom and predefined Systems Manager Automation runbooks (such as with the AWS SDK or custom scripts) to automate tasks in AWS and streamline processes.',
+          ],
           knowledge: [
             'AWS Systems Manager',
             'AWS Lambda',
@@ -235,17 +317,27 @@ export const SOA_C03 = {
             'AWS User Notifications',
             'Automation ランブック',
           ],
+          knowledgeEn: [
+            'AWS Systems Manager',
+            'AWS Lambda',
+            'Amazon EventBridge',
+            'AWS User Notifications',
+            'Automation runbooks',
+          ],
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'イベント駆動型のネットワーク自動化',
+                  titleEn: 'Automating Operational Events with AWS Systems Manager',
                   url: 'https://aws.amazon.com/blogs/mt/automating-operational-events-with-aws-systems-manager/',
                   note: 'Management Blog: Intermediate (Level 200)',
+                  noteEn: 'Management Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -253,19 +345,26 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Systems Manager ユーザーガイド',
+                  titleEn: 'AWS Systems Manager User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/what-is-systems-manager.html',
+                  urlEn: 'https://docs.aws.amazon.com/systems-manager/latest/userguide/what-is-systems-manager.html',
                   note: 'ランブックによる修復の自動化',
+                  noteEn: 'Automating remediation with runbooks',
                   recommend: true,
                 },
                 {
                   title: 'EventBridge ルールを使用して CloudWatch アラームに応答する Systems Manager Automation を実行する',
+                  titleEn: 'Use Amazon EventBridge Rules to Run AWS Systems Manager Automation in Response to CloudWatch Alarms',
                   url: 'https://aws.amazon.com/jp/blogs/mt/use-amazon-eventbridge-rules-to-run-aws-systems-manager-automation-in-response-to-cloudwatch-alarms/',
+                  urlEn: 'https://aws.amazon.com/blogs/mt/use-amazon-eventbridge-rules-to-run-aws-systems-manager-automation-in-response-to-cloudwatch-alarms/',
                   note: 'Management Blog: Intermediate (Level 200)',
+                  noteEn: 'Management Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -285,6 +384,15 @@ export const SOA_C03 = {
             '- スキル 1.3.5: Amazon RDS メトリクス (Amazon RDS Performance Insights、CloudWatch アラームなど) をモニタリングして、パフォーマンス効率を向上するために設定を変更する (Performance Insights のプロアクティブなレコメンデーション、RDS プロキシなど)。',
             '- スキル 1.3.6: EC2 インスタンスと関連するストレージおよびネットワーク機能 (EC2 プレイスメントグループなど) を実装、モニタリング、最適化する。',
           ],
+          descriptionEn: [
+            'Task 1.3: Implement performance optimization strategies for compute, storage, and database resources.',
+            '- Skill 1.3.1: Optimize compute resources and remediate performance issues using performance metrics, resource tags, and AWS tools.',
+            '- Skill 1.3.2: Analyze Amazon EBS performance metrics, troubleshoot issues, and optimize volume types to improve performance and reduce costs.',
+            '- Skill 1.3.3: Implement and optimize Amazon S3 performance strategies (such as AWS DataSync, S3 Transfer Acceleration, multipart upload, and S3 lifecycle policies) to enhance data transfer, storage efficiency, and access patterns.',
+            '- Skill 1.3.4: Evaluate and select shared storage solutions (such as Amazon EFS and Amazon FSx) and optimize solutions (such as EFS lifecycle policies) for specific use cases and requirements.',
+            '- Skill 1.3.5: Monitor Amazon RDS metrics (such as Amazon RDS Performance Insights and CloudWatch alarms) and modify configurations to improve performance efficiency (such as Performance Insights proactive recommendations and RDS Proxy).',
+            '- Skill 1.3.6: Implement, monitor, and optimize EC2 instances and associated storage and network features (such as EC2 placement groups).',
+          ],
           knowledge: [
             'Amazon EBS',
             'Amazon S3',
@@ -294,23 +402,39 @@ export const SOA_C03 = {
             'Performance Insights',
             'EC2 プレイスメントグループ',
           ],
+          knowledgeEn: [
+            'Amazon EBS',
+            'Amazon S3',
+            'Amazon EFS',
+            'Amazon FSx',
+            'Amazon RDS',
+            'Performance Insights',
+            'EC2 placement groups',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon RDS Performance Insights',
+                  titleEn: 'Amazon RDS Performance Insights',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonRDS/latest/UserGuide/USER_PerfInsights.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_PerfInsights.html',
                   note: 'データベースパフォーマンスの分析',
+                  noteEn: 'Analyzing database performance',
                   recommend: true,
                 },
                 {
                   title: 'Amazon S3 パフォーマンスの最適化',
+                  titleEn: 'Amazon S3 Performance Optimization',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/optimizing-performance.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonS3/latest/userguide/optimizing-performance.html',
                   note: 'S3 転送パフォーマンスのベストプラクティス',
+                  noteEn: 'Best practices for S3 transfer performance',
                 },
               ],
             },
@@ -325,6 +449,7 @@ export const SOA_C03 = {
       weight: 22,
       color: '#f97316',
       description: 'このドメインでは、スケーラビリティと伸縮性の実装、可用性とレジリエンスに優れた環境の構築、バックアップと復元の戦略に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to implementing scalability and elasticity, building highly available and resilient environments, and backup and restore strategies.',
       tasks: [
         {
           id: '2.1',
@@ -336,7 +461,20 @@ export const SOA_C03 = {
             '- スキル 2.1.2: AWS サービス (Amazon CloudFront、Amazon ElastiCache など) を使用してキャッシュを実装し、動的スケーラビリティを強化する。',
             '- スキル 2.1.3: AWS マネージドデータベース (Amazon RDS、Amazon DynamoDB など) のスケーリングを設定して管理する。',
           ],
+          descriptionEn: [
+            'Task 2.1: Implement scalability and elasticity.',
+            '- Skill 2.1.1: Configure and manage scaling mechanisms for compute environments.',
+            '- Skill 2.1.2: Implement caching using AWS services (such as Amazon CloudFront and Amazon ElastiCache) to enhance dynamic scalability.',
+            '- Skill 2.1.3: Configure and manage scaling for AWS managed databases (such as Amazon RDS and Amazon DynamoDB).',
+          ],
           knowledge: [
+            'Auto Scaling',
+            'Amazon CloudFront',
+            'Amazon ElastiCache',
+            'Amazon RDS',
+            'Amazon DynamoDB',
+          ],
+          knowledgeEn: [
             'Auto Scaling',
             'Amazon CloudFront',
             'Amazon ElastiCache',
@@ -347,19 +485,26 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon EC2 Auto Scaling ユーザーガイド',
+                  titleEn: 'Amazon EC2 Auto Scaling User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html',
+                  urlEn: 'https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html',
                   note: 'スケーリングポリシーとメカニズムの設定',
+                  noteEn: 'Configure scaling policies and mechanisms',
                   recommend: true,
                 },
                 {
                   title: 'Auto Scaling ユーザーガイド',
+                  titleEn: 'Auto Scaling User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html',
+                  urlEn: 'https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html',
                   note: 'スケーリングポリシーの設計',
+                  noteEn: 'Designing scaling policies',
                 },
               ],
             },
@@ -374,29 +519,47 @@ export const SOA_C03 = {
             '- スキル 2.2.1: Elastic Load Balancing (ELB) および Amazon Route 53 ヘルスチェックを設定してトラブルシューティングを行う。',
             '- スキル 2.2.2: 耐障害性を備えたシステム (マルチ AZ 配置など) を設定する。',
           ],
+          descriptionEn: [
+            'Task 2.2: Implement highly available and resilient environments.',
+            '- Skill 2.2.1: Configure and troubleshoot Elastic Load Balancing (ELB) and Amazon Route 53 health checks.',
+            '- Skill 2.2.2: Configure fault-tolerant systems (such as Multi-AZ deployments).',
+          ],
           knowledge: [
             'Elastic Load Balancing',
             'Amazon Route 53',
             'マルチ AZ',
             '耐障害性',
           ],
+          knowledgeEn: [
+            'Elastic Load Balancing',
+            'Amazon Route 53',
+            'Multi-AZ',
+            'Fault tolerance',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Elastic Load Balancing ユーザーガイド',
+                  titleEn: 'Elastic Load Balancing User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/elasticloadbalancing/latest/userguide/what-is-load-balancing.html',
+                  urlEn: 'https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html',
                   note: 'ロードバランシングとヘルスチェックの設定',
+                  noteEn: 'Configure load balancing and health checks',
                   recommend: true,
                 },
                 {
                   title: 'AWS Backup 開発者ガイド',
+                  titleEn: 'AWS Backup Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/aws-backup/latest/devguide/whatisbackup.html',
+                  urlEn: 'https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html',
                   note: 'バックアッププランの設計と実装',
+                  noteEn: 'Design and implement backup plans',
                   recommend: true,
                 },
               ],
@@ -414,6 +577,13 @@ export const SOA_C03 = {
             '- スキル 2.3.3: ストレージサービス (Amazon S3、Amazon FSx など) のバージョニングを実装する。',
             '- スキル 2.3.4: ディザスタリカバリ手順を実行する。',
           ],
+          descriptionEn: [
+            'Task 2.3: Implement backup and restore strategies.',
+            '- Skill 2.3.1: Automate snapshots and backups of AWS resources (such as Amazon EC2 instances, RDS DB instances, Amazon EBS volumes, Amazon S3 buckets, and DynamoDB tables) using AWS services (such as AWS Backup).',
+            '- Skill 2.3.2: Restore databases using various methods (such as point-in-time recovery) to meet Recovery Time Objective (RTO), Recovery Point Objective (RPO), and cost requirements.',
+            '- Skill 2.3.3: Implement versioning for storage services (such as Amazon S3 and Amazon FSx).',
+            '- Skill 2.3.4: Execute disaster recovery procedures.',
+          ],
           knowledge: [
             'AWS Backup',
             'RTO',
@@ -421,17 +591,28 @@ export const SOA_C03 = {
             'ポイントインタイム復元',
             'ディザスタリカバリ',
           ],
+          knowledgeEn: [
+            'AWS Backup',
+            'RTO',
+            'RPO',
+            'Point-in-time recovery',
+            'Disaster recovery',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Backup 開発者ガイド',
+                  titleEn: 'AWS Backup Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/aws-backup/latest/devguide/whatisbackup.html',
+                  urlEn: 'https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html',
                   note: 'バックアップ計画の作成と復元手順',
+                  noteEn: 'Create backup plans and restore procedures',
                   recommend: true,
                 },
               ],
@@ -447,6 +628,7 @@ export const SOA_C03 = {
       weight: 22,
       color: '#22c55e',
       description: 'このドメインでは、クラウドリソースのプロビジョニングと保守、リソース管理の自動化に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to provisioning and maintaining cloud resources and automating resource management.',
       tasks: [
         {
           id: '3.1',
@@ -461,7 +643,24 @@ export const SOA_C03 = {
             '- スキル 3.1.5: デプロイ戦略とサービスを実装する。',
             '- スキル 3.1.6: サードパーティーツール (Terraform、Git など) を使用して管理し、リソースのデプロイを自動化する。',
           ],
+          descriptionEn: [
+            'Task 3.1: Provision and maintain cloud resources.',
+            '- Skill 3.1.1: Create and manage AMIs and container images (such as Amazon EC2 Image Builder).',
+            '- Skill 3.1.2: Create and manage resource stacks using AWS CloudFormation and AWS CDK.',
+            '- Skill 3.1.3: Identify and remediate deployment issues (such as subnet sizing issues, CloudFormation errors, and permission issues).',
+            '- Skill 3.1.4: Provision and share resources across multiple AWS Regions and accounts (such as AWS RAM and CloudFormation StackSets).',
+            '- Skill 3.1.5: Implement deployment strategies and services.',
+            '- Skill 3.1.6: Manage and automate resource deployments using third-party tools (such as Terraform and Git).',
+          ],
           knowledge: [
+            'AMI',
+            'EC2 Image Builder',
+            'AWS CloudFormation',
+            'AWS CDK',
+            'CloudFormation StackSets',
+            'Terraform',
+          ],
+          knowledgeEn: [
             'AMI',
             'EC2 Image Builder',
             'AWS CloudFormation',
@@ -473,13 +672,17 @@ export const SOA_C03 = {
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS CloudFormation#1 基礎編',
+                  titleEn: 'AWS CloudFormation#1 Basics',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
                   note: 'PDF | Youtube: 2023/07',
+                  noteEn: 'PDF | YouTube: 2023/07',
                   recommend: true,
                 },
               ],
@@ -487,19 +690,26 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS CloudFormation ユーザーガイド',
+                  titleEn: 'AWS CloudFormation User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/Welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html',
                   note: 'IaC テンプレートの作成とデプロイ',
+                  noteEn: 'Create and deploy IaC templates',
                   recommend: true,
                 },
                 {
                   title: 'AWS CDK 開発者ガイド',
+                  titleEn: 'AWS CDK Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/cdk/v2/guide/home.html',
+                  urlEn: 'https://docs.aws.amazon.com/cdk/v2/guide/home.html',
                   note: 'プログラマブルな IaC の構築',
+                  noteEn: 'Build programmable IaC',
                 },
               ],
             },
@@ -514,29 +724,47 @@ export const SOA_C03 = {
             '- スキル 3.2.1: AWS サービスを使用して、オペレーションプロセスを自動化する (AWS Systems Manager など)。',
             '- スキル 3.2.2: AWS のサービスと機能 (AWS Lambda、Amazon S3 イベント通知など) を使用して、イベント駆動型の自動化を実装する。',
           ],
+          descriptionEn: [
+            'Task 3.2: Automate existing resource management.',
+            '- Skill 3.2.1: Automate operational processes using AWS services (such as AWS Systems Manager).',
+            '- Skill 3.2.2: Implement event-driven automation using AWS services and features (such as AWS Lambda and Amazon S3 event notifications).',
+          ],
           knowledge: [
             'AWS Systems Manager',
             'AWS Lambda',
             'Amazon S3 イベント通知',
             'イベント駆動型自動化',
           ],
+          knowledgeEn: [
+            'AWS Systems Manager',
+            'AWS Lambda',
+            'Amazon S3 event notifications',
+            'Event-driven automation',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Systems Manager Automation',
+                  titleEn: 'AWS Systems Manager Automation',
                   url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-automation.html',
+                  urlEn: 'https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-automation.html',
                   note: 'ランブックによる運用タスクの自動化',
+                  noteEn: 'Automate operational tasks with runbooks',
                   recommend: true,
                 },
                 {
                   title: 'Amazon ECS 開発者ガイド',
+                  titleEn: 'Amazon ECS Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonECS/latest/developerguide/Welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonECS/latest/developerguide/Welcome.html',
                   note: 'コンテナデプロイとサービス管理',
+                  noteEn: 'Container deployment and service management',
                 },
               ],
             },
@@ -551,6 +779,7 @@ export const SOA_C03 = {
       weight: 16,
       color: '#a855f7',
       description: 'このドメインでは、セキュリティとコンプライアンスのツール・ポリシーの管理、データとインフラストラクチャの保護に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to managing security and compliance tools and policies, and protecting data and infrastructure.',
       tasks: [
         {
           id: '4.1',
@@ -564,7 +793,22 @@ export const SOA_C03 = {
             '- スキル 4.1.4: AWS Trusted Advisor のセキュリティチェックの結果に基づいて修復を実装する。',
             '- スキル 4.1.5: コンプライアンス要件 (AWS リージョンやサービスの選択など) を適用する。',
           ],
+          descriptionEn: [
+            'Task 4.1: Implement and manage security and compliance tools and policies.',
+            '- Skill 4.1.1: Implement AWS IAM features (such as password policies, MFA, roles, federated identities, resource policies, and policy conditions).',
+            '- Skill 4.1.2: Troubleshoot and audit access issues using AWS tools (such as AWS CloudTrail, IAM Access Analyzer, and IAM Policy Simulator).',
+            '- Skill 4.1.3: Securely implement multi-account strategies.',
+            '- Skill 4.1.4: Implement remediation based on AWS Trusted Advisor security check findings.',
+            '- Skill 4.1.5: Apply compliance requirements (such as AWS Region and service selection).',
+          ],
           knowledge: [
+            'AWS IAM',
+            'MFA',
+            'IAM Access Analyzer',
+            'IAM Policy Simulator',
+            'AWS Trusted Advisor',
+          ],
+          knowledgeEn: [
             'AWS IAM',
             'MFA',
             'IAM Access Analyzer',
@@ -575,13 +819,17 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'IAM でのセキュリティのベストプラクティス',
+                  titleEn: 'Security Best Practices in IAM',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html',
+                  urlEn: 'https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html',
                   note: '最小権限・MFA・ロール設計',
+                  noteEn: 'Least privilege, MFA, and role design',
                   recommend: true,
                 },
               ],
@@ -600,7 +848,23 @@ export const SOA_C03 = {
             '- スキル 4.2.4: AWS サービスを使用してシークレットを安全に保管する。',
             '- スキル 4.2.5: レポートを設定して、AWS サービス (AWS Security Hub、Amazon GuardDuty、AWS Config、Amazon Inspector など) からの結果を修復する。',
           ],
+          descriptionEn: [
+            'Task 4.2: Implement strategies to protect data and infrastructure.',
+            '- Skill 4.2.1: Implement and apply data classification schemes.',
+            '- Skill 4.2.2: Implement, configure, and troubleshoot encryption at rest (such as AWS KMS).',
+            '- Skill 4.2.3: Implement, configure, and troubleshoot encryption in transit (such as AWS Certificate Manager).',
+            '- Skill 4.2.4: Securely store secrets using AWS services.',
+            '- Skill 4.2.5: Configure reports and remediate findings from AWS services (such as AWS Security Hub, Amazon GuardDuty, AWS Config, and Amazon Inspector).',
+          ],
           knowledge: [
+            'AWS KMS',
+            'AWS Certificate Manager',
+            'AWS Security Hub',
+            'Amazon GuardDuty',
+            'AWS Config',
+            'Amazon Inspector',
+          ],
+          knowledgeEn: [
             'AWS KMS',
             'AWS Certificate Manager',
             'AWS Security Hub',
@@ -612,13 +876,17 @@ export const SOA_C03 = {
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS Key Management Service Part.2 発展編',
+                  titleEn: 'AWS Key Management Service Part.2 Advanced',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
+                  urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
                   note: 'PDF | Youtube: 2024/04',
+                  noteEn: 'PDF | YouTube: 2024/04',
                   recommend: true,
                 },
               ],
@@ -626,19 +894,26 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS KMS 開発者ガイド',
+                  titleEn: 'AWS KMS Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/kms/latest/developerguide/overview.html',
+                  urlEn: 'https://docs.aws.amazon.com/kms/latest/developerguide/overview.html',
                   note: '暗号化キーの作成と管理',
+                  noteEn: 'Create and manage encryption keys',
                   recommend: true,
                 },
                 {
                   title: 'AWS Security Hub ユーザーガイド',
+                  titleEn: 'AWS Security Hub User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/what-is-securityhub.html',
+                  urlEn: 'https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html',
                   note: 'セキュリティ検出結果の一元管理',
+                  noteEn: 'Centralized management of security findings',
                 },
               ],
             },
@@ -653,6 +928,7 @@ export const SOA_C03 = {
       weight: 18,
       color: '#ef4444',
       description: 'このドメインでは、ネットワーク機能と接続の実装・最適化、DNS とコンテンツ配信の設定、ネットワーク接続のトラブルシューティングに関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to implementing and optimizing network features and connectivity, configuring DNS and content delivery, and troubleshooting network connectivity issues.',
       tasks: [
         {
           id: '5.1',
@@ -665,6 +941,13 @@ export const SOA_C03 = {
             '- スキル 5.1.3: 単一のアカウント内の AWS ネットワーク保護サービス (Amazon Route 53 Resolver DNS Firewall、AWS WAF、AWS Shield、AWS Network Firewall など) の監査を行う。',
             '- スキル 5.1.4: ネットワークアーキテクチャのコストを最適化する。',
           ],
+          descriptionEn: [
+            'Task 5.1: Implement and optimize network features and connectivity.',
+            '- Skill 5.1.1: Configure VPCs (such as subnets, route tables, network ACLs, security groups, NAT gateways, internet gateways, and egress-only internet gateways).',
+            '- Skill 5.1.2: Configure private network connectivity.',
+            '- Skill 5.1.3: Audit AWS network protection services within a single account (such as Amazon Route 53 Resolver DNS Firewall, AWS WAF, AWS Shield, and AWS Network Firewall).',
+            '- Skill 5.1.4: Optimize network architecture costs.',
+          ],
           knowledge: [
             'VPC',
             'サブネット',
@@ -674,17 +957,30 @@ export const SOA_C03 = {
             'AWS Shield',
             'AWS Network Firewall',
           ],
+          knowledgeEn: [
+            'VPC',
+            'Subnets',
+            'Network ACLs',
+            'Security groups',
+            'AWS WAF',
+            'AWS Shield',
+            'AWS Network Firewall',
+          ],
           resources: [
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'Amazon VPC',
+                  titleEn: 'Amazon VPC',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
+                  urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
                   note: 'PDF | Youtube: 2020/10',
+                  noteEn: 'PDF | YouTube: 2020/10',
                   recommend: true,
                 },
               ],
@@ -692,13 +988,17 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon VPC ユーザーガイド',
+                  titleEn: 'Amazon VPC User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/what-is-amazon-vpc.html',
+                  urlEn: 'https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html',
                   note: 'VPC・サブネット・ルートテーブルの設定',
+                  noteEn: 'Configure VPCs, subnets, and route tables',
                   recommend: true,
                 },
               ],
@@ -715,7 +1015,19 @@ export const SOA_C03 = {
             '- スキル 5.2.2: Route 53 のルーティングポリシー、設定、クエリのログ記録を実装する。',
             '- スキル 5.2.3: コンテンツとサービスの配信 (Amazon CloudFront、AWS Global Accelerator など) を設定する。',
           ],
+          descriptionEn: [
+            'Task 5.2: Configure domains, DNS services, and content delivery.',
+            '- Skill 5.2.1: Configure DNS (such as Route 53 Resolver).',
+            '- Skill 5.2.2: Implement Route 53 routing policies, configurations, and query logging.',
+            '- Skill 5.2.3: Configure content and service delivery (such as Amazon CloudFront and AWS Global Accelerator).',
+          ],
           knowledge: [
+            'Amazon Route 53',
+            'Route 53 Resolver',
+            'Amazon CloudFront',
+            'AWS Global Accelerator',
+          ],
+          knowledgeEn: [
             'Amazon Route 53',
             'Route 53 Resolver',
             'Amazon CloudFront',
@@ -725,24 +1037,34 @@ export const SOA_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon CloudFront 開発者ガイド',
+                  titleEn: 'Amazon CloudFront Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonCloudFront/latest/DeveloperGuide/Introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonCloudFront/latest/DeveloperGuide/Introduction.html',
                   note: 'CDN とコンテンツ配信の設定',
+                  noteEn: 'Configure CDN and content delivery',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Route 53 開発者ガイド',
+                  titleEn: 'Amazon Route 53 Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/Welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html',
                   note: 'DNS ルーティングポリシーの設定',
+                  noteEn: 'Configure DNS routing policies',
                 },
                 {
                   title: 'Amazon Route 53 開発者ガイド',
+                  titleEn: 'Amazon Route 53 Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/Route53/latest/DeveloperGuide/Welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html',
                   note: 'DNS ルーティングとヘルスチェック',
+                  noteEn: 'DNS routing and health checks',
                   recommend: true,
                 },
               ],
@@ -761,6 +1083,14 @@ export const SOA_C03 = {
             '- スキル 5.3.4: ハイブリッド接続の問題とプライベート接続の問題を特定してトラブルシューティングを行う。',
             '- スキル 5.3.5: Amazon CloudWatch ネットワークモニタリングサービスを設定して分析する。',
           ],
+          descriptionEn: [
+            'Task 5.3: Troubleshoot network connectivity issues.',
+            '- Skill 5.3.1: Troubleshoot VPC configurations (such as subnets, route tables, network ACLs, security groups, transit gateways, and NAT gateways).',
+            '- Skill 5.3.2: Collect and interpret network logs (such as VPC Flow Logs, ELB access logs, AWS WAF web ACL logs, CloudFront logs, and container logs) to troubleshoot issues.',
+            '- Skill 5.3.3: Identify and remediate CloudFront caching issues.',
+            '- Skill 5.3.4: Identify and troubleshoot hybrid connectivity and private connectivity issues.',
+            '- Skill 5.3.5: Configure and analyze Amazon CloudWatch network monitoring services.',
+          ],
           knowledge: [
             'VPC フローログ',
             'ELB アクセスログ',
@@ -768,23 +1098,37 @@ export const SOA_C03 = {
             'トランジットゲートウェイ',
             'ハイブリッド接続',
           ],
+          knowledgeEn: [
+            'VPC Flow Logs',
+            'ELB access logs',
+            'CloudFront',
+            'Transit Gateway',
+            'Hybrid connectivity',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'VPC フローログ',
+                  titleEn: 'VPC Flow Logs',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/flow-logs.html',
+                  urlEn: 'https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html',
                   note: 'ネットワークトラフィックのログ収集と分析',
+                  noteEn: 'Collect and analyze network traffic logs',
                   recommend: true,
                 },
                 {
                   title: 'VPC エンドポイント',
+                  titleEn: 'VPC Endpoints',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/vpc-endpoints.html',
+                  urlEn: 'https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html',
                   note: 'プライベート接続とコスト削減',
+                  noteEn: 'Private connectivity and cost reduction',
                 },
               ],
             },

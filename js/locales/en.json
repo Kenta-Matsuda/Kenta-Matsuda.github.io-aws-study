@@ -30,16 +30,17 @@
   },
   "dashboard": {
     "title": "Study Dashboard",
+    "dailyHighlight": "Today's Highlight",
     "domainRatio": "Domain Question Ratio",
     "feedback": "Send Feedback",
     "defaultGreeting": "Let's build up your learning progress.",
     "changeUsername": "Change Username",
     "tweetBtn": "Post on X",
     "bookPromo": {
-      "onSale": "On Sale",
-      "title": "AWS Certification",
-      "subtitle": "Complete Guide",
-      "description": "All AWS certification know-how in one book!"
+      "onSale": "発売中",
+      "title": "AWS認定",
+      "subtitle": "全冠攻略本",
+      "description": "AWS認定全冠のノウハウを一冊に凝縮！"
     },
     "quizCarousel": {
       "title": "Quiz Challenge",
@@ -116,7 +117,9 @@
     "summarySubtitle": "{{label}} — {{total}} questions completed",
     "timerOvertime": " overtime",
     "generateBtn": "Generate Quiz",
-    "explainBtn": "Explain"
+    "explainBtn": "Explain",
+    "smartReview": "Smart Review",
+    "smartReviewDesc": "Auto-generated from weak areas and past mistakes. Efficiently overcome weaknesses!"
   },
   "quizHistory": {
     "title": "Review Past Questions",
@@ -145,6 +148,9 @@
     "geminiKeyHelp": "If you don't have a key, get one free from Google AI Studio (18+ only).",
     "openaiKeyHelp": "Get a key from OpenAI Platform.",
     "openaiWarning": "Note: OpenAI API is paid (charged per usage). See pricing for details.",
+    "openaiWarningLabel": "Note:",
+    "openaiWarningText": "OpenAI API is paid (charged per usage). Users under 18 must use it under parental consent and supervision.",
+    "openaiWarningLinkText": "OpenAI Terms of Use",
     "keyPrivacy": "API keys are stored only in your browser's local storage and are never sent to external servers.",
     "resetData": "Reset Data",
     "resetConfirm": "This will reset all study data stored on this device (XP, quiz history, API keys, etc.). Continue?"
@@ -284,6 +290,12 @@
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",
     "recommend": "Recommended"
+  },
+  "learningStatus": {
+    "selected": "Selected",
+    "progress": "Progress:",
+    "accuracy": "Accuracy:",
+    "nextAction": "Next Step"
   },
   "aiDisclaimer": "Note: AI-generated results may not always be accurate (may contain errors). For important decisions, verify with primary sources such as AWS official documentation.",
   "footer": {

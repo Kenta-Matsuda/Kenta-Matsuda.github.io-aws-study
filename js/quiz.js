@@ -134,10 +134,10 @@ export function getComboLabel(streak) {
 
 /** Mode configuration: question count and time limits */
 export const QUIZ_MODE_CONFIG = {
-  single: { questionCount: 1, timeLimitSec: 0, preGenerate: false, label: '1問チャレンジ' },
-  quick5: { questionCount: 5, timeLimitSec: 0, preGenerate: false, label: '5問連続' },
-  speed:  { questionCount: 10, timeLimitSec: 300, preGenerate: true, label: 'スピードチャレンジ' },
-  mock:   { questionCount: 65, timeLimitSec: 7800, preGenerate: true, label: '本番模擬試験' },  // defaults; overridden per-exam
+  single: { questionCount: 1, timeLimitSec: 0, preGenerate: false, label: '1問チャレンジ', labelEn: 'Single Question' },
+  quick5: { questionCount: 5, timeLimitSec: 0, preGenerate: false, label: '5問連続', labelEn: '5 Questions' },
+  speed:  { questionCount: 10, timeLimitSec: 300, preGenerate: true, label: 'スピードチャレンジ', labelEn: 'Speed Run' },
+  mock:   { questionCount: 65, timeLimitSec: 7800, preGenerate: true, label: '本番模擬試験', labelEn: 'Practice Exam' },  // defaults; overridden per-exam
 };
 
 /**

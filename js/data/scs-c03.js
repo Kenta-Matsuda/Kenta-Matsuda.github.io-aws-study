@@ -4,6 +4,7 @@ export const SCS_C03 = {
   shortLabel: 'SCS',
   title: 'AWS Certified Security - Specialty',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -12,17 +13,24 @@ export const SCS_C03 = {
       description: [
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
       ],
+      descriptionEn: [
+        'Register for the AWS certification exam. You can take the exam online or at a test center through Pearson VUE.',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified Security - Specialty 公式ページ',
+              titleEn: 'AWS Certified Security - Specialty Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-security-specialty/',
+              urlEn: 'https://aws.amazon.com/certification/certified-security-specialty/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information on exam overview, passing criteria, and scope',
               recommend: true,
             },
           ],
@@ -30,13 +38,16 @@ export const SCS_C03 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for the AWS certification exam here (official registration site)',
               recommend: true,
             },
           ],
@@ -50,17 +61,24 @@ export const SCS_C03 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the Exam Guide (PDF) to understand the exam scope, scoring weights, and question formats. Grasp the big picture before diving into each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified Security - Specialty 試験ガイド (PDF)',
+              titleEn: 'AWS Certified Security - Specialty Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-security-spec/AWS-Certified-Security-Specialty_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-security-spec/AWS-Certified-Security-Specialty_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Review exam scope, question ratios, and sample questions',
               recommend: true,
             },
           ],
@@ -74,17 +92,23 @@ export const SCS_C03 = {
       description: [
         'AWS Skill Builder の無料コースで、セキュリティ分野の基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational security knowledge with free courses on AWS Skill Builder. Exam-specific preparation courses are also available.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified Security - Specialty',
+              titleEn: 'Exam Prep Standard Course: AWS Certified Security - Specialty',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18291/exam-prep-standard-course-aws-certified-security-specialty-scs-c02-english',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
             },
           ],
@@ -99,6 +123,10 @@ export const SCS_C03 = {
         'このアプリの Domain 1〜6 タブに切り替えて、各ドメインのタスクごとに用意されたリソースを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to the Domain 1–6 tabs in this app and work through the resources prepared for each task.',
+        'You can also use AI explanations and AI practice questions to deepen your understanding.',
+      ],
       knowledge: [
         'Domain 1: 検出（16%）',
         'Domain 2: インシデント対応（14%）',
@@ -107,23 +135,38 @@ export const SCS_C03 = {
         'Domain 5: データ保護（18%）',
         'Domain 6: セキュリティ基盤とガバナンス（14%）',
       ],
+      knowledgeEn: [
+        'Domain 1: Detection (16%)',
+        'Domain 2: Incident Response (14%)',
+        'Domain 3: Infrastructure Security (18%)',
+        'Domain 4: Identity and Access Management (20%)',
+        'Domain 5: Data Protection (18%)',
+        'Domain 6: Security Foundations and Governance (14%)',
+      ],
       resources: [
         {
           key: 'whitepapers',
           label: 'ホワイトペーパー・ガイド',
+          labelEn: 'Whitepapers & Guides',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-gray-600',
           items: [
             {
               title: 'AWS Well-Architected フレームワーク',
+              titleEn: 'AWS Well-Architected Framework',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/framework/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html',
               note: 'AWS のベストプラクティスフレームワーク',
+              noteEn: 'AWS best practices framework',
               recommend: true,
             },
             {
               title: 'AWS Well-Architected フレームワーク — セキュリティの柱',
+              titleEn: 'AWS Well-Architected Framework — Security Pillar',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/security-pillar/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/security-pillar/welcome.html',
               note: 'セキュリティ設計のベストプラクティス',
+              noteEn: 'Best practices for security design',
               recommend: true,
             },
           ],
@@ -137,17 +180,23 @@ export const SCS_C03 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve near-real exam questions from the official practice set and check your understanding. If you find weak domains, return to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
+              titleEn: 'AWS Certification Official Practice Question Set',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/15232/aws-certified-security-specialty-official-practice-question-set-scs-c02-japanese',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -163,6 +212,7 @@ export const SCS_C03 = {
       weight: 16,
       color: '#3b82f6',
       description: 'このドメインでは、AWS アカウントまたは組織向けのモニタリング・アラートソリューションの設計と実装、ロギングソリューションの設計と実装、セキュリティモニタリング・ロギング・アラートソリューションのトラブルシューティングに関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to designing and implementing monitoring and alerting solutions for AWS accounts or organizations, designing and implementing logging solutions, and troubleshooting security monitoring, logging, and alerting solutions.',
       tasks: [
         {
           id: '1.1',
@@ -176,7 +226,23 @@ export const SCS_C03 = {
             '- スキル 1.1.4: メトリクス、アラート、ダッシュボードを作成し、異常なデータやイベントを検出する (Amazon GuardDuty、Amazon Security Lake、AWS Security Hub、Amazon Macie など)。',
             '- スキル 1.1.5: オートメーションを作成して管理し、定期的な評価と調査を行う (AWS Config コンフォーマンスパック、Security Hub、AWS Systems Manager State Manager のデプロイなど)。',
           ],
+          descriptionEn: [
+            'Task 1.1: Design and implement monitoring and alerting solutions for AWS accounts or organizations.',
+            '- Skill 1.1.1: Analyze workloads to determine monitoring requirements.',
+            '- Skill 1.1.2: Design and implement workload monitoring strategies (e.g., configuring health checks for resources).',
+            '- Skill 1.1.3: Aggregate security and monitoring events.',
+            '- Skill 1.1.4: Create metrics, alerts, and dashboards to detect anomalous data or events (e.g., Amazon GuardDuty, Amazon Security Lake, AWS Security Hub, Amazon Macie).',
+            '- Skill 1.1.5: Create and manage automation for periodic assessments and investigations (e.g., deploying AWS Config conformance packs, Security Hub, AWS Systems Manager State Manager).',
+          ],
           knowledge: [
+            'Amazon GuardDuty',
+            'Amazon Security Lake',
+            'AWS Security Hub',
+            'Amazon Macie',
+            'AWS Config',
+            'Systems Manager State Manager',
+          ],
+          knowledgeEn: [
             'Amazon GuardDuty',
             'Amazon Security Lake',
             'AWS Security Hub',
@@ -188,13 +254,17 @@ export const SCS_C03 = {
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Amazon CloudWatch と AWS X-Ray で MTTR を短縮する',
+                  titleEn: 'Lowering MTTR with Amazon CloudWatch and AWS X-Ray',
                   url: 'https://aws.amazon.com/jp/blogs/mt/lowering-mttr-with-amazon-cloudwatch-and-aws-x-ray/',
+                  urlEn: 'https://aws.amazon.com/blogs/mt/lowering-mttr-with-amazon-cloudwatch-and-aws-x-ray/',
                   note: 'Management Blog: Intermediate (Level 200)',
+                  noteEn: 'Management Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -202,19 +272,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon GuardDuty ユーザーガイド',
+                  titleEn: 'Amazon GuardDuty User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/what-is-guardduty.html',
+                  urlEn: 'https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html',
                   note: '脅威検出とセキュリティモニタリング',
+                  noteEn: 'Threat detection and security monitoring',
                   recommend: true,
                 },
                 {
                   title: 'AWS Security Hub ユーザーガイド',
+                  titleEn: 'AWS Security Hub User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/securityhub/latest/userguide/what-is-securityhub.html',
+                  urlEn: 'https://docs.aws.amazon.com/securityhub/latest/userguide/what-is-securityhub.html',
                   note: 'セキュリティ検出結果の集約・管理',
+                  noteEn: 'Aggregation and management of security findings',
                 },
               ],
             },
@@ -233,6 +310,15 @@ export const SCS_C03 = {
             '- スキル 1.2.5: AWS のサービスを使用してログの正規化、解析、関連付けを行う (Amazon OpenSearch Service、AWS Lambda、Amazon Managed Grafana など)。',
             '- スキル 1.2.6: ネットワーク設計、脅威、攻撃に基づいて適切なログソースを判断し、設定する (VPC フローログ、Transit Gateway フローログ、Amazon Route 53 Resolver ログなど)。',
           ],
+          descriptionEn: [
+            'Task 1.2: Design and implement logging solutions.',
+            '- Skill 1.2.1: Identify log ingestion and storage sources based on requirements.',
+            '- Skill 1.2.2: Configure logging for AWS services and applications (e.g., configuring organizational AWS CloudTrail trails, creating dedicated Amazon CloudWatch logging accounts, configuring Amazon CloudWatch Logs agents).',
+            '- Skill 1.2.3: Implement log storage and log data lakes (e.g., Security Lake) and integrate with third-party security tools.',
+            '- Skill 1.2.4: Analyze logs using AWS services (e.g., CloudWatch Logs Insights, Amazon Athena, Security Hub findings).',
+            '- Skill 1.2.5: Normalize, parse, and correlate logs using AWS services (e.g., Amazon OpenSearch Service, AWS Lambda, Amazon Managed Grafana).',
+            '- Skill 1.2.6: Determine and configure appropriate log sources based on network design, threats, and attacks (e.g., VPC Flow Logs, Transit Gateway Flow Logs, Amazon Route 53 Resolver logs).',
+          ],
           knowledge: [
             'AWS CloudTrail',
             'Amazon CloudWatch Logs',
@@ -241,17 +327,28 @@ export const SCS_C03 = {
             'Amazon OpenSearch Service',
             'VPC フローログ',
           ],
+          knowledgeEn: [
+            'AWS CloudTrail',
+            'Amazon CloudWatch Logs',
+            'Amazon Security Lake',
+            'Amazon Athena',
+            'Amazon OpenSearch Service',
+            'VPC Flow Logs',
+          ],
           resources: [
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS CloudTrail 基礎編',
+                  titleEn: 'AWS CloudTrail Fundamentals',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudTrail%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
                   note: 'PDF | Youtube: 2024/09',
+                  noteEn: 'PDF | Youtube: 2024/09',
                   recommend: true,
                 },
               ],
@@ -259,19 +356,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS CloudTrail ユーザーガイド',
+                  titleEn: 'AWS CloudTrail User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/awscloudtrail/latest/userguide/cloudtrail-user-guide.html',
+                  urlEn: 'https://docs.aws.amazon.com/awscloudtrail/latest/userguide/cloudtrail-user-guide.html',
                   note: 'API コールの記録・セキュリティ監査',
+                  noteEn: 'Recording API calls and security auditing',
                   recommend: true,
                 },
                 {
                   title: 'Amazon CloudWatch Logs ユーザーガイド',
+                  titleEn: 'Amazon CloudWatch Logs User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/WhatIsCloudWatchLogs.html',
                   note: 'ログの収集・保存・分析',
+                  noteEn: 'Log collection, storage, and analysis',
                 },
               ],
             },
@@ -286,8 +390,19 @@ export const SCS_C03 = {
             '- スキル 1.3.1: リソースの機能、アクセス許可、設定を分析する (Lambda 関数ロギング、Amazon API Gateway ロギング、ヘルスチェック、Amazon CloudFront ロギングなど)。',
             '- スキル 1.3.2: リソースの設定ミスを修正する (CloudWatch Agent 設定のトラブルシューティング、不足しているログのトラブルシューティングなど)。',
           ],
+          descriptionEn: [
+            'Task 1.3: Troubleshoot security monitoring, logging, and alerting solutions.',
+            '- Skill 1.3.1: Analyze resource capabilities, permissions, and configurations (e.g., Lambda function logging, Amazon API Gateway logging, health checks, Amazon CloudFront logging).',
+            '- Skill 1.3.2: Remediate resource misconfigurations (e.g., troubleshooting CloudWatch Agent configuration, troubleshooting missing logs).',
+          ],
           knowledge: [
             'Lambda 関数ロギング',
+            'Amazon API Gateway',
+            'Amazon CloudFront',
+            'CloudWatch Agent',
+          ],
+          knowledgeEn: [
+            'Lambda function logging',
             'Amazon API Gateway',
             'Amazon CloudFront',
             'CloudWatch Agent',
@@ -296,19 +411,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'CloudWatch Agent の設定',
+                  titleEn: 'CloudWatch Agent Configuration',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html',
                   note: 'CloudWatch Agent のインストールとトラブルシューティング',
+                  noteEn: 'CloudWatch Agent installation and troubleshooting',
                   recommend: true,
                 },
                 {
                   title: 'AWS Lambda のログ設定',
+                  titleEn: 'AWS Lambda Logging Configuration',
                   url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/monitoring-cloudwatchlogs.html',
+                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/monitoring-cloudwatchlogs.html',
                   note: 'Lambda 関数のログ出力設定',
+                  noteEn: 'Lambda function log output configuration',
                 },
               ],
             },
@@ -323,6 +445,7 @@ export const SCS_C03 = {
       weight: 14,
       color: '#f97316',
       description: 'このドメインでは、インシデント対応計画の策定とテスト、セキュリティイベントへの対応に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to developing and testing an incident response plan and responding to security events.',
       tasks: [
         {
           id: '2.1',
@@ -335,7 +458,21 @@ export const SCS_C03 = {
             '- スキル 2.1.3: インシデント対応計画の有効性のテストと検証のための手順を推奨する (AWS Fault Injection Service、AWS Resilience Hub など)。',
             '- スキル 2.1.4: AWS のサービスを使用してインシデントを自動的に修復する (Systems Manager、Automated Forensics Orchestrator for Amazon EC2、AWS Step Functions、Amazon Application Recovery Controller、Lambda 関数など)。',
           ],
+          descriptionEn: [
+            'Task 2.1: Develop and test an incident response plan.',
+            '- Skill 2.1.1: Develop and implement response plans and runbooks for responding to security incidents (e.g., Systems Manager OpsCenter, Amazon SageMaker AI notebooks).',
+            '- Skill 2.1.2: Use AWS services and features to configure services in preparation for incidents (e.g., provisioning access, deploying security tools, minimizing blast radius, configuring AWS Shield Advanced protection).',
+            '- Skill 2.1.3: Recommend procedures for testing and validating the effectiveness of incident response plans (e.g., AWS Fault Injection Service, AWS Resilience Hub).',
+            '- Skill 2.1.4: Automatically remediate incidents using AWS services (e.g., Systems Manager, Automated Forensics Orchestrator for Amazon EC2, AWS Step Functions, Amazon Application Recovery Controller, Lambda functions).',
+          ],
           knowledge: [
+            'Systems Manager OpsCenter',
+            'AWS Shield Advanced',
+            'AWS Fault Injection Service',
+            'AWS Resilience Hub',
+            'AWS Step Functions',
+          ],
+          knowledgeEn: [
             'Systems Manager OpsCenter',
             'AWS Shield Advanced',
             'AWS Fault Injection Service',
@@ -346,19 +483,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS セキュリティインシデント対応ガイド',
+                  titleEn: 'AWS Security Incident Response Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-security-incident-response-guide/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/welcome.html',
                   note: 'インシデント対応のベストプラクティス',
+                  noteEn: 'Incident response best practices',
                   recommend: true,
                 },
                 {
                   title: 'AWS Shield Advanced ユーザーガイド',
+                  titleEn: 'AWS Shield Advanced User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/shield-chapter.html',
+                  urlEn: 'https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html',
                   note: 'DDoS 保護とインシデント対応',
+                  noteEn: 'DDoS protection and incident response',
                 },
               ],
             },
@@ -376,29 +520,50 @@ export const SCS_C03 = {
             '- スキル 2.2.4: 脅威を封じ込めて根絶することにより、影響を受けたリソースに対応し、リソースを復旧する (ネットワーク封じ込めコントロールの実装、バックアップの復元など)。',
             '- スキル 2.2.5: 根本原因分析を行う方法を説明する (Amazon Detective など)。',
           ],
+          descriptionEn: [
+            'Task 2.2: Respond to security events.',
+            '- Skill 2.2.1: Capture and preserve relevant system and application logs as forensic artifacts.',
+            '- Skill 2.2.2: Search and correlate security event logs across applications and AWS services.',
+            '- Skill 2.2.3: Validate AWS security service findings and assess the scope and impact of events.',
+            '- Skill 2.2.4: Respond to affected resources by containing and eradicating threats and recovering resources (e.g., implementing network containment controls, restoring backups).',
+            '- Skill 2.2.5: Describe methods for performing root cause analysis (e.g., Amazon Detective).',
+          ],
           knowledge: [
             'フォレンジック',
             'Amazon Detective',
             '脅威封じ込め',
             'ネットワーク封じ込めコントロール',
           ],
+          knowledgeEn: [
+            'Forensics',
+            'Amazon Detective',
+            'Threat containment',
+            'Network containment controls',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Detective ユーザーガイド',
+                  titleEn: 'Amazon Detective User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/detective/latest/userguide/what-is-detective.html',
+                  urlEn: 'https://docs.aws.amazon.com/detective/latest/userguide/what-is-detective.html',
                   note: 'セキュリティ検出結果の根本原因分析',
+                  noteEn: 'Root cause analysis for security findings',
                   recommend: true,
                 },
                 {
                   title: 'Amazon GuardDuty ユーザーガイド',
+                  titleEn: 'Amazon GuardDuty User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/guardduty/latest/ug/what-is-guardduty.html',
+                  urlEn: 'https://docs.aws.amazon.com/guardduty/latest/ug/what-is-guardduty.html',
                   note: '脅威検出とイベントの特定',
+                  noteEn: 'Threat detection and event identification',
                 },
               ],
             },
@@ -413,6 +578,7 @@ export const SCS_C03 = {
       weight: 18,
       color: '#22c55e',
       description: 'このドメインでは、ネットワークエッジサービスのセキュリティコントロール、コンピューティングワークロードのセキュリティコントロール、ネットワークセキュリティコントロールの設計・実装・トラブルシューティングに関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to designing, implementing, and troubleshooting security controls for network edge services, compute workloads, and network security controls.',
       tasks: [
         {
           id: '3.1',
@@ -425,7 +591,21 @@ export const SCS_C03 = {
             '- スキル 3.1.3: 要件に基づいて AWS エッジコントロールとルールを設計し、実装する (地理、位置情報、レート制限、クライアントフィンガープリントなど)。',
             '- スキル 3.1.4: AWS エッジサービスとサードパーティーサービスとの統合を設定する [Open Cybersecurity Schema Framework (OCSF) 形式のデータの取り込み、サードパーティーの WAF ルールの使用など]。',
           ],
+          descriptionEn: [
+            'Task 3.1: Design, implement, and troubleshoot security controls for network edge services.',
+            '- Skill 3.1.1: Define and select edge security strategies based on anticipated threats and attacks.',
+            '- Skill 3.1.2: Implement appropriate network edge protections (e.g., CloudFront headers, AWS WAF, AWS IoT policies, OWASP Top 10 threat protection, Amazon S3 cross-origin resource sharing (CORS), Shield Advanced).',
+            '- Skill 3.1.3: Design and implement AWS edge controls and rules based on requirements (e.g., geography, geolocation, rate limiting, client fingerprinting).',
+            '- Skill 3.1.4: Configure integration of AWS edge services with third-party services (e.g., ingesting data in Open Cybersecurity Schema Framework (OCSF) format, using third-party WAF rules).',
+          ],
           knowledge: [
+            'Amazon CloudFront',
+            'AWS WAF',
+            'AWS Shield Advanced',
+            'OWASP Top 10',
+            'OCSF',
+          ],
+          knowledgeEn: [
             'Amazon CloudFront',
             'AWS WAF',
             'AWS Shield Advanced',
@@ -436,13 +616,16 @@ export const SCS_C03 = {
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'Amazon VPC',
+                  titleEn: 'Amazon VPC',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
                   note: 'PDF | Youtube: 2020/10',
+                  noteEn: 'PDF | Youtube: 2020/10',
                   recommend: true,
                 },
               ],
@@ -450,19 +633,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS WAF 開発者ガイド',
+                  titleEn: 'AWS WAF Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/what-is-aws-waf.html',
+                  urlEn: 'https://docs.aws.amazon.com/waf/latest/developerguide/what-is-aws-waf.html',
                   note: 'Web アプリケーションファイアウォールの設定・ルール',
+                  noteEn: 'Web application firewall configuration and rules',
                   recommend: true,
                 },
                 {
                   title: 'AWS Shield Advanced ユーザーガイド',
+                  titleEn: 'AWS Shield Advanced User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/shield-chapter.html',
+                  urlEn: 'https://docs.aws.amazon.com/waf/latest/developerguide/shield-chapter.html',
                   note: 'DDoS 保護の設計・実装',
+                  noteEn: 'DDoS protection design and implementation',
                 },
               ],
             },
@@ -482,7 +672,25 @@ export const SCS_C03 = {
             '- スキル 3.2.6: パイプライン内の脆弱性を検出して修正するためのセキュリティツールを設定する (Amazon Q Developer、Amazon CodeGuru Security など)。',
             '- スキル 3.2.7: 生成 AI アプリケーションの保護とガードレールを実装する (GenAI OWASP Top 10 for LLM Applications 保護の適用など)。',
           ],
+          descriptionEn: [
+            'Task 3.2: Design, implement, and troubleshoot security controls for compute workloads.',
+            '- Skill 3.2.1: Design and implement hardened Amazon EC2 AMIs and container images to protect compute workloads and incorporate security controls (e.g., Systems Manager, EC2 Image Builder).',
+            '- Skill 3.2.2: Appropriately apply instance profiles, service roles, and execution roles to authorize compute workloads.',
+            '- Skill 3.2.3: Scan compute resources for known vulnerabilities (e.g., scanning container images and Lambda functions with Amazon Inspector, monitoring compute runtimes with GuardDuty).',
+            '- Skill 3.2.4: Deploy patches across compute resources by automating update processes and integrating continuous validation to maintain secure, compliant environments (e.g., Systems Manager Patch Manager, Amazon Inspector).',
+            '- Skill 3.2.5: Configure secure administrative access to compute resources (e.g., Systems Manager Session Manager, EC2 Instance Connect).',
+            '- Skill 3.2.6: Configure security tools to detect and remediate vulnerabilities in pipelines (e.g., Amazon Q Developer, Amazon CodeGuru Security).',
+            '- Skill 3.2.7: Implement protections and guardrails for generative AI applications (e.g., applying GenAI OWASP Top 10 for LLM Applications protections).',
+          ],
           knowledge: [
+            'EC2 Image Builder',
+            'Amazon Inspector',
+            'Systems Manager Patch Manager',
+            'Session Manager',
+            'Amazon Q Developer',
+            'Amazon GuardDuty',
+          ],
+          knowledgeEn: [
             'EC2 Image Builder',
             'Amazon Inspector',
             'Systems Manager Patch Manager',
@@ -494,19 +702,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Inspector ユーザーガイド',
+                  titleEn: 'Amazon Inspector User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/inspector/latest/user/what-is-inspector.html',
+                  urlEn: 'https://docs.aws.amazon.com/inspector/latest/user/what-is-inspector.html',
                   note: '脆弱性スキャン（EC2・コンテナ・ Lambda）',
+                  noteEn: 'Vulnerability scanning (EC2, containers, Lambda)',
                   recommend: true,
                 },
                 {
                   title: 'AWS Systems Manager Patch Manager',
+                  titleEn: 'AWS Systems Manager Patch Manager',
                   url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/patch-manager.html',
+                  urlEn: 'https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html',
                   note: 'パッチ管理の自動化',
+                  noteEn: 'Automated patch management',
                 },
               ],
             },
@@ -524,9 +739,26 @@ export const SCS_C03 = {
             '- スキル 3.3.4: セキュリティ要件に基づいてネットワークセグメンテーションを設計する (north-south と east-west のトラフィック保護、分離されたサブネットなど)。',
             '- スキル 3.3.5: 不必要なネットワークアクセスを特定する (AWS Verified Access、Network Access Analyzer、Amazon Inspector のネットワーク到達可能性の検出結果など)。',
           ],
+          descriptionEn: [
+            'Task 3.3: Design and troubleshoot network security controls.',
+            '- Skill 3.3.1: Design and troubleshoot appropriate network controls to allow or deny network traffic as required (e.g., security groups, network ACLs, AWS Network Firewall).',
+            '- Skill 3.3.2: Design secure connectivity between hybrid networks and multi-cloud networks (e.g., AWS Site-to-Site VPN, AWS Direct Connect, MAC Security (MACsec)).',
+            '- Skill 3.3.3: Determine and configure security workload requirements for communication between hybrid environments and AWS (e.g., using AWS Verified Access).',
+            '- Skill 3.3.4: Design network segmentation based on security requirements (e.g., north-south and east-west traffic protection, isolated subnets).',
+            '- Skill 3.3.5: Identify unnecessary network access (e.g., AWS Verified Access, Network Access Analyzer, Amazon Inspector network reachability findings).',
+          ],
           knowledge: [
             'セキュリティグループ',
             'ネットワーク ACL',
+            'AWS Network Firewall',
+            'AWS Site-to-Site VPN',
+            'AWS Direct Connect',
+            'AWS Verified Access',
+            'Network Access Analyzer',
+          ],
+          knowledgeEn: [
+            'Security groups',
+            'Network ACLs',
             'AWS Network Firewall',
             'AWS Site-to-Site VPN',
             'AWS Direct Connect',
@@ -537,19 +769,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon VPC ユーザーガイド',
+                  titleEn: 'Amazon VPC User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/what-is-amazon-vpc.html',
+                  urlEn: 'https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html',
                   note: 'ネットワークセグメンテーション・セキュリティグループ・ ACL',
+                  noteEn: 'Network segmentation, security groups, and ACLs',
                   recommend: true,
                 },
                 {
                   title: 'AWS Network Firewall 開発者ガイド',
+                  titleEn: 'AWS Network Firewall Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/network-firewall/latest/developerguide/what-is-aws-network-firewall.html',
+                  urlEn: 'https://docs.aws.amazon.com/network-firewall/latest/developerguide/what-is-aws-network-firewall.html',
                   note: 'VPC レベルのファイアウォールルール',
+                  noteEn: 'VPC-level firewall rules',
                 },
               ],
             },
@@ -564,6 +803,7 @@ export const SCS_C03 = {
       weight: 20,
       color: '#a855f7',
       description: 'このドメインでは、認証戦略と認可戦略の設計・実装・トラブルシューティングに関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to designing, implementing, and troubleshooting authentication and authorization strategies.',
       tasks: [
         {
           id: '4.1',
@@ -575,8 +815,21 @@ export const SCS_C03 = {
             '- スキル 4.1.2: 一時的な認証情報を発行するためのメカニズムを設定する [AWS Security Token Service (AWS STS)、Amazon S3 署名付き URL など]。',
             '- スキル 4.1.3: 認証に関する問題をトラブルシューティングする (CloudTrail、Amazon Cognito、IAM アイデンティティセンターのアクセス許可セット、AWS Directory Service など)。',
           ],
+          descriptionEn: [
+            'Task 4.1: Design, implement, and troubleshoot authentication strategies.',
+            '- Skill 4.1.1: Design and establish identity solutions for human, application, and system authentication (e.g., AWS IAM Identity Center, Amazon Cognito, multi-factor authentication (MFA), identity provider (IdP) integration).',
+            '- Skill 4.1.2: Configure mechanisms for issuing temporary credentials (e.g., AWS Security Token Service (AWS STS), Amazon S3 presigned URLs).',
+            '- Skill 4.1.3: Troubleshoot authentication issues (e.g., CloudTrail, Amazon Cognito, IAM Identity Center permission sets, AWS Directory Service).',
+          ],
           knowledge: [
             'AWS IAM アイデンティティセンター',
+            'Amazon Cognito',
+            'MFA',
+            'AWS STS',
+            'AWS Directory Service',
+          ],
+          knowledgeEn: [
+            'AWS IAM Identity Center',
             'Amazon Cognito',
             'MFA',
             'AWS STS',
@@ -586,24 +839,34 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS IAM Identity Center ユーザーガイド',
+                  titleEn: 'AWS IAM Identity Center User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/singlesignon/latest/userguide/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/singlesignon/latest/userguide/what-is.html',
                   note: 'マルチアカウントの ID フェデレーション',
+                  noteEn: 'Multi-account identity federation',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Cognito 開発者ガイド',
+                  titleEn: 'Amazon Cognito Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/what-is-amazon-cognito.html',
+                  urlEn: 'https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html',
                   note: 'アプリケーションの認証・ユーザー管理',
+                  noteEn: 'Application authentication and user management',
                 },
                 {
                   title: 'IAM ポリシーの評価ロジック',
+                  titleEn: 'IAM Policy Evaluation Logic',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/reference_policies_evaluation-logic.html',
+                  urlEn: 'https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_policies_evaluation-logic.html',
                   note: 'ポリシー評価の仕組みを理解（Specialty必須）',
+                  noteEn: 'Understanding policy evaluation logic (essential for Specialty)',
                   recommend: true,
                 },
               ],
@@ -622,7 +885,23 @@ export const SCS_C03 = {
             '- スキル 4.2.4: 認可障害を分析して原因または影響を判断する (IAM Policy Simulator、IAM Access Analyzer など)。',
             '- スキル 4.2.5: リソース、サービス、またはエンティティに付与された、意図しないアクセス許可、認可、または権限を調査し、修正する (IAM Access Analyzer など)。',
           ],
+          descriptionEn: [
+            'Task 4.2: Design, implement, and troubleshoot authorization strategies.',
+            '- Skill 4.2.1: Design and evaluate authorization controls for human, application, and system access (e.g., Amazon Verified Permissions, IAM paths, IAM Roles Anywhere, resource policies for cross-account access, IAM role trust policies).',
+            '- Skill 4.2.2: Design attribute-based access control (ABAC) and role-based access control (RBAC) strategies (e.g., configuring resource access based on tags or attributes).',
+            '- Skill 4.2.3: Design, interpret, and implement IAM policies following the principle of least privilege (e.g., permissions boundaries, session policies).',
+            '- Skill 4.2.4: Analyze authorization failures to determine causes or impacts (e.g., IAM Policy Simulator, IAM Access Analyzer).',
+            '- Skill 4.2.5: Investigate and remediate unintended permissions, authorization, or privileges granted to resources, services, or entities (e.g., IAM Access Analyzer).',
+          ],
           knowledge: [
+            'Amazon Verified Permissions',
+            'IAM Roles Anywhere',
+            'ABAC',
+            'RBAC',
+            'IAM Policy Simulator',
+            'IAM Access Analyzer',
+          ],
+          knowledgeEn: [
             'Amazon Verified Permissions',
             'IAM Roles Anywhere',
             'ABAC',
@@ -634,19 +913,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'IAM でのセキュリティのベストプラクティス',
+                  titleEn: 'Security Best Practices in IAM',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html',
+                  urlEn: 'https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html',
                   note: '最小権限・ ABAC/RBAC のベストプラクティス',
+                  noteEn: 'Least privilege and ABAC/RBAC best practices',
                   recommend: true,
                 },
                 {
                   title: 'IAM Access Analyzer ユーザーガイド',
+                  titleEn: 'IAM Access Analyzer User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/what-is-access-analyzer.html',
+                  urlEn: 'https://docs.aws.amazon.com/IAM/latest/UserGuide/what-is-access-analyzer.html',
                   note: 'アクセス許可の分析・検証',
+                  noteEn: 'Access permissions analysis and validation',
                 },
               ],
             },
@@ -661,6 +947,7 @@ export const SCS_C03 = {
       weight: 18,
       color: '#ef4444',
       description: 'このドメインでは、転送中のデータのコントロール、保管中のデータのコントロール、機密データ・認証情報・シークレット・暗号化キーマテリアルの保護に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to controls for data in transit, controls for data at rest, and protecting sensitive data, credentials, secrets, and cryptographic key material.',
       tasks: [
         {
           id: '5.1',
@@ -672,6 +959,12 @@ export const SCS_C03 = {
             '- スキル 5.1.2: リソースへのセキュアなプライベートアクセスのためのメカニズムを設計し、設定する (AWS PrivateLink、VPC エンドポイント、AWS Client VPN、AWS Verified Access など)。',
             '- スキル 5.1.3: 転送中のリソース間暗号化を設計し、設定する [Amazon EMR、Amazon Elastic Kubernetes Service (Amazon EKS)、SageMaker AI、Nitro 暗号化のためのノード間暗号化設定など]。',
           ],
+          descriptionEn: [
+            'Task 5.1: Design and implement controls for data in transit.',
+            '- Skill 5.1.1: Design and configure mechanisms to enforce encryption when connecting to resources (e.g., configuring Elastic Load Balancing (ELB) security policies, enforcing TLS settings).',
+            '- Skill 5.1.2: Design and configure mechanisms for secure private access to resources (e.g., AWS PrivateLink, VPC endpoints, AWS Client VPN, AWS Verified Access).',
+            '- Skill 5.1.3: Design and configure inter-resource encryption in transit (e.g., node-to-node encryption settings for Amazon EMR, Amazon Elastic Kubernetes Service (Amazon EKS), SageMaker AI, Nitro encryption).',
+          ],
           knowledge: [
             'ELB セキュリティポリシー',
             'TLS',
@@ -679,17 +972,27 @@ export const SCS_C03 = {
             'VPC エンドポイント',
             'AWS Client VPN',
           ],
+          knowledgeEn: [
+            'ELB security policies',
+            'TLS',
+            'AWS PrivateLink',
+            'VPC endpoints',
+            'AWS Client VPN',
+          ],
           resources: [
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS Key Management Service Part.2 発展編',
+                  titleEn: 'AWS Key Management Service Part.2 Advanced',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
                   note: 'PDF | Youtube: 2024/04',
+                  noteEn: 'PDF | Youtube: 2024/04',
                   recommend: true,
                 },
               ],
@@ -697,19 +1000,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Certificate Manager ユーザーガイド',
+                  titleEn: 'AWS Certificate Manager User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/acm/latest/userguide/acm-overview.html',
+                  urlEn: 'https://docs.aws.amazon.com/acm/latest/userguide/acm-overview.html',
                   note: 'SSL/TLS 証明書の管理・プロビジョニング',
+                  noteEn: 'SSL/TLS certificate management and provisioning',
                   recommend: true,
                 },
                 {
                   title: 'AWS PrivateLink ユーザーガイド',
+                  titleEn: 'AWS PrivateLink User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/what-is-privatelink.html',
+                  urlEn: 'https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html',
                   note: 'プライベート接続によるデータ保護',
+                  noteEn: 'Data protection through private connectivity',
                 },
               ],
             },
@@ -726,7 +1036,22 @@ export const SCS_C03 = {
             '- スキル 5.2.3: データの自動ライフサイクル管理および保持ソリューションを設計する [S3 ライフサイクルポリシー、S3 Object Lock、Amazon Elastic File System (Amazon EFS) ライフサイクルポリシー、Amazon FSx for Lustre バックアップポリシーなど]。',
             '- スキル 5.2.4: セキュアなデータレプリケーションおよびバックアップソリューションを設計し、設定する (Amazon Data Lifecycle Manager、AWS Backup、ランサムウェア対策、AWS DataSync など)。',
           ],
+          descriptionEn: [
+            'Task 5.2: Design and implement controls for data at rest.',
+            '- Skill 5.2.1: Design, implement, and configure data-at-rest encryption based on specific requirements (e.g., selecting appropriate encryption key services such as AWS CloudHSM or AWS Key Management Service (AWS KMS), selecting appropriate encryption types such as client-side or server-side encryption).',
+            '- Skill 5.2.2: Design and configure mechanisms to ensure data integrity (e.g., S3 Object Lock, S3 Glacier Vault Lock, versioning, digital code signing, file validation).',
+            '- Skill 5.2.3: Design automated data lifecycle management and retention solutions (e.g., S3 lifecycle policies, S3 Object Lock, Amazon Elastic File System (Amazon EFS) lifecycle policies, Amazon FSx for Lustre backup policies).',
+            '- Skill 5.2.4: Design and configure secure data replication and backup solutions (e.g., Amazon Data Lifecycle Manager, AWS Backup, ransomware protection, AWS DataSync).',
+          ],
           knowledge: [
+            'AWS CloudHSM',
+            'AWS KMS',
+            'S3 Object Lock',
+            'S3 Glacier Vault Lock',
+            'AWS Backup',
+            'AWS DataSync',
+          ],
+          knowledgeEn: [
             'AWS CloudHSM',
             'AWS KMS',
             'S3 Object Lock',
@@ -738,19 +1063,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS KMS 開発者ガイド',
+                  titleEn: 'AWS KMS Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/kms/latest/developerguide/overview.html',
+                  urlEn: 'https://docs.aws.amazon.com/kms/latest/developerguide/overview.html',
                   note: '保管中のデータの暗号化キー管理',
+                  noteEn: 'Encryption key management for data at rest',
                   recommend: true,
                 },
                 {
                   title: 'AWS CloudHSM ユーザーガイド',
+                  titleEn: 'AWS CloudHSM User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/cloudhsm/latest/userguide/introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/cloudhsm/latest/userguide/introduction.html',
                   note: 'ハードウェアセキュリティモジュールによるキー管理',
+                  noteEn: 'Key management with hardware security modules',
                 },
               ],
             },
@@ -768,29 +1100,50 @@ export const SCS_C03 = {
             '- スキル 5.3.4: 機密データをマスクする [CloudWatch Logs データ保護ポリシー、Amazon Simple Notification Service (Amazon SNS) メッセージデータ保護など]。',
             '- スキル 5.3.5: 単一の AWS リージョンまたは複数のリージョンにわたる暗号化キーと証明書を作成し、管理する (AWS KMS カスタマーマネージド AWS KMS キー、AWS Private Certificate Authority など)。',
           ],
+          descriptionEn: [
+            'Task 5.3: Design and implement controls to protect sensitive data, credentials, secrets, and cryptographic key material.',
+            '- Skill 5.3.1: Design management and rotation of credentials and secrets (e.g., AWS Secrets Manager).',
+            '- Skill 5.3.2: Manage and use imported key material (e.g., managing and rotating imported key material, managing and configuring external key stores).',
+            '- Skill 5.3.3: Describe the differences between imported key material and AWS-generated key material.',
+            '- Skill 5.3.4: Mask sensitive data (e.g., CloudWatch Logs data protection policies, Amazon Simple Notification Service (Amazon SNS) message data protection).',
+            '- Skill 5.3.5: Create and manage encryption keys and certificates across single or multiple AWS Regions (e.g., AWS KMS customer managed keys, AWS Private Certificate Authority).',
+          ],
           knowledge: [
             'AWS Secrets Manager',
             'キーマテリアル',
             '外部キーストア',
             'AWS Private Certificate Authority',
           ],
+          knowledgeEn: [
+            'AWS Secrets Manager',
+            'Key material',
+            'External key stores',
+            'AWS Private Certificate Authority',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Secrets Manager ユーザーガイド',
+                  titleEn: 'AWS Secrets Manager User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/secretsmanager/latest/userguide/intro.html',
+                  urlEn: 'https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html',
                   note: 'シークレットの管理と自動ローテーション',
+                  noteEn: 'Secret management and automatic rotation',
                   recommend: true,
                 },
                 {
                   title: 'AWS KMS 開発者ガイド — キーマテリアルのインポート',
+                  titleEn: 'AWS KMS Developer Guide — Importing Key Material',
                   url: 'https://docs.aws.amazon.com/ja_jp/kms/latest/developerguide/importing-keys.html',
+                  urlEn: 'https://docs.aws.amazon.com/kms/latest/developerguide/importing-keys.html',
                   note: 'キーマテリアルのインポートと管理',
+                  noteEn: 'Importing and managing key material',
                 },
               ],
             },
@@ -805,6 +1158,7 @@ export const SCS_C03 = {
       weight: 14,
       color: '#06b6d4',
       description: 'このドメインでは、AWS アカウントの一元的なデプロイと管理、クラウドリソースのためのセキュアで一貫したデプロイ戦略、AWS リソースのコンプライアンス評価に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to centrally deploying and managing AWS accounts, implementing a secure and consistent deployment strategy for cloud resources, and evaluating the compliance of AWS resources.',
       tasks: [
         {
           id: '6.1',
@@ -818,6 +1172,14 @@ export const SCS_C03 = {
             '- スキル 6.1.4: セキュリティサービスを一元管理する (委任管理者アカウントなど)。',
             '- スキル 6.1.5: AWS アカウントのルートユーザー認証情報を管理する (メンバーアカウントのルートアクセスの一元化、MFA の管理、ブレークグラス手順の設計など)。',
           ],
+          descriptionEn: [
+            'Task 6.1: Develop a strategy for centrally deploying and managing AWS accounts.',
+            '- Skill 6.1.1: Deploy and configure organizations using AWS Organizations.',
+            '- Skill 6.1.2: Implement and manage AWS Control Tower in new and existing environments and deploy optional custom controls.',
+            '- Skill 6.1.3: Implement organizational policies to manage permissions (e.g., SCPs, RCPs, AI service opt-out policies, declarative policies).',
+            '- Skill 6.1.4: Centrally manage security services (e.g., delegated administrator accounts).',
+            '- Skill 6.1.5: Manage AWS account root user credentials (e.g., centralizing root access for member accounts, managing MFA, designing break-glass procedures).',
+          ],
           knowledge: [
             'AWS Organizations',
             'AWS Control Tower',
@@ -825,28 +1187,44 @@ export const SCS_C03 = {
             'RCP',
             '委任管理者アカウント',
           ],
+          knowledgeEn: [
+            'AWS Organizations',
+            'AWS Control Tower',
+            'SCP',
+            'RCP',
+            'Delegated administrator accounts',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Organizations ユーザーガイド',
+                  titleEn: 'AWS Organizations User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/organizations/latest/userguide/orgs_introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/organizations/latest/userguide/orgs_introduction.html',
                   note: 'マルチアカウントの一元管理と SCP',
+                  noteEn: 'Multi-account centralized management and SCPs',
                   recommend: true,
                 },
                 {
                   title: 'AWS Control Tower ユーザーガイド',
+                  titleEn: 'AWS Control Tower User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/controltower/latest/userguide/what-is-control-tower.html',
+                  urlEn: 'https://docs.aws.amazon.com/controltower/latest/userguide/what-is-control-tower.html',
                   note: 'マルチアカウントのガバナンス・コントロール',
+                  noteEn: 'Multi-account governance and controls',
                 },
                 {
                   title: 'AWS Security Reference Architecture',
+                  titleEn: 'AWS Security Reference Architecture',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
                   note: 'Prescriptive Guidance: マルチアカウントセキュリティ設計',
+                  noteEn: 'Prescriptive Guidance: Multi-account security design',
                   recommend: true,
                 },
               ],
@@ -864,7 +1242,21 @@ export const SCS_C03 = {
             '- スキル 6.2.3: 中央のソースからポリシーと設定をデプロイし、強制適用する (AWS Firewall Manager など)。',
             '- スキル 6.2.4: AWS アカウント間でリソースをセキュアな方法で共有する [AWS Service Catalog、AWS Resource Access Manager (AWS RAM) など]。',
           ],
+          descriptionEn: [
+            'Task 6.2: Implement a secure and consistent deployment strategy for cloud resources.',
+            '- Skill 6.2.1: Use Infrastructure as Code to deploy cloud resources in a consistent, secure manner across accounts (e.g., CloudFormation stack sets, third-party IaC tools, CloudFormation Guard, cfn-lint).',
+            '- Skill 6.2.2: Organize AWS resources into management groups using tags (e.g., grouping by department, cost center, environment).',
+            '- Skill 6.2.3: Deploy and enforce policies and configurations from a central source (e.g., AWS Firewall Manager).',
+            '- Skill 6.2.4: Securely share resources across AWS accounts (e.g., AWS Service Catalog, AWS Resource Access Manager (AWS RAM)).',
+          ],
           knowledge: [
+            'CloudFormation',
+            'CloudFormation Guard',
+            'AWS Firewall Manager',
+            'AWS Service Catalog',
+            'AWS RAM',
+          ],
+          knowledgeEn: [
             'CloudFormation',
             'CloudFormation Guard',
             'AWS Firewall Manager',
@@ -875,19 +1267,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS CloudFormation ユーザーガイド',
+                  titleEn: 'AWS CloudFormation User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/Welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html',
                   note: 'IaC によるセキュアなリソースデプロイ',
+                  noteEn: 'Secure resource deployment with IaC',
                   recommend: true,
                 },
                 {
                   title: 'AWS Firewall Manager ユーザーガイド',
+                  titleEn: 'AWS Firewall Manager User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/waf/latest/developerguide/fms-chapter.html',
+                  urlEn: 'https://docs.aws.amazon.com/waf/latest/developerguide/fms-chapter.html',
                   note: 'マルチアカウントのファイアウォールポリシー一元管理',
+                  noteEn: 'Centralized firewall policy management across accounts',
                 },
               ],
             },
@@ -903,7 +1302,20 @@ export const SCS_C03 = {
             '- スキル 6.3.2: AWS 監査サービスを使用してエビデンスを収集し、整理する (AWS Audit Manager、AWS Artifact など)。',
             '- スキル 6.3.3: AWS のサービスを使用して、アーキテクチャが AWS セキュリティのベストプラクティスに準拠しているかどうかを評価する (AWS Well-Architected フレームワークツールなど)。',
           ],
+          descriptionEn: [
+            'Task 6.3: Evaluate the compliance of AWS resources.',
+            '- Skill 6.3.1: Create or enable rules to detect and remediate non-compliant AWS resources and send notifications (e.g., aggregating alerts and remediating non-compliant resources using AWS Config, Security Hub).',
+            '- Skill 6.3.2: Collect and organize evidence using AWS audit services (e.g., AWS Audit Manager, AWS Artifact).',
+            '- Skill 6.3.3: Evaluate whether architectures comply with AWS security best practices using AWS services (e.g., AWS Well-Architected Framework Tool).',
+          ],
           knowledge: [
+            'AWS Config',
+            'AWS Security Hub',
+            'AWS Audit Manager',
+            'AWS Artifact',
+            'AWS Well-Architected',
+          ],
+          knowledgeEn: [
             'AWS Config',
             'AWS Security Hub',
             'AWS Audit Manager',
@@ -914,19 +1326,26 @@ export const SCS_C03 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Config 開発者ガイド',
+                  titleEn: 'AWS Config Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/config/latest/developerguide/WhatIsConfig.html',
+                  urlEn: 'https://docs.aws.amazon.com/config/latest/developerguide/WhatIsConfig.html',
                   note: 'コンプライアンスルールの設定・自動修復',
+                  noteEn: 'Compliance rule configuration and automatic remediation',
                   recommend: true,
                 },
                 {
                   title: 'AWS Audit Manager ユーザーガイド',
+                  titleEn: 'AWS Audit Manager User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/audit-manager/latest/userguide/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html',
                   note: '監査エビデンスの収集・管理',
+                  noteEn: 'Audit evidence collection and management',
                 },
               ],
             },
