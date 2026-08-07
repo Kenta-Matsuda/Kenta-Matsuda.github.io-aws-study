@@ -830,21 +830,6 @@
         #examSidebar.open {
             transform: translateX(0);
         }
-        @media (min-width: 1024px) {
-            #examSidebar {
-                position: sticky;
-                top: 0;
-                height: 100vh;
-                flex-shrink: 0;
-            }
-            body {
-                display: flex;
-                flex-direction: column;
-            }
-            body > .flex-grow {
-                display: flex;
-            }
-        }
         .exam-sidebar-category {
             margin-bottom: 0.5rem;
         }
@@ -946,8 +931,8 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between gap-4">
                 <div class="flex items-center gap-3">
-                    <!-- Sidebar toggle (mobile) -->
-                    <button id="sidebarToggleBtn" type="button" class="lg:hidden bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2 transition" aria-label="Toggle sidebar">
+                    <!-- Sidebar toggle -->
+                    <button id="sidebarToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2 transition" aria-label="Toggle sidebar">
                         <i class="fas fa-bars text-lg"></i>
                     </button>
                     <div>
@@ -976,10 +961,10 @@
         <i id="themeToggleIcon"></i>
     </div>
 
-    <!-- Exam Sidebar (responsive) -->
-    <aside id="examSidebar" class="fixed inset-y-0 left-0 z-40 w-64 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto lg:z-auto transition-transform duration-200 ease-in-out bg-white border-r border-gray-200 shadow-lg lg:shadow-none overflow-y-auto" style="top: 0;">
+    <!-- Exam Sidebar (overlay on all screen sizes) -->
+    <aside id="examSidebar" class="fixed inset-y-0 left-0 z-40 w-64 transform -translate-x-full transition-transform duration-200 ease-in-out bg-white border-r border-gray-200 shadow-lg overflow-y-auto" style="top: 0;">
         <div class="p-4">
-            <div class="flex items-center justify-between mb-4 lg:hidden">
+            <div class="flex items-center justify-between mb-4">
                 <span class="text-sm font-bold text-gray-700" data-i18n="sidebar.title">Select Exam</span>
                 <button id="sidebarCloseBtn" type="button" class="text-gray-400 hover:text-gray-600 p-1">
                     <i class="fas fa-times"></i>
@@ -990,8 +975,8 @@
             </div>
         </div>
     </aside>
-    <!-- Sidebar backdrop (mobile) -->
-    <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
+    <!-- Sidebar backdrop -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
 
     <!-- Main Content Grid -->
     <main class="flex-grow container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
