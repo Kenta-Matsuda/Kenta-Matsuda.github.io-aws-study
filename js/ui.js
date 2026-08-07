@@ -3255,9 +3255,19 @@ function wireThemeSwitch(els) {
   if (!els.themeToggleBtn) return;
 
   // Cycle through: light → dark → system → light ...
+  // Skip states that produce the same visual result as the current effective theme
   els.themeToggleBtn.addEventListener('click', () => {
     const current = getTheme();
-    const next = current === 'light' ? 'dark' : current === 'dark' ? 'system' : 'light';
+    const effectiveBefore = getEffectiveTheme();
+    let next;
+    if (current === 'light') {
+      next = 'dark';
+    } else if (current === 'dark') {
+      next = 'system';
+    } else {
+      // 'system' — skip to the opposite of what system currently shows
+      next = effectiveBefore === 'dark' ? 'light' : 'dark';
+    }
     setTheme(next);
     applyTheme();
     reflectThemeToggleIcon(els);
