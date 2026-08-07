@@ -45,6 +45,7 @@ import {
   formatTime,
 } from './quiz.js';
 import { initChat, resetChat } from './chat.js';
+import { t, getLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 
 let chartInstance = null;
 
@@ -592,7 +593,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // If we couldn't generate enough, adjust session
     if (generated.length === 0) {
-      updateAiModalContent(els, 'エラー: 問題を生成できませんでした。もう一度お試しください。');
+      updateAiModalContent(els, t('errors.cannotGenerate'));
       return;
     }
     session.questionCount = generated.length;
@@ -955,8 +956,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.quizResultIcon) els.quizResultIcon.textContent = isCorrect ? '✅' : '❌';
     if (els.quizResultText) {
       els.quizResultText.textContent = isCorrect
-        ? `正解！ ${getComboLabel(result.combo)}`
-        : `不正解 — 正解は ${indexToLetter(quiz.correctIndex)}`;
+        ? t('quiz.correctFeedback', { combo: getComboLabel(result.combo) })
+        : t('quiz.incorrectFeedback', { letter: indexToLetter(quiz.correctIndex) });
       els.quizResultText.className = isCorrect
         ? 'font-bold text-sm text-green-800'
         : 'font-bold text-sm text-red-800';
@@ -1071,9 +1072,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     const ok = await copyTextToClipboard(text);
     if (ok) {
-      flashAiCopyButton(els, 'コピーしました');
+      flashAiCopyButton(els, t('common.copied'));
     } else {
-      flashAiCopyButton(els, 'コピー失敗');
+      flashAiCopyButton(els, t('common.copyFailed'));
     }
   });
 
@@ -1105,6 +1106,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   // Boot marker for non-JS/module failure detection
   window.__APP_READY__ = true;
+
+  // Re-render dashboard when locale changes
+  onLocaleChange(() => {
+    translateStaticElements();
+    const exam = getExamById(state.examId);
+    renderXpDashboard({ els, exam, state });
+    renderContent({ els, exam, state });
+  });
 
   function setExam(examId) {
     const exam = getExamById(examId);
@@ -1416,9 +1425,9 @@ function setAiCopyButtonLabel(els, label) {
   if (!els.aiCopyBtn) return;
   const span = els.aiCopyBtn.querySelector('[data-ai-copy-label]');
   if (span) {
-    span.textContent = String(label ?? 'コピー');
+    span.textContent = String(label ?? t('common.copy'));
   } else {
-    els.aiCopyBtn.textContent = String(label ?? 'コピー');
+    els.aiCopyBtn.textContent = String(label ?? t('common.copy'));
   }
 }
 
@@ -1432,7 +1441,7 @@ function clearAiCopyFlashTimer(els) {
 
 function resetAiCopyButton(els) {
   clearAiCopyFlashTimer(els);
-  setAiCopyButtonLabel(els, 'コピー');
+  setAiCopyButtonLabel(els, t('common.copy'));
   setAiCopyButtonEnabled(els, false);
 }
 
@@ -1441,7 +1450,7 @@ function flashAiCopyButton(els, message, ms = 1400) {
   clearAiCopyFlashTimer(els);
   setAiCopyButtonLabel(els, message);
   els.aiCopyBtn.__aiCopyTimer = setTimeout(() => {
-    setAiCopyButtonLabel(els, 'コピー');
+    setAiCopyButtonLabel(els, t('common.copy'));
     els.aiCopyBtn.__aiCopyTimer = null;
   }, ms);
 }
@@ -1527,9 +1536,7 @@ function wireGlobalUiHandlers({ els }) {
   wireAiProviderSwitch(els);
 
   els.resetLocalBtn?.addEventListener('click', () => {
-    const ok = window.confirm(
-      'この端末に保存されている学習データ（ユーザー名・XP・称号）とAPIキーを初期化します。\n続行しますか？',
-    );
+    const ok = window.confirm(t('settings.resetConfirm'));
     if (!ok) return;
     resetAppStorage();
     closeModal(els.settingsModal);
@@ -1586,11 +1593,11 @@ function wireProfileHandlers({ els, state, getExamById }) {
   const saveFromModal = () => {
     const name = String(els.userNameInput.value || '').trim();
     if (!name) {
-      showInlineMessage(els.userMessage, 'ユーザー名を入力してください。', 'text-red-600');
+      showInlineMessage(els.userMessage, t('userModal.validationEmpty'), 'text-red-600');
       return;
     }
     if (name.length > 30) {
-      showInlineMessage(els.userMessage, 'ユーザー名は30文字以内にしてください。', 'text-red-600');
+      showInlineMessage(els.userMessage, t('userModal.validationLength'), 'text-red-600');
       return;
     }
 
@@ -1665,17 +1672,12 @@ function showInlineMessage(messageEl, text, colorClass) {
 }
 
 function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
-  const name = String(userName || '名無し');
+  const name = String(userName || (getLocale() === 'ja' ? '名無し' : 'Anonymous'));
   const code = String(examCode || '');
-  const t = String(title || '');
   const total = Number(totalXp || 0);
   const week = Number(weekXp || 0);
-  return [
-    `${name} のAWS学習ログ` + (code ? `（${code}を勉強中）` : ''),
-    `称号：${t}`,
-    `累積XP：${total}（今週+${week}）`,
-    '完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！ #AWS #AWS合格ナビゲーター',
-  ].filter(Boolean).join('\n');
+  const tpl = t('tweet.template', { name, code, title: String(title || ''), total, week });
+  return [tpl, t('tweet.cta') + ' ' + t('tweet.hashtag')].filter(Boolean).join('\n');
 }
 
 function buildTweetIntentUrl({ text, url }) {
@@ -1691,7 +1693,8 @@ function showMilestoneToast({ els, unlocked }) {
   if (!els.milestoneToast || !els.milestoneToastText) return;
   const latest = unlocked?.[unlocked.length - 1];
   if (!latest) return;
-  els.milestoneToastText.textContent = `「${latest.title}」を解放（${latest.xp} XP）`;
+  const localTitle = t(`milestones.${latest.id}`) !== `milestones.${latest.id}` ? t(`milestones.${latest.id}`) : latest.title;
+  els.milestoneToastText.textContent = t('milestones.toastText', { title: localTitle, xp: latest.xp });
   els.milestoneToast.classList.remove('hidden');
   window.clearTimeout?.(els.__milestoneToastTimer);
   els.__milestoneToastTimer = window.setTimeout(() => {
@@ -1823,19 +1826,18 @@ function renderStreakDisplay(els) {
   if (els.streakMessage) {
     if (streak.hadActivityToday) {
       els.streakMessage.textContent = streak.current >= 7
-        ? '素晴らしい！1週間連続学習達成 🎉'
+        ? t('dashboard.streak.weekAchieved')
         : streak.current >= 3
-          ? `${streak.current}日連続！この調子で続けよう 💪`
-          : '今日もがんばってるね！';
+          ? t('dashboard.streak.ongoing', { count: streak.current })
+          : t('dashboard.streak.todayActive');
     } else {
       els.streakMessage.textContent = streak.current > 0
-        ? '今日もアクセスしてストリークを守ろう！'
-        : '今日から連続学習をスタートしよう！';
+        ? t('dashboard.streak.atRisk')
+        : t('dashboard.streak.startNew');
     }
   }
   if (els.streakWeekDots) {
-    // Render 7 dots: newest (today) on the right
-    const days = ['月', '火', '水', '木', '金', '土', '日'];
+    const days = [t('days.mon'), t('days.tue'), t('days.wed'), t('days.thu'), t('days.fri'), t('days.sat'), t('days.sun')];
     const today = new Date().getDay(); // 0=Sun
     const dayLabels = [];
     for (let i = 6; i >= 0; i--) {
@@ -1990,7 +1992,7 @@ function renderSkillRadarChart({ els, exam, state }) {
 function renderRecentXpActionsHtml(actions) {
   const list = Array.isArray(actions) ? actions : [];
   if (!list.length) {
-    return '<div class="text-gray-400">まだ獲得履歴がありません</div>';
+    return `<div class="text-gray-400">${t('xpActions.noHistory')}</div>`;
   }
 
   const rows = list
@@ -2003,12 +2005,12 @@ function renderRecentXpActionsHtml(actions) {
 
       const label =
         reason === 'link'
-          ? 'URL遷移'
+          ? t('xpActions.link')
           : reason === 'explain'
-            ? 'AI解説'
+            ? t('xpActions.explain')
             : reason === 'quiz'
-              ? 'AI作問'
-              : reason || 'XP';
+              ? t('xpActions.quiz')
+              : reason || t('xpActions.xp');
 
       let timeText = '';
       try {
@@ -2064,19 +2066,29 @@ function buildDashboardHeadline({ userName }) {
   const daySeed = now.toISOString().slice(0, 10);
   const baseSeed = `${daySeed}|${name || 'anon'}`;
 
-  const greetingCandidates =
-    hour < 5
-      ? ['こんばんは。', 'おつかれさまです。', '夜遅くまでおつかれさまです。']
+  let greet;
+  if (getLocale() === 'ja') {
+    const greetingCandidates =
+      hour < 5
+        ? ['こんばんは。', 'おつかれさまです。', '夜遅くまでおつかれさまです。']
+        : hour < 11
+          ? ['おはようございます。', 'おはよう。', 'いい朝ですね。']
+          : hour < 18
+            ? ['こんにちは。', 'こんにちは！', 'やあ。']
+            : ['こんばんは。', 'おつかれさまです。', 'おかえりなさい。'];
+    greet = stablePick(greetingCandidates, `${baseSeed}|g`);
+  } else {
+    greet = hour < 5
+      ? t('greeting.night')
       : hour < 11
-        ? ['おはようございます。', 'おはよう。', 'いい朝ですね。']
+        ? t('greeting.morning')
         : hour < 18
-          ? ['こんにちは。', 'こんにちは！', 'やあ。']
-          : ['こんばんは。', 'おつかれさまです。', 'おかえりなさい。'];
+          ? t('greeting.afternoon')
+          : t('greeting.evening');
+  }
 
-  const greet = stablePick(greetingCandidates, `${baseSeed}|g`);
-
-  const you = name ? `${name}さん` : 'あなた';
-  const line1 = `${greet} ${you}`.trim();
+  const you = name ? (getLocale() === 'ja' ? `${name}さん` : name) : (getLocale() === 'ja' ? 'あなた' : 'there');
+  const line1 = getLocale() === 'ja' ? `${greet} ${you}`.trim() : `${greet} Hi, ${you}!`.replace('. Hi', ', ');
   const line2 = buildDashboardOneLiner({ userName: name });
   return [line1, line2].filter(Boolean).join('\n').trim();
 }
@@ -2087,6 +2099,19 @@ function buildDashboardOneLiner({ userName, title } = {}) {
   const hour = now.getHours();
   const daySeed = now.toISOString().slice(0, 10);
   const baseSeed = `${daySeed}|${name || 'anon'}|${String(title || '')}`;
+
+  if (getLocale() === 'en') {
+    // Use localized motivations from JSON
+    const motivations = [];
+    for (let i = 0; i < 10; i++) {
+      const key = `greeting.motivations.${i}`;
+      const val = t(key);
+      if (val !== key) motivations.push(val);
+    }
+    // Fallback
+    if (!motivations.length) motivations.push('Keep up the great work!');
+    return stablePick(motivations, `${baseSeed}|l`);
+  }
 
   const base = [
     '今日も来てくれて嬉しいです。',
@@ -2381,7 +2406,7 @@ function renderContent({ els, exam, state }) {
               data-task-context="${escapeHtml(taskContext)}"
               class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap"
             >
-            <i class="fas fa-magic"></i> 模擬問題を作成
+            <i class="fas fa-magic"></i> ${t('quiz.generateBtn')}
             </button>
           </div>
         </div>
@@ -2577,7 +2602,7 @@ function renderKnowledgeRow({ knowledge, term, taskContext }) {
         data-task-context="${escapeHtml(taskContext || '')}"
         class="text-xs text-purple-600 border border-purple-200 bg-purple-50 hover:bg-purple-100 px-2 py-1 rounded flex items-center gap-1 whitespace-nowrap transition"
       >
-        <i class="fas fa-sparkles"></i> 解説
+        <i class="fas fa-sparkles"></i> ${t('quiz.explainBtn')}
       </button>
     </li>
   `;
@@ -2617,7 +2642,8 @@ function renderBlogCard({ blog, term, context }) {
   const isRecommended = blog?.recommend === true;
   const titleSafe = escapeHtml(blog.title);
   const title = highlightHtml(titleSafe, term);
-  const urlSafe = escapeHtml(blog.url);
+  const localizedUrl = getLocalizedUrl(blog.url, blog.urlEn);
+  const urlSafe = escapeHtml(localizedUrl);
   const noteSafe = escapeHtml(blog.note);
 
   const voteTargetId = String(blog.url || '').trim();
@@ -2638,7 +2664,7 @@ function renderBlogCard({ blog, term, context }) {
   const badge = isRecommended
     ? `
       <span class="inline-flex items-center gap-1 text-[10px] font-bold text-orange-700 bg-orange-100 border border-orange-200 rounded px-2 py-0.5 whitespace-nowrap">
-        おススメ
+        ${t('roadmap.recommend')}
       </span>
     `
     : '';
@@ -2798,18 +2824,18 @@ function submitFeedback(els) {
   const category = String(els.feedbackCategorySelect?.value || 'general');
 
   if (!text) {
-    showInlineMessage(els.feedbackMessage, 'フィードバック内容を入力してください。', 'text-red-600');
+    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationEmpty'), 'text-red-600');
     return;
   }
   if (text.length > FEEDBACK_MAX_LENGTH) {
-    showInlineMessage(els.feedbackMessage, `${FEEDBACK_MAX_LENGTH}文字以内で入力してください。`, 'text-red-600');
+    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationLength'), 'text-red-600');
     return;
   }
 
   // Send to Google Analytics as a custom event
   sendFeedbackToGa({ category, text });
 
-  showInlineMessage(els.feedbackMessage, 'フィードバックを送信しました。ありがとうございます！', 'text-teal-600');
+  showInlineMessage(els.feedbackMessage, t('feedbackModal.sent'), 'text-teal-600');
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   updateFeedbackCharCount(els);
 
@@ -3049,12 +3075,10 @@ function updateAiModalContent(els, text) {
     els.aiRetryBtn.classList.remove('opacity-60', 'cursor-not-allowed');
   }
 
-  const disclaimer =
-    '※注意: AIの生成結果は必ずしも正しくありません（誤りを含む可能性があります）。\n' +
-    '重要な判断は、AWS公式ドキュメント等の一次情報で確認してください。';
+  const disclaimer = t('aiDisclaimer');
 
   const baseText = String(text ?? '');
-  const shouldAppend = baseText && !baseText.includes('AIの生成結果は必ずしも正しくありません');
+  const shouldAppend = baseText && !baseText.includes(disclaimer.slice(0, 20));
   const md = shouldAppend ? `${baseText}\n\n---\n\n> ${disclaimer.replaceAll('\n', '\n> ')}` : baseText;
 
   if (els.modalContent?.dataset) {
@@ -3215,15 +3239,15 @@ function showQuizSummary({ els, session }) {
   // Emoji & title based on accuracy
   const acc = summary.accuracy;
   let emoji = '🎉';
-  let title = 'クイズ完了！';
-  if (acc >= 0.9) { emoji = '🏆'; title = '素晴らしい！'; }
-  else if (acc >= 0.7) { emoji = '🎉'; title = 'よくできました！'; }
-  else if (acc >= 0.5) { emoji = '💪'; title = 'まずまず！'; }
-  else { emoji = '📚'; title = '復習しよう！'; }
+  let title = t('quiz.complete');
+  if (acc >= 0.9) { emoji = '🏆'; title = t('quiz.summaryExcellent'); }
+  else if (acc >= 0.7) { emoji = '🎉'; title = t('quiz.summaryGood'); }
+  else if (acc >= 0.5) { emoji = '💪'; title = t('quiz.summaryOkay'); }
+  else { emoji = '📚'; title = t('quiz.summaryReview'); }
 
   if (els.quizSummaryEmoji) els.quizSummaryEmoji.textContent = emoji;
   if (els.quizSummaryTitle) els.quizSummaryTitle.textContent = title;
-  if (els.quizSummarySubtitle) els.quizSummarySubtitle.textContent = `${config.label} — ${summary.total}問完了`;
+  if (els.quizSummarySubtitle) els.quizSummarySubtitle.textContent = t('quiz.summarySubtitle', { label: config.label, total: summary.total });
 
   if (els.quizSumCorrect) els.quizSumCorrect.textContent = String(summary.correct);
   if (els.quizSumTotal) els.quizSumTotal.textContent = String(summary.total);
@@ -3367,7 +3391,7 @@ function isSuccessfulAiResponse(response) {
 
 // ─── Quiz History Review ────────────────────────────────────
 
-const REVIEW_MODE_LABELS = { single: '模擬問題', quick5: '5問連続', speed: 'スピードラン', mock: '本番模擬試験' };
+const REVIEW_MODE_LABELS = { single: t('quizHistory.reviewModeLabels.single'), quick5: t('quizHistory.reviewModeLabels.quick5'), speed: t('quizHistory.reviewModeLabels.speed'), mock: t('quizHistory.reviewModeLabels.mock') };
 const REVIEW_MODE_ICONS = { single: '📝', quick5: '⚡', speed: '⏱️', mock: '📋' };
 
 function formatElapsedMs(ms) {

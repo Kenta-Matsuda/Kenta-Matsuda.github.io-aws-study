@@ -1,5 +1,6 @@
 import { getApiKey } from './storage.js';
 import { GEMINI_MODEL_CANDIDATES } from './config.js';
+import { t } from './i18n.js';
 
 const DEFAULT_MODEL_CANDIDATES = [
   'gemini-2.0-flash',
@@ -70,7 +71,7 @@ function extractTextFromCandidatePayload(payload) {
 
 async function consumeSseText({ response, onTextDelta }) {
   if (!response?.body || typeof response.body.getReader !== 'function') {
-    throw new Error('ストリーミングに対応していない環境です。');
+    throw new Error(t('errors.streamingUnsupported'));
   }
 
   const reader = response.body.getReader();
@@ -189,14 +190,14 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
           if (response.status === 400 || response.status === 401 || response.status === 403) {
             const detail = await readErrorMessage(response);
             throw new Error(
-              detail || 'APIキーが無効であるか、権限がありません。設定を確認してください。'
+              detail || t('errors.invalidApiKey')
             );
           }
 
           if (response.status === 429) {
             // rate limit: retry
             const detail = await readErrorMessage(response);
-            lastError = new Error(detail || '混雑しています（429）。少し待って再試行してください。');
+            lastError = new Error(detail || t('errors.rateLimited'));
             if (i === 2) throw lastError;
             await new Promise((r) => setTimeout(r, delays[i]));
             continue;
@@ -210,7 +211,7 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
         }
 
         const data = await response.json();
-        return data.candidates?.[0]?.content?.parts?.[0]?.text || '回答を生成できませんでした。';
+        return data.candidates?.[0]?.content?.parts?.[0]?.text || t('errors.noResponse');
       } catch (e) {
         lastError = e;
         if (i === 2) break;
@@ -219,8 +220,8 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : '不明なエラー';
-  return `エラーが発生しました: ${msg}`;
+  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
+  return t('errors.generic', { msg });
 }
 
 export async function callGeminiStream({
@@ -277,13 +278,13 @@ export async function callGeminiStream({
           if (response.status === 400 || response.status === 401 || response.status === 403) {
             const detail = await readErrorMessage(response);
             throw new Error(
-              detail || 'APIキーが無効であるか、権限がありません。設定を確認してください。'
+              detail || t('errors.invalidApiKey')
             );
           }
 
           if (response.status === 429) {
             const detail = await readErrorMessage(response);
-            lastError = new Error(detail || '混雑しています（429）。少し待って再試行してください。');
+            lastError = new Error(detail || t('errors.rateLimited'));
             if (i === 2) throw lastError;
             // eslint-disable-next-line no-await-in-loop
             await new Promise((r) => setTimeout(r, delays[i]));
@@ -300,7 +301,7 @@ export async function callGeminiStream({
 
         // eslint-disable-next-line no-await-in-loop
         const finalText = await consumeSseText({ response, onTextDelta });
-        return finalText || '回答を生成できませんでした。';
+        return finalText || t('errors.noResponse');
       } catch (e) {
         lastError = e;
         if (i === 2) break;
@@ -310,6 +311,6 @@ export async function callGeminiStream({
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : '不明なエラー';
-  return `エラーが発生しました: ${msg}`;
+  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
+  return t('errors.generic', { msg });
 }

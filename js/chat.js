@@ -6,6 +6,7 @@
 import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
+import { getLocale, t } from './i18n.js';
 
 /** Conversation history (role/content pairs) */
 let history = [];
@@ -113,7 +114,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
     });
 
     if (String(response || '').includes('ストリーミングに対応していない環境')) {
-      updateBubbleContent(aiBubble, '考え中...');
+      updateBubbleContent(aiBubble, t('chat.thinking'));
       response = await callAi({
         userPrompt: text,
         systemPrompt,
@@ -127,10 +128,10 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
       history.push({ role: 'assistant', content: response });
       if (history.length > MAX_HISTORY) history = history.slice(-MAX_HISTORY);
     } else {
-      updateBubbleContent(aiBubble, '回答を生成できませんでした。', true);
+      updateBubbleContent(aiBubble, t('chat.noResponse'), true);
     }
   } catch (err) {
-    updateBubbleContent(aiBubble, `エラー: ${err.message || err}`, true);
+    updateBubbleContent(aiBubble, `${t('common.error')}: ${err.message || err}`, true);
   }
 
   busy = false;
@@ -139,7 +140,16 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
 
 function buildChatSystemPrompt(exam) {
   const code = exam?.code || 'AWS';
-  const label = exam?.shortLabel || '認定試験';
+  const label = exam?.shortLabel || (getLocale() === 'ja' ? '認定試験' : 'Certification');
+  if (getLocale() === 'en') {
+    return (
+      `You are a friendly AWS study assistant. ` +
+      `The user is currently studying for ${code} (${label}).\n` +
+      `Answer questions clearly and concisely, using concrete examples.\n` +
+      `Use Markdown format with bullet points and code examples as appropriate.\n` +
+      `Respond in English.`
+    );
+  }
   return (
     `あなたはフレンドリーなAWS学習アシスタントです。` +
     `現在ユーザーは${code}（${label}）の学習をしています。\n` +
@@ -208,6 +218,6 @@ function clearChat(els) {
   history = [];
   if (els.chatMessages) {
     els.chatMessages.innerHTML =
-      '<div class="chat-bubble chat-bubble-ai">こんにちは！AWS学習について何でも聞いてください。選択中の試験に関する質問に回答します 💡</div>';
+      `<div class="chat-bubble chat-bubble-ai">${t('chat.greeting')}</div>`;
   }
 }

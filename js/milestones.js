@@ -1,3 +1,5 @@
+import { t } from './i18n.js';
+
 export const MILESTONES = [
   { id: 'beginner', xp: 0, title: 'ビギナー' },
   { id: 'rookie', xp: 10, title: 'ルーキー' },
@@ -9,6 +11,18 @@ export const MILESTONES = [
   { id: 'king', xp: 10000, title: 'AWSキング' },
   { id: 'sage', xp: 100000, title: 'AWS大賢者' },
 ];
+
+/**
+ * Get the localized title for a milestone.
+ * @param {{ id: string, title: string }} milestone
+ * @returns {string}
+ */
+export function getMilestoneTitle(milestone) {
+  if (!milestone) return '';
+  const key = `milestones.${milestone.id}`;
+  const localized = t(key);
+  return localized !== key ? localized : milestone.title;
+}
 
 export function getMilestoneStatus(totalXp) {
   const xp = Number(totalXp || 0);

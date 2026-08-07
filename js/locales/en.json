@@ -1,0 +1,292 @@
+{
+  "common": {
+    "save": "Save",
+    "cancel": "Cancel",
+    "close": "Close",
+    "start": "Start",
+    "copy": "Copy",
+    "copied": "Copied",
+    "copyFailed": "Copy failed",
+    "good": "Good",
+    "bad": "Bad",
+    "retry": "Retry",
+    "next": "Next",
+    "prev": "Previous",
+    "back": "Back",
+    "all": "All",
+    "error": "Error",
+    "export": "Export",
+    "send": "Send",
+    "loading": "Loading..."
+  },
+  "header": {
+    "subtitle": "Study Resource Navigator based on the Exam Guide",
+    "switchExam": "Switch Exam",
+    "examLabel": "Exam",
+    "themeToggle": "Toggle Theme",
+    "apiKeySettings": "API Key Settings",
+    "selectExam": "Select an Exam",
+    "langToggle": "Language"
+  },
+  "dashboard": {
+    "title": "Study Dashboard",
+    "domainRatio": "Domain Question Ratio",
+    "feedback": "Send Feedback",
+    "defaultGreeting": "Let's build up your learning progress.",
+    "changeUsername": "Change Username",
+    "tweetBtn": "Post on X",
+    "bookPromo": {
+      "onSale": "On Sale",
+      "title": "AWS Certification",
+      "subtitle": "Complete Guide",
+      "description": "All AWS certification know-how in one book!"
+    },
+    "quizCarousel": {
+      "title": "Quiz Challenge",
+      "subtitle": "Test your skills across all domains",
+      "startBtn": "Start Challenge",
+      "reviewBtn": "Review Past Questions"
+    },
+    "xpCarousel": {
+      "totalXp": "Total XP",
+      "weekXp": "Last 7 Days",
+      "recent": "Recent"
+    },
+    "streak": {
+      "title": "Study Streak",
+      "days": "days in a row",
+      "keepGoing": "Keep learning today to extend your streak!",
+      "weekAchieved": "Amazing! 1 week streak achieved 🎉",
+      "ongoing": "{{count}} days in a row! Keep going 💪",
+      "todayActive": "Great job learning today!",
+      "atRisk": "Study today to keep your streak!",
+      "startNew": "Start a new study streak today!"
+    },
+    "milestone": {
+      "title": "Title",
+      "nextTitle": "Next title:",
+      "remaining": "Remaining:",
+      "zeroXp": "0 XP"
+    },
+    "skillRadar": {
+      "title": "Skills by Domain",
+      "placeholder": "Answer quizzes to see your skill chart"
+    },
+    "bootError": "Failed to load page data. Please reload the page. If opening locally, you need to open via a local server."
+  },
+  "quiz": {
+    "modeSelect": "Select Quiz Mode",
+    "quick5": {
+      "label": "5 Questions",
+      "description": "5 consecutive questions. Build combos to earn more XP!"
+    },
+    "speed": {
+      "label": "Speed Run",
+      "description": "10 quick Q&A questions. 30 seconds per question!",
+      "timeNote": "⏰ 30 seconds per question"
+    },
+    "mock": {
+      "label": "Practice Exam",
+      "description": "Real exam-equivalent question count, time limit, and difficulty. Explanations with AWS documentation citations.",
+      "formatNote": "📋 Real exam format per certification"
+    },
+    "single": {
+      "label": "Single Question"
+    },
+    "generating": "Generating questions...",
+    "generatingSubtext": "The quiz will start once all questions are generated",
+    "thinking": "Gemini is thinking...",
+    "combo": "Combo",
+    "complete": "Quiz Complete!",
+    "correct": "Correct",
+    "incorrect": "Incorrect",
+    "questionCount": "Questions",
+    "accuracy": "Accuracy",
+    "earnedXp": "XP Earned",
+    "maxCombo": "Max Combo",
+    "elapsed": "Time Taken",
+    "explanationList": "Explanations",
+    "nextQuestion": "Next Question",
+    "correctFeedback": "Correct! {{combo}}",
+    "incorrectFeedback": "Incorrect — Answer is {{letter}}",
+    "summaryExcellent": "Excellent!",
+    "summaryGood": "Well done!",
+    "summaryOkay": "Not bad!",
+    "summaryReview": "Let's review!",
+    "summarySubtitle": "{{label}} — {{total}} questions completed",
+    "timerOvertime": " overtime",
+    "generateBtn": "Generate Quiz",
+    "explainBtn": "Explain"
+  },
+  "quizHistory": {
+    "title": "Review Past Questions",
+    "empty": "No answer history yet.",
+    "emptyHint": "Try a quiz and your questions and answers will be recorded here.",
+    "reviewModeLabels": {
+      "single": "Quiz",
+      "quick5": "5 Questions",
+      "speed": "Speed Run",
+      "mock": "Practice Exam"
+    },
+    "unanswered": "Unanswered",
+    "yourAnswer": "Your answer:",
+    "correctAnswer": "Correct:",
+    "retryWrong": "Retry incorrect questions ({{count}})",
+    "correct": "Correct"
+  },
+  "settings": {
+    "title": "Settings",
+    "aiProvider": "AI Provider",
+    "gemini": "Gemini",
+    "openai": "OpenAI",
+    "providerNote": "Normally use Gemini (free). If you are 13–17 years old, please use OpenAI (requires parental consent, paid).",
+    "geminiApiKey": "Google Gemini API Key",
+    "openaiApiKey": "OpenAI API Key",
+    "geminiKeyHelp": "If you don't have a key, get one free from Google AI Studio (18+ only).",
+    "openaiKeyHelp": "Get a key from OpenAI Platform.",
+    "openaiWarning": "Note: OpenAI API is paid (charged per usage). See pricing for details.",
+    "keyPrivacy": "API keys are stored only in your browser's local storage and are never sent to external servers.",
+    "resetData": "Reset Data",
+    "resetConfirm": "This will reset all study data stored on this device (XP, quiz history, API keys, etc.). Continue?"
+  },
+  "userModal": {
+    "title": "Register Username",
+    "description": "Please register a username to save your study progress. The name will be displayed on the dashboard and posts.",
+    "placeholder": "e.g. matsu",
+    "note": "You can change it anytime later.",
+    "label": "Username",
+    "validationEmpty": "Please enter a username.",
+    "validationLength": "Username must be 30 characters or less."
+  },
+  "feedbackModal": {
+    "title": "Feedback",
+    "description": "Please share your opinions and requests for improving this app. Submissions are recorded anonymously via Google Analytics.",
+    "categories": {
+      "general": "General",
+      "resources": "Add study resources (BlackBelt, official docs, etc.)",
+      "feature": "Feature request",
+      "bug": "Bug report",
+      "aiQuality": "AI quality",
+      "ui": "UI / Usability",
+      "other": "Other"
+    },
+    "contentLabel": "Feedback",
+    "contentPlaceholder": "Please describe improvements or features you'd like within 100 characters.",
+    "sent": "Feedback sent. Thank you!",
+    "validationEmpty": "Please enter feedback content.",
+    "validationLength": "Please keep it within 100 characters."
+  },
+  "chat": {
+    "title": "AI Tutor",
+    "greeting": "Hi! Ask me anything about AWS study. I'll answer questions about the selected exam 💡",
+    "suggestions": {
+      "keyPoints": "Key Points",
+      "keyPointsQuery": "What are the key points of this exam?",
+      "frequentServices": "Frequent Services",
+      "frequentServicesQuery": "Tell me the frequently tested services",
+      "studyTips": "Study Tips",
+      "studyTipsQuery": "Give me study advice"
+    },
+    "inputPlaceholder": "Enter a question...",
+    "fabTitle": "Ask AI Tutor",
+    "noResponse": "Could not generate a response.",
+    "thinking": "Thinking..."
+  },
+  "milestones": {
+    "beginner": "Beginner",
+    "rookie": "Rookie",
+    "architect": "Apprentice Architect",
+    "solution_architect": "Solution Architect",
+    "senior_architect": "Senior Architect",
+    "specialist": "AWS Specialist",
+    "master": "AWS Master",
+    "king": "AWS King",
+    "sage": "AWS Sage",
+    "unlocked": "Title Unlocked!",
+    "toastText": "Unlocked \"{{title}}\" ({{xp}} XP)"
+  },
+  "xpActions": {
+    "link": "Link Visit",
+    "explain": "AI Explain",
+    "quiz": "AI Quiz",
+    "xp": "XP",
+    "noHistory": "No XP history yet"
+  },
+  "greeting": {
+    "morning": "Good morning.",
+    "afternoon": "Good afternoon.",
+    "evening": "Good evening.",
+    "night": "Late night study? Take it easy.",
+    "motivations": [
+      "Glad to see you today.",
+      "Consistency is power.",
+      "Go at your own pace.",
+      "Even a little progress counts.",
+      "Great job continuing!",
+      "This'll pay off for sure.",
+      "Let's learn one new thing today.",
+      "Building knowledge step by step.",
+      "You can do it!",
+      "Keep going, you'll get there."
+    ]
+  },
+  "days": {
+    "mon": "Mon",
+    "tue": "Tue",
+    "wed": "Wed",
+    "thu": "Thu",
+    "fri": "Fri",
+    "sat": "Sat",
+    "sun": "Sun"
+  },
+  "tweet": {
+    "template": "{{name}}'s AWS Study Log (studying {{code}})\nTitle: {{title}}\nTotal XP: {{total}} (this week +{{week}})",
+    "hashtag": "#AWS #AWSStudyNavigator",
+    "cta": "Study efficiently with the free \"AWS Study Navigator\"!"
+  },
+  "batch": {
+    "alreadyInProgress": "A batch generation is already in progress. Please wait until it completes.",
+    "confirmStart": "Generate a Practice Exam using the Gemini Batch API.\n\nThis may take several minutes to tens of minutes. Do not close this tab/browser.\n\nProceed?",
+    "ready": "Practice Exam is ready!",
+    "failed": "Generation failed",
+    "generating": "Generating Practice Exam",
+    "requesting": "Sending request to Batch API…",
+    "warning": "⚠️ This may take several minutes to tens of minutes. Closing this tab/browser will interrupt the generation.",
+    "startQuiz": "Start Quiz",
+    "stateWaiting": "Waiting",
+    "stateGenerating": "Generating",
+    "stateComplete": "Complete"
+  },
+  "errors": {
+    "cannotGenerate": "Error: Could not generate questions. Please try again.",
+    "noResponse": "Could not generate a response.",
+    "invalidApiKey": "API key is invalid or permissions are insufficient. Please check settings.",
+    "rateLimited": "Server is busy (429). Please wait and try again.",
+    "generic": "An error occurred: {{msg}}",
+    "streamingUnsupported": "Streaming is not supported in this environment.",
+    "chartLoadFailed": "Could not load chart library (Chart.js).",
+    "examDataNotFound": "Data for this exam is not registered yet.",
+    "domainTaskNotFound": "No tasks found for this domain.",
+    "stepsNotFound": "Study steps for this exam are not registered yet."
+  },
+  "storage": {
+    "apiKeyEmpty": "Please enter an API key.",
+    "apiKeySaved": "API key saved.",
+    "apiKeyDeleted": "API key deleted.",
+    "openaiKeyEmpty": "Please enter an OpenAI API key.",
+    "openaiKeySaved": "OpenAI API key saved.",
+    "openaiKeyDeleted": "OpenAI API key deleted."
+  },
+  "roadmap": {
+    "title": "Study Roadmap",
+    "description": "Follow the {{code}} exam study steps from top to bottom.",
+    "taskStatement": "Task Statement {{id}}",
+    "knowledge": "Required Knowledge & Skills",
+    "keyPoints": "Key Points",
+    "recommend": "Recommended"
+  },
+  "aiDisclaimer": "Note: AI-generated results may not always be accurate (may contain errors). For important decisions, verify with primary sources such as AWS official documentation.",
+  "footer": {
+    "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
+  }
+}

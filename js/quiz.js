@@ -3,6 +3,8 @@
  * manages combo streaks, and scores answers.
  */
 
+import { getLocale } from './i18n.js';
+
 // ─── Quiz Parsing ───────────────────────────────────────────
 
 /**
@@ -249,6 +251,21 @@ export function getSessionSummary(session) {
  * Build a system prompt that asks the AI for JSON-formatted quiz output.
  */
 export function buildQuizSystemPrompt(examCode, examShortLabel) {
+  if (getLocale() === 'en') {
+    return (
+      `You are an AWS certification exam expert. Create 1 multiple-choice question at the ${examCode} (${examShortLabel}) level.\n\n` +
+      `You MUST output ONLY the following JSON format (no markdown or other text):\n` +
+      '```json\n' +
+      '{\n' +
+      '  "question": "Scenario-based question text",\n' +
+      '  "choices": ["A. Choice 1", "B. Choice 2", "C. Choice 3", "D. Choice 4"],\n' +
+      '  "correct": "B",\n' +
+      '  "explanation": "Brief explanation of why the answer is correct and why others are incorrect"\n' +
+      '}\n' +
+      '```\n' +
+      'Create a practical scenario-based question. Cover a different AWS service or topic each time — do not repeat the same service.'
+    );
+  }
   return (
     `あなたはAWS認定試験のエキスパートです。${examCode}（${examShortLabel}）レベルの4択問題を1問作成してください。\n\n` +
     `必ず以下のJSON形式のみで出力してください（マークダウンやそれ以外のテキストは不要です）：\n` +
@@ -268,6 +285,13 @@ export function buildQuizSystemPrompt(examCode, examShortLabel) {
  * Build the user prompt for quiz generation.
  */
 export function buildQuizUserPrompt(taskTitle, taskContext) {
+  if (getLocale() === 'en') {
+    let prompt = `Task: Create 1 practical scenario-based multiple-choice question related to "${taskTitle}" in the specified JSON format.`;
+    if (taskContext) {
+      prompt += `\n\n[Task Context]\n${taskContext}`;
+    }
+    return prompt;
+  }
   let prompt = `タスク: 「${taskTitle}」に関連する、実践的なシナリオベースの選択問題を1問、指定のJSON形式で作成してください。`;
   if (taskContext) {
     prompt += `\n\n【タスク文脈】\n${taskContext}`;
@@ -279,6 +303,24 @@ export function buildQuizUserPrompt(taskTitle, taskContext) {
  * Build a system prompt for speed-run mode (short 1Q1A format, answerable in ~30s).
  */
 export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
+  if (getLocale() === 'en') {
+    return (
+      `You are an AWS certification exam expert. Create 1 short multiple-choice question at the ${examCode} (${examShortLabel}) level.\n\n` +
+      `[IMPORTANT] This is a speed-run question:\n` +
+      `- Question text should be 1-2 sentences (no scenario needed, directly test knowledge)\n` +
+      `- Choices should be short (service names or feature names)\n` +
+      `- Should be answerable within 30 seconds\n\n` +
+      `You MUST output ONLY the following JSON format (no markdown or other text):\n` +
+      '```json\n' +
+      '{\n' +
+      '  "question": "Short question (1-2 sentences)",\n' +
+      '  "choices": ["A. Choice 1", "B. Choice 2", "C. Choice 3", "D. Choice 4"],\n' +
+      '  "correct": "B",\n' +
+      '  "explanation": "Brief explanation (1-2 sentences)"\n' +
+      '}\n' +
+      '```'
+    );
+  }
   return (
     `あなたはAWS認定試験のエキスパートです。${examCode}（${examShortLabel}）レベルの短答式4択問題を1問作成してください。\n\n` +
     `【重要】スピードラン用の問題です：\n` +
@@ -302,6 +344,18 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
  * When targetDomain is provided, the prompt is scoped to that domain's topics.
  */
 export function buildGeneralQuizUserPrompt(examCode, targetDomain) {
+  if (getLocale() === 'en') {
+    if (targetDomain) {
+      const name = targetDomain.title || targetDomain.jpTitle;
+      let prompt = `Create 1 question from the "${name}" domain of the ${examCode} exam in the specified JSON format. Use a different AWS service/topic than last time.`;
+      if (targetDomain.tasks && targetDomain.tasks.length > 0) {
+        const taskNames = targetDomain.tasks.map(t => t.title || t.jpTitle).join(', ');
+        prompt += `\nThis domain covers these tasks: ${taskNames}\nPick one at random and create a question about it. Don't repeat the same task as last time.`;
+      }
+      return prompt;
+    }
+    return `Create 1 question from a random domain/topic of the ${examCode} exam in the specified JSON format. Cover a different domain, topic, and AWS service each time — do not repeat.`;
+  }
   if (targetDomain) {
     const name = targetDomain.jpTitle || targetDomain.title;
     let prompt = `${examCode}試験のドメイン「${name}」の出題範囲から問題を1問、指定のJSON形式で作成してください。前回と異なるAWSサービス・トピックを扱ってください。`;
@@ -347,6 +401,59 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
   };
 
   const guide = levelGuide[examLevel] || levelGuide['Associate'];
+
+  if (getLocale() === 'en') {
+    const enLevelGuide = {
+      'Foundational': {
+        questionDesc: 'Questions testing broad foundational AWS cloud knowledge',
+        questionLength: 'Question text is 2-4 sentences with basic situational context',
+        choiceLength: 'Each choice is 1 sentence (testing service names or basic concepts)',
+        difficultyNote: 'Level suitable for someone with ~6 months of AWS study',
+      },
+      'Associate': {
+        questionDesc: 'Scenario-based questions reflecting real-world situations',
+        questionLength: 'Question text is 3-5 sentences with specific business scenarios (including requirements and constraints)',
+        choiceLength: 'Each choice is 1-2 sentences proposing specific solutions',
+        difficultyNote: 'Intermediate level assuming 1+ years of AWS hands-on experience',
+      },
+      'Professional': {
+        questionDesc: 'Questions about complex multi-service, multi-account architecture decisions',
+        questionLength: 'Question text is 5-8 sentences with complex scenarios (multiple requirements, constraints, existing infrastructure)',
+        choiceLength: 'Each choice is 2-3 sentences describing specific architecture strategies or procedures',
+        difficultyNote: 'Advanced level assuming 2+ years of AWS experience. Tests trade-off judgment',
+      },
+      'Specialty': {
+        questionDesc: 'Scenario-based questions testing deep technical knowledge and best practices in specialized domains',
+        questionLength: 'Question text is 4-7 sentences with specialized scenarios (detailed technical constraints and requirements)',
+        choiceLength: 'Each choice is 1-3 sentences proposing technically different approaches',
+        difficultyNote: 'Advanced level assuming 2-5 years of AWS experience in the specialty domain',
+      },
+    };
+    const enGuide = enLevelGuide[examLevel] || enLevelGuide['Associate'];
+    return (
+      `You are an expert AWS certification exam question author. Create 1 multiple-choice question of identical quality to the real ${examCode} (${examShortLabel}) exam.\n\n` +
+      `[Exam Level] ${examLevel}\n` +
+      `[Question Format] ${enGuide.questionDesc}\n` +
+      `[Question Length] ${enGuide.questionLength}\n` +
+      `[Choice Length] ${enGuide.choiceLength}\n` +
+      `[Difficulty] ${enGuide.difficultyNote}\n\n` +
+      `[Explanation Requirements — IMPORTANT]\n` +
+      `Create a detailed explanation with the following structure:\n` +
+      `1. Explain specifically why the correct choice is right\n` +
+      `2. Explain why each incorrect choice (A/B/C/D) is inappropriate in 1-2 sentences each\n` +
+      `3. Reference relevant AWS best practices or Well-Architected Framework principles\n` +
+      `4. Cite 1-2 relevant AWS official documentation URLs (format: Reference: https://docs.aws.amazon.com/...)\n\n` +
+      `You MUST output ONLY the following JSON format (no markdown or other text):\n` +
+      '```json\n' +
+      '{\n' +
+      '  "question": "Exam-equivalent scenario question text",\n' +
+      '  "choices": ["A. Choice 1", "B. Choice 2", "C. Choice 3", "D. Choice 4"],\n' +
+      '  "correct": "B",\n' +
+      '  "explanation": "Detailed explanation (correct reason → each incorrect reason → best practices → AWS documentation URLs)"\n' +
+      '}\n' +
+      '```'
+    );
+  }
 
   return (
     `あなたはAWS認定試験のエキスパート問題作成者です。${examCode}（${examShortLabel}）の本番試験とまったく同等品質の4択問題を1問作成してください。\n\n` +

@@ -1,5 +1,6 @@
 import { getOpenAiApiKey } from './storage.js';
 import { OPENAI_MODEL_CANDIDATES } from './config.js';
+import { t } from './i18n.js';
 
 const DEFAULT_MODEL_CANDIDATES = ['gpt-5-mini', 'gpt-5'];
 
@@ -70,13 +71,13 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, hi
           if (response.status === 401 || response.status === 403) {
             const detail = await readErrorMessage(response);
             throw new Error(
-              detail || 'APIキーが無効であるか、権限がありません。設定を確認してください。'
+              detail || t('errors.invalidApiKey')
             );
           }
 
           if (response.status === 429) {
             const detail = await readErrorMessage(response);
-            lastError = new Error(detail || '混雑しています（429）。少し待って再試行してください。');
+            lastError = new Error(detail || t('errors.rateLimited'));
             if (i === 2) throw lastError;
             await new Promise((r) => setTimeout(r, delays[i]));
             continue;
@@ -90,7 +91,7 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, hi
         }
 
         const data = await response.json();
-        return data.choices?.[0]?.message?.content || '回答を生成できませんでした。';
+        return data.choices?.[0]?.message?.content || t('errors.noResponse');
       } catch (e) {
         lastError = e;
         if (i === 2) break;
@@ -99,8 +100,8 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, hi
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : '不明なエラー';
-  return `エラーが発生しました: ${msg}`;
+  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
+  return t('errors.generic', { msg });
 }
 
 /**
@@ -154,13 +155,13 @@ export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiK
           if (response.status === 401 || response.status === 403) {
             const detail = await readErrorMessage(response);
             throw new Error(
-              detail || 'APIキーが無効であるか、権限がありません。設定を確認してください。'
+              detail || t('errors.invalidApiKey')
             );
           }
 
           if (response.status === 429) {
             const detail = await readErrorMessage(response);
-            lastError = new Error(detail || '混雑しています（429）。少し待って再試行してください。');
+            lastError = new Error(detail || t('errors.rateLimited'));
             if (i === 2) throw lastError;
             // eslint-disable-next-line no-await-in-loop
             await new Promise((r) => setTimeout(r, delays[i]));
@@ -177,7 +178,7 @@ export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiK
 
         // eslint-disable-next-line no-await-in-loop
         const fullText = await consumeOpenAiSse({ response, onTextDelta });
-        return fullText || '回答を生成できませんでした。';
+        return fullText || t('errors.noResponse');
       } catch (e) {
         lastError = e;
         if (i === 2) break;
@@ -187,13 +188,13 @@ export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiK
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : '不明なエラー';
-  return `エラーが発生しました: ${msg}`;
+  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
+  return t('errors.generic', { msg });
 }
 
 async function consumeOpenAiSse({ response, onTextDelta }) {
   if (!response?.body || typeof response.body.getReader !== 'function') {
-    throw new Error('ストリーミングに対応していない環境です。');
+    throw new Error(t('errors.streamingUnsupported'));
   }
 
   const reader = response.body.getReader();
