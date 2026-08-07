@@ -4,6 +4,7 @@ export const DVA_C02 = {
   shortLabel: 'DVA',
   title: 'AWS Certified Developer - Associate',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -12,17 +13,24 @@ export const DVA_C02 = {
       description: [
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
       ],
+      descriptionEn: [
+        'Register for the AWS certification exam. You can take the exam online or at a test center through Pearson VUE.',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified Developer - Associate 公式ページ',
+              titleEn: 'AWS Certified Developer - Associate Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-developer-associate/',
+              urlEn: 'https://aws.amazon.com/certification/certified-developer-associate/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information on exam overview, passing criteria, and scope',
               recommend: true,
             },
           ],
@@ -30,19 +38,23 @@ export const DVA_C02 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification?p=cert&c=ai&z=1',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for the AWS certification exam here (official registration site)',
               recommend: true,
             },
           ],
         },
       ],
     },
+
     {
       id: '2',
       title: 'Understand the exam overview',
@@ -50,23 +62,31 @@ export const DVA_C02 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the exam guide (PDF) to understand the scope, scoring weights, and question format. Get the big picture before diving into each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified Developer - Associate 試験ガイド (PDF)',
+              titleEn: 'AWS Certified Developer - Associate Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-dev-associate/AWS-Certified-Developer-Associate_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-dev-associate/AWS-Certified-Developer-Associate_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Review exam scope, scoring weights, and sample questions',
               recommend: true,
             },
           ],
         },
       ],
     },
+
     {
       id: '3',
       title: 'Learn with official training courses',
@@ -74,23 +94,30 @@ export const DVA_C02 = {
       description: [
         'AWS Skill Builder の無料コースで、開発分野の基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational knowledge in development with free courses on AWS Skill Builder. Exam-specific prep courses are also available.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified Developer - Associate',
+              titleEn: 'Exam Prep Standard Course: AWS Certified Developer - Associate',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14724/exam-prep-standard-course-aws-certified-developer-associate-dva-c02',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam prep course (free)',
               recommend: true,
             },
           ],
         },
       ],
     },
+
     {
       id: '4',
       title: 'Deep dive into each domain',
@@ -99,34 +126,52 @@ export const DVA_C02 = {
         'このアプリの Domain 1〜4 タブに切り替えて、各ドメインのタスクごとに用意されたリソースを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to Domain 1-4 tabs in this app and work through the resources prepared for each task.',
+        'You can also use AI explanations and AI practice questions to deepen your understanding.',
+      ],
       knowledge: [
         'Domain 1: AWS のサービスによる開発（32%）',
         'Domain 2: セキュリティ（26%）',
         'Domain 3: デプロイ（24%）',
         'Domain 4: トラブルシューティングと最適化（18%）',
       ],
+      knowledgeEn: [
+        'Domain 1: Development with AWS Services (32%)',
+        'Domain 2: Security (26%)',
+        'Domain 3: Deployment (24%)',
+        'Domain 4: Troubleshooting and Optimization (18%)',
+      ],
       resources: [
         {
           key: 'whitepapers',
           label: 'ホワイトペーパー・ガイド',
+          labelEn: 'Whitepapers & Guides',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-gray-600',
           items: [
             {
               title: 'AWS Well-Architected Framework',
+              titleEn: 'AWS Well-Architected Framework',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/framework/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html',
               note: 'ホワイトペーパー: 6つの柱の詳細解説',
+              noteEn: 'Whitepaper: Detailed explanation of the six pillars',
               recommend: true,
             },
             {
               title: 'AWS サーバーレスアプリケーションレンズ',
+              titleEn: 'AWS Serverless Applications Lens',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/serverless-applications-lens/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/serverless-applications-lens/welcome.html',
               note: 'サーバーレスアプリケーション向けベストプラクティス',
+              noteEn: 'Best practices for serverless applications',
             },
           ],
         },
       ],
     },
+
     {
       id: '5',
       title: 'Practice with sample questions',
@@ -134,17 +179,23 @@ export const DVA_C02 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve exam-like questions from the official practice set to check your understanding. If you find weak domains, go back to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
+              titleEn: 'AWS Certification Official Practice Question Set (DVA-C02)',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14060/aws-certified-developer-associate-official-practice-question-set-dva-c02-japanese',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -152,6 +203,7 @@ export const DVA_C02 = {
       ],
     },
   ],
+
   domains: [
     {
       id: 1,
@@ -160,6 +212,7 @@ export const DVA_C02 = {
       weight: 32,
       color: '#3b82f6',
       description: 'このドメインでは、AWS でホストされているアプリケーションの開発、Lambda 関数の開発、データストアの使用に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to developing applications hosted on AWS, developing Lambda functions, and using data stores.',
       tasks: [
         {
           id: '1.1',
@@ -182,6 +235,24 @@ export const DVA_C02 = {
             '- API と AWS SDK を使用した AWS のサービスとやり取りするためのコードの作成',
             '- AWS のサービスを使用したデータストリーミングの処理',
           ],
+
+          descriptionEn: [
+            'Task 1: Develop code for applications hosted on AWS.',
+            'Target knowledge:',
+            '- Architectural patterns (event-driven, microservices, monolithic, choreography, orchestration, fan-out, etc.)',
+            '- Idempotency',
+            '- Differences between stateful and stateless concepts',
+            '- Differences between tightly coupled and loosely coupled components',
+            '- Fault-tolerant design patterns (retries with exponential backoff and jitter, dead-letter queues, etc.)',
+            '- Differences between synchronous and asynchronous patterns',
+            'Target skills:',
+            '- Creating fault-tolerant and resilient applications in programming languages (Java, C#, Python, JavaScript, TypeScript, Go, etc.)',
+            '- Creating, extending, and maintaining APIs (response/request transformations, applying validation rules, overriding status codes, etc.)',
+            '- Writing and running unit tests in development environments (using AWS SAM, etc.)',
+            '- Writing code to use messaging services',
+            '- Writing code to interact with AWS services using APIs and AWS SDKs',
+            '- Processing data streaming using AWS services',
+          ],
           knowledge: [
             'アーキテクチャパターン',
             'イベント駆動型',
@@ -191,92 +262,133 @@ export const DVA_C02 = {
             'Amazon Q Developer',
             'AWS SAM',
           ],
+          knowledgeEn: [
+            'Architectural patterns',
+            'Event-driven',
+            'Microservices',
+            'Amazon EventBridge',
+            'AWS SDK',
+            'Amazon Q Developer',
+            'AWS SAM',
+          ],
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'イベント駆動型アーキテクチャの組織への実装ベストプラクティス',
+                  titleEn: 'Best Practices for Implementing Event-Driven Architectures in Your Organization',
                   url: 'https://aws.amazon.com/blogs/architecture/best-practices-for-implementing-event-driven-architectures-in-your-organization/',
                   note: 'Architecture Blog: Intermediate (Level 200)',
+                  noteEn: 'Architecture Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
+
                 {
                   title: 'Amazon DynamoDB のサーバーレスパターンの探索',
+                  titleEn: 'Exploring Serverless Patterns for Amazon DynamoDB',
                   url: 'https://aws.amazon.com/blogs/compute/exploring-serverless-patterns-for-amazon-dynamodb/',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'Well-Architected サーバーレスアプリケーションの構築: パフォーマンスの最適化 – Part 3',
+                  titleEn: 'Building Well-Architected Serverless Applications: Optimizing Application Performance - Part 3',
                   url: 'https://aws.amazon.com/jp/blogs/compute/building-well-architected-serverless-applications-optimizing-application-performance-part-3/',
+                  urlEn: 'https://aws.amazon.com/blogs/compute/building-well-architected-serverless-applications-optimizing-application-performance-part-3/',
                   note: 'Compute Blog: Advanced (Level 300)',
+                  noteEn: 'Compute Blog: Advanced (Level 300)',
                 },
                 {
                   title: 'Lambda を使ったサーバーレスURLショートナーの構築 – Part 1',
+                  titleEn: 'Building a Serverless URL Shortener App Without Lambda - Part 1',
                   url: 'https://aws.amazon.com/cn/blogs/compute/building-a-serverless-url-shortener-app-without-lambda-part-1/',
                   note: 'Compute Blog: API Gateway + DynamoDB 直接統合パターン',
+                  noteEn: 'Compute Blog: API Gateway + DynamoDB direct integration pattern',
                 },
               ],
             },
+
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'サーバーレスイベント駆動アーキテクチャ',
+                  titleEn: 'Serverless Event-Driven Architecture',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%83%AC%E3%82%B9%E3%82%A4%E3%83%99%E3%83%B3%E3%83%88%E9%A7%86%E5%8B%95%E3%82%A2%E3%83%BC%E3%82%AD%E3%83%86%E3%82%AF%E3%83%81%E3%83%A3',
                   note: 'PDF | Youtube: 2019/08',
+                  noteEn: 'PDF | YouTube: 2019/08',
                   recommend: true,
                 },
                 {
                   title: 'Amazon API Gateway',
+                  titleEn: 'Amazon API Gateway',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20API%20Gateway',
                   note: 'PDF | Youtube: 2019/05',
+                  noteEn: 'PDF | YouTube: 2019/05',
                 },
                 {
                   title: '形で考えるサーバーレス設計 サーバーレスユースケースパターン解説',
+                  titleEn: 'Serverless Design Patterns: Use Case Pattern Explained',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=%E5%BD%A2%E3%81%A7%E8%80%83%E3%81%88%E3%82%8B%E3%82%B5%E3%83%BC%E3%83%90%E3%83%BC%E3%83%AC%E3%82%B9%E8%A8%AD%E8%A8%88',
                   note: 'PDF | Youtube: 2020/11',
+                  noteEn: 'PDF | YouTube: 2020/11',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon API Gateway 開発者ガイド',
+                  titleEn: 'Amazon API Gateway Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/apigateway/latest/developerguide/welcome.html',
                   note: 'REST API / HTTP API の作成と管理',
+                  noteEn: 'Creating and managing REST APIs / HTTP APIs',
                   recommend: true,
                 },
                 {
                   title: 'Amazon EventBridge ユーザーガイド',
+                  titleEn: 'Amazon EventBridge User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/eventbridge/latest/userguide/eb-what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-what-is.html',
                   note: 'イベント駆動型アーキテクチャの構築',
+                  noteEn: 'Building event-driven architectures',
                 },
                 {
                   title: 'Lambda を使用したイベント駆動型アーキテクチャの作成',
+                  titleEn: 'Creating Event-Driven Architectures with Lambda',
                   url: 'https://docs.aws.amazon.com/lambda/latest/dg/concepts-event-driven-architectures.html',
                   note: 'Lambda Developer Guide: イベント駆動設計の基本',
+                  noteEn: 'Lambda Developer Guide: Basics of event-driven design',
                 },
                 {
                   title: 'イベント駆動型アーキテクチャへの移行',
+                  titleEn: 'Transitioning to Event-Driven Architecture',
                   url: 'https://docs.aws.amazon.com/serverless/latest/devguide/serverless-transition.html',
                   note: 'Serverless Developer Guide: EDA の学習パス',
+                  noteEn: 'Serverless Developer Guide: EDA learning path',
                 },
               ],
             },
           ],
         },
+
         {
           id: '1.2',
           title: 'Develop code for AWS Lambda.',
@@ -297,6 +409,22 @@ export const DVA_C02 = {
             '- Lambda 関数と AWS のサービスの統合',
             '- 最適なパフォーマンスのための Lambda 関数のチューニング',
           ],
+          descriptionEn: [
+            'Task 2: Develop code for AWS Lambda.',
+            'Target knowledge:',
+            '- Event source mapping',
+            '- Stateless applications',
+            '- Unit testing',
+            '- Event-driven architecture',
+            '- Scalability',
+            '- Accessing private resources in a VPC from Lambda code',
+            'Target skills:',
+            '- Configuring Lambda functions by defining environment variables and parameters (memory, concurrency, timeout, runtime, handler, layers, extensions, triggers, destinations, etc.)',
+            '- Handling event lifecycle and errors using code (Lambda destinations, dead-letter queues, etc.)',
+            '- Writing and running test code using AWS services and tools',
+            '- Integrating Lambda functions with AWS services',
+            '- Tuning Lambda functions for optimal performance',
+          ],
           knowledge: [
             'AWS Lambda',
             'VPC',
@@ -304,98 +432,140 @@ export const DVA_C02 = {
             'デッドレターキュー',
             'Lambda 同時実行',
           ],
+          knowledgeEn: [
+            'AWS Lambda',
+            'VPC',
+            'Lambda Layers',
+            'Dead-letter queues',
+            'Lambda concurrency',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Operating Lambda: パフォーマンスの最適化 – Part 1',
+                  titleEn: 'Operating Lambda: Performance Optimization - Part 1',
                   url: 'https://aws.amazon.com/jp/blogs/news/operating-lambda-performance-optimization-part-1/',
+                  urlEn: 'https://aws.amazon.com/blogs/news/operating-lambda-performance-optimization-part-1/',
                   note: 'Compute Blog: Advanced (Level 300)',
+                  noteEn: 'Compute Blog: Advanced (Level 300)',
                   recommend: true,
                 },
                 {
                   title: 'Operating Lambda: パフォーマンスの最適化 – Part 2',
+                  titleEn: 'Operating Lambda: Performance Optimization - Part 2',
                   url: 'https://aws.amazon.com/jp/blogs/news/operating-lambda-performance-optimization-part-2/',
+                  urlEn: 'https://aws.amazon.com/blogs/news/operating-lambda-performance-optimization-part-2/',
                   note: 'Compute Blog: Advanced (Level 300)',
+                  noteEn: 'Compute Blog: Advanced (Level 300)',
                   recommend: true,
                 },
                 {
                   title: 'AWS Lambda のコストとパフォーマンスを AWS Compute Optimizer で最適化する',
+                  titleEn: 'Optimizing AWS Lambda Cost and Performance Using AWS Compute Optimizer',
                   url: 'https://aws.amazon.com/blogs/compute/optimizing-aws-lambda-cost-and-performance-using-aws-compute-optimizer/',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                 },
                 {
                   title: 'AWS Lambda 関数の高度なロギングコントロールの紹介',
+                  titleEn: 'Introducing Advanced Logging Controls for AWS Lambda Functions',
                   url: 'https://aws.amazon.com/it/blogs/compute/introducing-advanced-logging-controls-for-aws-lambda-functions/',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                 },
                 {
                   title: 'Lambda カナリアデプロイの実装（エイリアストラフィックシフティング）',
+                  titleEn: 'Implementing Canary Deployments of AWS Lambda Functions with Alias Traffic Shifting',
                   url: 'https://aws.amazon.com/blogs/compute/implementing-canary-deployments-of-aws-lambda-functions-with-alias-traffic-shifting/',
                   note: 'Compute Blog: Advanced (Level 300)',
+                  noteEn: 'Compute Blog: Advanced (Level 300)',
                 },
               ],
             },
+
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS Lambda Part1',
+                  titleEn: 'AWS Lambda Part1',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Lambda%20Part1',
                   note: 'PDF | Youtube: 2018/02',
+                  noteEn: 'PDF | YouTube: 2018/02',
                   recommend: true,
                 },
                 {
                   title: 'AWS Lambda Part2',
+                  titleEn: 'AWS Lambda Part2',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Lambda%20Part2',
                   note: 'PDF | Youtube: 2019/04',
+                  noteEn: 'PDF | YouTube: 2019/04',
                 },
                 {
                   title: 'AWS Lambda Part3',
+                  titleEn: 'AWS Lambda Part3',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Lambda%20Part3',
                   note: 'PDF | Youtube: 2019/04',
+                  noteEn: 'PDF | YouTube: 2019/04',
                 },
                 {
                   title: 'AWS Lambda Part4',
+                  titleEn: 'AWS Lambda Part4',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Lambda%20Part4',
                   note: 'PDF | Youtube: 2019/05',
+                  noteEn: 'PDF | YouTube: 2019/05',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Lambda 開発者ガイド',
+                  titleEn: 'AWS Lambda Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/welcome.html',
                   note: 'Lambda 関数の作成・設定・デプロイ',
+                  noteEn: 'Creating, configuring, and deploying Lambda functions',
                   recommend: true,
                 },
                 {
                   title: 'Lambda のベストプラクティス',
+                  titleEn: 'Lambda Best Practices',
                   url: 'https://docs.aws.amazon.com/lambda/latest/operatorguide/architecture-best-practice.html',
                   note: 'Operator Guide: パフォーマンスとコスト最適化',
+                  noteEn: 'Operator Guide: Performance and cost optimization',
                   recommend: true,
                 },
                 {
                   title: 'Lambda のベストプラクティス（開発者ガイド）',
+                  titleEn: 'Lambda Best Practices (Developer Guide)',
                   url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/best-practices.html',
+                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html',
                   note: 'Developer Guide: 設計・コーディングのベストプラクティス',
+                  noteEn: 'Developer Guide: Design and coding best practices',
                 },
               ],
             },
           ],
         },
+
         {
           id: '1.3',
           title: 'Use data stores in application development.',
@@ -419,6 +589,26 @@ export const DVA_C02 = {
             '- データライフサイクルの管理',
             '- データキャッシュサービスの使用',
           ],
+          descriptionEn: [
+            'Task 3: Use data stores in application development.',
+            'Target knowledge:',
+            '- Relational and non-relational databases',
+            '- Create, read, update, delete (CRUD) operations',
+            '- High-cardinality partition keys for balanced partition access',
+            '- Cloud storage options (file, object, database, etc.)',
+            '- Database consistency models (strong consistency, eventual consistency, etc.)',
+            '- Differences between query and scan operations',
+            '- Amazon DynamoDB keys and indexing',
+            '- Caching strategies (write-through, read-through, lazy loading, TTL, etc.)',
+            '- Amazon S3 tiers and lifecycle management',
+            '- Differences between ephemeral and persistent data storage patterns',
+            'Target skills:',
+            '- Serializing and deserializing data to provide persistence to a data store',
+            '- Using, managing, and maintaining data stores',
+            '- Managing data lifecycles',
+            '- Using data caching services',
+          ],
+
           knowledge: [
             'Amazon DynamoDB',
             'パーティションキー',
@@ -426,72 +616,103 @@ export const DVA_C02 = {
             'Amazon OpenSearch Service',
             'データキャッシュ',
           ],
+          knowledgeEn: [
+            'Amazon DynamoDB',
+            'Partition keys',
+            'Strong consistency / eventual consistency',
+            'Amazon OpenSearch Service',
+            'Data caching',
+          ],
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Amazon DynamoDB のサーバーレスパターンの探索',
+                  titleEn: 'Exploring Serverless Patterns for Amazon DynamoDB',
                   url: 'https://aws.amazon.com/blogs/compute/exploring-serverless-patterns-for-amazon-dynamodb/',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'Amazon API Gateway を DynamoDB のプロキシとして使用する',
+                  titleEn: 'Using Amazon API Gateway as a Proxy for DynamoDB',
                   url: 'https://aws.amazon.com/it/blogs/compute/using-amazon-api-gateway-as-a-proxy-for-dynamodb/',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                 },
               ],
             },
+
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'Amazon DynamoDB – How it works',
+                  titleEn: 'Amazon DynamoDB - How it works',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20DynamoDB%20%E2%80%93%20How%20it%20works',
                   note: 'PDF | Youtube: 2023/12',
+                  noteEn: 'PDF | YouTube: 2023/12',
                   recommend: true,
                 },
                 {
                   title: 'Amazon DynamoDB Advanced Design Pattern',
+                  titleEn: 'Amazon DynamoDB Advanced Design Pattern',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20DynamoDB%20Advanced%20Design%20Pattern',
                   note: 'PDF | Youtube: 2018/12',
+                  noteEn: 'PDF | YouTube: 2018/12',
                 },
                 {
                   title: 'Amazon ElastiCache',
+                  titleEn: 'Amazon ElastiCache',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2023/02%0AArchived-,Amazon%20ElastiCache',
                   note: 'PDF | Youtube: 2023/02',
+                  noteEn: 'PDF | YouTube: 2023/02',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon DynamoDB 開発者ガイド',
+                  titleEn: 'Amazon DynamoDB Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/Introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Introduction.html',
                   note: 'テーブル設計・クエリ・インデックスの基本',
+                  noteEn: 'Table design, queries, and indexing basics',
                   recommend: true,
                 },
                 {
                   title: 'DynamoDB のベストプラクティス',
+                  titleEn: 'DynamoDB Best Practices',
                   url: 'https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/best-practices.html',
+                  urlEn: 'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html',
                   note: 'パーティションキー設計・インデックス設計のガイド',
+                  noteEn: 'Guide for partition key design and index design',
                   recommend: true,
                 },
                 {
                   title: 'Amazon ElastiCache ユーザーガイド',
+                  titleEn: 'Amazon ElastiCache User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/WhatIs.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html',
                   note: 'インメモリキャッシュサービスの概要',
+                  noteEn: 'Overview of in-memory cache service',
                 },
               ],
             },
@@ -499,6 +720,7 @@ export const DVA_C02 = {
         },
       ],
     },
+
     {
       id: 2,
       title: 'Security',
@@ -506,6 +728,7 @@ export const DVA_C02 = {
       weight: 26,
       color: '#f97316',
       description: 'このドメインでは、アプリケーションと AWS サービスの認証・認可、暗号化、機密データ管理に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to authentication and authorization for applications and AWS services, encryption, and sensitive data management.',
       tasks: [
         {
           id: '2.1',
@@ -531,6 +754,27 @@ export const DVA_C02 = {
             '- IAM ロールの引き受け',
             '- プリンシパルのアクセス許可の定義',
           ],
+
+          descriptionEn: [
+            'Task 1: Implement authentication and/or authorization for applications and AWS services.',
+            'Target knowledge:',
+            '- Identity federation (SAML, OpenID Connect (OIDC), Amazon Cognito, etc.)',
+            '- Bearer tokens (JSON Web Tokens (JWT), OAuth, AWS Security Token Service (AWS STS), etc.)',
+            '- Comparison of user pools and identity pools in Amazon Cognito',
+            '- Resource-based policies, service policies, and principal policies',
+            '- Role-based access control (RBAC)',
+            '- Application authorization using ACLs',
+            '- Principle of least privilege',
+            '- Differences between AWS managed policies and customer managed policies',
+            '- Identity and access management',
+            'Target skills:',
+            '- Implementing federated access using identity providers (Amazon Cognito, IAM, etc.)',
+            '- Securing applications using bearer tokens',
+            '- Configuring programmatic access to AWS',
+            '- Making authenticated calls to AWS services',
+            '- Assuming IAM roles',
+            '- Defining permissions for principals',
+          ],
           knowledge: [
             'Amazon Cognito',
             'IAM ロール・ポリシー',
@@ -538,88 +782,125 @@ export const DVA_C02 = {
             'ベアラートークン',
             'クロスサービス認証',
           ],
+          knowledgeEn: [
+            'Amazon Cognito',
+            'IAM roles and policies',
+            'Federated access',
+            'Bearer tokens',
+            'Cross-service authentication',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Amazon Cognito で OAuth 2.0 を使用する方法: さまざまな OAuth 2.0 グラントについて',
+                  titleEn: 'How to Use OAuth 2.0 in Amazon Cognito: Learn About the Different OAuth 2.0 Grants',
                   url: 'https://aws.amazon.com/es/blogs/security/how-to-use-oauth-2-0-in-amazon-cognito-learn-about-the-different-oauth-2-0-grants/',
                   note: 'Security Blog: Intermediate (Level 200)',
+                  noteEn: 'Security Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Cognito マシン間認証のモニタリング・最適化・セキュリティ',
+                  titleEn: 'How to Monitor, Optimize, and Secure Amazon Cognito Machine-to-Machine Authorization',
                   url: 'https://aws.amazon.com/blogs/security/how-to-monitor-optimize-and-secure-amazon-cognito-machine-to-machine-authorization/',
                   note: 'Security Blog: Advanced (Level 300)',
+                  noteEn: 'Security Blog: Advanced (Level 300)',
                 },
                 {
                   title: 'Amazon Cognito と Amazon API Gateway でマシン間認証を構成する – Part 2',
+                  titleEn: 'Configuring Machine-to-Machine Authentication with Amazon Cognito and Amazon API Gateway - Part 2',
                   url: 'https://aws.amazon.com/jp/blogs/mt/configuring-machine-to-machine-authentication-with-amazon-cognito-and-amazon-api-gateway-part-2/',
+                  urlEn: 'https://aws.amazon.com/blogs/mt/configuring-machine-to-machine-authentication-with-amazon-cognito-and-amazon-api-gateway-part-2/',
                   note: 'Management & Governance Blog: Intermediate (Level 200)',
+                  noteEn: 'Management & Governance Blog: Intermediate (Level 200)',
                 },
               ],
             },
+
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'Amazon Cognito 基礎編',
+                  titleEn: 'Amazon Cognito Basics',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Cognito%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
                   note: 'PDF | Youtube: 2026/04',
+                  noteEn: 'PDF | YouTube: 2026/04',
                   recommend: true,
                 },
                 {
                   title: 'Amazon Cognito 実装編',
+                  titleEn: 'Amazon Cognito Implementation',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Cognito%20%E5%AE%9F%E8%A3%85%E7%B7%A8',
                   note: 'PDF | Youtube: 2026/04',
+                  noteEn: 'PDF | YouTube: 2026/04',
                   recommend: true,
                 },
                 {
                   title: '認証・認可サービス構築 on AWS 〜デザインパターンと Amazon Cognito 活用プラクティス〜',
+                  titleEn: 'Building Authentication and Authorization Services on AWS - Design Patterns and Amazon Cognito Practices',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=%E8%AA%8D%E8%A8%BC%E3%83%BB%E8%AA%8D%E5%8F%AF%E3%82%B5%E3%83%BC%E3%83%93%E3%82%B9%E6%A7%8B%E7%AF%89%20on%20AWS',
                   note: 'PDF: 2025/07',
+                  noteEn: 'PDF: 2025/07',
                 },
                 {
                   title: 'AWS Identity and Access Management (IAM) Part1',
+                  titleEn: 'AWS Identity and Access Management (IAM) Part1',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Identity%20and%20Access%20Management%20(IAM)%20Part1',
                   note: 'PDF | Youtube: 2019/01',
+                  noteEn: 'PDF | YouTube: 2019/01',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon Cognito 開発者ガイド',
+                  titleEn: 'Amazon Cognito Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/cognito/latest/developerguide/what-is-amazon-cognito.html',
+                  urlEn: 'https://docs.aws.amazon.com/cognito/latest/developerguide/what-is-amazon-cognito.html',
                   note: 'ユーザー認証・認可の実装',
+                  noteEn: 'Implementing user authentication and authorization',
                   recommend: true,
                 },
                 {
                   title: 'IAM でのセキュリティのベストプラクティス',
+                  titleEn: 'Security Best Practices in IAM',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html',
+                  urlEn: 'https://docs.aws.amazon.com/IAM/latest/UserGuide/best-practices.html',
                   note: 'IAM ロール・ポリシー設計の基本',
+                  noteEn: 'Basics of IAM role and policy design',
                 },
                 {
                   title: 'エンタープライズアプリケーション向け Amazon Cognito 認証フローの選択',
+                  titleEn: 'Choose an Amazon Cognito Authentication Flow for Enterprise Applications',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/choose-an-amazon-cognito-authentication-flow-for-enterprise-applications.html',
                   note: 'Prescriptive Guidance: 認証フロー選択ガイド',
+                  noteEn: 'Prescriptive Guidance: Authentication flow selection guide',
                   recommend: true,
                 },
               ],
             },
           ],
         },
+
         {
           id: '2.2',
           title: 'Implement encryption by using AWS services.',
@@ -638,6 +919,20 @@ export const DVA_C02 = {
             '- アカウントの境界を越えた暗号化の使用',
             '- キーローテーションの有効化と無効化',
           ],
+          descriptionEn: [
+            'Task 2: Implement encryption by using AWS services.',
+            'Target knowledge:',
+            '- Encryption at rest and in transit',
+            '- Certificate management (AWS Private Certificate Authority, etc.)',
+            '- Key protection (key rotation, etc.)',
+            '- Differences between client-side and server-side encryption',
+            '- Differences between AWS managed keys and customer managed AWS KMS keys',
+            'Target skills:',
+            '- Encrypting or decrypting data using encryption keys',
+            '- Generating certificates and SSH keys for development purposes',
+            '- Using encryption across account boundaries',
+            '- Enabling and disabling key rotation',
+          ],
           knowledge: [
             'AWS KMS',
             '保管中・転送中の暗号化',
@@ -645,17 +940,28 @@ export const DVA_C02 = {
             'クライアント側・サーバー側暗号化',
             'キーローテーション',
           ],
+          knowledgeEn: [
+            'AWS KMS',
+            'Encryption at rest and in transit',
+            'AWS Private CA',
+            'Client-side and server-side encryption',
+            'Key rotation',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'AWS Secrets Manager、AWS KMS、AWS Certificate Manager で DevOps パイプラインを強化しデータを保護する',
+                  titleEn: 'Strengthen the DevOps Pipeline and Protect Data with AWS Secrets Manager, AWS KMS, and AWS Certificate Manager',
                   url: 'https://aws.amazon.com/blogs/security/strengthen-the-devops-pipeline-and-protect-data-with-aws-secrets-manager-aws-kms-and-aws-certificate-manager/',
                   note: 'Security Blog: Intermediate (Level 200)',
+                  noteEn: 'Security Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -663,49 +969,64 @@ export const DVA_C02 = {
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS Key Management Service Part.2 発展編',
+                  titleEn: 'AWS Key Management Service Part 2 - Advanced',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
                   note: 'PDF | Youtube: 2024/04',
+                  noteEn: 'PDF | YouTube: 2024/04',
                   recommend: true,
                 },
                 {
                   title: 'AWS Key Management Service',
+                  titleEn: 'AWS Key Management Service',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2018/11%0AArchived-,AWS%20Key%20Management%20Service',
                   note: 'PDF | Youtube: 2018/11',
+                  noteEn: 'PDF | YouTube: 2018/11',
                 },
                 {
                   title: 'AWS Certificate Manager',
+                  titleEn: 'AWS Certificate Manager',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Certificate%20Manager',
                   note: 'PDF | Youtube: 2018/12',
+                  noteEn: 'PDF | YouTube: 2018/12',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS KMS 開発者ガイド',
+                  titleEn: 'AWS KMS Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/kms/latest/developerguide/overview.html',
+                  urlEn: 'https://docs.aws.amazon.com/kms/latest/developerguide/overview.html',
                   note: '暗号化キーの作成・管理・ローテーション',
+                  noteEn: 'Creating, managing, and rotating encryption keys',
                   recommend: true,
                 },
                 {
                   title: 'AWS KMS ベストプラクティス',
+                  titleEn: 'AWS KMS Best Practices',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/aws-kms-best-practices/introduction.html',
                   note: 'Prescriptive Guidance: 暗号化のベストプラクティス',
+                  noteEn: 'Prescriptive Guidance: Encryption best practices',
                   recommend: true,
                 },
               ],
             },
           ],
         },
+
         {
           id: '2.3',
           title: 'Manage sensitive data in application code.',
@@ -722,6 +1043,18 @@ export const DVA_C02 = {
             '- シークレット管理サービスの使用による機密データの保護',
             '- 機密データのサニタイズ',
           ],
+          descriptionEn: [
+            'Task 3: Manage sensitive data in application code.',
+            'Target knowledge:',
+            '- Data classification (PII, PHI, etc.)',
+            '- Environment variables',
+            '- Secrets management (AWS Secrets Manager, AWS Systems Manager Parameter Store, etc.)',
+            '- Secure credential handling',
+            'Target skills:',
+            '- Encrypting environment variables that contain sensitive data',
+            '- Protecting sensitive data using secrets management services',
+            '- Sanitizing sensitive data',
+          ],
           knowledge: [
             'PII・PHI',
             'AWS Secrets Manager',
@@ -729,53 +1062,78 @@ export const DVA_C02 = {
             'データマスキング',
             'マルチテナント',
           ],
+          knowledgeEn: [
+            'PII / PHI',
+            'AWS Secrets Manager',
+            'AWS Systems Manager Parameter Store',
+            'Data masking',
+            'Multi-tenancy',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'シークレット管理への一般的な集中型・分散型アプローチの探索',
+                  titleEn: 'Exploring Common Centralized and Decentralized Approaches to Secrets Management',
                   url: 'https://aws.amazon.com/blogs/security/exploring-common-centralized-and-decentralized-approaches-to-secrets-management/',
                   note: 'Security Blog: Intermediate (Level 200)',
+                  noteEn: 'Security Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'AWS Secrets Manager、AWS KMS、ACM で DevOps パイプラインを強化する',
+                  titleEn: 'Strengthen the DevOps Pipeline with AWS Secrets Manager, AWS KMS, and ACM',
                   url: 'https://aws.amazon.com/blogs/security/strengthen-the-devops-pipeline-and-protect-data-with-aws-secrets-manager-aws-kms-and-aws-certificate-manager/',
                   note: 'Security Blog: Intermediate (Level 200)',
+                  noteEn: 'Security Blog: Intermediate (Level 200)',
                 },
               ],
             },
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Secrets Manager ユーザーガイド',
+                  titleEn: 'AWS Secrets Manager User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/secretsmanager/latest/userguide/intro.html',
+                  urlEn: 'https://docs.aws.amazon.com/secretsmanager/latest/userguide/intro.html',
                   note: 'シークレットの安全な保存と管理',
+                  noteEn: 'Securely storing and managing secrets',
                   recommend: true,
                 },
+
                 {
                   title: 'AWS Secrets Manager ベストプラクティス',
+                  titleEn: 'AWS Secrets Manager Best Practices',
                   url: 'https://docs.aws.amazon.com/secretsmanager/latest/userguide/best-practices.html',
                   note: 'ローテーション・アクセス制御・暗号化のベストプラクティス',
+                  noteEn: 'Best practices for rotation, access control, and encryption',
                   recommend: true,
                 },
                 {
                   title: 'AWS Systems Manager Parameter Store',
+                  titleEn: 'AWS Systems Manager Parameter Store',
                   url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-parameter-store.html',
+                  urlEn: 'https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html',
                   note: '設定データとシークレットの集中管理',
+                  noteEn: 'Centralized management of configuration data and secrets',
                 },
                 {
                   title: 'SEC02-BP03 シークレットを安全に保存して使用する',
+                  titleEn: 'SEC02-BP03 Store and Use Secrets Securely',
                   url: 'https://docs.aws.amazon.com/wellarchitected/2025-02-25/framework/sec_identities_secrets.html',
                   note: 'Well-Architected Framework: シークレット管理の設計原則',
+                  noteEn: 'Well-Architected Framework: Design principles for secrets management',
                 },
               ],
             },
@@ -783,6 +1141,7 @@ export const DVA_C02 = {
         },
       ],
     },
+
     {
       id: 3,
       title: 'Deployment',
@@ -790,6 +1149,7 @@ export const DVA_C02 = {
       weight: 24,
       color: '#22c55e',
       description: 'このドメインでは、アプリケーションアーティファクトの準備、テスト、CI/CD を使用したデプロイに関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to preparing application artifacts, testing, and deploying using CI/CD.',
       tasks: [
         {
           id: '3.1',
@@ -808,6 +1168,20 @@ export const DVA_C02 = {
             '- デプロイ環境でのコードリポジトリの使用',
             '- リソース (メモリ、コアなど) に対するアプリケーション要件の適用',
           ],
+          descriptionEn: [
+            'Task 1: Prepare application artifacts to be deployed to AWS.',
+            'Target knowledge:',
+            '- Methods for accessing application configuration data (AWS AppConfig, Secrets Manager, Parameter Store, etc.)',
+            '- Lambda deployment packaging, layers, and configuration options',
+            '- Git-based version control tools (Git, etc.)',
+            '- Container images',
+            'Target skills:',
+            '- Managing dependencies of code modules within packages (environment variables, config files, container images, etc.)',
+            '- Organizing file and directory structures for application deployment',
+            '- Using code repositories in deployment environments',
+            '- Applying application requirements to resources (memory, cores, etc.)',
+          ],
+
           knowledge: [
             'コンテナイメージ',
             'コードリポジトリ',
@@ -815,17 +1189,27 @@ export const DVA_C02 = {
             '環境変数',
             'デプロイアーティファクト',
           ],
+          knowledgeEn: [
+            'Container images',
+            'Code repositories',
+            'AWS AppConfig',
+            'Environment variables',
+            'Deployment artifacts',
+          ],
           resources: [
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS Serverless Application Model',
+                  titleEn: 'AWS Serverless Application Model',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Serverless%20Application%20Model',
                   note: 'PDF | Youtube: 2019/08',
+                  noteEn: 'PDF | YouTube: 2019/08',
                   recommend: true,
                 },
               ],
@@ -833,29 +1217,40 @@ export const DVA_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS SAM 開発者ガイド',
+                  titleEn: 'AWS SAM Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/serverless-application-model/latest/developerguide/what-is-sam.html',
+                  urlEn: 'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html',
                   note: 'サーバーレスアプリケーションのビルドとデプロイ',
+                  noteEn: 'Building and deploying serverless applications',
                   recommend: true,
                 },
                 {
                   title: 'AWS AppConfig ユーザーガイド',
+                  titleEn: 'AWS AppConfig User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/appconfig/latest/userguide/what-is-appconfig.html',
+                  urlEn: 'https://docs.aws.amazon.com/appconfig/latest/userguide/what-is-appconfig.html',
                   note: 'アプリケーション設定のデプロイ管理',
+                  noteEn: 'Application configuration deployment management',
                 },
                 {
                   title: 'Lambda デプロイパッケージ',
+                  titleEn: 'Lambda Deployment Packages',
                   url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/gettingstarted-package.html',
+                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-package.html',
                   note: 'ZIP / コンテナイメージでのパッケージング',
+                  noteEn: 'Packaging with ZIP / container images',
                 },
               ],
             },
           ],
         },
+
         {
           id: '3.2',
           title: 'Test applications in development environments.',
@@ -872,6 +1267,18 @@ export const DVA_C02 = {
             '- 開発エンドポイントを使用したアプリケーションのテスト (Amazon API Gateway でのステージの設定など)',
             '- 既存の環境へのアプリケーションスタックの更新のデプロイ (AWS SAM テンプレートの別のステージング環境へのデプロイなど)',
           ],
+          descriptionEn: [
+            'Task 2: Test applications in development environments.',
+            'Target knowledge:',
+            '- Features of AWS services that perform application deployment',
+            '- Integration testing using mock endpoints',
+            '- Lambda versions and aliases',
+            'Target skills:',
+            '- Testing deployed code using AWS services and tools',
+            '- Performing mock integrations of APIs and resolving integration dependencies',
+            '- Testing applications using development endpoints (configuring stages in Amazon API Gateway, etc.)',
+            '- Deploying application stack updates to existing environments (deploying AWS SAM templates to another staging environment, etc.)',
+          ],
           knowledge: [
             'Amazon API Gateway ステージ',
             'AWS SAM',
@@ -879,34 +1286,53 @@ export const DVA_C02 = {
             'モック API',
             'イベント駆動型テスト',
           ],
+          knowledgeEn: [
+            'Amazon API Gateway stages',
+            'AWS SAM',
+            'Integration testing',
+            'Mock APIs',
+            'Event-driven testing',
+          ],
+
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon API Gateway でのステージ管理',
+                  titleEn: 'Stage Management in Amazon API Gateway',
                   url: 'https://docs.aws.amazon.com/ja_jp/apigateway/latest/developerguide/how-to-deploy-api.html',
+                  urlEn: 'https://docs.aws.amazon.com/apigateway/latest/developerguide/how-to-deploy-api.html',
                   note: 'テスト環境のステージ設定とデプロイ',
+                  noteEn: 'Stage configuration and deployment for test environments',
                   recommend: true,
                 },
                 {
                   title: 'Lambda 関数のバージョンとエイリアス',
+                  titleEn: 'Lambda Function Versions and Aliases',
                   url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-aliases.html',
+                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-aliases.html',
                   note: 'バージョニングとトラフィックシフティングの基本',
+                  noteEn: 'Basics of versioning and traffic shifting',
                   recommend: true,
                 },
                 {
                   title: 'AWS SAM を使用したローカルテスト',
+                  titleEn: 'Local Testing with AWS SAM',
                   url: 'https://docs.aws.amazon.com/ja_jp/serverless-application-model/latest/developerguide/serverless-test-and-debug.html',
+                  urlEn: 'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-test-and-debug.html',
                   note: 'sam local invoke / sam local start-api でのローカルテスト',
+                  noteEn: 'Local testing with sam local invoke / sam local start-api',
                 },
               ],
             },
           ],
         },
+
         {
           id: '3.3',
           title: 'Automate deployment testing.',
@@ -924,6 +1350,19 @@ export const DVA_C02 = {
             '- Infrastructure as Code (IaC) テンプレートの実装およびデプロイ (AWS SAM テンプレート、AWS CloudFormation テンプレートなど)',
             '- 個々の AWS のサービスの環境管理 (API Gateway での開発、テスト、本番環境の区別など)',
           ],
+          descriptionEn: [
+            'Task 3: Automate deployment testing.',
+            'Target knowledge:',
+            '- API Gateway stages',
+            '- Branches and actions in CI/CD workflows',
+            '- Automated software testing (unit tests, mock tests, etc.)',
+            'Target skills:',
+            '- Creating application test events (JSON payloads for testing Lambda, API Gateway, AWS SAM resources, etc.)',
+            '- Deploying API resources to various environments',
+            '- Creating application environments using approved versions for integration testing (Lambda aliases, container image tags, AWS Amplify branches, AWS Copilot environments, etc.)',
+            '- Implementing and deploying IaC templates (AWS SAM templates, AWS CloudFormation templates, etc.)',
+            '- Managing environments for individual AWS services (distinguishing between development, test, and production in API Gateway, etc.)',
+          ],
           knowledge: [
             'Lambda エイリアス',
             'AWS Amplify',
@@ -931,17 +1370,28 @@ export const DVA_C02 = {
             'Infrastructure as Code (IaC)',
             'Amazon Q Developer',
           ],
+          knowledgeEn: [
+            'Lambda aliases',
+            'AWS Amplify',
+            'AWS CloudFormation',
+            'Infrastructure as Code (IaC)',
+            'Amazon Q Developer',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'AWS Step Functions のテストと CI/CD パイプラインの作成（CodePipeline + CodeBuild）',
+                  titleEn: 'Testing and Creating CI/CD Pipelines for AWS Step Functions Using AWS CodePipeline and AWS CodeBuild',
                   url: 'https://aws.amazon.com/blogs/devops/testing-and-creating-ci-cd-pipelines-for-aws-step-functions-using-aws-codepipeline-and-aws-codebuild/',
                   note: 'DevOps Blog: Intermediate (Level 200)',
+                  noteEn: 'DevOps Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -949,42 +1399,55 @@ export const DVA_C02 = {
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS CloudFormation#1 基礎編',
+                  titleEn: 'AWS CloudFormation #1 - Basics',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
                   note: 'PDF | Youtube: 2023/07',
+                  noteEn: 'PDF | YouTube: 2023/07',
                 },
                 {
                   title: 'AWS CloudFormation DeepDive 編',
+                  titleEn: 'AWS CloudFormation DeepDive',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%20DeepDive%20%E7%B7%A8',
                   note: 'PDF | Youtube: 2023/10',
+                  noteEn: 'PDF | YouTube: 2023/10',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS CloudFormation ユーザーガイド',
+                  titleEn: 'AWS CloudFormation User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AWSCloudFormation/latest/UserGuide/Welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/Welcome.html',
                   note: 'IaC テンプレートの作成とデプロイ',
+                  noteEn: 'Creating and deploying IaC templates',
                   recommend: true,
                 },
                 {
                   title: 'AWS CodePipeline と AWS CDK で CI/CD パイプラインをセットアップする',
+                  titleEn: 'Set Up a CI/CD Pipeline by Using AWS CodePipeline and AWS CDK',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/set-up-a-ci-cd-pipeline-by-using-aws-codepipeline-and-aws-cdk.html',
                   note: 'Prescriptive Guidance: CDK + CodePipeline パターン',
+                  noteEn: 'Prescriptive Guidance: CDK + CodePipeline pattern',
                 },
               ],
             },
           ],
         },
+
         {
           id: '3.4',
           title: 'Deploy code by using AWS CI/CD services.',
@@ -1010,6 +1473,28 @@ export const DVA_C02 = {
             '- バージョンとリリース管理へのラベルとブランチの使用',
             '- 動的デプロイを作成するための既存のランタイム設定の使用 (Lambda 関数での API Gateway のステージング変数の使用など)',
           ],
+
+          descriptionEn: [
+            'Task 4: Deploy code by using AWS CI/CD services.',
+            'Target knowledge:',
+            '- Git-based version control tools (Git, etc.)',
+            '- Manual and automatic approvals in AWS CodePipeline',
+            '- Accessing application configuration from AWS AppConfig and Secrets Manager',
+            '- CI/CD workflows using AWS services',
+            '- Deploying applications using AWS services and tools (CloudFormation, AWS CDK, AWS SAM, AWS CodeArtifact, AWS Copilot, Amplify, Lambda, etc.)',
+            '- Lambda deployment packaging options',
+            '- API Gateway stages and custom domains',
+            '- Deployment strategies (canary, blue/green, rolling, etc.)',
+            'Target skills:',
+            '- Updating existing IaC templates (AWS SAM templates, CloudFormation templates, etc.)',
+            '- Managing application environments using AWS services',
+            '- Deploying application versions using deployment strategies',
+            '- Committing code to repositories to invoke build, test, and deploy actions',
+            '- Using orchestrated workflows to deploy code to various environments',
+            '- Performing application rollback using existing deployment strategies',
+            '- Using labels and branches for version and release management',
+            '- Using existing runtime configurations to create dynamic deployments (using API Gateway staging variables in Lambda functions, etc.)',
+          ],
           knowledge: [
             'AWS CodePipeline',
             'AWS CodeBuild',
@@ -1018,72 +1503,103 @@ export const DVA_C02 = {
             'カナリアデプロイ',
             'ローリングデプロイ',
           ],
+          knowledgeEn: [
+            'AWS CodePipeline',
+            'AWS CodeBuild',
+            'AWS CodeDeploy',
+            'Blue/green deployment',
+            'Canary deployment',
+            'Rolling deployment',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'AWS CodeCommit、CodeBuild、CodeDeploy、CodePipeline で完全な CI/CD を実現する',
+                  titleEn: 'Complete CI/CD with AWS CodeCommit, AWS CodeBuild, AWS CodeDeploy, and AWS CodePipeline',
                   url: 'https://aws.amazon.com/blogs/devops/complete-ci-cd-with-aws-codecommit-aws-codebuild-aws-codedeploy-and-aws-codepipeline/',
                   note: 'DevOps Blog: Intermediate (Level 200)',
+                  noteEn: 'DevOps Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'Lambda エイリアスのトラフィックシフティングによるカナリアデプロイの実装',
+                  titleEn: 'Implementing Canary Deployments of AWS Lambda Functions with Alias Traffic Shifting',
                   url: 'https://aws.amazon.com/blogs/compute/implementing-canary-deployments-of-aws-lambda-functions-with-alias-traffic-shifting/',
                   note: 'Compute Blog: Advanced (Level 300)',
+                  noteEn: 'Compute Blog: Advanced (Level 300)',
                   recommend: true,
                 },
                 {
                   title: 'AWS CloudFormation と AWS CodeDeploy を使った Amazon ECS へのブルー/グリーンデプロイ',
+                  titleEn: 'Blue/Green Deployments to Amazon ECS Using AWS CloudFormation and AWS CodeDeploy',
                   url: 'https://aws.amazon.com/it/blogs/devops/blue-green-deployments-to-amazon-ecs-using-aws-cloudformation-and-aws-codedeploy/',
                   note: 'DevOps Blog: Advanced (Level 300)',
+                  noteEn: 'DevOps Blog: Advanced (Level 300)',
                 },
               ],
             },
+
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'AWS CodePipeline 基礎編',
+                  titleEn: 'AWS CodePipeline - Basics',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CodePipeline%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
                   note: 'PDF | Youtube: 2025/12',
+                  noteEn: 'PDF | YouTube: 2025/12',
                   recommend: true,
                 },
                 {
                   title: 'AWS CodeConnections',
+                  titleEn: 'AWS CodeConnections',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CodeConnections',
                   note: 'PDF | Youtube: 2024/12',
+                  noteEn: 'PDF | YouTube: 2024/12',
                 },
               ],
             },
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS CodePipeline ユーザーガイド',
+                  titleEn: 'AWS CodePipeline User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/codepipeline/latest/userguide/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/codepipeline/latest/userguide/welcome.html',
                   note: 'CI/CD パイプラインの構築',
+                  noteEn: 'Building CI/CD pipelines',
                   recommend: true,
                 },
                 {
                   title: 'AWS CodeDeploy ユーザーガイド',
+                  titleEn: 'AWS CodeDeploy User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/codedeploy/latest/userguide/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/codedeploy/latest/userguide/welcome.html',
                   note: 'デプロイ戦略（Blue/Green・カナリア）の実装',
+                  noteEn: 'Implementing deployment strategies (Blue/Green, canary)',
                 },
                 {
                   title: 'Lambda のデプロイ（CodeDeploy ブルー/グリーン）',
+                  titleEn: 'Lambda Deployment (CodeDeploy Blue/Green)',
                   url: 'https://docs.aws.amazon.com/codedeploy/latest/userguide/applications-create-blue-green.html',
                   note: 'CodeDeploy User Guide: Lambda B/G デプロイの作成',
+                  noteEn: 'CodeDeploy User Guide: Creating Lambda B/G deployments',
                 },
               ],
             },
@@ -1091,6 +1607,7 @@ export const DVA_C02 = {
         },
       ],
     },
+
     {
       id: 4,
       title: 'Troubleshooting and Optimization',
@@ -1098,6 +1615,7 @@ export const DVA_C02 = {
       weight: 18,
       color: '#a855f7',
       description: 'このドメインでは、根本原因分析、オブザーバビリティ、アプリケーションの最適化に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to root cause analysis, observability, and application optimization.',
       tasks: [
         {
           id: '4.1',
@@ -1121,6 +1639,25 @@ export const DVA_C02 = {
             '- ダッシュボードとインサイトを使用したアプリケーションヘルスの確認',
             '- サービス出力ログを使用したデプロイ失敗のトラブルシューティング',
           ],
+
+          descriptionEn: [
+            'Task 1: Assist in a root cause analysis.',
+            'Target knowledge:',
+            '- Logging and monitoring systems',
+            '- Log query languages (Amazon CloudWatch Logs Insights, etc.)',
+            '- Data visualization',
+            '- Code analysis tools',
+            '- Common HTTP error codes',
+            '- Common exceptions generated by SDKs',
+            '- AWS X-Ray service maps',
+            'Target skills:',
+            '- Debugging code to identify defects',
+            '- Interpreting application metrics, logs, and traces',
+            '- Querying logs to find relevant data',
+            '- Implementing custom metrics (CloudWatch Embedded Metric Format (EMF), etc.)',
+            '- Reviewing application health using dashboards and insights',
+            '- Troubleshooting deployment failures using service output logs',
+          ],
           knowledge: [
             'Amazon CloudWatch',
             'CloudWatch EMF',
@@ -1128,23 +1665,36 @@ export const DVA_C02 = {
             'デバッグ',
             'デプロイ失敗のトラブルシューティング',
           ],
+          knowledgeEn: [
+            'Amazon CloudWatch',
+            'CloudWatch EMF',
+            'Log queries',
+            'Debugging',
+            'Troubleshooting deployment failures',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Operating Lambda: CloudWatch Logs Insights の使用',
+                  titleEn: 'Operating Lambda: Using CloudWatch Logs Insights',
                   url: 'https://aws.amazon.com/blogs/compute/operating-lambda-using-cloudwatch-logs-insights',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'Operating Lambda: ロギングとカスタムメトリクス',
+                  titleEn: 'Operating Lambda: Logging and Custom Metrics',
                   url: 'https://aws.amazon.com/blogs/compute/operating-lambda-logging-and-custom-metrics/',
                   note: 'Compute Blog: Intermediate (Level 200)',
+                  noteEn: 'Compute Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
               ],
@@ -1152,43 +1702,57 @@ export const DVA_C02 = {
             {
               key: 'blackbelts',
               label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
               iconClass: 'fas fa-video',
               iconColorClass: 'text-red-500',
               items: [
                 {
                   title: 'Amazon CloudWatch Part1 Observability の基本・メトリクス・アラーム編',
+                  titleEn: 'Amazon CloudWatch Part1 - Observability Basics, Metrics, and Alarms',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20CloudWatch%20Part1%20Observability%20%E3%81%AE%E5%9F%BA%E6%9C%AC',
                   note: 'PDF | Youtube: 2026/05',
+                  noteEn: 'PDF | YouTube: 2026/05',
                   recommend: true,
                 },
                 {
                   title: 'Serverless モニタリング',
+                  titleEn: 'Serverless Monitoring',
                   url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Serverless%E3%83%A2%E3%83%8B%E3%82%BF%E3%83%AA%E3%83%B3%E3%82%B0',
                   note: 'PDF | Youtube: 2019/08',
+                  noteEn: 'PDF | YouTube: 2019/08',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon CloudWatch ユーザーガイド',
+                  titleEn: 'Amazon CloudWatch User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/WhatIsCloudWatch.html',
                   note: 'メトリクス・ログ・アラームによるモニタリング',
+                  noteEn: 'Monitoring with metrics, logs, and alarms',
                   recommend: true,
                 },
                 {
                   title: 'CloudWatch Logs Insights クエリ構文',
+                  titleEn: 'CloudWatch Logs Insights Query Syntax',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/CWL_QuerySyntax.html',
                   note: 'ログクエリ言語のリファレンス',
+                  noteEn: 'Log query language reference',
                 },
               ],
             },
           ],
         },
+
         {
           id: '4.2',
           title: 'Instrument code for observability.',
@@ -1207,6 +1771,20 @@ export const DVA_C02 = {
             '- 特定のアクション (クォータ制限またはデプロイの完了に関する通知など) に関する通知アラートの実装',
             '- AWS のサービスとツールを使用したトレースの実装',
           ],
+          descriptionEn: [
+            'Task 2: Instrument code for observability.',
+            'Target knowledge:',
+            '- Distributed tracing',
+            '- Differences between logging, monitoring, and observability',
+            '- Structured logging',
+            '- Application metrics (custom, embedded, built-in, etc.)',
+            'Target skills:',
+            '- Implementing effective logging strategies to record application behavior and state',
+            '- Implementing code that emits custom metrics',
+            '- Adding annotations to tracing services',
+            '- Implementing notification alerts for specific actions (quota limit notifications, deployment completion notifications, etc.)',
+            '- Implementing tracing using AWS services and tools',
+          ],
           knowledge: [
             'AWS X-Ray',
             '構造化ログ記録',
@@ -1214,64 +1792,94 @@ export const DVA_C02 = {
             'ヘルスチェック',
             'オブザーバビリティ',
           ],
+          knowledgeEn: [
+            'AWS X-Ray',
+            'Structured logging',
+            'Custom metrics',
+            'Health checks',
+            'Observability',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'AWS ネイティブな CloudWatch と X-Ray を使用したサーバーレスモダンアプリケーションのオブザーバビリティ',
+                  titleEn: 'Observability Using Native Amazon CloudWatch and AWS X-Ray for Serverless Modern Applications',
                   url: 'https://aws.amazon.com/jp/blogs/news/observability-using-native-amazon-cloudwatch-and-aws-x-ray-for-serverless-modern-applications/',
+                  urlEn: 'https://aws.amazon.com/blogs/news/observability-using-native-amazon-cloudwatch-and-aws-x-ray-for-serverless-modern-applications/',
                   note: 'Management & Governance Blog: Intermediate (Level 200)',
+                  noteEn: 'Management & Governance Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'Amazon CloudWatch と AWS X-Ray で MTTR を短縮する',
+                  titleEn: 'Lowering MTTR with Amazon CloudWatch and AWS X-Ray',
                   url: 'https://aws.amazon.com/jp/blogs/mt/lowering-mttr-with-amazon-cloudwatch-and-aws-x-ray/',
+                  urlEn: 'https://aws.amazon.com/blogs/mt/lowering-mttr-with-amazon-cloudwatch-and-aws-x-ray/',
                   note: 'Management & Governance Blog: Intermediate (Level 200)',
+                  noteEn: 'Management & Governance Blog: Intermediate (Level 200)',
                   recommend: true,
                 },
                 {
                   title: 'AWS Lambda Powertools でサーバーレスのベストプラクティスを簡素化する',
+                  titleEn: 'Simplifying Serverless Best Practices with Lambda Powertools',
                   url: 'https://aws.amazon.com/cn/blogs/opensource/simplifying-serverless-best-practices-with-lambda-powertools/',
                   note: 'Open Source Blog: Intermediate (Level 200)',
+                  noteEn: 'Open Source Blog: Intermediate (Level 200)',
                 },
                 {
                   title: 'AWS Lambda 関数の高度なロギングコントロールの紹介',
+                  titleEn: 'Introducing Advanced Logging Controls for AWS Lambda Functions',
                   url: 'https://aws.amazon.com/it/blogs/compute/introducing-advanced-logging-controls-for-aws-lambda-functions/',
                   note: 'Compute Blog: Intermediate (Level 200) - JSON 構造化ログ',
+                  noteEn: 'Compute Blog: Intermediate (Level 200) - JSON structured logging',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS X-Ray 開発者ガイド',
+                  titleEn: 'AWS X-Ray Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/xray/latest/devguide/aws-xray.html',
+                  urlEn: 'https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html',
                   note: '分散トレーシングによるアプリケーション分析',
+                  noteEn: 'Application analysis with distributed tracing',
                   recommend: true,
                 },
                 {
                   title: 'Powertools for AWS Lambda',
+                  titleEn: 'Powertools for AWS Lambda',
                   url: 'https://aws.amazon.com/jp/powertools-for-aws-lambda/',
+                  urlEn: 'https://aws.amazon.com/powertools-for-aws-lambda/',
                   note: 'Logger / Tracer / Metrics ユーティリティ（Python, Java, TypeScript, .NET）',
+                  noteEn: 'Logger / Tracer / Metrics utilities (Python, Java, TypeScript, .NET)',
                   recommend: true,
                 },
                 {
                   title: 'AWS Prescriptive Guidance: X-Ray によるアプリケーショントレーシング',
+                  titleEn: 'AWS Prescriptive Guidance: Application Tracing with X-Ray',
                   url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/implementing-logging-monitoring-cloudwatch/application-tracing-xray.html',
                   note: 'CloudWatch + X-Ray の統合実装パターン',
+                  noteEn: 'CloudWatch + X-Ray integrated implementation pattern',
                 },
               ],
             },
           ],
         },
+
         {
           id: '4.3',
           title: 'Optimize applications by using AWS services and features.',
@@ -1288,6 +1896,18 @@ export const DVA_C02 = {
             '- サブスクリプションフィルターポリシーを使用したメッセージの最適化',
             '- リクエストヘッダーに基づくコンテンツのキャッシュ',
           ],
+          descriptionEn: [
+            'Task 3: Optimize applications by using AWS services and features.',
+            'Target knowledge:',
+            '- Caching',
+            '- Concurrency',
+            '- Messaging services (Amazon SQS, Amazon SNS, etc.)',
+            'Target skills:',
+            '- Profiling application performance',
+            '- Determining minimum memory and compute capacity for applications',
+            '- Optimizing messages using subscription filter policies',
+            '- Caching content based on request headers',
+          ],
           knowledge: [
             '同時実行',
             'キャッシュ戦略',
@@ -1295,48 +1915,73 @@ export const DVA_C02 = {
             'パフォーマンスプロファイリング',
             'サブスクリプションフィルター',
           ],
+          knowledgeEn: [
+            'Concurrency',
+            'Caching strategies',
+            'Amazon ElastiCache',
+            'Performance profiling',
+            'Subscription filters',
+          ],
+
           resources: [
             {
               key: 'blogs',
               label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
               iconClass: 'fas fa-book',
               iconColorClass: 'text-orange-500',
               items: [
                 {
                   title: 'Operating Lambda: パフォーマンスの最適化 – Part 1',
+                  titleEn: 'Operating Lambda: Performance Optimization - Part 1',
                   url: 'https://aws.amazon.com/jp/blogs/news/operating-lambda-performance-optimization-part-1/',
+                  urlEn: 'https://aws.amazon.com/blogs/news/operating-lambda-performance-optimization-part-1/',
                   note: 'Compute Blog: Advanced (Level 300) - メモリ・同時実行の最適化',
+                  noteEn: 'Compute Blog: Advanced (Level 300) - Memory and concurrency optimization',
                   recommend: true,
                 },
                 {
                   title: 'Well-Architected サーバーレスアプリケーションの構築: パフォーマンスの最適化 – Part 3',
+                  titleEn: 'Building Well-Architected Serverless Applications: Optimizing Application Performance - Part 3',
                   url: 'https://aws.amazon.com/jp/blogs/compute/building-well-architected-serverless-applications-optimizing-application-performance-part-3/',
+                  urlEn: 'https://aws.amazon.com/blogs/compute/building-well-architected-serverless-applications-optimizing-application-performance-part-3/',
                   note: 'Compute Blog: Intermediate (Level 200) - API Gateway 直接統合',
+                  noteEn: 'Compute Blog: Intermediate (Level 200) - API Gateway direct integration',
                 },
               ],
             },
+
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon ElastiCache ユーザーガイド',
+                  titleEn: 'Amazon ElastiCache User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/WhatIs.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html',
                   note: 'キャッシュ戦略によるパフォーマンス最適化',
+                  noteEn: 'Performance optimization through caching strategies',
                   recommend: true,
                 },
                 {
                   title: 'Lambda のベストプラクティス（Operator Guide）',
+                  titleEn: 'Lambda Best Practices (Operator Guide)',
                   url: 'https://docs.aws.amazon.com/lambda/latest/operatorguide/architecture-best-practice.html',
                   note: '実行環境の再利用・SDK 初期化の外出し・/tmp キャッシュ',
+                  noteEn: 'Execution environment reuse, SDK initialization outside handler, /tmp caching',
                   recommend: true,
                 },
                 {
                   title: 'Amazon SQS 開発者ガイド',
+                  titleEn: 'Amazon SQS Developer Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html',
                   note: 'メッセージキューイングによる非同期処理の最適化',
+                  noteEn: 'Optimizing asynchronous processing with message queuing',
                 },
               ],
             },

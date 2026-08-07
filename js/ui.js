@@ -49,6 +49,81 @@ import {
 import { initChat, resetChat } from './chat.js';
 import { t, getLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 
+/**
+ * Return locale-aware title: jpTitle for 'ja', title (English) for 'en'.
+ * Falls back to whichever is available.
+ */
+function localizedTitle(obj) {
+  if (!obj) return '';
+  if (getLocale() === 'ja') return obj.jpTitle || obj.title || '';
+  return obj.title || obj.jpTitle || '';
+}
+
+/**
+ * Return locale-aware description lines.
+ * Uses descriptionEn (if available) for 'en', description for 'ja'.
+ */
+function localizedDescription(obj) {
+  if (!obj) return [];
+  if (getLocale() === 'en' && obj.descriptionEn) return obj.descriptionEn;
+  return obj.description || [];
+}
+
+/**
+ * Return locale-aware knowledge array.
+ * Uses knowledgeEn (if available) for 'en', knowledge for 'ja'.
+ */
+function localizedKnowledge(obj) {
+  if (!obj) return [];
+  if (getLocale() === 'en' && obj.knowledgeEn) return obj.knowledgeEn;
+  return obj.knowledge || [];
+}
+
+/**
+ * Return locale-aware subtitle.
+ */
+function localizedSubtitle(exam) {
+  if (!exam) return '';
+  if (getLocale() === 'en') return exam.subtitleEn || t('header.subtitle');
+  return exam.subtitle || '';
+}
+
+/**
+ * Return locale-aware resource label.
+ */
+function localizedResourceLabel(section) {
+  if (!section) return '';
+  if (getLocale() === 'en' && section.labelEn) return section.labelEn;
+  return section.label || '';
+}
+
+/**
+ * Return locale-aware resource item title.
+ */
+function localizedResourceTitle(item) {
+  if (!item) return '';
+  if (getLocale() === 'en' && item.titleEn) return item.titleEn;
+  return item.title || '';
+}
+
+/**
+ * Return locale-aware resource item note.
+ */
+function localizedResourceNote(item) {
+  if (!item) return '';
+  if (getLocale() === 'en' && item.noteEn) return item.noteEn;
+  return item.note || '';
+}
+
+/**
+ * Return locale-aware domain description.
+ */
+function localizedDomainDescription(domain) {
+  if (!domain) return '';
+  if (getLocale() === 'en' && domain.descriptionEn) return domain.descriptionEn;
+  return domain.description || '';
+}
+
 let chartInstance = null;
 
 const XP_RULES = {
@@ -261,7 +336,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (mode === 'smartReview') {
       const reviewQuestions = getSmartReviewCombined(lastAiRequest.examId);
       if (reviewQuestions.length === 0) {
-        alert('復習対象の問題がまだありません。まずはクイズに挑戦しましょう！');
+        alert(getLocale() === 'ja'
+          ? '復習対象の問題がまだありません。まずはクイズに挑戦しましょう！'
+          : 'No questions to review yet. Try a quiz first!');
         return;
       }
       closeModal(els.quizModeModal);
@@ -301,16 +378,20 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (mode === 'mock' && isAiBatchEligible()) {
       // 進行中のバッチがあれば二重起動を防ぐ
       if (batchInProgress) {
-        alert('既にバッチ生成が進行中です。完了するまでお待ちください。');
+        alert(getLocale() === 'ja'
+          ? '既にバッチ生成が進行中です。完了するまでお待ちください。'
+          : t('batch.alreadyInProgress'));
         return;
       }
       const ok = window.confirm(
-        '本番模擬試験を「Gemini Batch API」で生成します。\n\n' +
-        '⚠️ 注意事項\n' +
-        '・完了まで数分〜最大数十分かかる場合があります\n' +
-        '・このタブ／ブラウザを閉じると生成は中断されます\n' +
-        '・完了したら画面右下に通知が表示されます\n\n' +
-        '続行しますか？'
+        getLocale() === 'ja'
+          ? '本番模擬試験を「Gemini Batch API」で生成します。\n\n' +
+            '⚠️ 注意事項\n' +
+            '・完了まで数分〜最大数十分かかる場合があります\n' +
+            '・このタブ／ブラウザを閉じると生成は中断されます\n' +
+            '・完了したら画面右下に通知が表示されます\n\n' +
+            '続行しますか？'
+          : t('batch.confirmStart')
       );
       if (!ok) return;
       closeModal(els.quizModeModal);
@@ -447,7 +528,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       type: 'quiz',
       examId: retryExamId,
       taskId: '',
-      taskTitle: '間違えた問題の解き直し',
+      taskTitle: getLocale() === 'ja' ? '間違えた問題の解き直し' : 'Retry incorrect questions',
       taskContext: '',
       isDashboardQuiz: true,
     };
@@ -1809,7 +1890,8 @@ function hideMilestoneToast({ els }) {
 
 function computeNextAction({ exam, analytics, streakInfo }) {
   if (!analytics || analytics.total === 0) {
-    return `${exam.code} の学習を始めましょう`;
+    if (getLocale() === 'ja') return `${exam.code} の学習を始めましょう`;
+    return `Let's start studying for ${exam.code}`;
   }
 
   // Find weakest domain
@@ -1830,28 +1912,34 @@ function computeNextAction({ exam, analytics, streakInfo }) {
   const recentAccuracy = recent10.length > 0 ? recentCorrect / recent10.length : 0;
 
   if (recentAccuracy >= 0.8 && analytics.accuracy >= 0.7) {
-    return '好調です！新しいドメインに挑戦しましょう';
+    if (getLocale() === 'ja') return '好調です！新しいドメインに挑戦しましょう';
+    return 'You\'re on a roll! Try a new domain';
   }
 
   if (weakestDomain && weakestAccuracy < 0.5) {
-    const name = weakestDomain.shortName || weakestDomain.name || `ドメイン${weakestDomain.id}`;
-    return `苦手な「${name}」を重点復習しましょう`;
+    const name = localizedTitle(weakestDomain) || weakestDomain.shortName || `Domain ${weakestDomain.id}`;
+    if (getLocale() === 'ja') return `苦手な「${name}」を重点復習しましょう`;
+    return `Focus on your weak area: "${name}"`;
   }
 
   if (!streakInfo.hadActivityToday) {
-    return '今日の学習をスタートしましょう！';
+    if (getLocale() === 'ja') return '今日の学習をスタートしましょう！';
+    return 'Start today\'s study session!';
   }
 
   if (analytics.total < 20) {
-    return 'まずは20問を目標に挑戦しましょう';
+    if (getLocale() === 'ja') return 'まずは20問を目標に挑戦しましょう';
+    return 'Aim for 20 questions to build a foundation';
   }
 
   if (weakestDomain) {
-    const name = weakestDomain.shortName || weakestDomain.name || `ドメイン${weakestDomain.id}`;
-    return `「${name}」の理解を深めましょう`;
+    const name = localizedTitle(weakestDomain) || weakestDomain.shortName || `Domain ${weakestDomain.id}`;
+    if (getLocale() === 'ja') return `「${name}」の理解を深めましょう`;
+    return `Deepen your understanding of "${name}"`;
   }
 
-  return '全ドメイン横断でチャレンジしましょう';
+  if (getLocale() === 'ja') return '全ドメイン横断でチャレンジしましょう';
+  return 'Challenge yourself across all domains';
 }
 
 function renderLearningStatus({ els, exam, state }) {
@@ -2059,12 +2147,17 @@ function renderStreakDisplay(els) {
 
 function generateDailyHighlight({ exam, analytics, streakInfo, xpSummary }) {
   const highlights = [];
+  const isJa = getLocale() === 'ja';
 
   // Check streak milestones
   if (streakInfo.current >= 7) {
-    highlights.push({ emoji: '🔥', text: `${streakInfo.current}日連続学習中！素晴らしい継続力です。この習慣があなたの合格を支えています。` });
+    highlights.push({ emoji: '🔥', text: isJa
+      ? `${streakInfo.current}日連続学習中！素晴らしい継続力です。この習慣があなたの合格を支えています。`
+      : `${streakInfo.current}-day study streak! Your consistency is paving the way to success.` });
   } else if (streakInfo.current >= 3) {
-    highlights.push({ emoji: '💪', text: `${streakInfo.current}日連続で学習を続けています。着実に力がついてきています！` });
+    highlights.push({ emoji: '💪', text: isJa
+      ? `${streakInfo.current}日連続で学習を続けています。着実に力がついてきています！`
+      : `${streakInfo.current} days in a row! You're steadily building your skills.` });
   }
 
   // Check if there are good domains
@@ -2083,42 +2176,64 @@ function generateDailyHighlight({ exam, analytics, streakInfo, xpSummary }) {
     }
 
     if (bestDomain && bestAcc >= 0.8) {
-      const name = bestDomain.shortName || bestDomain.jpTitle || bestDomain.title || '';
-      highlights.push({ emoji: '🌟', text: `「${name}」の正答率は${Math.round(bestAcc * 100)}%！しっかり理解できていますね。` });
+      const name = localizedTitle(bestDomain) || bestDomain.shortName || '';
+      if (isJa) {
+        highlights.push({ emoji: '🌟', text: `「${name}」の正答率は${Math.round(bestAcc * 100)}%！しっかり理解できていますね。` });
+      } else {
+        highlights.push({ emoji: '🌟', text: `${Math.round(bestAcc * 100)}% accuracy in "${name}" — great understanding!` });
+      }
     }
 
     if (worstDomain && worstAcc < 0.5 && bestDomain) {
-      const name = worstDomain.shortName || worstDomain.jpTitle || worstDomain.title || '';
-      highlights.push({ emoji: '📈', text: `「${name}」を重点復習すれば、合格がぐっと近づきます。あと少しです！` });
+      const name = localizedTitle(worstDomain) || worstDomain.shortName || '';
+      if (isJa) {
+        highlights.push({ emoji: '📈', text: `「${name}」を重点復習すれば、合格がぐっと近づきます。あと少しです！` });
+      } else {
+        highlights.push({ emoji: '📈', text: `Focus on "${name}" to improve your pass chances. Almost there!` });
+      }
     }
 
     // Overall progress
     const accuracy = analytics.accuracy;
     if (accuracy >= 0.8) {
-      highlights.push({ emoji: '🏆', text: `全体正答率${Math.round(accuracy * 100)}%！合格圏内の実力です。自信を持ってください！` });
+      highlights.push({ emoji: '🏆', text: isJa
+        ? `全体正答率${Math.round(accuracy * 100)}%！合格圏内の実力です。自信を持ってください！`
+        : `${Math.round(accuracy * 100)}% overall accuracy! You're in the passing zone. Be confident!` });
     } else if (accuracy >= 0.6) {
-      highlights.push({ emoji: '✨', text: `正答率${Math.round(accuracy * 100)}%まで到達。合格ラインまであと一歩です！` });
+      highlights.push({ emoji: '✨', text: isJa
+        ? `正答率${Math.round(accuracy * 100)}%まで到達。合格ラインまであと一歩です！`
+        : `You've reached ${Math.round(accuracy * 100)}% accuracy. One more step to the passing line!` });
     }
 
     // Total questions milestone
     if (analytics.total >= 100) {
-      highlights.push({ emoji: '🎯', text: `累計${analytics.total}問に回答！膨大な演習量が本番での自信になります。` });
+      highlights.push({ emoji: '🎯', text: isJa
+        ? `累計${analytics.total}問に回答！膨大な演習量が本番での自信になります。`
+        : `${analytics.total} questions answered! This practice will boost your exam confidence.` });
     } else if (analytics.total >= 50) {
-      highlights.push({ emoji: '📚', text: `もう${analytics.total}問もこなしました。着実に知識が積み上がっています。` });
+      highlights.push({ emoji: '📚', text: isJa
+        ? `もう${analytics.total}問もこなしました。着実に知識が積み上がっています。`
+        : `You've completed ${analytics.total} questions. Knowledge is building up steadily.` });
     }
   }
 
   // XP milestone
   if (xpSummary.totalXp >= 500) {
-    highlights.push({ emoji: '⭐', text: `累計${xpSummary.totalXp} XPを獲得！学習者としての成長が数字に表れています。` });
+    highlights.push({ emoji: '⭐', text: isJa
+      ? `累計${xpSummary.totalXp} XPを獲得！学習者としての成長が数字に表れています。`
+      : `${xpSummary.totalXp} XP earned! Your growth as a learner is showing in the numbers.` });
   }
 
   // Default if nothing to highlight
   if (highlights.length === 0) {
     if (streakInfo.hadActivityToday) {
-      return { emoji: '👍', text: '今日もアクセスありがとうございます。一歩ずつ前進していきましょう！' };
+      return { emoji: '👍', text: isJa
+        ? '今日もアクセスありがとうございます。一歩ずつ前進していきましょう！'
+        : 'Thanks for showing up today. Keep moving forward, one step at a time!' };
     }
-    return { emoji: '🌅', text: '今日の学習で、未来の自分に投資しましょう。小さな一歩が大きな成果につながります。' };
+    return { emoji: '🌅', text: isJa
+      ? '今日の学習で、未来の自分に投資しましょう。小さな一歩が大きな成果につながります。'
+      : 'Invest in your future self with today\'s study. Small steps lead to big results.' };
   }
 
   // Pick the most relevant one (random from top highlights for variety)
@@ -2223,7 +2338,7 @@ function renderSkillRadarChart({ els, exam, state }) {
 
   // Use short labels (D1, D2...) to fit within carousel
   const labels = exam.domains.map((d) => `D${d.id}`);
-  const fullNames = exam.domains.map((d) => d.jpTitle);
+  const fullNames = exam.domains.map((d) => localizedTitle(d));
   const dataValues = exam.domains.map((d) => {
     const domainData = byDomain[d.id];
     return domainData ? Math.round(domainData.accuracy * 100) : 0;
@@ -2320,7 +2435,7 @@ function renderSkillRadarChart({ els, exam, state }) {
   // Render legend below chart
   if (els.skillRadarLegend) {
     els.skillRadarLegend.innerHTML = exam.domains.map((d) =>
-      `<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${d.color || '#6366f1'}"></span><span class="text-gray-600">D${d.id}: ${d.jpTitle}</span></span>`
+      `<span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${d.color || '#6366f1'}"></span><span class="text-gray-600">D${d.id}: ${localizedTitle(d)}</span></span>`
     ).join('');
   }
 }
@@ -2491,7 +2606,7 @@ function smoothReturnToDashboard({ els }) {
 function renderExamMeta({ els, exam }) {
   document.title = `${exam.title}`;
   els.siteTitle.textContent = exam.title;
-  els.siteSubtitle.textContent = exam.subtitle;
+  els.siteSubtitle.textContent = localizedSubtitle(exam);
   els.examCodeBadge.textContent = exam.code;
 }
 
@@ -2560,20 +2675,20 @@ function renderChart({ els, exam, onDomainSelect }) {
   // Chart.js が読み込めない環境でもアプリ自体は動かす
   if (typeof window.Chart === 'undefined') {
     els.domainLegend.innerHTML =
-      '<div class="text-sm text-gray-500">チャートライブラリを読み込めませんでした（Chart.js）。</div>';
+      `<div class="text-sm text-gray-500">${t('errors.chartLoadFailed')}</div>`;
     return;
   }
 
   // データが無い場合
   if (!exam.domains || exam.domains.length === 0) {
-    els.domainLegend.innerHTML = '<div class="text-sm text-gray-500">この試験のデータは未登録です。</div>';
+    els.domainLegend.innerHTML = `<div class="text-sm text-gray-500">${t('errors.examDataNotFound')}</div>`;
     return;
   }
 
   const ctx = els.examWeightChart?.getContext?.('2d');
   if (!ctx) return;
   const data = {
-    labels: exam.domains.map((d) => d.jpTitle),
+    labels: exam.domains.map((d) => localizedTitle(d)),
     datasets: [
       {
         data: exam.domains.map((d) => d.weight),
@@ -2638,7 +2753,7 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
       allBtn.style.borderColor = '#f97316';
       allBtn.style.color = '#f97316';
     }
-    allBtn.innerHTML = '<i class="fas fa-star text-xs mr-1"></i>全般';
+    allBtn.innerHTML = `<i class="fas fa-star text-xs mr-1"></i>${t('common.all')}`;
     allBtn.addEventListener('click', () => onDomainSelect('all'));
     els.domainTabs.appendChild(allBtn);
   }
@@ -2673,7 +2788,7 @@ function renderContent({ els, exam, state }) {
     els.contentArea.innerHTML = `
       <div class="text-center py-12 text-gray-500">
         <i class="fas fa-circle-info text-4xl mb-3 text-gray-300"></i>
-        <p>この試験のデータはまだ用意されていません。</p>
+        <p>${t('errors.examDataNotFound')}</p>
       </div>
     `;
     return;
@@ -2695,10 +2810,10 @@ function renderContent({ els, exam, state }) {
     domainHeader.innerHTML = `
       <div class="flex items-center gap-2 mb-4">
         <span class="px-3 py-1 rounded text-xs font-bold text-white" style="background-color: ${domain.color}">Domain ${domain.id}</span>
-        <h2 class="text-xl font-bold text-gray-800">${escapeHtml(domain.jpTitle)}</h2>
+        <h2 class="text-xl font-bold text-gray-800">${escapeHtml(localizedTitle(domain))}</h2>
       </div>
       <p class="text-gray-600 mb-6 bg-gray-50 p-4 rounded-lg border-l-4" style="border-color: ${domain.color}">
-        ${escapeHtml(domain.description)}
+        ${escapeHtml(localizedDomainDescription(domain))}
       </p>
     `;
     els.contentArea.appendChild(domainHeader);
@@ -2709,7 +2824,7 @@ function renderContent({ els, exam, state }) {
 
       const taskContext = buildTaskAiContext(task);
       const shouldShowDescription = task?.showDescription === true;
-      const taskDescriptionLines = normalizeDescriptionLines(task?.description);
+      const taskDescriptionLines = normalizeDescriptionLines(localizedDescription(task));
       const taskDescriptionHtml = taskDescriptionLines
         .map((line) => `<div>${highlightHtml(escapeHtml(line), term)}</div>`)
         .join('');
@@ -2717,7 +2832,7 @@ function renderContent({ els, exam, state }) {
         shouldShowDescription && taskDescriptionLines.length
           ? `
             <div class="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
-              <div class="text-xs font-bold text-amber-700 mb-1">説明</div>
+              <div class="text-xs font-bold text-amber-700 mb-1">${getLocale() === 'ja' ? '説明' : 'Description'}</div>
               <div class="space-y-1">${taskDescriptionHtml}</div>
             </div>
           `
@@ -2728,9 +2843,9 @@ function renderContent({ els, exam, state }) {
       header.innerHTML = `
         <div class="flex flex-col gap-3">
           <div>
-            <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Task Statement ${escapeHtml(task.id)}</div>
-            <h3 class="text-lg font-bold text-gray-900">${escapeHtml(task.jpTitle)}</h3>
-            <p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>
+            <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">${t('roadmap.taskStatement', { id: escapeHtml(task.id) })}</div>
+            <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(task))}</h3>
+            <p class="text-sm text-gray-500 mt-1">${escapeHtml(getLocale() === 'ja' ? task.title : (task.jpTitle || ''))}</p>
             ${descriptionHtml}
           </div>
           <div class="flex justify-end">
@@ -2738,7 +2853,7 @@ function renderContent({ els, exam, state }) {
               type="button"
               data-action="quiz"
               data-task-id="${escapeHtml(task.id)}"
-              data-task-title="${escapeHtml(task.jpTitle)}"
+              data-task-title="${escapeHtml(localizedTitle(task))}"
               data-task-context="${escapeHtml(taskContext)}"
               class="sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2 whitespace-nowrap"
             >
@@ -2757,10 +2872,10 @@ function renderContent({ els, exam, state }) {
       const knowledgeCol = document.createElement('div');
       knowledgeCol.innerHTML = `
         <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <i class="fas fa-check-circle text-green-500"></i> 必要な知識・スキル
+          <i class="fas fa-check-circle text-green-500"></i> ${t('roadmap.knowledge')}
         </h4>
         <ul class="space-y-3">
-          ${(task.knowledge || []).map((k) => renderKnowledgeRow({ knowledge: k, term, taskContext })).join('')}
+          ${(localizedKnowledge(task)).map((k) => renderKnowledgeRow({ knowledge: k, term, taskContext })).join('')}
         </ul>
       `;
 
@@ -2783,7 +2898,7 @@ function renderContent({ els, exam, state }) {
                     examId: state.examId,
                     domainId: String(domain.id || ''),
                     taskId: String(task.id || ''),
-                    taskTitle: String(task.jpTitle || ''),
+                    taskTitle: String(localizedTitle(task) || ''),
                     resourceSection: String(section.key || ''),
                   },
                 })
@@ -2802,7 +2917,7 @@ function renderContent({ els, exam, state }) {
     els.contentArea.innerHTML = `
       <div class="text-center py-12 text-gray-500">
         <i class="fas fa-circle-info text-4xl mb-3 text-gray-300"></i>
-        <p>このドメインのタスクが見つかりませんでした。</p>
+        <p>${t('errors.domainTaskNotFound')}</p>
       </div>
     `;
   }
@@ -2814,7 +2929,7 @@ function renderExamResources({ els, exam, state }) {
     els.contentArea.innerHTML = `
       <div class="text-center py-12 text-gray-500">
         <i class="fas fa-circle-info text-4xl mb-3 text-gray-300"></i>
-        <p>この試験の学習ステップはまだ登録されていません。</p>
+        <p>${t('errors.stepsNotFound')}</p>
       </div>
     `;
     return;
@@ -2826,11 +2941,11 @@ function renderExamResources({ els, exam, state }) {
   const headerEl = document.createElement('div');
   headerEl.innerHTML = `
     <div class="flex items-center gap-2 mb-4">
-      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-orange-500"><i class="fas fa-star mr-1"></i>全般</span>
-      <h2 class="text-xl font-bold text-gray-800">学習ロードマップ</h2>
+      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-orange-500"><i class="fas fa-star mr-1"></i>${t('common.all')}</span>
+      <h2 class="text-xl font-bold text-gray-800">${t('roadmap.title')}</h2>
     </div>
     <p class="text-gray-600 mb-6 bg-gray-50 p-4 rounded-lg border-l-4 border-orange-400">
-      ${escapeHtml(exam.code)} 試験の学習を上から順に進めていきましょう。各ステップのリソースを活用して学習を進めてください。
+      ${escapeHtml(t('roadmap.description', { code: exam.code }))}
     </p>
   `;
   els.contentArea.appendChild(headerEl);
@@ -2841,7 +2956,7 @@ function renderExamResources({ els, exam, state }) {
     card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
     // Step header — mirrors the domain task header format
-    const stepDescLines = normalizeDescriptionLines(step.description);
+    const stepDescLines = normalizeDescriptionLines(localizedDescription(step));
     const stepDescHtml = stepDescLines.length
       ? `<div class="mt-3 p-3 rounded-lg bg-orange-50 border border-orange-200 text-sm text-orange-900">
            <div class="space-y-1">${stepDescLines.map((l) => `<div>${escapeHtml(l)}</div>`).join('')}</div>
@@ -2855,8 +2970,8 @@ function renderExamResources({ els, exam, state }) {
         <span class="flex items-center justify-center w-9 h-9 rounded-full bg-orange-500 text-white font-bold text-sm flex-shrink-0 shadow-sm">${escapeHtml(step.id)}</span>
         <div class="flex-1 min-w-0">
           <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Step ${escapeHtml(step.id)}</div>
-          <h3 class="text-lg font-bold text-gray-900">${escapeHtml(step.jpTitle)}</h3>
-          <p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>
+          <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(step))}</h3>
+          <p class="text-sm text-gray-500 mt-0.5">${escapeHtml(getLocale() === 'ja' ? step.title : (step.jpTitle || ''))}</p>
         </div>
       </div>
       ${stepDescHtml}
@@ -2875,10 +2990,10 @@ function renderExamResources({ els, exam, state }) {
       const knowledgeCol = document.createElement('div');
       knowledgeCol.innerHTML = `
         <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <i class="fas fa-check-circle text-green-500"></i> ポイント
+          <i class="fas fa-check-circle text-green-500"></i> ${t('roadmap.keyPoints')}
         </h4>
         <ul class="space-y-2">
-          ${step.knowledge.map((k) => `
+          ${(localizedKnowledge(step)).map((k) => `
             <li class="text-sm text-gray-600 flex items-start gap-2 p-2 rounded hover:bg-gray-50 transition">
               <span class="mt-1.5 w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
               <span>${escapeHtml(k)}</span>
@@ -2906,7 +3021,7 @@ function renderExamResources({ els, exam, state }) {
                   examId: state.examId,
                   domainId: 'all',
                   taskId: String(step.id || ''),
-                  taskTitle: String(step.jpTitle || ''),
+                  taskTitle: String(localizedTitle(step) || ''),
                   resourceSection: String(section.key || ''),
                 },
               })
@@ -2976,11 +3091,11 @@ function normalizeDescriptionLines(description) {
 
 function renderBlogCard({ blog, term, context }) {
   const isRecommended = blog?.recommend === true;
-  const titleSafe = escapeHtml(blog.title);
+  const titleSafe = escapeHtml(localizedResourceTitle(blog));
   const title = highlightHtml(titleSafe, term);
   const localizedUrl = getLocalizedUrl(blog.url, blog.urlEn);
   const urlSafe = escapeHtml(localizedUrl);
-  const noteSafe = escapeHtml(blog.note);
+  const noteSafe = escapeHtml(localizedResourceNote(blog));
 
   const voteTargetId = String(blog.url || '').trim();
   const existing = voteTargetId ? getExistingVote({ targetType: 'resource', targetId: voteTargetId }) : null;
@@ -3060,7 +3175,7 @@ function buildResourceSections(task) {
     if (!group || typeof group !== 'object') continue;
 
     const key = String(group.key || group.id || group.type || '').trim();
-    const title = String(group.label || group.title || '').trim() || (key ? humanizeKey(key) : 'Resources');
+    const title = String(localizedResourceLabel(group) || group.label || group.title || '').trim() || (key ? humanizeKey(key) : 'Resources');
     const iconClass = typeof group.iconClass === 'string' ? group.iconClass : '';
     const iconColorClass = typeof group.iconColorClass === 'string' ? group.iconColorClass : '';
 
@@ -3079,8 +3194,11 @@ function normalizeResourceItems(items) {
     .filter((item) => item && typeof item === 'object')
     .map((item) => ({
       title: String(item.title || ''),
+      titleEn: item.titleEn ? String(item.titleEn) : undefined,
       url: String(item.url || ''),
+      urlEn: item.urlEn ? String(item.urlEn) : undefined,
       note: String(item.note || ''),
+      noteEn: item.noteEn ? String(item.noteEn) : undefined,
       recommend: item.recommend === true,
     }))
     .filter((item) => item.title && item.url);

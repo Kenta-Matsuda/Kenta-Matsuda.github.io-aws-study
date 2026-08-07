@@ -4,6 +4,7 @@ export const CLF_C02 = {
   shortLabel: 'CLF',
   title: 'AWS Certified Cloud Practitioner',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -13,23 +14,37 @@ export const CLF_C02 = {
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
         '初めて受験する方へ：申し込みサイトが英語表記だったり手順が分かりにくい場合があります。下記の「初めての試験申し込みガイド」を参考に、落ち着いて進めましょう。',
       ],
+      descriptionEn: [
+        'Register for the AWS certification exam. You can take the exam online or at a test center through Pearson VUE.',
+        'For first-time test takers: The registration process may seem complex. Refer to the guides below for step-by-step instructions.',
+      ],
       knowledge: [
         'AWS Training & Certification でアカウントを作成（または既存のAmazonアカウントでサインイン）',
         '試験言語・受験方法（テストセンター or オンライン）を選択',
         '受験料の支払い（クレジットカード）を完了',
         'オンライン受験の場合はシステムテストを事前に実施しておくと安心',
       ],
+      knowledgeEn: [
+        'Create an AWS Training & Certification account (or sign in with an existing Amazon account)',
+        'Select exam language and delivery method (test center or online)',
+        'Complete payment (credit card)',
+        'For online exams, run the system test in advance',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified Cloud Practitioner 公式ページ',
+              titleEn: 'AWS Certified Cloud Practitioner Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-cloud-practitioner/',
+              urlEn: 'https://aws.amazon.com/certification/certified-cloud-practitioner/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information on exam overview, passing criteria, and scope',
               recommend: true,
             },
           ],
@@ -37,13 +52,16 @@ export const CLF_C02 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification?p=cert&c=ai&z=1',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for the AWS certification exam here (official registration site)',
               recommend: true,
             },
           ],
@@ -51,19 +69,26 @@ export const CLF_C02 = {
         {
           key: 'beginner-guide',
           label: '初めての試験申し込みガイド',
+          labelEn: 'First-Time Registration Guide',
           iconClass: 'fas fa-hand-holding-heart',
           iconColorClass: 'text-pink-500',
           items: [
             {
               title: '【YouTube】AWS認定試験の申し込み手順（日本語解説）',
+              titleEn: 'AWS Certification Exam Registration Steps (Video)',
               url: 'https://www.youtube.com/results?search_query=AWS%E8%AA%8D%E5%AE%9A%E8%A9%A6%E9%A8%93+%E7%94%B3%E3%81%97%E8%BE%BC%E3%81%BF+%E6%89%8B%E9%A0%86',
+              urlEn: 'https://www.youtube.com/results?search_query=AWS+certification+exam+registration+guide',
               note: 'YouTube で申し込み手順を動画で確認できます',
+              noteEn: 'Watch registration steps on YouTube',
               recommend: true,
             },
             {
               title: 'AWS認定試験の予約方法（公式ポリシーページ）',
+              titleEn: 'How to Schedule an AWS Certification Exam (Official Policy)',
               url: 'https://aws.amazon.com/jp/certification/policies/before-testing/',
+              urlEn: 'https://aws.amazon.com/certification/policies/before-testing/',
               note: 'アカウント作成から予約完了までの手順を公式が解説',
+              noteEn: 'Official guide from account creation to booking completion',
             },
           ],
         },
@@ -76,17 +101,24 @@ export const CLF_C02 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the Exam Guide (PDF) to understand the exam scope, scoring weights, and question formats. Grasp the big picture before diving into each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified Cloud Practitioner 試験ガイド (PDF)',
+              titleEn: 'AWS Certified Cloud Practitioner Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-cloud-practitioner/AWS-Certified-Cloud-Practitioner_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-cloud-practitioner/AWS-Certified-Cloud-Practitioner_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Review exam scope, question ratios, and sample questions',
               recommend: true,
             },
           ],
@@ -100,23 +132,31 @@ export const CLF_C02 = {
       description: [
         'AWS Skill Builder の無料コースで、クラウドの基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational cloud knowledge with free courses on AWS Skill Builder. Exam-specific preparation courses are also available.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'AWS Cloud Practitioner Essentials（日本語）',
+              titleEn: 'AWS Cloud Practitioner Essentials',
               url: 'https://skillbuilder.aws/learn/94T2BEN85A/aws-cloud-practitioner-essentials-/J3USM8JWUK',
               note: 'AWS Skill Builder: 基礎コース（無料・7時間）',
+              noteEn: 'AWS Skill Builder: Foundational course (free, 7 hours)',
               recommend: true,
             },
             {
               title: 'Exam Prep Overview: AWS Certified Cloud Practitioner (CLF-C02 - 日本語)',
+              titleEn: 'Exam Prep Overview: AWS Certified Cloud Practitioner (CLF-C02)',
               url: 'https://skillbuilder.aws/learn/N7R36JEFT4/exam-prep-overview-aws-certified-cloud-practitioner-clfc02--/K5E54343CX',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
             },
           ],
@@ -131,29 +171,46 @@ export const CLF_C02 = {
         'このアプリの Domain 1〜4 タブに切り替えて、各ドメインのタスクごとに用意されたブログ・Black Belt・公式ドキュメントを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to Domain 1–4 tabs in this app to study blog posts, Black Belt presentations, and official documentation organized by task.',
+        'You can also use AI explanations and AI practice questions to deepen your understanding.',
+      ],
       knowledge: [
         'Domain 1: クラウドのコンセプト（24%）',
         'Domain 2: セキュリティとコンプライアンス（30%）',
         'Domain 3: クラウドテクノロジーとサービス（34%）',
         'Domain 4: 請求、料金、およびサポート（12%）',
       ],
+      knowledgeEn: [
+        'Domain 1: Cloud Concepts (24%)',
+        'Domain 2: Security and Compliance (30%)',
+        'Domain 3: Cloud Technology and Services (34%)',
+        'Domain 4: Billing, Pricing, and Support (12%)',
+      ],
       resources: [
         {
           key: 'whitepapers',
           label: 'ホワイトペーパー・ガイド',
+          labelEn: 'Whitepapers & Guides',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-gray-600',
           items: [
             {
               title: 'AWS クラウド導入フレームワーク (AWS CAF)',
+              titleEn: 'AWS Cloud Adoption Framework (AWS CAF)',
               url: 'https://aws.amazon.com/jp/cloud-adoption-framework/',
+              urlEn: 'https://aws.amazon.com/cloud-adoption-framework/',
               note: 'クラウド移行・導入の全体像',
+              noteEn: 'Overview of cloud migration and adoption',
               recommend: true,
             },
             {
               title: 'AWS Well-Architected Framework 概要',
+              titleEn: 'AWS Well-Architected Framework Overview',
               url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/framework/welcome.html',
+              urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html',
               note: 'ホワイトペーパー: 6つの柱の概要',
+              noteEn: 'Whitepaper: Overview of the 6 pillars',
             },
           ],
         },
@@ -166,17 +223,23 @@ export const CLF_C02 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve near-real questions from official practice sets to check your understanding. If you find weak domains, go back to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'Official Practice Question Set: AWS Certified Cloud Practitioner (CLF-C02 - 日本語)',
+              titleEn: 'Official Practice Question Set: AWS Certified Cloud Practitioner (CLF-C02)',
               url: 'https://skillbuilder.aws/learn/E4W52ZKK6P/official-practice-question-set-aws-certified-cloud-practitioner-clfc02--/7Z82N2MBYU',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -192,6 +255,7 @@ export const CLF_C02 = {
       weight: 24,
       color: '#3b82f6',
       description: 'このドメインでは、AWS クラウドの価値提案、クラウドのメリット、クラウド移行戦略など、クラウドコンピューティングの基礎概念が問われます。',
+      descriptionEn: 'This domain covers foundational cloud computing concepts including the AWS Cloud value proposition, benefits of the cloud, and cloud migration strategies.',
       tasks: [
         {
           id: '1.1',
@@ -205,6 +269,14 @@ export const CLF_C02 = {
             '- グローバルインフラストラクチャの利点の理解 (デプロイのスピード、グローバルリーチなど)',
             '- 高可用性、伸縮性、俊敏性の利点の理解',
           ],
+          descriptionEn: [
+            'Task Statement 1.1: Define the benefits of the AWS Cloud.',
+            'Knowledge of:',
+            '- Value proposition of the AWS Cloud',
+            'Skills in:',
+            '- Understanding the benefits of global infrastructure (e.g., speed of deployment, global reach)',
+            '- Understanding the benefits of high availability, elasticity, and agility',
+          ],
           knowledge: [
             'AWS クラウドの価値提案',
             'グローバルインフラストラクチャ',
@@ -212,17 +284,28 @@ export const CLF_C02 = {
             '伸縮性',
             '俊敏性',
           ],
+          knowledgeEn: [
+            'Value proposition of the AWS Cloud',
+            'Global infrastructure',
+            'High availability',
+            'Elasticity',
+            'Agility',
+          ],
           resources: [
             {
               key: 'blogs',
               label: 'AWS ブログ',
+              labelEn: 'AWS Blog',
               iconClass: 'fab fa-aws',
               iconColorClass: 'text-orange-400',
               items: [
                 {
                   title: 'AWS グローバルインフラストラクチャ',
+                  titleEn: 'AWS Global Infrastructure',
                   url: 'https://aws.amazon.com/jp/about-aws/global-infrastructure/',
+                  urlEn: 'https://aws.amazon.com/about-aws/global-infrastructure/',
                   note: 'リージョン・AZ・エッジロケーションの概要',
+                  noteEn: 'Overview of Regions, AZs, and Edge Locations',
                   recommend: true,
                 },
               ],
@@ -230,19 +313,26 @@ export const CLF_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS クラウドとは',
+                  titleEn: 'What is AWS?',
                   url: 'https://aws.amazon.com/jp/what-is-aws/',
+                  urlEn: 'https://aws.amazon.com/what-is-aws/',
                   note: 'AWS クラウドの全体像',
+                  noteEn: 'Overview of the AWS Cloud',
                   recommend: true,
                 },
                 {
                   title: 'AWS クラウドの利点',
+                  titleEn: 'Advantages of Cloud Computing',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-overview/six-advantages-of-cloud-computing.html',
                   note: '6つのクラウドの利点',
+                  noteEn: 'Six advantages of cloud computing',
                 },
               ],
             },
@@ -260,6 +350,14 @@ export const CLF_C02 = {
             '- Well-Architected フレームワークの柱の理解 (運用上の優秀性、セキュリティ、信頼性、パフォーマンス効率、コスト最適化、持続可能性など)',
             '- Well-Architected フレームワークのさまざまな柱の相違点の特定',
           ],
+          descriptionEn: [
+            'Task Statement 1.2: Identify design principles of the AWS Cloud.',
+            'Knowledge of:',
+            '- AWS Well-Architected Framework',
+            'Skills in:',
+            '- Understanding the pillars of the Well-Architected Framework (e.g., operational excellence, security, reliability, performance efficiency, cost optimization, sustainability)',
+            '- Identifying differences between the various pillars of the Well-Architected Framework',
+          ],
           knowledge: [
             'AWS Well-Architected フレームワーク',
             '運用上の優秀性',
@@ -269,17 +367,30 @@ export const CLF_C02 = {
             'コスト最適化',
             '持続可能性',
           ],
+          knowledgeEn: [
+            'AWS Well-Architected Framework',
+            'Operational excellence',
+            'Security',
+            'Reliability',
+            'Performance efficiency',
+            'Cost optimization',
+            'Sustainability',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Well-Architected フレームワーク',
+                  titleEn: 'AWS Well-Architected Framework',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/framework/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/framework/welcome.html',
                   note: '6つの柱の詳細解説',
+                  noteEn: 'Detailed explanation of the 6 pillars',
                   recommend: true,
                 },
               ],
@@ -299,23 +410,42 @@ export const CLF_C02 = {
             '- AWS クラウド導入フレームワーク (AWS CAF) のコンポーネントの理解 [ビジネスリスクの軽減、環境・社会・ガバナンス (ESG) パフォーマンスの向上、収益の増大、運用効率の向上など]',
             '- 適切な移行戦略の特定 (データベースのレプリケーション、AWS Snowball の使用など)',
           ],
+          descriptionEn: [
+            'Task Statement 1.3: Understand the benefits of and strategies for migration to the AWS Cloud.',
+            'Knowledge of:',
+            '- Cloud adoption strategies',
+            '- Resources to support the cloud migration journey',
+            'Skills in:',
+            '- Understanding the components of the AWS Cloud Adoption Framework (AWS CAF) (e.g., reduced business risk, improved ESG performance, increased revenue, increased operational efficiency)',
+            '- Identifying appropriate migration strategies (e.g., database replication, use of AWS Snowball)',
+          ],
           knowledge: [
             'クラウド導入戦略',
             'AWS クラウド導入フレームワーク (AWS CAF)',
             'AWS Snowball',
             '環境・社会・ガバナンス (ESG)',
           ],
+          knowledgeEn: [
+            'Cloud adoption strategies',
+            'AWS Cloud Adoption Framework (AWS CAF)',
+            'AWS Snowball',
+            'Environmental, Social, and Governance (ESG)',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS クラウド導入フレームワーク (AWS CAF)',
+                  titleEn: 'AWS Cloud Adoption Framework (AWS CAF)',
                   url: 'https://aws.amazon.com/jp/cloud-adoption-framework/',
+                  urlEn: 'https://aws.amazon.com/cloud-adoption-framework/',
                   note: '移行戦略・導入フレームワーク',
+                  noteEn: 'Migration strategies and adoption framework',
                   recommend: true,
                 },
               ],
@@ -339,6 +469,19 @@ export const CLF_C02 = {
             '- オートメーションの利点の特定',
             '- 規模の経済についての理解 (コスト削減など)',
           ],
+          descriptionEn: [
+            'Task Statement 1.4: Understand concepts of cloud economics.',
+            'Knowledge of:',
+            '- Aspects of cloud economics',
+            '- Cost savings of moving to the cloud',
+            'Skills in:',
+            '- Understanding the role of fixed costs compared with variable costs',
+            '- Understanding costs that are associated with on-premises environments',
+            '- Understanding the differences between licensing strategies (e.g., Bring Your Own License [BYOL] model compared with included licenses)',
+            '- Understanding the concept of right-sizing',
+            '- Identifying benefits of automation',
+            '- Understanding economies of scale (e.g., cost savings)',
+          ],
           knowledge: [
             'クラウドエコノミクス',
             '固定費と変動費',
@@ -347,17 +490,29 @@ export const CLF_C02 = {
             'オートメーション',
             '規模の経済',
           ],
+          knowledgeEn: [
+            'Cloud economics',
+            'Fixed costs vs. variable costs',
+            'Bring Your Own License (BYOL)',
+            'Right-sizing',
+            'Automation',
+            'Economies of scale',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'クラウドの経済性',
+                  titleEn: 'Cloud Economics',
                   url: 'https://aws.amazon.com/jp/economics/',
+                  urlEn: 'https://aws.amazon.com/economics/',
                   note: 'AWS のコストメリット',
+                  noteEn: 'Cost benefits of AWS',
                   recommend: true,
                 },
               ],
@@ -373,6 +528,7 @@ export const CLF_C02 = {
       weight: 30,
       color: '#ef4444',
       description: 'このドメインでは、AWS の責任共有モデル、アクセス管理、セキュリティサービス、コンプライアンスに関する知識が問われます。',
+      descriptionEn: 'This domain covers the AWS Shared Responsibility Model, access management, security services, and compliance.',
       tasks: [
         {
           id: '2.1',
@@ -389,22 +545,42 @@ export const CLF_C02 = {
             '- お客様と AWS が共有する責任の説明',
             '- 使用するサービス (Amazon RDS、AWS Lambda、Amazon EC2 など) に応じて、AWS の責任とお客様の責任がどのように変化するかの説明',
           ],
+          descriptionEn: [
+            'Task Statement 2.1: Understand the AWS Shared Responsibility Model.',
+            'Knowledge of:',
+            '- AWS Shared Responsibility Model',
+            'Skills in:',
+            '- Recognizing the components of the AWS Shared Responsibility Model',
+            '- Describing the customer\'s responsibilities on AWS',
+            '- Describing AWS responsibilities',
+            '- Describing responsibilities that the customer and AWS share',
+            '- Describing how the customer\'s responsibilities and AWS responsibilities can shift depending on the service used (e.g., Amazon RDS, AWS Lambda, Amazon EC2)',
+          ],
           knowledge: [
             'AWS 責任共有モデル',
             'AWS の責任 (クラウドのセキュリティ)',
             'お客様の責任 (クラウド内のセキュリティ)',
           ],
+          knowledgeEn: [
+            'AWS Shared Responsibility Model',
+            'AWS responsibility (security OF the cloud)',
+            'Customer responsibility (security IN the cloud)',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS 責任共有モデル',
+                  titleEn: 'AWS Shared Responsibility Model',
                   url: 'https://aws.amazon.com/jp/compliance/shared-responsibility-model/',
+                  urlEn: 'https://aws.amazon.com/compliance/shared-responsibility-model/',
                   note: 'AWS とユーザーの責任範囲の理解',
+                  noteEn: 'Understanding the responsibility boundaries between AWS and the customer',
                   recommend: true,
                 },
               ],
@@ -429,7 +605,31 @@ export const CLF_C02 = {
             '- ガバナンスとコンプライアンスに役立つサービスの認識 (Amazon CloudWatch を使用したモニタリング、AWS CloudTrail、AWS Audit Manager、AWS Config による監査、アクセスレポートを使用したレポート作成など)',
             '- AWS サービスによって異なるコンプライアンス要件の認識',
           ],
+          descriptionEn: [
+            'Task Statement 2.2: Understand AWS Cloud security, governance, and compliance concepts.',
+            'Knowledge of:',
+            '- AWS compliance and governance concepts',
+            '- Benefits of cloud security (e.g., encryption)',
+            '- Where to capture and locate logs that are associated with cloud security',
+            'Skills in:',
+            '- Identifying where to find AWS compliance information (e.g., AWS Artifact)',
+            '- Understanding compliance needs among geographic locations or industries (e.g., AWS Compliance)',
+            '- Describing how customers secure resources on AWS (e.g., Amazon Inspector, AWS Security Hub, Amazon GuardDuty, AWS Shield)',
+            '- Identifying different encryption options (e.g., encryption in transit, encryption at rest)',
+            '- Recognizing services that aid in governance and compliance (e.g., monitoring with Amazon CloudWatch, auditing with AWS CloudTrail, AWS Audit Manager, AWS Config)',
+            '- Recognizing compliance requirements that vary among AWS services',
+          ],
           knowledge: [
+            'AWS Artifact',
+            'Amazon Inspector',
+            'AWS Security Hub',
+            'Amazon GuardDuty',
+            'AWS CloudTrail',
+            'AWS Audit Manager',
+            'AWS Config',
+            'Amazon CloudWatch',
+          ],
+          knowledgeEn: [
             'AWS Artifact',
             'Amazon Inspector',
             'AWS Security Hub',
@@ -443,13 +643,17 @@ export const CLF_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS コンプライアンス',
+                  titleEn: 'AWS Compliance',
                   url: 'https://aws.amazon.com/jp/compliance/',
+                  urlEn: 'https://aws.amazon.com/compliance/',
                   note: 'コンプライアンスプログラム一覧',
+                  noteEn: 'List of compliance programs',
                   recommend: true,
                 },
               ],
@@ -475,6 +679,21 @@ export const CLF_C02 = {
             '- ルートユーザー保護を実現できる方法の理解',
             '- アイデンティティ管理のタイプの理解 (フェデレーテッドなど)',
           ],
+          descriptionEn: [
+            'Task Statement 2.3: Identify AWS access management capabilities.',
+            'Knowledge of:',
+            '- Identity and access management (e.g., AWS Identity and Access Management [IAM])',
+            '- Importance of protecting the AWS root user account',
+            '- Principle of least privilege',
+            '- AWS IAM Identity Center (AWS Single Sign-On)',
+            'Skills in:',
+            '- Understanding access keys, password policies, and credential storage (e.g., AWS Secrets Manager, AWS Systems Manager)',
+            '- Identifying authentication methods in AWS (e.g., multi-factor authentication [MFA], IAM Identity Center, cross-account IAM roles)',
+            '- Defining groups, users, custom policies, and managed policies that comply with the principle of least privilege',
+            '- Identifying tasks that only the account root user can perform',
+            '- Understanding methods to protect the root user',
+            '- Understanding types of identity management (e.g., federated)',
+          ],
           knowledge: [
             'AWS IAM',
             'IAM ポリシー',
@@ -485,17 +704,31 @@ export const CLF_C02 = {
             '最小権限の原則',
             'AWS Secrets Manager',
           ],
+          knowledgeEn: [
+            'AWS IAM',
+            'IAM policies',
+            'IAM roles',
+            'AWS IAM Identity Center',
+            'Multi-factor authentication (MFA)',
+            'Root user',
+            'Principle of least privilege',
+            'AWS Secrets Manager',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS IAM ユーザーガイド',
+                  titleEn: 'AWS IAM User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/IAM/latest/UserGuide/introduction.html',
                   note: 'IAM の基礎',
+                  noteEn: 'IAM fundamentals',
                   recommend: true,
                 },
               ],
@@ -517,7 +750,26 @@ export const CLF_C02 = {
             '- AWS セキュリティ情報を入手できる場所の特定 (AWS ナレッジセンター、AWS セキュリティセンター、AWS Security Blog など)',
             '- セキュリティの問題の特定に向けた AWS サービスの利用についての理解 (AWS Trusted Advisor など)',
           ],
+          descriptionEn: [
+            'Task Statement 2.4: Identify components and resources for security.',
+            'Knowledge of:',
+            '- Security capabilities that AWS provides',
+            '- Security-related documentation that AWS provides',
+            'Skills in:',
+            '- Describing AWS security features and services (e.g., AWS WAF, AWS Firewall Manager, AWS Shield, Amazon GuardDuty)',
+            '- Understanding that third-party security products are available from AWS Marketplace',
+            '- Identifying where AWS security information is available (e.g., AWS Knowledge Center, AWS Security Center, AWS Security Blog)',
+            '- Understanding the use of AWS services for identifying security issues (e.g., AWS Trusted Advisor)',
+          ],
           knowledge: [
+            'AWS WAF',
+            'AWS Firewall Manager',
+            'AWS Shield',
+            'Amazon GuardDuty',
+            'AWS Marketplace',
+            'AWS Trusted Advisor',
+          ],
+          knowledgeEn: [
             'AWS WAF',
             'AWS Firewall Manager',
             'AWS Shield',
@@ -529,13 +781,17 @@ export const CLF_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS セキュリティサービス概要',
+                  titleEn: 'AWS Security Services Overview',
                   url: 'https://aws.amazon.com/jp/products/security/',
+                  urlEn: 'https://aws.amazon.com/products/security/',
                   note: 'セキュリティサービスの全体像',
+                  noteEn: 'Overview of security services',
                   recommend: true,
                 },
               ],
@@ -551,6 +807,7 @@ export const CLF_C02 = {
       weight: 34,
       color: '#22c55e',
       description: 'このドメインでは、AWS の主要なサービス（コンピューティング、ストレージ、データベース、ネットワーキング等）とその使い分けに関する知識が問われます。',
+      descriptionEn: 'This domain covers knowledge of major AWS services (compute, storage, database, networking, etc.) and their appropriate use cases.',
       tasks: [
         {
           id: '3.1',
@@ -567,6 +824,17 @@ export const CLF_C02 = {
             '- 要件を評価し、１回限りのオペレーションと反復可能なプロセスのどちらを使用するかを判断',
             '- デプロイモデルの特定 (クラウド、ハイブリッド、オンプレミスなど)',
           ],
+          descriptionEn: [
+            'Task Statement 3.1: Define methods of deploying and operating in the AWS Cloud.',
+            'Knowledge of:',
+            '- Different ways of provisioning and operating in the AWS Cloud',
+            '- Different ways to access AWS services',
+            '- Types of cloud deployment models',
+            'Skills in:',
+            '- Deciding between options such as programmatic access (e.g., APIs, SDKs, CLI), the AWS Management Console, and infrastructure as code (IaC)',
+            '- Evaluating requirements to determine whether to use one-time operations or repeatable processes',
+            '- Identifying different deployment models (e.g., cloud, hybrid, on-premises)',
+          ],
           knowledge: [
             'AWS マネジメントコンソール',
             'AWS CLI',
@@ -574,23 +842,37 @@ export const CLF_C02 = {
             'Infrastructure as Code (IaC)',
             'クラウド / ハイブリッド / オンプレミス',
           ],
+          knowledgeEn: [
+            'AWS Management Console',
+            'AWS CLI',
+            'AWS SDK',
+            'Infrastructure as Code (IaC)',
+            'Cloud / Hybrid / On-premises',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS マネジメントコンソール入門',
+                  titleEn: 'Getting Started with the AWS Management Console',
                   url: 'https://aws.amazon.com/jp/console/',
+                  urlEn: 'https://aws.amazon.com/console/',
                   note: 'コンソールの概要',
+                  noteEn: 'Console overview',
                   recommend: true,
                 },
                 {
                   title: 'AWS コンピューティングサービスの選択',
+                  titleEn: 'Choosing an AWS Compute Service',
                   url: 'https://aws.amazon.com/jp/getting-started/decision-guides/compute-on-aws-how-to-choose/',
+                  urlEn: 'https://aws.amazon.com/getting-started/decision-guides/compute-on-aws-how-to-choose/',
                   note: 'EC2/Lambda/Fargate の使い分け',
+                  noteEn: 'Choosing between EC2/Lambda/Fargate',
                 },
               ],
             },
@@ -621,17 +903,29 @@ export const CLF_C02 = {
             '単一障害点',
             'ディザスタリカバリ',
           ],
+          knowledgeEn: [
+            'Regions',
+            'Availability Zones',
+            'Edge locations',
+            'High availability',
+            'Single points of failure',
+            'Disaster recovery',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS グローバルインフラストラクチャ',
+                  titleEn: 'AWS Global Infrastructure',
                   url: 'https://aws.amazon.com/jp/about-aws/global-infrastructure/',
+                  urlEn: 'https://aws.amazon.com/about-aws/global-infrastructure/',
                   note: 'リージョン・AZ 一覧',
+                  noteEn: 'Regions and AZs list',
                   recommend: true,
                 },
               ],
@@ -661,17 +955,29 @@ export const CLF_C02 = {
             'AWS Fargate',
             'オートスケーリング',
           ],
+          knowledgeEn: [
+            'Amazon EC2',
+            'AWS Lambda',
+            'Amazon ECS',
+            'Amazon EKS',
+            'AWS Fargate',
+            'Auto Scaling',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS コンピューティングサービス',
+                  titleEn: 'AWS Compute Services',
                   url: 'https://aws.amazon.com/jp/products/compute/',
+                  urlEn: 'https://aws.amazon.com/products/compute/',
                   note: 'コンピューティングサービスの全体像',
+                  noteEn: 'Overview of compute services',
                   recommend: true,
                 },
               ],
@@ -706,13 +1012,17 @@ export const CLF_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS データベースサービス',
+                  titleEn: 'AWS Database Services',
                   url: 'https://aws.amazon.com/jp/products/databases/',
+                  urlEn: 'https://aws.amazon.com/products/databases/',
                   note: 'データベースサービスの全体像',
+                  noteEn: 'Overview of database services',
                   recommend: true,
                 },
               ],
@@ -742,17 +1052,30 @@ export const CLF_C02 = {
             'AWS VPN',
             'AWS Direct Connect',
           ],
+          knowledgeEn: [
+            'Amazon VPC',
+            'Subnets',
+            'Network ACLs',
+            'Security groups',
+            'Amazon Route 53',
+            'AWS VPN',
+            'AWS Direct Connect',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'Amazon VPC ユーザーガイド',
+                  titleEn: 'Amazon VPC User Guide',
                   url: 'https://docs.aws.amazon.com/ja_jp/vpc/latest/userguide/what-is-amazon-vpc.html',
+                  urlEn: 'https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html',
                   note: 'VPC の基礎',
+                  noteEn: 'VPC fundamentals',
                   recommend: true,
                 },
               ],
@@ -785,17 +1108,30 @@ export const CLF_C02 = {
             'AWS Storage Gateway',
             'AWS Backup',
           ],
+          knowledgeEn: [
+            'Amazon S3',
+            'S3 storage classes',
+            'Amazon EBS',
+            'Amazon EFS',
+            'Amazon FSx',
+            'AWS Storage Gateway',
+            'AWS Backup',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS ストレージサービス',
+                  titleEn: 'AWS Storage Services',
                   url: 'https://aws.amazon.com/jp/products/storage/',
+                  urlEn: 'https://aws.amazon.com/products/storage/',
                   note: 'ストレージサービスの全体像',
+                  noteEn: 'Overview of storage services',
                   recommend: true,
                 },
               ],
@@ -828,19 +1164,26 @@ export const CLF_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS AI/ML サービス',
+                  titleEn: 'AWS AI/ML Services',
                   url: 'https://aws.amazon.com/jp/machine-learning/',
+                  urlEn: 'https://aws.amazon.com/machine-learning/',
                   note: 'AI/ML サービスの全体像',
+                  noteEn: 'Overview of AI/ML services',
                   recommend: true,
                 },
                 {
                   title: 'AWS 分析サービス',
+                  titleEn: 'AWS Analytics Services',
                   url: 'https://aws.amazon.com/jp/big-data/datalakes-and-analytics/',
+                  urlEn: 'https://aws.amazon.com/big-data/datalakes-and-analytics/',
                   note: '分析サービスの全体像',
+                  noteEn: 'Overview of analytics services',
                 },
               ],
             },
@@ -883,13 +1226,17 @@ export const CLF_C02 = {
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS の製品・サービス一覧',
+                  titleEn: 'AWS Products & Services',
                   url: 'https://aws.amazon.com/jp/products/',
+                  urlEn: 'https://aws.amazon.com/products/',
                   note: 'サービスカテゴリ別の一覧',
+                  noteEn: 'List of services by category',
                   recommend: true,
                 },
               ],
@@ -905,6 +1252,7 @@ export const CLF_C02 = {
       weight: 12,
       color: '#f59e0b',
       description: 'このドメインでは、AWS の料金モデル、請求管理、サポートプランに関する知識が問われます。',
+      descriptionEn: 'This domain covers knowledge of AWS pricing models, billing management, and support plans.',
       tasks: [
         {
           id: '4.1',
@@ -930,23 +1278,38 @@ export const CLF_C02 = {
             '専有ホスト',
             'データ転送コスト',
           ],
+          knowledgeEn: [
+            'On-Demand Instances',
+            'Reserved Instances',
+            'Savings Plans',
+            'Spot Instances',
+            'Dedicated Hosts',
+            'Data transfer costs',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS 料金',
+                  titleEn: 'AWS Pricing',
                   url: 'https://aws.amazon.com/jp/pricing/',
+                  urlEn: 'https://aws.amazon.com/pricing/',
                   note: '料金モデルの概要',
+                  noteEn: 'Overview of pricing models',
                   recommend: true,
                 },
                 {
                   title: 'AWS の料金の仕組み',
+                  titleEn: 'How AWS Pricing Works',
                   url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/welcome.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/welcome.html',
                   note: 'ホワイトペーパー: 料金モデルの基本',
+                  noteEn: 'Whitepaper: Pricing model fundamentals',
                   recommend: true,
                 },
               ],
@@ -978,17 +1341,29 @@ export const CLF_C02 = {
             'AWS コスト配分タグ',
             'AWS Cost and Usage Report',
           ],
+          knowledgeEn: [
+            'AWS Budgets',
+            'AWS Cost Explorer',
+            'AWS Pricing Calculator',
+            'AWS Organizations',
+            'AWS Cost Allocation Tags',
+            'AWS Cost and Usage Report',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS Billing and Cost Management',
+                  titleEn: 'AWS Billing and Cost Management',
                   url: 'https://docs.aws.amazon.com/ja_jp/account-billing/index.html',
+                  urlEn: 'https://docs.aws.amazon.com/account-billing/index.html',
                   note: '請求・コスト管理の基礎',
+                  noteEn: 'Billing and cost management fundamentals',
                   recommend: true,
                 },
               ],
@@ -1025,17 +1400,29 @@ export const CLF_C02 = {
             'AWS Marketplace',
             'AWS プロフェッショナルサービス',
           ],
+          knowledgeEn: [
+            'AWS Support plans',
+            'AWS Trusted Advisor',
+            'AWS Health Dashboard',
+            'AWS re:Post',
+            'AWS Marketplace',
+            'AWS Professional Services',
+          ],
           resources: [
             {
               key: 'docs',
               label: '公式ドキュメント',
+              labelEn: 'Official Documentation',
               iconClass: 'fas fa-book-open',
               iconColorClass: 'text-blue-600',
               items: [
                 {
                   title: 'AWS サポートプランの比較',
+                  titleEn: 'Compare AWS Support Plans',
                   url: 'https://aws.amazon.com/jp/premiumsupport/plans/',
+                  urlEn: 'https://aws.amazon.com/premiumsupport/plans/',
                   note: '各プランの詳細比較',
+                  noteEn: 'Detailed comparison of each plan',
                   recommend: true,
                 },
               ],

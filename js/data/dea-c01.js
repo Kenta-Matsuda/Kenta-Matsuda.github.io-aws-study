@@ -4,6 +4,7 @@ export const DEA_C01 = {
   shortLabel: 'DEA',
   title: 'AWS Certified Data Engineer - Associate',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
+  subtitleEn: 'Study Resource Navigator based on the Exam Guide',
   steps: [
     {
       id: '1',
@@ -12,17 +13,24 @@ export const DEA_C01 = {
       description: [
         'AWS認定試験の受験登録を行います。試験はPearson VUEを通じてオンラインまたはテストセンターで受験できます。',
       ],
+      descriptionEn: [
+        'Register for the AWS certification exam. You can take the exam online or at a test center through Pearson VUE.',
+      ],
       resources: [
         {
           key: 'official-page',
           label: '試験の公式ページ',
+          labelEn: 'Official Exam Page',
           iconClass: 'fas fa-file-alt',
           iconColorClass: 'text-blue-500',
           items: [
             {
               title: 'AWS Certified Data Engineer - Associate 公式ページ',
+              titleEn: 'AWS Certified Data Engineer - Associate Official Page',
               url: 'https://aws.amazon.com/jp/certification/certified-data-engineer-associate/',
+              urlEn: 'https://aws.amazon.com/certification/certified-data-engineer-associate/',
               note: '試験概要・合格条件・出題範囲などの公式情報',
+              noteEn: 'Official information including exam overview, passing criteria, and content outline',
               recommend: true,
             },
           ],
@@ -30,13 +38,16 @@ export const DEA_C01 = {
         {
           key: 'registration',
           label: '試験の申し込み',
+          labelEn: 'Exam Registration',
           iconClass: 'fas fa-clipboard-check',
           iconColorClass: 'text-indigo-500',
           items: [
             {
               title: 'AWS Training & Certification（試験申し込み）',
+              titleEn: 'AWS Training & Certification (Exam Registration)',
               url: 'https://www.aws.training/certification',
               note: 'AWS認定試験の受験登録はこちらから（公式の申し込みサイト）',
+              noteEn: 'Register for AWS certification exams here (official registration site)',
               recommend: true,
             },
           ],
@@ -50,17 +61,24 @@ export const DEA_C01 = {
       description: [
         '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
+      descriptionEn: [
+        'Read the exam guide (PDF) to understand the content outline, scoring weights, and question format. Grasp the overall picture before diving into each domain.',
+      ],
       resources: [
         {
           key: 'guide',
           label: '試験ガイド',
+          labelEn: 'Exam Guide',
           iconClass: 'fas fa-graduation-cap',
           iconColorClass: 'text-orange-500',
           items: [
             {
               title: 'AWS Certified Data Engineer - Associate 試験ガイド (PDF)',
+              titleEn: 'AWS Certified Data Engineer - Associate Exam Guide (PDF)',
               url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-data-engineer-associate/AWS-Certified-Data-Engineer-Associate_Exam-Guide.pdf',
+              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-data-engineer-associate/AWS-Certified-Data-Engineer-Associate_Exam-Guide.pdf',
               note: '試験範囲・出題比率・サンプル問題を確認',
+              noteEn: 'Review content outline, scoring weights, and sample questions',
               recommend: true,
             },
           ],
@@ -74,17 +92,23 @@ export const DEA_C01 = {
       description: [
         'AWS Skill Builder の無料コースで、データエンジニアリング分野の基礎知識をインプットします。試験対策に特化したコースもあります。',
       ],
+      descriptionEn: [
+        'Build foundational knowledge of data engineering with free courses on AWS Skill Builder. There are also courses specifically designed for exam preparation.',
+      ],
       resources: [
         {
           key: 'training',
           label: 'AWS トレーニング',
+          labelEn: 'AWS Training',
           iconClass: 'fas fa-chalkboard-teacher',
           iconColorClass: 'text-green-600',
           items: [
             {
               title: 'Exam Prep Standard Course: AWS Certified Data Engineer - Associate',
+              titleEn: 'Exam Prep Standard Course: AWS Certified Data Engineer - Associate',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18546/exam-prep-standard-course-aws-certified-data-engineer-associate-dea-c01',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
+              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
             },
           ],
@@ -99,11 +123,21 @@ export const DEA_C01 = {
         'このアプリの Domain 1〜4 タブに切り替えて、各ドメインのタスクごとに用意されたリソースを読み進めましょう。',
         'AI 解説や AI 模擬問題も活用して、理解を深めることができます。',
       ],
+      descriptionEn: [
+        'Switch to the Domain 1-4 tabs in this app and work through the resources prepared for each task in every domain.',
+        'You can also use AI explanations and AI practice questions to deepen your understanding.',
+      ],
       knowledge: [
         'Domain 1: データの取り込みと変換（34%）',
         'Domain 2: データストア管理（26%）',
         'Domain 3: データ運用とサポート（22%）',
         'Domain 4: データセキュリティとガバナンス（18%）',
+      ],
+      knowledgeEn: [
+        'Domain 1: Data Ingestion and Transformation (34%)',
+        'Domain 2: Data Store Management (26%)',
+        'Domain 3: Data Operations and Support (22%)',
+        'Domain 4: Data Security and Governance (18%)',
       ],
       resources: [],
     },
@@ -114,17 +148,23 @@ export const DEA_C01 = {
       description: [
         '公式の練習問題集で本番に近い問題を解き、理解度をチェックします。苦手なドメインが見つかったら、ドメイン別タブに戻って復習しましょう。',
       ],
+      descriptionEn: [
+        'Solve exam-like questions from the official practice question set to check your understanding. If you find weak domains, go back to the domain tabs to review.',
+      ],
       resources: [
         {
           key: 'practice',
           label: '練習問題',
+          labelEn: 'Practice Questions',
           iconClass: 'fas fa-tasks',
           iconColorClass: 'text-purple-500',
           items: [
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
+              titleEn: 'AWS Certification Official Practice Question Set',
               url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18608/aws-certified-data-engineer-associate-official-practice-question-set-dea-c01-japanese',
               note: 'AWS Skill Builder: 無料',
+              noteEn: 'AWS Skill Builder: Free',
               recommend: true,
             },
           ],
@@ -140,6 +180,7 @@ export const DEA_C01 = {
       weight: 34,
       color: '#3b82f6',
       description: 'このドメインでは、データの取り込みと変換、データパイプラインのオーケストレーション、プログラミングの概念の応用に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to data ingestion and transformation, data pipeline orchestration, and applying programming concepts.',
       tasks: [
         {
           id: '1.1',
@@ -160,6 +201,21 @@ export const DEA_C01 = {
             '- スキル 1.1.11: データ取り込みパイプラインの再現性について説明する。',
             '- スキル 1.1.12: ステートフルデータトランザクションとステートレスデータトランザクションを定義する。',
           ],
+          descriptionEn: [
+            'Task 1.1: Perform data ingestion',
+            '- Skill 1.1.1: Read data from streaming sources [Amazon Kinesis, Amazon Managed Streaming for Apache Kafka (Amazon MSK), Amazon DynamoDB Streams, AWS Database Migration Service (AWS DMS), AWS Glue, Amazon Redshift, etc.].',
+            '- Skill 1.1.2: Read data from batch sources (Amazon S3, AWS Glue, Amazon EMR, AWS DMS, Amazon Redshift, AWS Lambda, Amazon AppFlow, etc.).',
+            '- Skill 1.1.3: Implement appropriate configuration options for batch ingestion.',
+            '- Skill 1.1.4: Consume data APIs.',
+            '- Skill 1.1.5: Set up schedulers by using Amazon EventBridge, Apache Airflow, or time-based schedules for jobs and crawlers.',
+            '- Skill 1.1.6: Configure event triggers (Amazon S3 event notifications, EventBridge, etc.).',
+            '- Skill 1.1.7: Call a Lambda function from Kinesis.',
+            '- Skill 1.1.8: Create allowlists of IP addresses to allow connections to data sources.',
+            '- Skill 1.1.9: Implement throttling and overcome rate limiting (DynamoDB, Amazon RDS, Kinesis, etc.).',
+            '- Skill 1.1.10: Manage fan-in/fan-out of streaming data delivery.',
+            '- Skill 1.1.11: Describe the reproducibility of data ingestion pipelines.',
+            '- Skill 1.1.12: Define stateful and stateless data transactions.',
+          ],
           knowledge: [
             'Amazon Kinesis',
             'Amazon MSK',
@@ -170,9 +226,19 @@ export const DEA_C01 = {
             'Apache Airflow',
             'AWS Lambda',
           ],
+          knowledgeEn: [
+            'Amazon Kinesis',
+            'Amazon MSK',
+            'AWS DMS',
+            'Amazon S3',
+            'AWS Glue',
+            'Amazon EventBridge',
+            'Apache Airflow',
+            'AWS Lambda',
+          ],
           resources: [
-            {key:'blogs', label:'AWS Blogs', iconClass:'fas fa-book', iconColorClass:'text-orange-500', items:[{title:'Amazon Kinesis Data Streams のサーバーレスパターン', url:'https://aws.amazon.com/blogs/big-data/best-practices-for-consuming-amazon-kinesis-data-streams-using-aws-lambda/', note:'Big Data Blog: Intermediate (Level 200)', recommend:true}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue 開発者ガイド', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/what-is-glue.html', note:'ETL ジョブ・クローラー・データカタログ', recommend:true}, {title:'Amazon Kinesis Data Streams 開発者ガイド', url:'https://docs.aws.amazon.com/ja_jp/streams/latest/dev/introduction.html', note:'リアルタイムデータ取り込み'}]},
+            {key:'blogs', label:'AWS Blogs', labelEn:'AWS Blog', iconClass:'fas fa-book', iconColorClass:'text-orange-500', items:[{title:'Amazon Kinesis Data Streams のサーバーレスパターン', titleEn:'Best practices for consuming Amazon Kinesis Data Streams using AWS Lambda', url:'https://aws.amazon.com/blogs/big-data/best-practices-for-consuming-amazon-kinesis-data-streams-using-aws-lambda/', note:'Big Data Blog: Intermediate (Level 200)', noteEn:'Big Data Blog: Intermediate (Level 200)', recommend:true}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue 開発者ガイド', titleEn:'AWS Glue Developer Guide', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/what-is-glue.html', urlEn:'https://docs.aws.amazon.com/glue/latest/dg/what-is-glue.html', note:'ETL ジョブ・クローラー・データカタログ', noteEn:'ETL jobs, crawlers, and Data Catalog', recommend:true}, {title:'Amazon Kinesis Data Streams 開発者ガイド', titleEn:'Amazon Kinesis Data Streams Developer Guide', url:'https://docs.aws.amazon.com/ja_jp/streams/latest/dev/introduction.html', urlEn:'https://docs.aws.amazon.com/streams/latest/dev/introduction.html', note:'リアルタイムデータ取り込み', noteEn:'Real-time data ingestion'}]},
           ],
         },
         {
@@ -192,6 +258,19 @@ export const DEA_C01 = {
             '- スキル 1.2.9: データのボリューム、速度、多様性を定義する (構造化データ、非構造化データなど)。',
             '- スキル 1.2.10: データ処理のために大規模言語モデル (LLM) を統合する。',
           ],
+          descriptionEn: [
+            'Task 1.2: Transform and process data',
+            '- Skill 1.2.1: Optimize the use of containers for performance needs [Amazon Elastic Kubernetes Service (Amazon EKS), Amazon Elastic Container Service (Amazon ECS), etc.].',
+            '- Skill 1.2.2: Connect to various data sources [Java Database Connectivity (JDBC), Open Database Connectivity (ODBC), etc.].',
+            '- Skill 1.2.3: Integrate data from multiple sources.',
+            '- Skill 1.2.4: Optimize cost during data processing.',
+            '- Skill 1.2.5: Implement data transformation services based on requirements (Amazon EMR, AWS Glue, Lambda, Amazon Redshift, etc.).',
+            '- Skill 1.2.6: Transform data formats (e.g., .csv to Apache Parquet).',
+            '- Skill 1.2.7: Troubleshoot and debug common transformation errors and performance issues.',
+            '- Skill 1.2.8: Create data APIs by using AWS services to make data consumable by other systems.',
+            '- Skill 1.2.9: Define data volume, velocity, and variety (structured data, unstructured data, etc.).',
+            '- Skill 1.2.10: Integrate large language models (LLMs) for data processing.',
+          ],
           knowledge: [
             'Amazon EKS',
             'Amazon ECS',
@@ -201,9 +280,18 @@ export const DEA_C01 = {
             'Apache Parquet',
             'LLM',
           ],
+          knowledgeEn: [
+            'Amazon EKS',
+            'Amazon ECS',
+            'Amazon EMR',
+            'AWS Glue',
+            'Amazon Redshift',
+            'Apache Parquet',
+            'LLM',
+          ],
           resources: [
-            {key:'blackbelts', label:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon EMR Serverless', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20Serverless', note:'PDF | Youtube: 2024/02', recommend:true}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue ETL ジョブの最適化', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/aws-glue-programming-etl-partitions.html', note:'パーティション分割・データ形式変換'}, {title:'Amazon EMR ベストプラクティスガイド', url:'https://docs.aws.amazon.com/ja_jp/emr/latest/ManagementGuide/emr-plan.html', note:'クラスター設計・コスト最適化'}]},
+            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon EMR Serverless', titleEn:'Amazon EMR Serverless', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20Serverless', note:'PDF | Youtube: 2024/02', noteEn:'PDF | Youtube: 2024/02', recommend:true}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue ETL ジョブの最適化', titleEn:'Optimizing AWS Glue ETL Jobs', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/aws-glue-programming-etl-partitions.html', urlEn:'https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-partitions.html', note:'パーティション分割・データ形式変換', noteEn:'Partitioning and data format conversion'}, {title:'Amazon EMR ベストプラクティスガイド', titleEn:'Amazon EMR Best Practices Guide', url:'https://docs.aws.amazon.com/ja_jp/emr/latest/ManagementGuide/emr-plan.html', urlEn:'https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan.html', note:'クラスター設計・コスト最適化', noteEn:'Cluster design and cost optimization'}]},
           ],
         },
         {
@@ -217,6 +305,13 @@ export const DEA_C01 = {
             '- スキル 1.3.3: サーバーレスワークフローを実装および保守する。',
             '- スキル 1.3.4: 通知サービスを使用してアラートを送信する [Amazon Simple Notification Service (Amazon SNS)、Amazon Simple Queue Service (Amazon SQS) など]。',
           ],
+          descriptionEn: [
+            'Task 1.3: Orchestrate data pipelines',
+            '- Skill 1.3.1: Build workflows for data ETL pipelines by using orchestration services [Lambda, EventBridge, Amazon Managed Workflows for Apache Airflow (Amazon MWAA), AWS Step Functions, AWS Glue workflows, etc.].',
+            '- Skill 1.3.2: Build data pipelines for performance, availability, scalability, resiliency, and fault tolerance.',
+            '- Skill 1.3.3: Implement and maintain serverless workflows.',
+            '- Skill 1.3.4: Use notification services to send alerts [Amazon Simple Notification Service (Amazon SNS), Amazon Simple Queue Service (Amazon SQS), etc.].',
+          ],
           knowledge: [
             'Amazon MWAA',
             'AWS Step Functions',
@@ -225,8 +320,16 @@ export const DEA_C01 = {
             'Amazon SQS',
             'ETL パイプライン',
           ],
+          knowledgeEn: [
+            'Amazon MWAA',
+            'AWS Step Functions',
+            'AWS Glue Workflows',
+            'Amazon SNS',
+            'Amazon SQS',
+            'ETL Pipelines',
+          ],
           resources: [
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Step Functions 開発者ガイド', url:'https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/welcome.html', note:'ワークフローオーケストレーション', recommend:true}, {title:'Amazon MWAA ユーザーガイド', url:'https://docs.aws.amazon.com/ja_jp/mwaa/latest/userguide/what-is-mwaa.html', note:'Apache Airflow マネージド環境'}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Step Functions 開発者ガイド', titleEn:'AWS Step Functions Developer Guide', url:'https://docs.aws.amazon.com/ja_jp/step-functions/latest/dg/welcome.html', urlEn:'https://docs.aws.amazon.com/step-functions/latest/dg/welcome.html', note:'ワークフローオーケストレーション', noteEn:'Workflow orchestration', recommend:true}, {title:'Amazon MWAA ユーザーガイド', titleEn:'Amazon MWAA User Guide', url:'https://docs.aws.amazon.com/ja_jp/mwaa/latest/userguide/what-is-mwaa.html', urlEn:'https://docs.aws.amazon.com/mwaa/latest/userguide/what-is-mwaa.html', note:'Apache Airflow マネージド環境', noteEn:'Managed Apache Airflow environment'}]},
           ],
         },
         {
@@ -247,6 +350,20 @@ export const DEA_C01 = {
             '- スキル 1.4.10: 分散コンピューティングを定義する。',
             '- スキル 1.4.11: データ構造とアルゴリズムについて説明する (グラフデータ構造、ツリーデータ構造など)。',
           ],
+          descriptionEn: [
+            'Task 1.4: Apply programming concepts',
+            '- Skill 1.4.1: Optimize code to reduce runtime for data ingestion and transformation.',
+            '- Skill 1.4.2: Configure Lambda functions to meet concurrency and performance needs.',
+            '- Skill 1.4.3: Use programming languages and frameworks for data engineering (Python, SQL, Scala, R, Java, Bash, PowerShell, etc.).',
+            '- Skill 1.4.4: Use software engineering best practices for data engineering (version control, testing, logging, monitoring, etc.).',
+            '- Skill 1.4.5: Deploy data engineering solutions by using Infrastructure as Code (IaC).',
+            '- Skill 1.4.6: Package and deploy serverless data pipelines by using AWS Serverless Application Model (AWS SAM) (Lambda functions, Step Functions, DynamoDB tables, etc.).',
+            '- Skill 1.4.7: Use and mount storage volumes from within Lambda functions.',
+            '- Skill 1.4.8: Use Infrastructure as Code (IaC) for repeatable resource deployments [AWS CloudFormation, AWS Cloud Development Kit (AWS CDK), etc.].',
+            '- Skill 1.4.9: Describe continuous integration and continuous delivery (CI/CD) (implementation, testing, and deployment of data pipelines).',
+            '- Skill 1.4.10: Define distributed computing.',
+            '- Skill 1.4.11: Describe data structures and algorithms (graph data structures, tree data structures, etc.).',
+          ],
           knowledge: [
             'AWS SAM',
             'AWS CloudFormation',
@@ -255,9 +372,17 @@ export const DEA_C01 = {
             'Infrastructure as Code',
             'Lambda',
           ],
+          knowledgeEn: [
+            'AWS SAM',
+            'AWS CloudFormation',
+            'AWS CDK',
+            'CI/CD',
+            'Infrastructure as Code',
+            'Lambda',
+          ],
           resources: [
-            {key:'blackbelts', label:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'AWS CloudFormation#1 基礎編', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8', note:'PDF | Youtube: 2023/07'}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS SAM 開発者ガイド', url:'https://docs.aws.amazon.com/ja_jp/serverless-application-model/latest/developerguide/what-is-sam.html', note:'サーバーレスパイプラインのデプロイ', recommend:true}]},
+            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'AWS CloudFormation#1 基礎編', titleEn:'AWS CloudFormation#1 Basics', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudFormation%231%20%E5%9F%BA%E7%A4%8E%E7%B7%A8', note:'PDF | Youtube: 2023/07', noteEn:'PDF | Youtube: 2023/07'}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS SAM 開発者ガイド', titleEn:'AWS SAM Developer Guide', url:'https://docs.aws.amazon.com/ja_jp/serverless-application-model/latest/developerguide/what-is-sam.html', urlEn:'https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/what-is-sam.html', note:'サーバーレスパイプラインのデプロイ', noteEn:'Deploying serverless pipelines', recommend:true}]},
           ],
         },
       ],
@@ -269,6 +394,7 @@ export const DEA_C01 = {
       weight: 26,
       color: '#f97316',
       description: 'このドメインでは、データストアの選択、データカタログシステムの理解、データライフサイクルの管理、データモデルとスキーマの設計に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to choosing data stores, understanding data catalog systems, managing the lifecycle of data, and designing data models and schema evolution.',
       tasks: [
         {
           id: '2.1',
@@ -285,6 +411,17 @@ export const DEA_C01 = {
             '- スキル 2.1.7: オープンテーブルフォーマットを管理する (Apache Iceberg など)。',
             '- スキル 2.1.8: ベクトルインデックスのタイプについて説明する (HNSW、IVF など)。',
           ],
+          descriptionEn: [
+            'Task 2.1: Choose data stores',
+            '- Skill 2.1.1: Implement storage services that meet specific cost and performance requirements [Amazon Redshift, Amazon EMR, AWS Lake Formation, Amazon RDS, Amazon DynamoDB, Amazon Kinesis Data Streams, Amazon Managed Streaming for Apache Kafka (Amazon MSK), etc.].',
+            '- Skill 2.1.2: Configure storage services for specific access patterns and requirements (Amazon Redshift, Amazon EMR, Lake Formation, Amazon RDS, DynamoDB, etc.).',
+            '- Skill 2.1.3: Apply storage services to appropriate use cases [using indexing algorithms such as Hierarchical Navigable Small Worlds (HNSW) with Amazon Aurora PostgreSQL, using Amazon MemoryDB for rapid access to key-value pairs, etc.].',
+            '- Skill 2.1.4: Integrate migration tools into data processing systems (AWS Transfer Family, etc.).',
+            '- Skill 2.1.5: Implement data migration or remote access methods (Amazon Redshift federated queries, Amazon Redshift materialized views, Amazon Redshift Spectrum, etc.).',
+            '- Skill 2.1.6: Manage locks to prevent access to data (Amazon Redshift, Amazon RDS, etc.).',
+            '- Skill 2.1.7: Manage open table formats (Apache Iceberg, etc.).',
+            '- Skill 2.1.8: Describe types of vector indexes (HNSW, IVF, etc.).',
+          ],
           knowledge: [
             'Amazon Redshift',
             'Amazon RDS',
@@ -295,9 +432,19 @@ export const DEA_C01 = {
             'Apache Iceberg',
             'HNSW',
           ],
+          knowledgeEn: [
+            'Amazon Redshift',
+            'Amazon RDS',
+            'Amazon DynamoDB',
+            'AWS Lake Formation',
+            'Amazon Aurora',
+            'Amazon MemoryDB',
+            'Apache Iceberg',
+            'HNSW',
+          ],
           resources: [
-            {key:'blackbelts', label:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon DynamoDB – How it works', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20DynamoDB%20%E2%80%93%20How%20it%20works', note:'PDF | Youtube: 2023/12', recommend:true}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS データベースサービスの選択ガイド', url:'https://aws.amazon.com/jp/getting-started/decision-guides/databases-on-aws-how-to-choose/', note:'ユースケース別のデータストア選定', recommend:true}, {title:'Amazon Redshift 開始方法', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/gsg/new-user.html', note:'データウェアハウスの基礎'}]},
+            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon DynamoDB – How it works', titleEn:'Amazon DynamoDB – How it works', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20DynamoDB%20%E2%80%93%20How%20it%20works', note:'PDF | Youtube: 2023/12', noteEn:'PDF | Youtube: 2023/12', recommend:true}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS データベースサービスの選択ガイド', titleEn:'How to Choose AWS Database Services', url:'https://aws.amazon.com/jp/getting-started/decision-guides/databases-on-aws-how-to-choose/', urlEn:'https://aws.amazon.com/getting-started/decision-guides/databases-on-aws-how-to-choose/', note:'ユースケース別のデータストア選定', noteEn:'Choosing data stores by use case', recommend:true}, {title:'Amazon Redshift 開始方法', titleEn:'Amazon Redshift Getting Started', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/gsg/new-user.html', urlEn:'https://docs.aws.amazon.com/redshift/latest/gsg/new-user.html', note:'データウェアハウスの基礎', noteEn:'Data warehouse fundamentals'}]},
           ],
         },
         {
@@ -313,14 +460,29 @@ export const DEA_C01 = {
             '- スキル 2.2.5: カタログ用の新しいソース接続またはターゲット接続を作成する (AWS Glue など)。',
             '- スキル 2.2.6: ビジネスデータカタログを作成および管理する (Amazon SageMaker Catalog など)。',
           ],
+          descriptionEn: [
+            'Task 2.2: Understand data catalog systems',
+            '- Skill 2.2.1: Use data catalogs to consume data from data sources.',
+            '- Skill 2.2.2: Build and reference technical data catalogs (AWS Glue Data Catalog, Apache Hive metastore, etc.).',
+            '- Skill 2.2.3: Discover schemas and populate data catalogs by using AWS Glue crawlers.',
+            '- Skill 2.2.4: Synchronize partitions with data catalogs.',
+            '- Skill 2.2.5: Create new source or target connections for catalogs (AWS Glue, etc.).',
+            '- Skill 2.2.6: Create and manage business data catalogs (Amazon SageMaker Catalog, etc.).',
+          ],
           knowledge: [
             'AWS Glue Data Catalog',
             'AWS Glue クローラー',
             'Apache Hive メタストア',
             'Amazon SageMaker Catalog',
           ],
+          knowledgeEn: [
+            'AWS Glue Data Catalog',
+            'AWS Glue Crawlers',
+            'Apache Hive Metastore',
+            'Amazon SageMaker Catalog',
+          ],
           resources: [
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue Data Catalog', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/catalog-and-crawler.html', note:'データカタログとクローラーの設定', recommend:true}, {title:'AWS Lake Formation', url:'https://docs.aws.amazon.com/ja_jp/lake-formation/latest/dg/what-is-lake-formation.html', note:'データレイクのガバナンスとカタログ管理'}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue Data Catalog', titleEn:'AWS Glue Data Catalog', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/catalog-and-crawler.html', urlEn:'https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html', note:'データカタログとクローラーの設定', noteEn:'Data Catalog and crawler configuration', recommend:true}, {title:'AWS Lake Formation', titleEn:'AWS Lake Formation', url:'https://docs.aws.amazon.com/ja_jp/lake-formation/latest/dg/what-is-lake-formation.html', urlEn:'https://docs.aws.amazon.com/lake-formation/latest/dg/what-is-lake-formation.html', note:'データレイクのガバナンスとカタログ管理', noteEn:'Data lake governance and catalog management'}]},
           ],
         },
         {
@@ -336,14 +498,29 @@ export const DEA_C01 = {
             '- スキル 2.3.5: ビジネス要件および法的要件を満たすためにデータを削除する。',
             '- スキル 2.3.6: 適切なレジリエンスと可用性でデータを保護する。',
           ],
+          descriptionEn: [
+            'Task 2.3: Manage the lifecycle of data',
+            '- Skill 2.3.1: Perform load and unload operations to move data between Amazon S3 and Amazon Redshift.',
+            '- Skill 2.3.2: Manage S3 lifecycle policies to change storage tiers for S3 data.',
+            '- Skill 2.3.3: Expire data that has reached a specific age by using S3 lifecycle policies.',
+            '- Skill 2.3.4: Manage S3 versioning and DynamoDB TTL.',
+            '- Skill 2.3.5: Delete data to meet business and legal requirements.',
+            '- Skill 2.3.6: Protect data with appropriate resiliency and availability.',
+          ],
           knowledge: [
             'Amazon S3 ライフサイクルポリシー',
             'S3 バージョニング',
             'DynamoDB TTL',
             'Amazon Redshift',
           ],
+          knowledgeEn: [
+            'Amazon S3 Lifecycle Policies',
+            'S3 Versioning',
+            'DynamoDB TTL',
+            'Amazon Redshift',
+          ],
           resources: [
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon S3 ライフサイクル管理', url:'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/object-lifecycle-mgmt.html', note:'ストレージクラス移行・有効期限ポリシー', recommend:true}, {title:'Amazon S3 Glacier', url:'https://docs.aws.amazon.com/ja_jp/amazonglacier/latest/dev/introduction.html', note:'長期アーカイブストレージ'}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon S3 ライフサイクル管理', titleEn:'Amazon S3 Lifecycle Management', url:'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/object-lifecycle-mgmt.html', urlEn:'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html', note:'ストレージクラス移行・有効期限ポリシー', noteEn:'Storage class transitions and expiration policies', recommend:true}, {title:'Amazon S3 Glacier', titleEn:'Amazon S3 Glacier', url:'https://docs.aws.amazon.com/ja_jp/amazonglacier/latest/dev/introduction.html', urlEn:'https://docs.aws.amazon.com/amazonglacier/latest/dev/introduction.html', note:'長期アーカイブストレージ', noteEn:'Long-term archive storage'}]},
           ],
         },
         {
@@ -359,6 +536,15 @@ export const DEA_C01 = {
             '- スキル 2.4.5: インデックス作成、パーティショニング戦略、圧縮、その他のデータ最適化手法のベストプラクティスについて説明する。',
             '- スキル 2.4.6: ベクトル化の概念 (Amazon Bedrock ナレッジベースなど) について説明する。',
           ],
+          descriptionEn: [
+            'Task 2.4: Design data models and schema evolution',
+            '- Skill 2.4.1: Design schemas for Amazon Redshift, DynamoDB, and Lake Formation.',
+            '- Skill 2.4.2: Handle changes in data characteristics.',
+            '- Skill 2.4.3: Perform schema conversions [using AWS Schema Conversion Tool (AWS SCT) or AWS Database Migration Service (AWS DMS), etc.].',
+            '- Skill 2.4.4: Establish data lineage by using AWS tools (Amazon SageMaker ML Lineage Tracking, Amazon SageMaker Catalog, etc.).',
+            '- Skill 2.4.5: Describe best practices for indexing, partitioning strategies, compression, and other data optimization techniques.',
+            '- Skill 2.4.6: Describe vectorization concepts (Amazon Bedrock Knowledge Bases, etc.).',
+          ],
           knowledge: [
             'AWS SCT',
             'AWS DMS',
@@ -367,8 +553,16 @@ export const DEA_C01 = {
             'データリネージュ',
             'パーティショニング',
           ],
+          knowledgeEn: [
+            'AWS SCT',
+            'AWS DMS',
+            'Amazon SageMaker',
+            'Amazon Bedrock',
+            'Data Lineage',
+            'Partitioning',
+          ],
           resources: [
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon Redshift テーブル設計のベストプラクティス', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/dg/c_designing-tables-best-practices.html', note:'分散キー・ソートキー・圧縮の設計', recommend:true}, {title:'DynamoDB テーブル設計のベストプラクティス', url:'https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/best-practices.html', note:'パーティションキー・GSI の設計'}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon Redshift テーブル設計のベストプラクティス', titleEn:'Amazon Redshift Table Design Best Practices', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/dg/c_designing-tables-best-practices.html', urlEn:'https://docs.aws.amazon.com/redshift/latest/dg/c_designing-tables-best-practices.html', note:'分散キー・ソートキー・圧縮の設計', noteEn:'Distribution key, sort key, and compression design', recommend:true}, {title:'DynamoDB テーブル設計のベストプラクティス', titleEn:'DynamoDB Table Design Best Practices', url:'https://docs.aws.amazon.com/ja_jp/amazondynamodb/latest/developerguide/best-practices.html', urlEn:'https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/best-practices.html', note:'パーティションキー・GSI の設計', noteEn:'Partition key and GSI design'}]},
           ],
         },
       ],
@@ -380,6 +574,7 @@ export const DEA_C01 = {
       weight: 22,
       color: '#22c55e',
       description: 'このドメインでは、AWS サービスを使用したデータ処理の自動化と分析、データパイプラインの保守とモニタリング、データ品質の確保に関するスキルと知識が問われます。',
+      descriptionEn: 'This domain tests skills and knowledge related to automating data processing and analysis using AWS services, maintaining and monitoring data pipelines, and ensuring data quality.',
       tasks: [
         {
           id: '3.1',
