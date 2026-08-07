@@ -1,4 +1,4 @@
-import { getMilestoneStatus, getNewlyUnlockedMilestones } from './milestones.js';
+import { getMilestoneStatus, getNewlyUnlockedMilestones, getMilestoneTitle } from './milestones.js';
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
 const OPENAI_KEY_STORAGE_KEY = 'openai_api_key';
@@ -411,9 +411,9 @@ export function getXpSummary(examId) {
     totalXp,
     weekXp,
     milestoneId: ms.current?.id || null,
-    title: ms.current?.title || '',
+    title: getMilestoneTitle(ms.current),
     nextMilestoneId: ms.next?.id || null,
-    nextTitle: ms.next?.title || null,
+    nextTitle: ms.next ? getMilestoneTitle(ms.next) : null,
     remainingXp: ms.remainingXp,
     progress01: ms.progress01,
     recentActions: Array.isArray(ex.recentActions) ? ex.recentActions.slice(0, 3) : [],

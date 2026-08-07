@@ -841,33 +841,38 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
                     <h1 id="siteTitle" class="text-2xl md:text-3xl font-bold tracking-tight">AWS Study Navigator</h1>
-                    <p id="siteSubtitle" class="text-gray-300 mt-2 text-sm md:text-base">
-                        <a data-xp-link="resource" href="https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf" target="_blank" rel="noopener noreferrer" class="underline decoration-gray-500 hover:decoration-gray-200 hover:text-white transition-colors">試験ガイド</a>に基づく学習リソースナビゲーター
+                    <p id="siteSubtitle" class="text-gray-300 mt-2 text-sm md:text-base" data-i18n="header.subtitle">
+                        Study Resource Navigator based on the Exam Guide
                     </p>
                 </div>
 
                 <div class="flex flex-col items-end gap-3 w-full md:w-auto">
                     <div class="flex gap-3 items-center">
                         <div class="relative">
-                            <button id="examMenuBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition" title="試験を切り替え">
-                                <span class="block text-xs text-gray-400">Exam</span>
+                            <button id="examMenuBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition" title="Switch Exam" data-i18n-title="header.switchExam">
+                                <span class="block text-xs text-gray-400" data-i18n="header.examLabel">Exam</span>
                                 <span class="font-mono font-bold inline-flex items-center gap-2">
                                     <span id="examCodeBadge">ANS-C01</span>
                                     <i class="fas fa-chevron-down text-xs text-gray-300"></i>
                                 </span>
                             </button>
                             <div id="examMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
-                                <div class="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b">試験を選択</div>
+                                <div class="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b" data-i18n="header.selectExam">Select an Exam</div>
                                 <div id="examSwitcher" class="p-2 flex flex-wrap gap-2" aria-label="Exam Switcher"></div>
                             </div>
                         </div>
 
-                        <button id="themeToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="テーマ切替">
+                        <button id="langToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="Language" data-i18n-title="header.langToggle">
+                            <span class="block text-xs text-gray-400 group-hover:text-white" data-i18n="header.langToggle">Language</span>
+                            <span id="langToggleLabel" class="font-mono font-bold text-gray-300 group-hover:text-white text-xs">EN</span>
+                        </button>
+
+                        <button id="themeToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="テーマ切替" data-i18n-title="header.themeToggle">
                             <span class="block text-xs text-gray-400 group-hover:text-white">Theme</span>
                             <i id="themeToggleIcon" class="fas fa-moon text-gray-300 group-hover:text-white"></i>
                         </button>
 
-                        <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="API Key Settings">
+                        <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="API Key Settings" data-i18n-title="header.apiKeySettings">
                             <span class="block text-xs text-gray-400 group-hover:text-white">API Key</span>
                             <i class="fas fa-cog text-gray-300 group-hover:text-white"></i>
                         </button>
@@ -884,7 +889,7 @@
         <aside class="lg:col-span-4 xl:col-span-3 space-y-6">
             <!-- Domain Weight Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2">ドメイン別出題比率</h3>
+                <h3 class="text-lg font-bold text-gray-800 mb-4 border-b pb-2" data-i18n="dashboard.domainRatio">Domain Question Ratio</h3>
                 <div class="chart-container">
                     <canvas id="examWeightChart"></canvas>
                 </div>
@@ -895,7 +900,7 @@
 
             <!-- Feedback & Links -->
                 <button id="feedbackBtn" type="button" class="mt-4 w-full px-4 py-3 bg-gradient-to-r from-teal-500 to-emerald-500 hover:from-teal-600 hover:to-emerald-600 text-white rounded-lg text-sm font-bold transition shadow-sm hover:shadow-md flex items-center justify-center gap-2">
-                    <i class="fas fa-paper-plane"></i> フィードバックを送る
+                    <i class="fas fa-paper-plane"></i> <span data-i18n="dashboard.feedback">Send Feedback</span>
                 </button>
         </aside>
 
@@ -942,17 +947,17 @@
             <div id="xpDashboard" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
                 <div class="flex flex-col md:flex-row md:items-start justify-between gap-4">
                     <div class="min-w-0 flex-1">
-                        <h2 class="text-xl font-bold text-gray-900">学習ダッシュボード</h2>
-                        <p id="xpUserLine" class="text-gray-600 text-sm mt-1 whitespace-pre-line break-words">
-                            学習の総量を積み上げていきましょう。
+                        <h2 class="text-xl font-bold text-gray-900" data-i18n="dashboard.title">Study Dashboard</h2>
+                        <p id="xpUserLine" class="text-gray-600 text-sm mt-1 whitespace-pre-line break-words" data-i18n="dashboard.defaultGreeting">
+                            Let's build up your learning progress.
                         </p>
                     </div>
                     <div class="flex gap-2 justify-end flex-shrink-0">
                         <button id="editUserNameBtn" type="button" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-lg text-sm font-medium transition flex items-center gap-2 whitespace-nowrap">
-                            <i class="fas fa-user-pen"></i> ユーザー名変更
+                            <i class="fas fa-user-pen"></i> <span data-i18n="dashboard.changeUsername">Change Username</span>
                         </button>
                         <button id="tweetBtn" type="button" class="px-3 py-2 bg-black hover:bg-gray-900 text-white rounded-lg text-sm font-bold transition duration-150 flex items-center gap-2 whitespace-nowrap shadow-sm hover:shadow-md active:shadow-sm active:translate-y-px focus:outline-none focus:ring-2 focus:ring-black/30">
-                            Xに投稿
+                            <span data-i18n="dashboard.tweetBtn">Post on X</span>
                         </button>
                     </div>
                 </div>
@@ -969,8 +974,8 @@
                 </div>
 
                 <div id="dashboardCarousel" class="mt-6 dashboard-carousel">
-                    <button class="dashboard-carousel-nav dashboard-carousel-prev" id="carouselPrev" aria-label="前へ"><i class="fas fa-chevron-left"></i></button>
-                    <button class="dashboard-carousel-nav dashboard-carousel-next" id="carouselNext" aria-label="次へ"><i class="fas fa-chevron-right"></i></button>
+                    <button class="dashboard-carousel-nav dashboard-carousel-prev" id="carouselPrev" aria-label="Previous" data-i18n-aria="common.prev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="dashboard-carousel-nav dashboard-carousel-next" id="carouselNext" aria-label="Next" data-i18n-aria="common.next"><i class="fas fa-chevron-right"></i></button>
                     <div class="dashboard-carousel-track" id="carouselTrack">
                         <!-- Slide 1: Book Promo -->
                         <div class="dashboard-carousel-slide">
@@ -979,10 +984,10 @@
                                     <img src="./assets/books/aws-zenkan-kouryakubon-cover.jpg" alt="AWS認定 全冠攻略本の表紙" class="book-promo-cover" loading="lazy">
                                     <div class="min-w-0">
                                         <div class="book-promo-badge">
-                                            <i class="fas fa-book-open"></i> 発売中
+                                            <i class="fas fa-book-open"></i> <span data-i18n="dashboard.bookPromo.onSale">On Sale</span>
                                         </div>
-                                        <div class="book-promo-title mt-3"><span>AWS認定</span><span>全冠攻略本</span></div>
-                                        <p class="mt-2 text-xs md:text-sm leading-relaxed text-orange-50/90">AWS認定全冠のノウハウを一冊に凝縮！</p>
+                                        <div class="book-promo-title mt-3"><span data-i18n="dashboard.bookPromo.title">AWS Certification</span><span data-i18n="dashboard.bookPromo.subtitle">Complete Guide</span></div>
+                                        <p class="mt-2 text-xs md:text-sm leading-relaxed text-orange-50/90" data-i18n="dashboard.bookPromo.description">All AWS certification know-how in one book!</p>
                                         <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
                                             <a href="https://amzn.asia/d/0hIOAXuc" target="_blank" rel="noopener noreferrer" class="book-promo-link book-promo-amazon" aria-label="AWS認定 全冠攻略本をAmazonで見る">
                                                 <i class="fa-brands fa-amazon"></i>
@@ -999,14 +1004,14 @@
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-5 md:p-6 h-full flex flex-col items-center justify-center text-center">
                                 <span class="text-4xl mb-3">🎯</span>
-                                <div class="text-base font-bold text-gray-800 mb-1">クイズチャレンジ</div>
-                                <p class="text-sm text-gray-500 mb-4">全ドメイン横断で実力を試そう</p>
+                                <div class="text-base font-bold text-gray-800 mb-1" data-i18n="dashboard.quizCarousel.title">Quiz Challenge</div>
+                                <p class="text-sm text-gray-500 mb-4" data-i18n="dashboard.quizCarousel.subtitle">Test your skills across all domains</p>
                                 <div class="flex flex-col gap-2">
                                     <button id="dashboardQuizBtn" type="button" class="sparkle-btn px-6 py-3 text-white rounded-lg text-sm font-bold transition shadow-md hover:shadow-lg flex items-center gap-2">
-                                        <i class="fas fa-gamepad"></i> チャレンジ開始
+                                        <i class="fas fa-gamepad"></i> <span data-i18n="dashboard.quizCarousel.startBtn">Start Challenge</span>
                                     </button>
                                     <button id="dashboardReviewBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
-                                        <i class="fas fa-book-open"></i> 過去の問題を見直す
+                                        <i class="fas fa-book-open"></i> <span data-i18n="dashboard.quizCarousel.reviewBtn">Review Past Questions</span>
                                     </button>
                                 </div>
                             </div>
@@ -1014,27 +1019,27 @@
                         <!-- Slide 3: XP -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
-                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">これまでの累積 XP</div>
+                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.xpCarousel.totalXp">Total XP</div>
                                 <div class="mt-2 flex items-end gap-3">
                                     <div id="xpTotal" class="text-4xl font-extrabold text-gray-900 font-mono">0</div>
-                                    <div class="pb-1 text-sm font-bold text-gray-500 font-mono">(直近7日間 <span id="xpWeek">+0</span>)</div>
+                                    <div class="pb-1 text-sm font-bold text-gray-500 font-mono">(<span data-i18n="dashboard.xpCarousel.weekXp">Last 7 Days</span> <span id="xpWeek">+0</span>)</div>
                                 </div>
-                                <div class="mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wide">直近の獲得</div>
+                                <div class="mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.xpCarousel.recent">Recent</div>
                                 <div id="xpRecentActions" class="mt-2 space-y-1.5 text-xs text-gray-600"></div>
                             </div>
                         </div>
                         <!-- Slide 4: Streak -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
-                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">学習ストリーク</div>
+                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.streak.title">Study Streak</div>
                                 <div class="mt-2 flex items-center gap-3">
                                     <span class="streak-flame text-3xl">🔥</span>
                                     <span id="streakCount" class="text-4xl font-extrabold text-gray-900 font-mono">0</span>
-                                    <span class="text-sm font-bold text-gray-500">日連続</span>
+                                    <span class="text-sm font-bold text-gray-500" data-i18n="dashboard.streak.days">days in a row</span>
                                 </div>
                                 <div class="mt-4">
                                     <div id="streakWeekDots" class="flex gap-2 mt-1"></div>
-                                    <p id="streakMessage" class="text-sm text-gray-500 mt-3">今日も学習してストリークを伸ばそう！</p>
+                                    <p id="streakMessage" class="text-sm text-gray-500 mt-3" data-i18n="dashboard.streak.keepGoing">Keep learning today to extend your streak!</p>
                                 </div>
                             </div>
                         </div>
@@ -1042,16 +1047,16 @@
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="flex items-center gap-2">
-                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">称号</div>
+                                    <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.milestone.title">Title</div>
                                     <div id="xpTitleBadge" class="text-xs font-bold px-2.5 py-1 rounded-md border bg-white text-gray-800 border-gray-200">-</div>
                                 </div>
                                 <div class="mt-4 space-y-2 text-sm text-gray-600">
                                     <div class="flex items-center gap-2 min-w-0">
-                                        <span class="whitespace-nowrap">次の称号：</span>
+                                        <span class="whitespace-nowrap" data-i18n="dashboard.milestone.nextTitle">Next title:</span>
                                         <span id="xpNextTitle" class="min-w-0 truncate font-semibold text-gray-800">-</span>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <span class="whitespace-nowrap">残り：</span>
+                                        <span class="whitespace-nowrap" data-i18n="dashboard.milestone.remaining">Remaining:</span>
                                         <span id="xpRemaining" class="whitespace-nowrap font-semibold">0 XP</span>
                                     </div>
                                 </div>
@@ -1063,11 +1068,11 @@
                         <!-- Slide 6: Skill Radar Chart -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 md:p-5 h-full flex flex-col">
-                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide">ドメイン別スキル</div>
+                                <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.skillRadar.title">Skills by Domain</div>
                                 <div id="skillRadarChartContainer" class="mt-1 flex items-center justify-center flex-1" style="min-height: 140px; max-height: 180px;">
                                     <canvas id="skillRadarChart"></canvas>
                                 </div>
-                                <p id="skillRadarEmpty" class="hidden text-center text-xs text-gray-400 mt-1">クイズに回答するとスキルチャートが表示されます</p>
+                                <p id="skillRadarEmpty" class="hidden text-center text-xs text-gray-400 mt-1" data-i18n="dashboard.skillRadar.placeholder">Answer quizzes to see your skill chart</p>
                                 <div id="skillRadarLegend" class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] leading-tight"></div>
                             </div>
                         </div>
@@ -1077,8 +1082,7 @@
 
                 <div id="appBootError" class="hidden mt-4 p-3 bg-red-50 text-red-800 text-xs rounded border border-red-200">
                     <i class="fas fa-triangle-exclamation mr-1"></i>
-                    画面データの読み込みに失敗しました。ページを再読み込みしてください。
-                    ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。
+                    <span data-i18n="dashboard.bootError">Failed to load page data. Please reload the page. If opening locally, you need to open via a local server.</span>
                 </div>
             </div>
 
@@ -1106,7 +1110,7 @@
         <div class="modal-content" style="max-width: 560px;">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-gamepad text-indigo-500"></i> クイズモード選択
+                    <i class="fas fa-gamepad text-indigo-500"></i> <span data-i18n="quiz.modeSelect">Select Quiz Mode</span>
                 </h3>
                 <button type="button" data-close-modal="quizModeModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
@@ -1118,25 +1122,25 @@
                     <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4 selected" data-quiz-mode="quick5">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">⚡</span>
-                            <span class="font-bold text-gray-800 text-sm">5問連続</span>
+                            <span class="font-bold text-gray-800 text-sm" data-i18n="quiz.quick5.label">5 Questions</span>
                         </div>
-                        <p class="text-xs text-gray-500">5問連続出題。コンボを繋げてXPを稼ごう！</p>
+                        <p class="text-xs text-gray-500" data-i18n="quiz.quick5.description">5 consecutive questions. Build combos to earn more XP!</p>
                     </div>
                     <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="speed">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">⏱️</span>
-                            <span class="font-bold text-gray-800 text-sm">スピードラン</span>
+                            <span class="font-bold text-gray-800 text-sm" data-i18n="quiz.speed.label">Speed Run</span>
                         </div>
-                        <p class="text-xs text-gray-500">10問を1問1答形式で。30秒で解ける短問！</p>
-                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">⏰ 1問あたり30秒</div>
+                        <p class="text-xs text-gray-500" data-i18n="quiz.speed.description">10 quick Q&amp;A questions. 30 seconds per question!</p>
+                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold" data-i18n="quiz.speed.timeNote">⏰ 30 seconds per question</div>
                     </div>
                     <div class="quiz-mode-card rounded-xl bg-white border border-gray-200 p-4" data-quiz-mode="mock">
                         <div class="flex items-center gap-2 mb-2">
                             <span class="text-xl">📝</span>
-                            <span class="font-bold text-gray-800 text-sm">本番模擬試験</span>
+                            <span class="font-bold text-gray-800 text-sm" data-i18n="quiz.mock.label">Practice Exam</span>
                         </div>
-                        <p class="text-xs text-gray-500">本番同等の問題数・制限時間・難易度。AWS公式ドキュメントの引用付き解説。</p>
-                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold">📋 試験別の本番形式</div>
+                        <p class="text-xs text-gray-500" data-i18n="quiz.mock.description">Real exam-equivalent question count, time limit, and difficulty. Explanations with AWS documentation citations.</p>
+                        <div class="mt-1.5 text-[10px] text-indigo-600 font-bold" data-i18n="quiz.mock.formatNote">📋 Real exam format per certification</div>
                     </div>
                     <div class="quiz-mode-card rounded-xl bg-white border border-emerald-200 p-4" data-quiz-mode="smartReview">
                         <div class="flex items-center gap-2 mb-2">
@@ -1150,10 +1154,10 @@
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
                 <button type="button" data-close-modal="quizModeModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                    キャンセル
+                    <span data-i18n="common.cancel">Cancel</span>
                 </button>
                 <button id="quizModeStartBtn" type="button" class="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-bold transition-colors flex items-center gap-2">
-                    <i class="fas fa-play"></i> スタート
+                    <i class="fas fa-play"></i> <span data-i18n="common.start">Start</span>
                 </button>
             </div>
         </div>
@@ -1173,7 +1177,7 @@
             <div class="p-6">
                 <div id="modalLoading" class="hidden flex flex-col items-center justify-center py-8">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mb-4"></div>
-                    <p class="text-gray-500 text-sm animate-pulse">Gemini is thinking...</p>
+                    <p class="text-gray-500 text-sm animate-pulse" data-i18n="quiz.thinking">Gemini is thinking...</p>
                 </div>
                 <div id="modalContent" class="text-gray-700 ai-response-area text-sm md:text-base"></div>
 
@@ -1183,12 +1187,12 @@
                     <div id="quizPregenOverlay" class="hidden">
                         <div class="text-center py-8">
                             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-                            <p class="text-gray-700 font-bold text-sm mb-2">問題を生成中...</p>
+                            <p class="text-gray-700 font-bold text-sm mb-2" data-i18n="quiz.generating">Generating questions...</p>
                             <p id="quizPregenStatus" class="text-gray-500 text-xs mb-4">0 / 10 問</p>
                             <div class="quiz-pregen-bar max-w-xs mx-auto">
                                 <div id="quizPregenFill" class="quiz-pregen-fill" style="width: 0%"></div>
                             </div>
-                            <p class="text-gray-400 text-xs mt-3">全問題の生成が完了するとクイズが始まります</p>
+                            <p class="text-gray-400 text-xs mt-3" data-i18n="quiz.generatingSubtext">The quiz will start once all questions are generated</p>
                         </div>
                     </div>
 
@@ -1205,7 +1209,7 @@
                             </div>
                             <div id="quizComboDisplay" class="hidden">
                                 <span class="combo-badge inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-orange-100 text-orange-700 text-xs font-bold">
-                                    🔥 <span id="quizComboCount">0</span> コンボ
+                                    🔥 <span id="quizComboCount">0</span> <span data-i18n="quiz.combo">Combo</span>
                                     <span id="quizComboMultiplier" class="text-orange-500 text-[10px]"></span>
                                 </span>
                             </div>
@@ -1240,45 +1244,45 @@
                     <div id="quizSummary" class="hidden">
                         <div class="text-center py-4">
                             <div class="text-3xl mb-2" id="quizSummaryEmoji">🎉</div>
-                            <h3 class="text-lg font-bold text-gray-800 mb-1" id="quizSummaryTitle">クイズ完了！</h3>
+                            <h3 class="text-lg font-bold text-gray-800 mb-1" id="quizSummaryTitle" data-i18n="quiz.complete">Quiz Complete!</h3>
                             <p class="text-sm text-gray-500 mb-5" id="quizSummarySubtitle"></p>
                         </div>
                         <div class="grid grid-cols-4 gap-2 mb-5 bg-gray-50 rounded-xl p-4">
                             <div class="quiz-summary-stat">
                                 <div class="stat-value text-gray-900" id="quizSumCorrect">0</div>
-                                <div class="stat-label">正解</div>
+                                <div class="stat-label" data-i18n="quiz.correct">Correct</div>
                             </div>
                             <div class="quiz-summary-stat">
                                 <div class="stat-value text-gray-400" id="quizSumTotal">0</div>
-                                <div class="stat-label">問題数</div>
+                                <div class="stat-label" data-i18n="quiz.questionCount">Questions</div>
                             </div>
                             <div class="quiz-summary-stat">
                                 <div class="stat-value text-indigo-600" id="quizSumAccuracy">0%</div>
-                                <div class="stat-label">正答率</div>
+                                <div class="stat-label" data-i18n="quiz.accuracy">Accuracy</div>
                             </div>
                             <div class="quiz-summary-stat">
                                 <div class="stat-value text-orange-600" id="quizSumXp">0</div>
-                                <div class="stat-label">獲得XP</div>
+                                <div class="stat-label" data-i18n="quiz.earnedXp">XP Earned</div>
                             </div>
                         </div>
                         <div class="flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm">🔥</span>
-                                <span class="text-xs font-bold text-gray-600">最大コンボ</span>
+                                <span class="text-xs font-bold text-gray-600" data-i18n="quiz.maxCombo">Max Combo</span>
                             </div>
                             <span class="font-mono font-bold text-gray-800 text-sm" id="quizSumCombo">0</span>
                         </div>
                         <div id="quizSumTime" class="hidden flex items-center justify-between bg-gray-50 rounded-lg p-3 mb-4">
                             <div class="flex items-center gap-2">
                                 <span class="text-sm">⏱️</span>
-                                <span class="text-xs font-bold text-gray-600">所要時間</span>
+                                <span class="text-xs font-bold text-gray-600" data-i18n="quiz.elapsed">Time Taken</span>
                             </div>
                             <span class="font-mono font-bold text-gray-800 text-sm" id="quizSumTimeValue">0:00</span>
                         </div>
                         <!-- Explanation Review -->
                         <div id="quizSumExplanations" class="hidden">
                             <button id="quizSumExplanationsToggle" type="button" class="w-full flex items-center justify-between bg-indigo-50 hover:bg-indigo-100 rounded-lg p-3 mb-2 transition-colors">
-                                <span class="text-sm font-bold text-indigo-700 flex items-center gap-2"><i class="fas fa-book-open"></i> 解説一覧</span>
+                                <span class="text-sm font-bold text-indigo-700 flex items-center gap-2"><i class="fas fa-book-open"></i> <span data-i18n="quiz.explanationList">Explanations</span></span>
                                 <i class="fas fa-chevron-down text-indigo-400 text-xs transition-transform" id="quizSumExplanationsArrow"></i>
                             </button>
                             <div id="quizSumExplanationsList" class="hidden space-y-3 max-h-96 overflow-y-auto"></div>
@@ -1295,7 +1299,7 @@
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
                 <button id="aiCopyBtn" type="button" disabled class="px-4 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 opacity-60 cursor-not-allowed">
-                    <i class="fas fa-copy"></i> <span data-ai-copy-label>コピー</span>
+                    <i class="fas fa-copy"></i> <span data-ai-copy-label data-i18n="common.copy">Copy</span>
                 </button>
                 <button id="aiVoteGoodBtn" type="button" class="px-3 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" title="役に立った">
                     <i class="fa-regular fa-thumbs-up"></i> Good
@@ -1304,13 +1308,13 @@
                     <i class="fa-regular fa-thumbs-down"></i> Bad
                 </button>
                 <button id="aiRetryBtn" type="button" class="hidden px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fas fa-rotate-right"></i> もう一度
+                    <i class="fas fa-rotate-right"></i> <span data-i18n="common.retry">Retry</span>
                 </button>
                 <button id="quizNextBtn" type="button" class="hidden px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fas fa-arrow-right"></i> 次の問題
+                    <i class="fas fa-arrow-right"></i> <span data-i18n="quiz.nextQuestion">Next Question</span>
                 </button>
                 <button type="button" data-close-modal="aiModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                    閉じる
+                    <span data-i18n="common.close">Close</span>
                 </button>
             </div>
         </div>
@@ -1321,7 +1325,7 @@
         <div class="modal-content" style="max-width: 500px;">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-cog text-gray-600"></i> 設定
+                    <i class="fas fa-cog text-gray-600"></i> <span data-i18n="settings.title">Settings</span>
                 </h3>
                 <button type="button" data-close-modal="settingsModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
@@ -1330,7 +1334,7 @@
             <div class="p-6 space-y-6">
                 <!-- AI Provider Switch -->
                 <div>
-                    <label class="block text-gray-700 text-sm font-bold mb-2">AIプロバイダ</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.aiProvider">AI Provider</label>
                     <div id="aiProviderSwitch" class="flex rounded-lg border border-gray-200 overflow-hidden">
                         <button type="button" data-provider="gemini" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center border-r border-gray-200">
                             <i class="fas fa-wand-magic-sparkles mr-1"></i> Gemini
@@ -1339,10 +1343,9 @@
                             <i class="fas fa-brain mr-1"></i> OpenAI
                         </button>
                     </div>
-                    <p class="text-gray-500 text-xs mt-2">
+                    <p class="text-gray-500 text-xs mt-2" data-i18n="settings.providerNote">
                         <i class="fas fa-info-circle mr-1"></i>
-                        通常は <strong>Gemini（無料）</strong>をご利用ください。<br>
-                        13〜17歳の方は <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Google AI Studio</a> が年齢制限で利用できないため、OpenAI をお選びください。
+                        Normally use Gemini (free). If you are 13–17 years old, please use OpenAI (requires parental consent, paid).
                     </p>
                 </div>
 
@@ -1357,8 +1360,8 @@
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
-                    <p class="text-gray-500 text-xs mt-2">
-                        キーをお持ちでない場合は <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Google AI Studio</a> から無料で取得できます（18歳以上）。
+                    <p class="text-gray-500 text-xs mt-2" data-i18n="settings.geminiKeyHelp">
+                        If you don't have a key, get one free from <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">Google AI Studio</a> (18+ only).
                     </p>
                 </div>
 
@@ -1373,8 +1376,8 @@
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
-                    <p class="text-gray-500 text-xs mt-2">
-                        キーは <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">OpenAI Platform</a> から取得してください。
+                    <p class="text-gray-500 text-xs mt-2" data-i18n="settings.openaiKeyHelp">
+                        Get a key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">OpenAI Platform</a>.
                     </p>
                     <div class="mt-2 p-2.5 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
                         <i class="fas fa-triangle-exclamation mr-1"></i>
@@ -1385,19 +1388,19 @@
                     </div>
                 </div>
 
-                <p class="text-gray-400 text-xs">
+                <p class="text-gray-400 text-xs" data-i18n="settings.keyPrivacy">
                     <i class="fas fa-lock mr-1"></i>
-                    APIキーはブラウザのローカルストレージにのみ保存され、外部サーバーには送信されません。
+                    API keys are stored only in your browser's local storage and are never sent to external servers.
                 </p>
 
                 <div id="settingsMessage" class="text-sm mb-4 hidden"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
-                <button id="resetLocalBtn" type="button" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors mr-auto">
-                    データ初期化
+                <button id="resetLocalBtn" type="button" class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors mr-auto" data-i18n="settings.resetData">
+                    Reset Data
                 </button>
-                <button id="apiKeySaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    保存
+                <button id="apiKeySaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors" data-i18n="common.save">
+                    Save
                 </button>
             </div>
         </div>
@@ -1408,26 +1411,26 @@
         <div class="modal-content" style="max-width: 520px;">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-user text-gray-700"></i> ユーザー名登録
+                    <i class="fas fa-user text-gray-700"></i> <span data-i18n="userModal.title">Register Username</span>
                 </h3>
                 <button id="userModalCloseBtn" type="button" data-close-modal="userModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             <div class="p-6">
-                <p class="text-sm text-gray-600 mb-4">
-                    学習進捗を保存するため、まずユーザー名を登録してください（この端末のブラウザに保存されます）。
+                <p class="text-sm text-gray-600 mb-4" data-i18n="userModal.description">
+                    Please register a username to save your study progress. The name will be displayed on the dashboard and posts.
                 </p>
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="userNameInput">ユーザー名</label>
-                    <input id="userNameInput" type="text" maxlength="30" placeholder="例: matsu" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <p class="text-gray-500 text-xs mt-2">後からいつでも変更できます。</p>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="userNameInput" data-i18n="userModal.label">Username</label>
+                    <input id="userNameInput" type="text" maxlength="30" placeholder="e.g. matsu" data-i18n-placeholder="userModal.placeholder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <p class="text-gray-500 text-xs mt-2" data-i18n="userModal.note">You can change it anytime later.</p>
                 </div>
                 <div id="userMessage" class="text-sm mb-4 hidden"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
-                <button id="userNameSaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    保存
+                <button id="userNameSaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors" data-i18n="common.save">
+                    Save
                 </button>
             </div>
         </div>
@@ -1438,32 +1441,31 @@
         <div class="modal-content" style="max-width: 520px;">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-paper-plane text-teal-500"></i> フィードバック
+                    <i class="fas fa-paper-plane text-teal-500"></i> <span data-i18n="feedbackModal.title">Feedback</span>
                 </h3>
                 <button type="button" data-close-modal="feedbackModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
                 </button>
             </div>
             <div class="p-6">
-                <p class="text-sm text-gray-600 mb-4">
-                    このアプリの改善に向けたご意見・ご要望をお聞かせください。<br>
-                    送信内容は Google Analytics に匿名で記録されます。
+                <p class="text-sm text-gray-600 mb-4" data-i18n="feedbackModal.description">
+                    Please share your opinions and requests for improving this app. Submissions are recorded anonymously via Google Analytics.
                 </p>
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">カテゴリ</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">Category</label>
                     <select id="feedbackCategorySelect" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
-                        <option value="general">全般</option>
-                        <option value="resource_request">学習リソースの追加（BlackBelt・公式ドキュメント等）</option>
-                        <option value="feature_request">機能追加リクエスト</option>
-                        <option value="bug_report">不具合報告</option>
-                        <option value="ai_quality">AI機能の品質</option>
-                        <option value="ui_ux">UI / 使い勝手</option>
-                        <option value="other">その他</option>
+                        <option value="general" data-i18n="feedbackModal.categories.general">General</option>
+                        <option value="resource_request" data-i18n="feedbackModal.categories.resources">Add study resources (BlackBelt, official docs, etc.)</option>
+                        <option value="feature_request" data-i18n="feedbackModal.categories.feature">Feature request</option>
+                        <option value="bug_report" data-i18n="feedbackModal.categories.bug">Bug report</option>
+                        <option value="ai_quality" data-i18n="feedbackModal.categories.aiQuality">AI quality</option>
+                        <option value="ui_ux" data-i18n="feedbackModal.categories.ui">UI / Usability</option>
+                        <option value="other" data-i18n="feedbackModal.categories.other">Other</option>
                     </select>
                 </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackTextarea">フィードバック内容</label>
-                    <textarea id="feedbackTextarea" rows="5" maxlength="100" placeholder="改善してほしい点、追加してほしい機能などを100文字以内でお書きください。" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y"></textarea>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackTextarea" data-i18n="feedbackModal.contentLabel">Feedback</label>
+                    <textarea id="feedbackTextarea" rows="5" maxlength="100" placeholder="Please describe improvements or features you'd like within 100 characters." data-i18n-placeholder="feedbackModal.contentPlaceholder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y"></textarea>
                     <div class="flex justify-end mt-1">
                         <span id="feedbackCharCount" class="text-xs text-gray-400">0 / 100</span>
                     </div>
@@ -1471,11 +1473,11 @@
                 <div id="feedbackMessage" class="text-sm mb-4 hidden"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
-                <button type="button" data-close-modal="feedbackModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                    キャンセル
+                <button type="button" data-close-modal="feedbackModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors" data-i18n="common.cancel">
+                    Cancel
                 </button>
                 <button id="feedbackSubmitBtn" type="button" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fas fa-paper-plane"></i> 送信
+                    <i class="fas fa-paper-plane"></i> <span data-i18n="common.send">Send</span>
                 </button>
             </div>
         </div>
@@ -1486,7 +1488,7 @@
         <div class="modal-content" style="max-width: 800px;">
             <div class="flex justify-between items-center p-4 border-b border-gray-100 bg-gray-50 rounded-t-xl">
                 <h3 class="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <i class="fas fa-book-open text-indigo-500"></i> 過去の問題を見直す
+                    <i class="fas fa-book-open text-indigo-500"></i> <span data-i18n="quizHistory.title">Review Past Questions</span>
                 </h3>
                 <button type="button" data-close-modal="quizHistoryModal" class="text-gray-400 hover:text-gray-600 focus:outline-none">
                     <i class="fas fa-times text-xl"></i>
@@ -1501,17 +1503,17 @@
                 <div id="quizHistoryBreadcrumb" class="hidden flex items-center gap-2 mb-3 text-sm"></div>
                 <div id="quizHistoryEmpty" class="hidden text-center py-8">
                     <span class="text-3xl mb-2 block">📋</span>
-                    <p class="text-gray-500 text-sm">まだ回答履歴がありません。</p>
-                    <p class="text-gray-400 text-xs mt-1">クイズに挑戦すると、ここに問題と回答が記録されます。</p>
+                    <p class="text-gray-500 text-sm" data-i18n="quizHistory.empty">No answer history yet.</p>
+                    <p class="text-gray-400 text-xs mt-1" data-i18n="quizHistory.emptyHint">Try a quiz and your questions and answers will be recorded here.</p>
                 </div>
                 <div id="quizHistoryList" class="space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
                 <button id="quizHistoryExportBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fas fa-download"></i> エクスポート
+                    <i class="fas fa-download"></i> <span data-i18n="common.export">Export</span>
                 </button>
-                <button type="button" data-close-modal="quizHistoryModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors">
-                    閉じる
+                <button type="button" data-close-modal="quizHistoryModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors" data-i18n="common.close">
+                    Close
                 </button>
             </div>
         </div>
@@ -1525,7 +1527,7 @@
                     <i class="fas fa-trophy"></i>
                 </div>
                 <div class="flex-1">
-                    <div class="text-sm font-bold text-gray-900">称号を解放しました！</div>
+                    <div class="text-sm font-bold text-gray-900" data-i18n="milestones.unlocked">Title Unlocked!</div>
                     <div id="milestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
                 </div>
                 <button id="milestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
@@ -1543,14 +1545,13 @@
                     <i class="fas fa-spinner fa-spin"></i>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <div id="batchProgressTitle" class="text-sm font-bold text-gray-900">本番模擬試験を生成中</div>
-                    <div id="batchProgressStatus" class="text-xs text-gray-600 mt-1">バッチAPIにリクエスト中…</div>
-                    <div id="batchProgressNote" class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 leading-snug">
-                        ⚠️ 完了まで数分〜数十分かかる場合があります。<br>
-                        このタブ／ブラウザを閉じると生成は中断されます。
+                    <div id="batchProgressTitle" class="text-sm font-bold text-gray-900" data-i18n="batch.generating">Generating Practice Exam</div>
+                    <div id="batchProgressStatus" class="text-xs text-gray-600 mt-1" data-i18n="batch.requesting">Sending request to Batch API…</div>
+                    <div id="batchProgressNote" class="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 mt-2 leading-snug" data-i18n="batch.warning">
+                        ⚠️ This may take several minutes to tens of minutes. Closing this tab/browser will interrupt the generation.
                     </div>
-                    <button id="batchProgressStartBtn" type="button" class="hidden mt-2 w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md py-2">
-                        クイズを開始する
+                    <button id="batchProgressStartBtn" type="button" class="hidden mt-2 w-full text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md py-2" data-i18n="batch.startQuiz">
+                        Start Quiz
                     </button>
                 </div>
                 <button id="batchProgressCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
@@ -1565,7 +1566,7 @@
             <div class="flex items-center justify-between px-4 py-3 border-b border-gray-200 bg-gradient-to-r from-indigo-500 to-purple-500 text-white rounded-t-2xl">
                 <div class="flex items-center gap-2">
                     <i class="fas fa-robot"></i>
-                    <span class="font-bold text-sm">AI チューター</span>
+                    <span class="font-bold text-sm" data-i18n="chat.title">AI Tutor</span>
                     <span id="chatExamBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full"></span>
                 </div>
                 <div class="flex items-center gap-2">
@@ -1574,23 +1575,23 @@
                 </div>
             </div>
             <div id="chatMessages" class="chat-messages">
-                <div class="chat-bubble chat-bubble-ai">
-                    こんにちは！AWS学習について何でも聞いてください。選択中の試験に関する質問に回答します 💡
+                <div class="chat-bubble chat-bubble-ai" data-i18n="chat.greeting">
+                    Hi! Ask me anything about AWS study. I'll answer questions about the selected exam 💡
                 </div>
             </div>
             <div id="chatSuggestions" class="px-3 py-2 flex gap-2 flex-wrap border-t border-gray-100">
-                <button type="button" data-chat-suggest="この試験の重要ポイントは？" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition">重要ポイント</button>
-                <button type="button" data-chat-suggest="頻出サービスを教えて" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition">頻出サービス</button>
-                <button type="button" data-chat-suggest="勉強方法のアドバイス" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition">勉強方法</button>
+                <button type="button" data-chat-suggest="What are the key points of this exam?" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition" data-i18n="chat.suggestions.keyPoints">Key Points</button>
+                <button type="button" data-chat-suggest="Tell me the frequently tested services" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition" data-i18n="chat.suggestions.frequentServices">Frequent Services</button>
+                <button type="button" data-chat-suggest="Give me study advice" class="text-xs px-3 py-1.5 bg-indigo-50 text-indigo-700 rounded-full hover:bg-indigo-100 transition" data-i18n="chat.suggestions.studyTips">Study Tips</button>
             </div>
             <div class="flex items-center gap-2 px-3 py-3 border-t border-gray-200">
-                <input id="chatInput" type="text" maxlength="500" placeholder="質問を入力..." class="flex-1 text-sm border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:border-indigo-400">
+                <input id="chatInput" type="text" maxlength="500" placeholder="Enter a question..." data-i18n-placeholder="chat.inputPlaceholder" class="flex-1 text-sm border border-gray-200 rounded-full px-4 py-2 focus:outline-none focus:border-indigo-400">
                 <button id="chatSendBtn" type="button" class="w-8 h-8 rounded-full bg-indigo-500 hover:bg-indigo-600 text-white flex items-center justify-center transition text-sm">
                     <i class="fas fa-paper-plane text-xs"></i>
                 </button>
             </div>
         </div>
-        <button id="chatFab" type="button" class="chat-fab" title="AI チューターに質問">
+        <button id="chatFab" type="button" class="chat-fab" title="Ask AI Tutor" data-i18n-title="chat.fabTitle">
             <i class="fas fa-comments"></i>
         </button>
     </div>

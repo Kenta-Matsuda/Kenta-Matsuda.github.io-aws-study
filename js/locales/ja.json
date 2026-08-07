@@ -1,0 +1,292 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "start": "スタート",
+    "copy": "コピー",
+    "copied": "コピーしました",
+    "copyFailed": "コピー失敗",
+    "good": "Good",
+    "bad": "Bad",
+    "retry": "もう一度",
+    "next": "次へ",
+    "prev": "前へ",
+    "back": "戻る",
+    "all": "すべて",
+    "error": "エラー",
+    "export": "エクスポート",
+    "send": "送信",
+    "loading": "読み込み中..."
+  },
+  "header": {
+    "subtitle": "試験ガイドに基づく学習リソースナビゲーター",
+    "switchExam": "試験を切り替え",
+    "examLabel": "Exam",
+    "themeToggle": "テーマ切替",
+    "apiKeySettings": "API Key Settings",
+    "selectExam": "試験を選択",
+    "langToggle": "言語"
+  },
+  "dashboard": {
+    "title": "学習ダッシュボード",
+    "domainRatio": "ドメイン別出題比率",
+    "feedback": "フィードバックを送る",
+    "defaultGreeting": "学習の総量を積み上げていきましょう。",
+    "changeUsername": "ユーザー名変更",
+    "tweetBtn": "Xに投稿",
+    "bookPromo": {
+      "onSale": "発売中",
+      "title": "AWS認定",
+      "subtitle": "全冠攻略本",
+      "description": "AWS認定全冠のノウハウを一冊に凝縮！"
+    },
+    "quizCarousel": {
+      "title": "クイズチャレンジ",
+      "subtitle": "全ドメイン横断で実力を試そう",
+      "startBtn": "チャレンジ開始",
+      "reviewBtn": "過去の問題を見直す"
+    },
+    "xpCarousel": {
+      "totalXp": "これまでの累積 XP",
+      "weekXp": "直近7日間",
+      "recent": "直近の獲得"
+    },
+    "streak": {
+      "title": "学習ストリーク",
+      "days": "日連続",
+      "keepGoing": "今日も学習してストリークを伸ばそう！",
+      "weekAchieved": "素晴らしい！1週間連続学習達成 🎉",
+      "ongoing": "{{count}}日連続！この調子で続けよう 💪",
+      "todayActive": "今日もがんばってるね！",
+      "atRisk": "今日もアクセスしてストリークを守ろう！",
+      "startNew": "今日から連続学習をスタートしよう！"
+    },
+    "milestone": {
+      "title": "称号",
+      "nextTitle": "次の称号：",
+      "remaining": "残り：",
+      "zeroXp": "0 XP"
+    },
+    "skillRadar": {
+      "title": "ドメイン別スキル",
+      "placeholder": "クイズに回答するとスキルチャートが表示されます"
+    },
+    "bootError": "画面データの読み込みに失敗しました。ページを再読み込みしてください。ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。"
+  },
+  "quiz": {
+    "modeSelect": "クイズモード選択",
+    "quick5": {
+      "label": "5問連続",
+      "description": "5問連続出題。コンボを繋げてXPを稼ごう！"
+    },
+    "speed": {
+      "label": "スピードラン",
+      "description": "10問を1問1答形式で。30秒で解ける短問！",
+      "timeNote": "⏰ 1問あたり30秒"
+    },
+    "mock": {
+      "label": "本番模擬試験",
+      "description": "本番同等の問題数・制限時間・難易度。AWS公式ドキュメントの引用付き解説。",
+      "formatNote": "📋 試験別の本番形式"
+    },
+    "single": {
+      "label": "1問チャレンジ"
+    },
+    "generating": "問題を生成中...",
+    "generatingSubtext": "全問題の生成が完了するとクイズが始まります",
+    "thinking": "Gemini is thinking...",
+    "combo": "コンボ",
+    "complete": "クイズ完了！",
+    "correct": "正解",
+    "incorrect": "不正解",
+    "questionCount": "問題数",
+    "accuracy": "正答率",
+    "earnedXp": "獲得XP",
+    "maxCombo": "最大コンボ",
+    "elapsed": "所要時間",
+    "explanationList": "解説一覧",
+    "nextQuestion": "次の問題",
+    "correctFeedback": "正解！ {{combo}}",
+    "incorrectFeedback": "不正解 — 正解は {{letter}}",
+    "summaryExcellent": "素晴らしい！",
+    "summaryGood": "よくできました！",
+    "summaryOkay": "まずまず！",
+    "summaryReview": "復習しよう！",
+    "summarySubtitle": "{{label}} — {{total}}問完了",
+    "timerOvertime": " 延長中",
+    "generateBtn": "模擬問題を作成",
+    "explainBtn": "解説"
+  },
+  "quizHistory": {
+    "title": "過去の問題を見直す",
+    "empty": "まだ回答履歴がありません。",
+    "emptyHint": "クイズに挑戦すると、ここに問題と回答が記録されます。",
+    "reviewModeLabels": {
+      "single": "模擬問題",
+      "quick5": "5問連続",
+      "speed": "スピードラン",
+      "mock": "本番模擬試験"
+    },
+    "unanswered": "未回答",
+    "yourAnswer": "あなたの回答:",
+    "correctAnswer": "正解:",
+    "retryWrong": "間違えた問題を解き直す（{{count}}問）",
+    "correct": "正解"
+  },
+  "settings": {
+    "title": "設定",
+    "aiProvider": "AIプロバイダ",
+    "gemini": "Gemini",
+    "openai": "OpenAI",
+    "providerNote": "通常は Gemini（無料）をご利用ください。13〜17歳の方はOpenAI（保護者の同意が必要、有料）をご利用ください。",
+    "geminiApiKey": "Google Gemini API Key",
+    "openaiApiKey": "OpenAI API Key",
+    "geminiKeyHelp": "キーをお持ちでない場合は Google AI Studio から無料で取得できます（18歳以上）。",
+    "openaiKeyHelp": "キーは OpenAI Platform から取得してください。",
+    "openaiWarning": "ご注意：OpenAI API は有料です（利用量に応じて課金されます）。料金詳細は公式サイトをご確認ください。",
+    "keyPrivacy": "APIキーはブラウザのローカルストレージにのみ保存され、外部サーバーには送信されません。",
+    "resetData": "データ初期化",
+    "resetConfirm": "この端末に保存されている学習データ（XP、クイズ履歴、APIキーなど）を初期化します。続行しますか？"
+  },
+  "userModal": {
+    "title": "ユーザー名登録",
+    "description": "学習進捗を保存するため、まずユーザー名を登録してください。ダッシュボードや投稿に表示されます。",
+    "placeholder": "例: matsu",
+    "note": "後からいつでも変更できます。",
+    "label": "ユーザー名",
+    "validationEmpty": "ユーザー名を入力してください。",
+    "validationLength": "ユーザー名は30文字以内にしてください。"
+  },
+  "feedbackModal": {
+    "title": "フィードバック",
+    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信内容は Google Analytics に匿名で記録されます。",
+    "categories": {
+      "general": "全般",
+      "resources": "学習リソースの追加（BlackBelt・公式ドキュメント等）",
+      "feature": "機能追加リクエスト",
+      "bug": "不具合報告",
+      "aiQuality": "AI機能の品質",
+      "ui": "UI / 使い勝手",
+      "other": "その他"
+    },
+    "contentLabel": "フィードバック内容",
+    "contentPlaceholder": "改善してほしい点、追加してほしい機能などを100文字以内でお書きください。",
+    "sent": "フィードバックを送信しました。ありがとうございます！",
+    "validationEmpty": "フィードバック内容を入力してください。",
+    "validationLength": "100文字以内で入力してください。"
+  },
+  "chat": {
+    "title": "AI チューター",
+    "greeting": "こんにちは！AWS学習について何でも聞いてください。選択中の試験に関する質問に回答します 💡",
+    "suggestions": {
+      "keyPoints": "重要ポイント",
+      "keyPointsQuery": "この試験の重要ポイントは？",
+      "frequentServices": "頻出サービス",
+      "frequentServicesQuery": "頻出サービスを教えて",
+      "studyTips": "勉強方法",
+      "studyTipsQuery": "勉強方法のアドバイス"
+    },
+    "inputPlaceholder": "質問を入力...",
+    "fabTitle": "AI チューターに質問",
+    "noResponse": "回答を生成できませんでした。",
+    "thinking": "考え中..."
+  },
+  "milestones": {
+    "beginner": "ビギナー",
+    "rookie": "ルーキー",
+    "architect": "見習いアーキテクト",
+    "solution_architect": "ソリューションアーキテクト",
+    "senior_architect": "上級アーキテクト",
+    "specialist": "AWSスペシャリスト",
+    "master": "AWSマスター",
+    "king": "AWSキング",
+    "sage": "AWS大賢者",
+    "unlocked": "称号を解放しました！",
+    "toastText": "「{{title}}」を解放（{{xp}} XP）"
+  },
+  "xpActions": {
+    "link": "URL遷移",
+    "explain": "AI解説",
+    "quiz": "AI作問",
+    "xp": "XP",
+    "noHistory": "まだ獲得履歴がありません"
+  },
+  "greeting": {
+    "morning": "おはようございます。",
+    "afternoon": "こんにちは。",
+    "evening": "こんばんは。",
+    "night": "深夜の勉強、無理せずに。",
+    "motivations": [
+      "今日も来てくれて嬉しいです。",
+      "継続は力なり、ですね。",
+      "マイペースで大丈夫ですよ。",
+      "少しずつ前に進んでいますよ。",
+      "続けている自分を褒めましょう。",
+      "きっと実を結びますよ。",
+      "今日も一つ新しいことを覚えましょう。",
+      "知識の積み上げ、着実に。",
+      "あなたなら大丈夫。",
+      "この調子で頑張りましょう。"
+    ]
+  },
+  "days": {
+    "mon": "月",
+    "tue": "火",
+    "wed": "水",
+    "thu": "木",
+    "fri": "金",
+    "sat": "土",
+    "sun": "日"
+  },
+  "tweet": {
+    "template": "{{name}} のAWS学習ログ（{{code}}を勉強中）\n称号：{{title}}\n累積XP：{{total}}（今週+{{week}}）",
+    "hashtag": "#AWS #AWS合格ナビゲーター",
+    "cta": "完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！"
+  },
+  "batch": {
+    "alreadyInProgress": "既にバッチ生成が進行中です。完了するまでお待ちください。",
+    "confirmStart": "本番模擬試験を「Gemini Batch API」で生成します。\n\n完了まで数分〜数十分かかる場合があります。このタブ／ブラウザを閉じると生成は中断されます。\n\n続行しますか？",
+    "ready": "本番模擬試験の準備ができました",
+    "failed": "生成に失敗しました",
+    "generating": "本番模擬試験を生成中",
+    "requesting": "バッチAPIにリクエスト中…",
+    "warning": "⚠️ 完了まで数分〜数十分かかる場合があります。このタブ／ブラウザを閉じると生成は中断されます。",
+    "startQuiz": "クイズを開始する",
+    "stateWaiting": "待機中",
+    "stateGenerating": "生成中",
+    "stateComplete": "完了"
+  },
+  "errors": {
+    "cannotGenerate": "エラー: 問題を生成できませんでした。もう一度お試しください。",
+    "noResponse": "回答を生成できませんでした。",
+    "invalidApiKey": "APIキーが無効であるか、権限がありません。設定を確認してください。",
+    "rateLimited": "混雑しています（429）。少し待って再試行してください。",
+    "generic": "エラーが発生しました: {{msg}}",
+    "streamingUnsupported": "ストリーミングに対応していない環境です。",
+    "chartLoadFailed": "チャートライブラリを読み込めませんでした（Chart.js）。",
+    "examDataNotFound": "この試験のデータは未登録です。",
+    "domainTaskNotFound": "このドメインのタスクが見つかりませんでした。",
+    "stepsNotFound": "この試験の学習ステップはまだ登録されていません。"
+  },
+  "storage": {
+    "apiKeyEmpty": "APIキーを入力してください。",
+    "apiKeySaved": "APIキーを保存しました。",
+    "apiKeyDeleted": "APIキーを削除しました。",
+    "openaiKeyEmpty": "OpenAI APIキーを入力してください。",
+    "openaiKeySaved": "OpenAI APIキーを保存しました。",
+    "openaiKeyDeleted": "OpenAI APIキーを削除しました。"
+  },
+  "roadmap": {
+    "title": "学習ロードマップ",
+    "description": "{{code}} 試験の学習を上から順に進めていきましょう。",
+    "taskStatement": "Task Statement {{id}}",
+    "knowledge": "必要な知識・スキル",
+    "keyPoints": "ポイント",
+    "recommend": "おススメ"
+  },
+  "aiDisclaimer": "※注意: AIの生成結果は必ずしも正しくありません（誤りを含む可能性があります）。重要な判断は、AWS公式ドキュメント等の一次情報で確認してください。",
+  "footer": {
+    "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
+  }
+}
