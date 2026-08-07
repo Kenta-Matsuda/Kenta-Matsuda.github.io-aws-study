@@ -148,6 +148,9 @@
     "geminiKeyHelp": "キーをお持ちでない場合は Google AI Studio から無料で取得できます（18歳以上）。",
     "openaiKeyHelp": "キーは OpenAI Platform から取得してください。",
     "openaiWarning": "ご注意：OpenAI API は有料です（利用量に応じて課金されます）。料金詳細は公式サイトをご確認ください。",
+    "openaiWarningLabel": "ご注意：",
+    "openaiWarningText": "OpenAI API は有料です（利用量に応じて課金されます）。18歳未満の方は保護者の同意・監督のもとでご利用ください。",
+    "openaiWarningLinkText": "OpenAI 利用規約",
     "keyPrivacy": "APIキーはブラウザのローカルストレージにのみ保存され、外部サーバーには送信されません。",
     "resetData": "データ初期化",
     "resetConfirm": "この端末に保存されている学習データ（XP、クイズ履歴、APIキーなど）を初期化します。続行しますか？"

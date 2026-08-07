@@ -124,6 +124,15 @@ function localizedDomainDescription(domain) {
   return domain.description || '';
 }
 
+/**
+ * Return locale-aware quiz mode label from config.
+ */
+function localizedModeLabel(config) {
+  if (!config) return '';
+  if (getLocale() === 'en' && config.labelEn) return config.labelEn;
+  return config.label || '';
+}
+
 let chartInstance = null;
 
 const XP_RULES = {
@@ -656,7 +665,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       els.quizSessionProgress.textContent = `${current + 1} / ${total}`;
     }
     if (els.quizModeLabel) {
-      els.quizModeLabel.textContent = config.label;
+      els.quizModeLabel.textContent = localizedModeLabel(config);
     }
     if (total > 1) {
       if (els.quizProgressBar) els.quizProgressBar.classList.remove('hidden');
@@ -672,7 +681,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const total = session.questionCount;
 
     // Open AI modal and show pre-generation overlay
-    showAiModal(els, `${config.label}: ${request.taskTitle}`, true);
+    showAiModal(els, `${localizedModeLabel(config)}: ${request.taskTitle}`, true);
     // Clear any previous content (e.g. old explanation)
     if (els.modalContent) els.modalContent.innerHTML = '';
     if (els.modalLoading) els.modalLoading.classList.add('hidden');
@@ -1002,7 +1011,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.mock;
 
     // Open the AI modal and prepare the quiz UI (mirrors preGenerateQuestions tail).
-    showAiModal(els, `${config.label}: ${request.taskTitle}`, true);
+    showAiModal(els, `${localizedModeLabel(config)}: ${request.taskTitle}`, true);
     if (els.modalContent) els.modalContent.innerHTML = '';
     if (els.modalLoading) els.modalLoading.classList.add('hidden');
     resetQuizUi(els);
@@ -2554,7 +2563,14 @@ function buildDashboardHeadline({ userName }) {
   }
 
   const you = name ? (getLocale() === 'ja' ? `${name}さん` : name) : (getLocale() === 'ja' ? 'あなた' : 'there');
-  const line1 = getLocale() === 'ja' ? `${greet} ${you}`.trim() : `${greet} Hi, ${you}!`.replace('. Hi', ', ');
+  let line1;
+  if (getLocale() === 'ja') {
+    line1 = `${greet} ${you}`.trim();
+  } else {
+    // English: "Good morning, kenta!" - strip trailing period from greeting and combine
+    const greetBase = greet.replace(/\.\s*$/, '');
+    line1 = `${greetBase}, ${you}!`;
+  }
   const line2 = buildDashboardOneLiner({ userName: name });
   return [line1, line2].filter(Boolean).join('\n').trim();
 }
@@ -3600,7 +3616,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   }
 
   const providerLabel = getActiveProviderLabel();
-  showAiModal(els, `用語解説: ${term}`, true);
+  showAiModal(els, `${getLocale() === 'ja' ? '用語解説' : 'Explain'}: ${term}`, true);
 
   const systemPrompt =
     `${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
@@ -3648,8 +3664,8 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
 
   const config = session ? QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single : null;
   const modalTitle = config && session && session.questionCount > 1
-    ? `${config.label}: ${taskTitle}`
-    : `模擬問題: ${taskTitle}`;
+    ? `${localizedModeLabel(config)}: ${taskTitle}`
+    : `${getLocale() === 'ja' ? '模擬問題' : 'Quiz'}: ${taskTitle}`;
 
   showAiModal(els, modalTitle, true);
 
@@ -3732,7 +3748,7 @@ function showQuizSummary({ els, session }) {
 
   if (els.quizSummaryEmoji) els.quizSummaryEmoji.textContent = emoji;
   if (els.quizSummaryTitle) els.quizSummaryTitle.textContent = title;
-  if (els.quizSummarySubtitle) els.quizSummarySubtitle.textContent = t('quiz.summarySubtitle', { label: config.label, total: summary.total });
+  if (els.quizSummarySubtitle) els.quizSummarySubtitle.textContent = t('quiz.summarySubtitle', { label: localizedModeLabel(config), total: summary.total });
 
   if (els.quizSumCorrect) els.quizSumCorrect.textContent = String(summary.correct);
   if (els.quizSumTotal) els.quizSumTotal.textContent = String(summary.total);

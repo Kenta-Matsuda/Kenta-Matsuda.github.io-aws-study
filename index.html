@@ -1379,12 +1379,11 @@
                     <p class="text-gray-500 text-xs mt-2" data-i18n="settings.openaiKeyHelp">
                         Get a key from <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener noreferrer" class="text-blue-500 underline">OpenAI Platform</a>.
                     </p>
-                    <div class="mt-2 p-2.5 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
+                    <div id="openaiWarningBlock" class="mt-2 p-2.5 bg-amber-50 text-amber-800 text-xs rounded border border-amber-200">
                         <i class="fas fa-triangle-exclamation mr-1"></i>
-                        <strong>ご注意：</strong>
-                        OpenAI API は<strong>有料</strong>です（利用量に応じて課金されます）。<br>
-                        18歳未満の方は<strong>保護者の同意・監督のもと</strong>でご利用ください。<br>
-                        詳しくは <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline font-medium">OpenAI 利用規約</a> をご確認ください。
+                        <strong data-i18n="settings.openaiWarningLabel">Note:</strong>
+                        <span data-i18n="settings.openaiWarningText">OpenAI API is paid (charged per usage). Users under 18 must use it under parental consent and supervision.</span><br>
+                        <a href="https://openai.com/policies/terms-of-use" target="_blank" rel="noopener noreferrer" class="text-amber-700 underline font-medium" data-i18n="settings.openaiWarningLinkText">OpenAI Terms of Use</a>
                     </div>
                 </div>
 

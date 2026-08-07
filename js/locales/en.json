@@ -37,10 +37,10 @@
     "changeUsername": "Change Username",
     "tweetBtn": "Post on X",
     "bookPromo": {
-      "onSale": "On Sale",
-      "title": "AWS Certification",
-      "subtitle": "Complete Guide",
-      "description": "All AWS certification know-how in one book!"
+      "onSale": "発売中",
+      "title": "AWS認定",
+      "subtitle": "全冠攻略本",
+      "description": "AWS認定全冠のノウハウを一冊に凝縮！"
     },
     "quizCarousel": {
       "title": "Quiz Challenge",
@@ -148,6 +148,9 @@
     "geminiKeyHelp": "If you don't have a key, get one free from Google AI Studio (18+ only).",
     "openaiKeyHelp": "Get a key from OpenAI Platform.",
     "openaiWarning": "Note: OpenAI API is paid (charged per usage). See pricing for details.",
+    "openaiWarningLabel": "Note:",
+    "openaiWarningText": "OpenAI API is paid (charged per usage). Users under 18 must use it under parental consent and supervision.",
+    "openaiWarningLinkText": "OpenAI Terms of Use",
     "keyPrivacy": "API keys are stored only in your browser's local storage and are never sent to external servers.",
     "resetData": "Reset Data",
     "resetConfirm": "This will reset all study data stored on this device (XP, quiz history, API keys, etc.). Continue?"
