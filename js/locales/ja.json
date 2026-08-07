@@ -28,6 +28,9 @@
     "selectExam": "試験を選択",
     "langToggle": "言語"
   },
+  "sidebar": {
+    "title": "試験を選択"
+  },
   "dashboard": {
     "title": "学習ダッシュボード",
     "dailyHighlight": "今日のハイライト",
@@ -139,6 +142,11 @@
   },
   "settings": {
     "title": "設定",
+    "language": "言語",
+    "theme": "テーマ",
+    "themeLight": "ライト",
+    "themeDark": "ダーク",
+    "themeSystem": "システム",
     "aiProvider": "AIプロバイダ",
     "gemini": "Gemini",
     "openai": "OpenAI",
@@ -286,6 +294,8 @@
   "roadmap": {
     "title": "学習ロードマップ",
     "description": "{{code}} 試験の学習を上から順に進めていきましょう。",
+    "commonTitle": "共通学習リソース",
+    "commonDescription": "すべてのAWS認定試験に共通する学習ステップ・リソースです。",
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "必要な知識・スキル",
     "keyPoints": "ポイント",

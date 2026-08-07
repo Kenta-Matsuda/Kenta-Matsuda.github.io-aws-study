@@ -822,6 +822,112 @@
 
         /* Dark mode: highlight search term */
         html.dark .bg-yellow-200 { background-color: #854d0e !important; color: #fef9c3 !important; }
+
+        /* ── Exam Sidebar ── */
+        #examSidebar {
+            scrollbar-width: thin;
+        }
+        #examSidebar.open {
+            transform: translateX(0);
+        }
+        @media (min-width: 1024px) {
+            #examSidebar {
+                position: sticky;
+                top: 0;
+                height: 100vh;
+                flex-shrink: 0;
+            }
+            body {
+                display: flex;
+                flex-direction: column;
+            }
+            body > .flex-grow {
+                display: flex;
+            }
+        }
+        .exam-sidebar-category {
+            margin-bottom: 0.5rem;
+        }
+        .exam-sidebar-category-label {
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #6b7280;
+            padding: 0.25rem 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.375rem;
+        }
+        .exam-sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .exam-sidebar-item:hover {
+            background: #f3f4f6;
+        }
+        .exam-sidebar-item.active {
+            background: #eef2ff;
+            color: #4338ca;
+            font-weight: 700;
+        }
+        .exam-sidebar-item .exam-code {
+            font-family: ui-monospace, monospace;
+            font-size: 0.7rem;
+            font-weight: 700;
+            background: #e5e7eb;
+            padding: 0.125rem 0.375rem;
+            border-radius: 0.25rem;
+        }
+        .exam-sidebar-item.active .exam-code {
+            background: #c7d2fe;
+            color: #3730a3;
+        }
+        html.dark #examSidebar {
+            background-color: #1e293b;
+            border-color: #334155;
+        }
+        html.dark .exam-sidebar-category-label {
+            color: #94a3b8;
+        }
+        html.dark .exam-sidebar-item {
+            color: #e2e8f0;
+        }
+        html.dark .exam-sidebar-item:hover {
+            background: #334155;
+        }
+        html.dark .exam-sidebar-item.active {
+            background: #312e81;
+            color: #a5b4fc;
+        }
+        html.dark .exam-sidebar-item .exam-code {
+            background: #475569;
+            color: #e2e8f0;
+        }
+        html.dark .exam-sidebar-item.active .exam-code {
+            background: #4338ca;
+            color: #e0e7ff;
+        }
+
+        /* ── Settings Modal: switch button states ── */
+        .settings-switch-btn {
+            transition: all 0.15s ease;
+        }
+        .settings-switch-btn.active {
+            background: #4338ca;
+            color: white;
+        }
+        html.dark .settings-switch-btn.active {
+            background: #6366f1;
+        }
     </style>
 </head>
 <!-- Google tag (gtag.js) -->
@@ -837,50 +943,55 @@
 
     <!-- Header -->
     <header class="aws-gradient text-white shadow-lg">
-        <div class="container mx-auto px-4 py-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h1 id="siteTitle" class="text-2xl md:text-3xl font-bold tracking-tight">AWS Study Navigator</h1>
-                    <p id="siteSubtitle" class="text-gray-300 mt-2 text-sm md:text-base" data-i18n="header.subtitle">
-                        Study Resource Navigator based on the Exam Guide
-                    </p>
-                </div>
-
-                <div class="flex flex-col items-end gap-3 w-full md:w-auto">
-                    <div class="flex gap-3 items-center">
-                        <div class="relative">
-                            <button id="examMenuBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition" title="Switch Exam" data-i18n-title="header.switchExam">
-                                <span class="block text-xs text-gray-400" data-i18n="header.examLabel">Exam</span>
-                                <span class="font-mono font-bold inline-flex items-center gap-2">
-                                    <span id="examCodeBadge">ANS-C01</span>
-                                    <i class="fas fa-chevron-down text-xs text-gray-300"></i>
-                                </span>
-                            </button>
-                            <div id="examMenu" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden z-50">
-                                <div class="px-3 py-2 text-xs text-gray-500 bg-gray-50 border-b" data-i18n="header.selectExam">Select an Exam</div>
-                                <div id="examSwitcher" class="p-2 flex flex-wrap gap-2" aria-label="Exam Switcher"></div>
-                            </div>
-                        </div>
-
-                        <button id="langToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="Language" data-i18n-title="header.langToggle">
-                            <span class="block text-xs text-gray-400 group-hover:text-white" data-i18n="header.langToggle">Language</span>
-                            <span id="langToggleLabel" class="font-mono font-bold text-gray-300 group-hover:text-white text-xs">EN</span>
-                        </button>
-
-                        <button id="themeToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="テーマ切替" data-i18n-title="header.themeToggle">
-                            <span class="block text-xs text-gray-400 group-hover:text-white">Theme</span>
-                            <i id="themeToggleIcon" class="fas fa-moon text-gray-300 group-hover:text-white"></i>
-                        </button>
-
-                        <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg px-4 py-2 text-center transition flex flex-col items-center justify-center group" title="API Key Settings" data-i18n-title="header.apiKeySettings">
-                            <span class="block text-xs text-gray-400 group-hover:text-white">API Key</span>
-                            <i class="fas fa-cog text-gray-300 group-hover:text-white"></i>
-                        </button>
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <!-- Sidebar toggle (mobile) -->
+                    <button id="sidebarToggleBtn" type="button" class="lg:hidden bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2 transition" aria-label="Toggle sidebar">
+                        <i class="fas fa-bars text-lg"></i>
+                    </button>
+                    <div>
+                        <h1 id="siteTitle" class="text-xl md:text-2xl font-bold tracking-tight">AWS Study Navigator</h1>
+                        <p id="siteSubtitle" class="text-gray-300 mt-1 text-xs md:text-sm" data-i18n="header.subtitle">
+                            Study Resource Navigator based on the Exam Guide
+                        </p>
                     </div>
                 </div>
+
+                <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2.5 transition" title="Settings" data-i18n-title="settings.title">
+                    <i class="fas fa-cog text-lg text-gray-300 hover:text-white"></i>
+                </button>
             </div>
         </div>
     </header>
+
+    <!-- Hidden elements for backward compat (used by JS but no longer in header) -->
+    <div class="hidden">
+        <span id="examCodeBadge"></span>
+        <button id="examMenuBtn" type="button"></button>
+        <div id="examMenu"><div id="examSwitcher"></div></div>
+        <button id="langToggleBtn" type="button"></button>
+        <span id="langToggleLabel"></span>
+        <button id="themeToggleBtn" type="button"></button>
+        <i id="themeToggleIcon"></i>
+    </div>
+
+    <!-- Exam Sidebar (responsive) -->
+    <aside id="examSidebar" class="fixed inset-y-0 left-0 z-40 w-64 transform -translate-x-full lg:translate-x-0 lg:static lg:inset-auto lg:z-auto transition-transform duration-200 ease-in-out bg-white border-r border-gray-200 shadow-lg lg:shadow-none overflow-y-auto" style="top: 0;">
+        <div class="p-4">
+            <div class="flex items-center justify-between mb-4 lg:hidden">
+                <span class="text-sm font-bold text-gray-700" data-i18n="sidebar.title">Select Exam</span>
+                <button id="sidebarCloseBtn" type="button" class="text-gray-400 hover:text-gray-600 p-1">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div id="examSidebarContent" class="space-y-4">
+                <!-- Populated by JS: exam categories -->
+            </div>
+        </div>
+    </aside>
+    <!-- Sidebar backdrop (mobile) -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden lg:hidden"></div>
 
     <!-- Main Content Grid -->
     <main class="flex-grow container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1332,6 +1443,37 @@
                 </button>
             </div>
             <div class="p-6 space-y-6">
+                <!-- Language Setting -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.language">Language</label>
+                    <div id="langSwitch" class="flex rounded-lg border border-gray-200 overflow-hidden">
+                        <button type="button" data-lang="ja" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center border-r border-gray-200">
+                            日本語
+                        </button>
+                        <button type="button" data-lang="en" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center">
+                            English
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Theme Setting -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.theme">Theme</label>
+                    <div id="themeSwitch" class="flex rounded-lg border border-gray-200 overflow-hidden">
+                        <button type="button" data-theme="light" class="flex-1 px-3 py-2 text-sm font-medium transition-colors text-center border-r border-gray-200">
+                            <i class="fas fa-sun mr-1"></i> <span data-i18n="settings.themeLight">Light</span>
+                        </button>
+                        <button type="button" data-theme="dark" class="flex-1 px-3 py-2 text-sm font-medium transition-colors text-center border-r border-gray-200">
+                            <i class="fas fa-moon mr-1"></i> <span data-i18n="settings.themeDark">Dark</span>
+                        </button>
+                        <button type="button" data-theme="system" class="flex-1 px-3 py-2 text-sm font-medium transition-colors text-center">
+                            <i class="fas fa-desktop mr-1"></i> <span data-i18n="settings.themeSystem">System</span>
+                        </button>
+                    </div>
+                </div>
+
+                <hr class="border-gray-200">
+
                 <!-- AI Provider Switch -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.aiProvider">AI Provider</label>

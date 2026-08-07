@@ -28,6 +28,9 @@
     "selectExam": "Select an Exam",
     "langToggle": "Language"
   },
+  "sidebar": {
+    "title": "Select Exam"
+  },
   "dashboard": {
     "title": "Study Dashboard",
     "dailyHighlight": "Today's Highlight",
@@ -139,6 +142,11 @@
   },
   "settings": {
     "title": "Settings",
+    "language": "Language",
+    "theme": "Theme",
+    "themeLight": "Light",
+    "themeDark": "Dark",
+    "themeSystem": "System",
     "aiProvider": "AI Provider",
     "gemini": "Gemini",
     "openai": "OpenAI",
@@ -286,6 +294,8 @@
   "roadmap": {
     "title": "Study Roadmap",
     "description": "Follow the {{code}} exam study steps from top to bottom.",
+    "commonTitle": "Common Learning Resources",
+    "commonDescription": "Learning steps and resources common to all AWS certification exams.",
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",

@@ -1,4 +1,4 @@
-import { getPublicExams, getExamById } from './exams.js';
+import { getPublicExams, getExamById, resolveExamFromHash } from './exams.js';
 import { DEFAULT_EXAM_ID } from './config.js';
 import { initApp } from './ui.js';
 import { initI18n, setLocale, getLocale, translateStaticElements } from './i18n.js';
@@ -23,6 +23,15 @@ async function loadLocales() {
   return { ja, en, urls };
 }
 
+/**
+ * Determine initial exam from URL hash, falling back to DEFAULT_EXAM_ID.
+ */
+function getInitialExamId() {
+  const hash = location.hash.replace(/^#/, '');
+  const resolved = resolveExamFromHash(hash);
+  return resolved || DEFAULT_EXAM_ID;
+}
+
 async function boot() {
   // Initialize i18n before app to ensure t() is ready
   const { ja, en, urls } = await loadLocales();
@@ -42,11 +51,24 @@ async function boot() {
     });
   }
 
-  return initApp({
+  const initialExamId = getInitialExamId();
+
+  const appApi = initApp({
     exams: getPublicExams(),
     getExamById,
-    defaultExamId: DEFAULT_EXAM_ID,
+    defaultExamId: initialExamId,
   });
+
+  // Listen for hash changes to switch exam
+  window.addEventListener('hashchange', () => {
+    const hash = location.hash.replace(/^#/, '');
+    const examId = resolveExamFromHash(hash);
+    if (examId && appApi && appApi.setExam) {
+      appApi.setExam(examId);
+    }
+  });
+
+  return appApi;
 }
 
 const runBoot = () => boot().catch(handleBootError);
