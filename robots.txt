@@ -1,0 +1,30 @@
+# robots.txt for AWS Study Navigator
+# https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/
+
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/sitemap.xml
+
+# AI Crawlers - explicitly allow for AI search discoverability
+User-agent: GPTBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: CCBot
+Allow: /

@@ -1,58 +1,64 @@
-![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=Kenta-Matsuda.github.io-aws-study&left_text=PageViews)
+# AWS Study Navigator
 
-# AWS認定 合格ナビゲーター
+[![Live Demo](https://img.shields.io/badge/demo-GitHub%20Pages-blue?logo=github)](https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
+![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=Kenta-Matsuda.github.io-aws-study&left_text=visitors)
 
-AWS認定試験の学習サイトです。
-分野別の知識項目を、公式の良質な学習リソースで勉強できます。
-Gemini API を設定すると「用語の解説」や「模擬問題」などのAI機能を利用できます。
+**AWS認定全12資格に対応した、無料の学習ナビゲーター。**  
+試験ガイドに基づくドメイン別ロードマップと、AI搭載クイズで効率的に合格を目指せます。
 
-現在はα版として **ANS-C01** のみを公開しています。
+**https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/**
+
+---
+
+## 対応資格
+
+| レベル | 資格 |
+|--------|------|
+| Foundational | CLF-C02 / AIF-C01 |
+| Associate | SAA-C03 / DVA-C02 / SOA-C03 / DEA-C01 / MLA-C01 / AIP-C01 |
+| Professional | SAP-C02 / DOP-C02 |
+| Specialty | ANS-C01 / SCS-C03 |
+
+## 主な機能
+
+- **ドメイン別学習ロードマップ** — 試験ガイド準拠のタスク・知識項目と公式リソースリンク
+- **AI搭載クイズ** — 5問 / スピードラン / 模擬試験 / スマート復習の4モード
+- **XP & 称号** — 学習を積み上げるゲーミフィケーション
+- **スキルレーダー** — ドメイン別の強み・弱みを可視化
+- **AIチューター** — チャットでAWSの疑問をすぐ解決
+- **日本語 / 英語対応**
 
 ## 使い方
 
-1. 公開されているサイト（GitHub Pages）にアクセスします
-2. 画面右上の **試験ボタン** で試験を切り替えます
-3. 画面上部のタブで **ドメイン** を切り替え、タスク一覧を確認します
-4. 良質な公式リソースで学習を加速させます
+1. [サイトにアクセス](https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/)
+2. 右上の試験ボタンから受験予定の資格を選択
+3. ドメインタブで学習範囲を確認し、公式リソースで学習
+4. AIクイズで理解度をチェック（API Key設定が必要）
+5. XPを貯めて称号をアンロック！
 
-## ローカルで動作させる場合
+## AI機能の設定
 
-ローカルで利用したい場合は Node.js で簡易サーバを起動します。
+画面右上の **⚙️ API Key** から設定できます。
 
-- 起動: `node dev-server.mjs`
-- アクセス先: `http://localhost:8000/`
+| プロバイダ | 対象 | 料金 |
+|-----------|------|------|
+| Google Gemini | 18歳以上 | 無料枠あり |
+| OpenAI | 全年齢（未成年は保護者同意要） | 従量課金 |
 
-オプション:
+> API キーはブラウザ内のみに保存され、外部サーバーには送信されません。
 
-- ポート指定: `node dev-server.mjs --port 8001`
-- キャッシュ無効: `node dev-server.mjs --no-cache`
+## ローカル起動
 
-## AI 機能について
+```bash
+node dev-server.mjs
+# http://localhost:8000/
+```
 
-Gemini API キーを設定すると、以下のAI機能を利用できます。
+## Contributing
 
-- 用語や概念のAI解説
-- AIによる模擬問題生成
+Issue・Pull Request 歓迎です。詳しくは [CONTRIBUTING.md](./CONTRIBUTING.md) をご覧ください。
 
-### 利用手順
+## License
 
-1. 画面右上の **API Key（⚙️）** を開く
-2. **Google Gemini API Key** を入力して保存
-3. 各項目のボタンを押す
-
-※ API キーはブラウザの LocalStorage に保存されます。共有PCなどではキーの削除を推奨します。
-
-## X(Twitter) 共有カード（称号ごとの画像）
-
-Xのカード画像は、共有URL先のHTMLにあるOG metaを読み取って表示されます。
-
-- 画像: `assets/og/{milestoneId}.png`
-- shareページ: `share/{milestoneId}.html`（例: `share/rookie.html`）
-- 有効化: `js/config.js` の `MILESTONE_SHARE_PAGE_IDS` に `milestoneId` を追加
-
-## 自分用にカスタマイズ
-
-このリポジトリは、フォークして独自の学習サイトに作り替えることも可能です。
-
-- 試験データは `js/data/*.js` に分割されているので、フォーク後に自分用データへ差し替え/追加できます
-- 公開する試験は `js/config.js` の `PUBLIC_EXAM_IDS` で制御できます
+[MIT](./LICENSE)

@@ -1,0 +1,26 @@
+{
+  "name": "AWS Study Navigator - AWS認定 合格ナビゲーター",
+  "short_name": "AWS Study Nav",
+  "description": "AWS認定全12資格の学習をXPと称号で効率的に進める無料学習ナビゲーター。AI搭載クイズで合格を目指そう。",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#232f3e",
+  "orientation": "any",
+  "lang": "ja",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "./assets/og/beginner.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/og/beginner.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

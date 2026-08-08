@@ -3,15 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AWS Study Navigator</title>
+    <title>AWS Study Navigator | AWS認定 合格ナビゲーター - 全12資格対応 学習支援アプリ</title>
 
-        <!-- Open Graph / Twitter Card
-            NOTE: For milestone-specific images, we use /share/*.html pages that point to assets/og/*.png.
-        -->
-        <meta property="og:locale" content="ja_JP">
-        <meta property="og:type" content="website">
-        <meta property="og:title" content="AWS Study Navigator">
-        <meta property="og:description" content="AWS認定の学習を、XPと称号で積み上げる学習ナビ。">
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="AWS認定全12資格（CLF, SAA, SAP, DVA, SOA, DOP, ANS, SCS, MLA, DEA, AIF, AIP）の学習をXPと称号で効率的に進める無料学習ナビゲーター。AI搭載クイズ・ドメイン別学習ロードマップ・スキルレーダーで合格を目指そう。">
+    <meta name="keywords" content="AWS認定,AWS資格,クラウドプラクティショナー,ソリューションアーキテクト,AWS学習,AWS試験対策,CLF-C02,SAA-C03,SAP-C02,DVA-C02,SOA-C03,DOP-C02,ANS-C01,SCS-C03,MLA-C01,DEA-C01,AIF-C01,AIP-C01,AWS certification,AWS study,cloud practitioner">
+    <meta name="author" content="Kenta Matsuda">
+    <meta name="robots" content="index, follow">
+    <link rel="canonical" href="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/">
+
+    <!-- Alternate Languages -->
+    <link rel="alternate" hreflang="ja" href="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/">
+    <link rel="alternate" hreflang="en" href="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/">
+    <link rel="alternate" hreflang="x-default" href="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./assets/og/favicon.ico">
+    <link rel="apple-touch-icon" href="./assets/og/beginner.png">
+
+    <!-- Web App Manifest -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#232f3e">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:locale:alternate" content="en_US">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="AWS Study Navigator">
+    <meta property="og:url" content="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/">
+    <meta property="og:title" content="AWS Study Navigator | AWS認定 合格ナビゲーター">
+    <meta property="og:description" content="AWS認定全12資格の学習をXPと称号で効率的に進める無料学習ナビゲーター。AI搭載クイズで合格を目指そう。">
+    <meta property="og:image" content="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/assets/og/solution_architect.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="AWS Study Navigator | AWS認定 合格ナビゲーター">
+    <meta name="twitter:description" content="AWS認定全12資格の学習をXPと称号で効率的に進める無料学習ナビゲーター。AI搭載クイズで合格を目指そう。">
+    <meta name="twitter:image" content="https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/assets/og/solution_architect.png">
+
+    <!-- JSON-LD Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "AWS Study Navigator",
+      "alternateName": "AWS認定 合格ナビゲーター",
+      "url": "https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/",
+      "description": "AWS認定全12資格（CLF, SAA, SAP, DVA, SOA, DOP, ANS, SCS, MLA, DEA, AIF, AIP）の学習をXPと称号で効率的に進める無料学習ナビゲーター。AI搭載クイズ・ドメイン別学習ロードマップ・スキルレーダーで合格を目指そう。",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Any",
+      "browserRequirements": "Requires JavaScript. Requires modern browser.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "JPY"
+      },
+      "author": {
+        "@type": "Person",
+        "name": "Kenta Matsuda"
+      },
+      "inLanguage": ["ja", "en"],
+      "keywords": "AWS認定, AWS資格, クラウドプラクティショナー, ソリューションアーキテクト, AWS学習, AWS試験対策, AWS certification, AWS study",
+      "image": "https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/assets/og/solution_architect.png"
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "AWS Study Navigatorとは何ですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AWS Study Navigatorは、AWS認定全12資格の学習を支援する無料Webアプリです。試験ガイドに基づいたドメイン別学習ロードマップ、AI搭載クイズ（Gemini/OpenAI対応）、XP・称号システムによるゲーミフィケーション、スキルレーダーチャートなどの機能を提供します。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "対応しているAWS認定資格は？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "CLF-C02（クラウドプラクティショナー）、SAA-C03（ソリューションアーキテクト アソシエイト）、SAP-C02（ソリューションアーキテクト プロフェッショナル）、DVA-C02（デベロッパー アソシエイト）、SOA-C03（SysOps アドミニストレーター）、DOP-C02（DevOps エンジニア）、ANS-C01（ネットワーキング スペシャリティ）、SCS-C03（セキュリティ スペシャリティ）、MLA-C01（機械学習エンジニア）、DEA-C01（データエンジニア）、AIF-C01（AI プラクティショナー）、AIP-C01（AI プラクティショナー Enhanced）の全12資格に対応しています。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "AWS Study Navigatorの料金は？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AWS Study Navigator自体は完全無料です。AI機能を利用する場合、Google Gemini APIキー（18歳以上、無料枠あり）またはOpenAI APIキー（従量課金）が別途必要です。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "AWS Study Navigatorはどのような機能がありますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "主な機能: (1) 試験ガイド準拠のドメイン別学習ロードマップ (2) AI搭載クイズ（5問/スピード/模擬試験/スマート復習の4モード） (3) XP・称号システムによるゲーミフィケーション (4) スキルレーダーチャート (5) 学習ストリーク (6) AIチューターチャット (7) 日英バイリンガル対応"
+          }
+        }
+      ]
+    }
+    </script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = { darkMode: 'class' };
@@ -954,6 +1051,49 @@
     gtag('config', 'G-HGYPRYH7Q1');
 </script>
 <body class="min-h-screen flex flex-col">
+
+    <!-- SEO: Static content for crawlers and AI indexers that may not fully execute JavaScript -->
+    <noscript>
+        <div style="max-width:800px;margin:2rem auto;padding:1rem;font-family:sans-serif;">
+            <h1>AWS Study Navigator（AWS認定 合格ナビゲーター）</h1>
+            <p>AWS認定全12資格の学習を、XPと称号で効率的に積み上げる無料学習支援Webアプリです。</p>
+            <h2>対応資格一覧</h2>
+            <ul>
+                <li>CLF-C02 - AWS Certified Cloud Practitioner（クラウドプラクティショナー）</li>
+                <li>AIF-C01 - AWS Certified AI Practitioner（AIプラクティショナー）</li>
+                <li>SAA-C03 - AWS Certified Solutions Architect – Associate（ソリューションアーキテクト アソシエイト）</li>
+                <li>SAP-C02 - AWS Certified Solutions Architect – Professional（ソリューションアーキテクト プロフェッショナル）</li>
+                <li>DVA-C02 - AWS Certified Developer – Associate（デベロッパー アソシエイト）</li>
+                <li>SOA-C03 - AWS Certified SysOps Administrator – Associate（SysOps アドミニストレーター アソシエイト）</li>
+                <li>DOP-C02 - AWS Certified DevOps Engineer – Professional（DevOpsエンジニア プロフェッショナル）</li>
+                <li>ANS-C01 - AWS Certified Advanced Networking – Specialty（ネットワーキング スペシャリティ）</li>
+                <li>SCS-C03 - AWS Certified Security – Specialty（セキュリティ スペシャリティ）</li>
+                <li>MLA-C01 - AWS Certified Machine Learning Engineer – Associate（機械学習エンジニア アソシエイト）</li>
+                <li>DEA-C01 - AWS Certified Data Engineer – Associate（データエンジニア アソシエイト）</li>
+                <li>AIP-C01 - AWS Certified AI Practitioner Enhanced（AIプラクティショナー Enhanced）</li>
+            </ul>
+            <h2>主な機能</h2>
+            <ul>
+                <li>試験ガイド準拠のドメイン別学習ロードマップ</li>
+                <li>AI搭載クイズ（Gemini / OpenAI対応）- 5問モード・スピードラン・模擬試験・スマート復習</li>
+                <li>XP（経験値）と称号によるゲーミフィケーション</li>
+                <li>スキルレーダーチャートで弱点を可視化</li>
+                <li>学習ストリーク（連続学習日数）の記録</li>
+                <li>AIチューターによるチャット質問機能</li>
+                <li>日本語・英語バイリンガル対応</li>
+                <li>ダークモード対応</li>
+            </ul>
+            <h2>使い方</h2>
+            <ol>
+                <li>学習したいAWS認定試験を選択</li>
+                <li>ドメインごとのタスクと学習リソースを確認</li>
+                <li>AIクイズで理解度をテスト</li>
+                <li>XPを獲得して称号をアンロック</li>
+            </ol>
+            <p>このアプリはJavaScriptが必要です。ブラウザのJavaScriptを有効にしてご利用ください。</p>
+            <p>This application requires JavaScript. Please enable JavaScript in your browser.</p>
+        </div>
+    </noscript>
 
     <!-- Header -->
     <header class="aws-gradient text-white shadow-lg">
