@@ -239,6 +239,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: Bedrock の概要と GenAI ソリューション設計',
+                  noteEn: 'AWS Black Belt: Bedrock overview and GenAI solution design',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -262,6 +279,14 @@ export const AIP_C01 = {
                   note: 'InvokeModel / Converse API',
                   noteEn: 'InvokeModel / Converse API',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Well-Architected フレームワーク 生成 AI レンズ',
+                  titleEn: 'AWS Well-Architected Framework Generative AI Lens',
+                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+                  urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+                  note: 'GenAI ワークロードのベストプラクティス',
+                  noteEn: 'Best practices for GenAI workloads',
                 },
               ],
             },
@@ -299,6 +324,30 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon SageMaker Basic Session (2019/02)',
+                  titleEn: 'Amazon SageMaker Basic Session (2019/02)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20SageMaker%20Basic%20Session',
+                  note: 'AWS Black Belt: SageMaker の基礎とモデル管理',
+                  noteEn: 'AWS Black Belt: SageMaker fundamentals and model management',
+                  recommend: true,
+                },
+                {
+                  title: 'Amazon SageMaker Advanced Session (2019/02)',
+                  titleEn: 'Amazon SageMaker Advanced Session (2019/02)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20SageMaker%20Advanced%20Session',
+                  note: 'AWS Black Belt: SageMaker の高度な機能とカスタマイズ',
+                  noteEn: 'AWS Black Belt: Advanced SageMaker features and customization',
+                },
+              ],
+            },
+            {
               key: 'blogs',
               label: 'AWS Blogs',
               labelEn: 'AWS Blog',
@@ -331,6 +380,14 @@ export const AIP_C01 = {
                   note: 'FM のファインチューニングとカスタマイズ',
                   noteEn: 'Fine-tuning and customizing FMs',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon SageMaker AI 開発者ガイド',
+                  titleEn: 'Amazon SageMaker AI Developer Guide',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/whatis.html',
+                  urlEn: 'https://docs.aws.amazon.com/sagemaker/latest/dg/whatis.html',
+                  note: 'モデルのトレーニング・デプロイ・ライフサイクル管理',
+                  noteEn: 'Model training, deployment, and lifecycle management',
                 },
               ],
             },
@@ -368,6 +425,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: Bedrock のデータ処理パイプライン',
+                  noteEn: 'AWS Black Belt: Bedrock data processing pipelines',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -382,6 +456,14 @@ export const AIP_C01 = {
                   note: 'データ検証パイプラインの構築',
                   noteEn: 'Building data validation pipelines',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Comprehend 開発者ガイド',
+                  titleEn: 'Amazon Comprehend Developer Guide',
+                  url: 'https://docs.aws.amazon.com/ja_jp/comprehend/latest/dg/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/comprehend/latest/dg/what-is.html',
+                  note: 'エンティティ抽出・テキスト分析によるデータ品質向上',
+                  noteEn: 'Improving data quality with entity extraction and text analysis',
                 },
               ],
             },
@@ -420,6 +502,23 @@ export const AIP_C01 = {
             'Semantic search',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: ナレッジベースとベクトルストア',
+                  noteEn: 'AWS Black Belt: Knowledge bases and vector stores',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -486,6 +585,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: RAG と検索拡張生成',
+                  noteEn: 'AWS Black Belt: RAG and retrieval-augmented generation',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -549,6 +665,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: プロンプトエンジニアリングとガードレール',
+                  noteEn: 'AWS Black Belt: Prompt engineering and guardrails',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -571,6 +704,14 @@ export const AIP_C01 = {
                   urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/flows.html',
                   note: 'プロンプトチェーンとワークフローの構築',
                   noteEn: 'Building prompt chains and workflows',
+                },
+                {
+                  title: 'Amazon Bedrock Guardrails',
+                  titleEn: 'Amazon Bedrock Guardrails',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/guardrails.html',
+                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html',
+                  note: 'プロンプトのガバナンスとコンテンツフィルタリング',
+                  noteEn: 'Prompt governance and content filtering',
                 },
               ],
             },
@@ -626,6 +767,23 @@ export const AIP_C01 = {
             'Strands Agents',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: エージェンティック AI とツール統合',
+                  noteEn: 'AWS Black Belt: Agentic AI and tool integration',
+                  recommend: true,
+                },
+              ],
+            },
             {key:'blogs', label:'AWS Blogs', labelEn:'AWS Blog', iconClass:'fas fa-book', iconColorClass:'text-orange-500', items:[{title:'Amazon Bedrock ナレッジベースによる RAG の実装', titleEn:'RAG implementation with Amazon Bedrock Knowledge Bases', url:'https://aws.amazon.com/jp/blogs/news/amazon-bedrock-knowledge-bases-now-supports-advanced-parsing-chunking-and-query-reformulation-giving-higher-accuracy-for-rag-based-applications/', urlEn:'https://aws.amazon.com/blogs/news/amazon-bedrock-knowledge-bases-now-supports-advanced-parsing-chunking-and-query-reformulation-giving-higher-accuracy-for-rag-based-applications/', note:'AWS News Blog: Intermediate (Level 200)', noteEn:'AWS News Blog: Intermediate (Level 200)', recommend:true},{title:'Strands Agents SDK: エージェントアーキテクチャとオブザーバビリティの技術的深堤り', titleEn:'Strands Agents SDK: A technical deep dive into agent architectures and observability', url:'https://aws.amazon.com/jp/blogs/machine-learning/strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/', urlEn:'https://aws.amazon.com/blogs/machine-learning/strands-agents-sdk-a-technical-deep-dive-into-agent-architectures-and-observability/', note:'ML Blog: Advanced (Level 300)', noteEn:'ML Blog: Advanced (Level 300)', recommend:true}]},
             {
               key: 'docs',
@@ -685,6 +843,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon SageMaker Basic Session (2019/02)',
+                  titleEn: 'Amazon SageMaker Basic Session (2019/02)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20SageMaker%20Basic%20Session',
+                  note: 'AWS Black Belt: SageMaker エンドポイントとデプロイ戦略',
+                  noteEn: 'AWS Black Belt: SageMaker endpoints and deployment strategies',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -701,13 +876,12 @@ export const AIP_C01 = {
                   recommend: true,
                 },
                 {
-                  title: 'Amazon Bedrock Agents',
-                  titleEn: 'Amazon Bedrock Agents',
-                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/agents.html',
-                  urlEn: 'https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html',
-                  note: 'エージェントのオーケストレーション',
-                  noteEn: 'Agent orchestration',
-                  recommend: true,
+                  title: 'Amazon SageMaker AI リアルタイム推論',
+                  titleEn: 'Amazon SageMaker AI Real-time Inference',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/realtime-endpoints.html',
+                  urlEn: 'https://docs.aws.amazon.com/sagemaker/latest/dg/realtime-endpoints.html',
+                  note: 'SageMaker エンドポイントのデプロイと管理',
+                  noteEn: 'SageMaker endpoint deployment and management',
                 },
               ],
             },
@@ -746,6 +920,23 @@ export const AIP_C01 = {
             'Enterprise integration',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS IAM Part1 (2019/01)',
+                  titleEn: 'AWS IAM Part1 (2019/01)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20IAM%20Part1',
+                  note: 'AWS Black Belt: IAM によるセキュアなエンタープライズ統合',
+                  noteEn: 'AWS Black Belt: Secure enterprise integration with IAM',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -805,6 +996,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: Bedrock API とストリーミング',
+                  noteEn: 'AWS Black Belt: Bedrock API and streaming',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -819,6 +1027,14 @@ export const AIP_C01 = {
                   note: 'Bedrock API の呼び出しとストリーミング',
                   noteEn: 'Bedrock API invocation and streaming',
                   recommend: true,
+                },
+                {
+                  title: 'AWS X-Ray 開発者ガイド',
+                  titleEn: 'AWS X-Ray Developer Guide',
+                  url: 'https://docs.aws.amazon.com/ja_jp/xray/latest/devguide/aws-xray.html',
+                  urlEn: 'https://docs.aws.amazon.com/xray/latest/devguide/aws-xray.html',
+                  note: 'FM API コールのトレーシングとオブザーバビリティ',
+                  noteEn: 'FM API call tracing and observability',
                 },
               ],
             },
@@ -860,6 +1076,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: Bedrock と開発ツールの統合',
+                  noteEn: 'AWS Black Belt: Bedrock and development tool integration',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -874,6 +1107,14 @@ export const AIP_C01 = {
                   note: 'AI コーディングアシスタントの活用',
                   noteEn: 'Leveraging AI coding assistant',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Q Business 管理者ガイド',
+                  titleEn: 'Amazon Q Business Administrator Guide',
+                  url: 'https://docs.aws.amazon.com/ja_jp/amazonq/latest/qbusiness-ug/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/what-is.html',
+                  note: 'ビジネスシステムとの GenAI 統合',
+                  noteEn: 'GenAI integration with business systems',
                 },
               ],
             },
@@ -924,6 +1165,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: ガードレールと安全性コントロール',
+                  noteEn: 'AWS Black Belt: Guardrails and safety controls',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'blogs',
               label: 'AWS Blogs',
               labelEn: 'AWS Blog',
@@ -955,6 +1213,14 @@ export const AIP_C01 = {
                   note: 'コンテンツフィルタリング・安全性制御',
                   noteEn: 'Content filtering and safety controls',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Comprehend: PII 検出',
+                  titleEn: 'Amazon Comprehend: PII Detection',
+                  url: 'https://docs.aws.amazon.com/ja_jp/comprehend/latest/dg/how-pii.html',
+                  urlEn: 'https://docs.aws.amazon.com/comprehend/latest/dg/how-pii.html',
+                  note: '入力コンテンツの前処理フィルターと PII 検出',
+                  noteEn: 'Input content preprocessing filters and PII detection',
                 },
               ],
             },
@@ -989,6 +1255,30 @@ export const AIP_C01 = {
             'PII detection',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Key Management Service Part.1 基礎編 (2024/03)',
+                  titleEn: 'AWS Key Management Service Part.1 Basics (2024/03)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.1%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'AWS Black Belt: KMS による暗号化とデータ保護',
+                  noteEn: 'AWS Black Belt: Encryption and data protection with KMS',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS IAM Part1 (2019/01)',
+                  titleEn: 'AWS IAM Part1 (2019/01)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20IAM%20Part1',
+                  note: 'AWS Black Belt: セキュアなアクセスコントロール',
+                  noteEn: 'AWS Black Belt: Secure access control',
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -1049,6 +1339,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  titleEn: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: モデル呼び出しログとガバナンス',
+                  noteEn: 'AWS Black Belt: Model invocation logging and governance',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -1063,6 +1370,14 @@ export const AIP_C01 = {
                   note: '監査ログとコンプライアンスモニタリング',
                   noteEn: 'Audit logging and compliance monitoring',
                   recommend: true,
+                },
+                {
+                  title: 'AWS Glue Data Catalog',
+                  titleEn: 'AWS Glue Data Catalog',
+                  url: 'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/catalog-and-crawler.html',
+                  urlEn: 'https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html',
+                  note: 'データリネージュとメタデータ管理',
+                  noteEn: 'Data lineage and metadata management',
                 },
               ],
             },
@@ -1098,6 +1413,23 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              labelEn: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon AI 入門 (2017/03)',
+                  titleEn: 'Introduction to Amazon AI (2017/03)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20AI%20%E5%85%A5%E9%96%80',
+                  note: 'AWS Black Belt: AI の基礎と責任ある AI の原則',
+                  noteEn: 'AWS Black Belt: AI fundamentals and responsible AI principles',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -1112,6 +1444,14 @@ export const AIP_C01 = {
                   note: 'AWS の責任ある AI の原則と実践',
                   noteEn: 'AWS responsible AI principles and practices',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon SageMaker AI Model Cards',
+                  titleEn: 'Amazon SageMaker AI Model Cards',
+                  url: 'https://docs.aws.amazon.com/ja_jp/sagemaker/latest/dg/model-cards.html',
+                  urlEn: 'https://docs.aws.amazon.com/sagemaker/latest/dg/model-cards.html',
+                  note: 'モデルの透明性とドキュメント化',
+                  noteEn: 'Model transparency and documentation',
                 },
               ],
             },
@@ -1145,6 +1485,20 @@ export const AIP_C01 = {
             'コスト最適化',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: Bedrock の料金体系とコスト最適化',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -1187,6 +1541,20 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon SageMaker Advanced Session (2019/02)',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20SageMaker%20Advanced%20Session',
+                  note: 'AWS Black Belt: 推論パフォーマンスの最適化',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -1197,6 +1565,11 @@ export const AIP_C01 = {
                   url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/inference-parameters.html',
                   note: 'Temperature ・ top-k ・ top-p の最適化',
                   recommend: true,
+                },
+                {
+                  title: 'Amazon Bedrock バッチ推論',
+                  url: 'https://docs.aws.amazon.com/ja_jp/bedrock/latest/userguide/batch-inference.html',
+                  note: 'バッチ推論によるスループット最適化',
                 },
               ],
             },
@@ -1222,6 +1595,20 @@ export const AIP_C01 = {
             '異常検出',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: GenAI アプリケーションのモニタリング',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -1277,6 +1664,20 @@ export const AIP_C01 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: モデル評価と品質管理',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               iconClass: 'fas fa-book-open',
@@ -1316,6 +1717,20 @@ export const AIP_C01 = {
             'プロンプトオブザーバビリティ',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'Black Belt',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Bedrock',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Bedrock',
+                  note: 'AWS Black Belt: GenAI アプリケーションのトラブルシューティング',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
