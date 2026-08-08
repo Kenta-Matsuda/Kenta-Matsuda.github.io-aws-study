@@ -46,14 +46,14 @@ export const EXAM_CATEGORIES = [
     labelJa: 'Associate',
     labelEn: 'Associate',
     icon: 'fas fa-user-graduate',
-    examIds: ['saa-c03', 'dva-c02', 'soa-c03', 'mla-c01', 'dea-c01', 'aip-c01'],
+    examIds: ['saa-c03', 'dva-c02', 'soa-c03', 'mla-c01', 'dea-c01'],
   },
   {
     id: 'professional',
     labelJa: 'Professional',
     labelEn: 'Professional',
     icon: 'fas fa-award',
-    examIds: ['sap-c02', 'dop-c02'],
+    examIds: ['sap-c02', 'dop-c02', 'aip-c01'],
   },
   {
     id: 'specialty',
