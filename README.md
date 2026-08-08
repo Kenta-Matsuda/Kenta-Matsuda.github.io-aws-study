@@ -13,12 +13,20 @@
 
 ## 対応資格
 
-| レベル | 資格 |
-|--------|------|
-| Foundational | CLF-C02 / AIF-C01 |
-| Associate | SAA-C03 / DVA-C02 / SOA-C03 / DEA-C01 / MLA-C01 / AIP-C01 |
-| Professional | SAP-C02 / DOP-C02 |
-| Specialty | ANS-C01 / SCS-C03 |
+| レベル | コード | 正式名称 |
+|--------|--------|----------|
+| Foundational | CLF-C02 | AWS Certified Cloud Practitioner |
+| Foundational | AIF-C01 | AWS Certified AI Practitioner |
+| Associate | SAA-C03 | AWS Certified Solutions Architect – Associate |
+| Associate | DVA-C02 | AWS Certified Developer – Associate |
+| Associate | SOA-C03 | AWS Certified CloudOps Engineer – Associate |
+| Associate | DEA-C01 | AWS Certified Data Engineer – Associate |
+| Associate | MLA-C01 | AWS Certified Machine Learning Engineer – Associate |
+| Professional | SAP-C02 | AWS Certified Solutions Architect – Professional |
+| Professional | DOP-C02 | AWS Certified DevOps Engineer – Professional |
+| Professional | AIP-C01 | AWS Certified Generative AI Developer – Professional |
+| Specialty | ANS-C01 | AWS Certified Advanced Networking – Specialty |
+| Specialty | SCS-C03 | AWS Certified Security – Specialty |
 
 ## 主な機能
 
