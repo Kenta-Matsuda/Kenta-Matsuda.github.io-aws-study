@@ -1,4 +1,6 @@
 import { callAi, callAiStream, callAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
+import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
+import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
 import {
   getApiKey,
   saveApiKeyFromInput,
@@ -47,7 +49,7 @@ import {
   formatTime,
 } from './quiz.js';
 import { initChat, resetChat } from './chat.js';
-import { t, getLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
+import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 
 /**
  * Return locale-aware title: jpTitle for 'ja', title (English) for 'en'.
@@ -1282,6 +1284,24 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     openSettingsModal: () => openSettingsModal(els),
   });
 
+  // ── Exam Sidebar ──
+  renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
+
+  // Sidebar toggle (mobile)
+  els.sidebarToggleBtn?.addEventListener('click', () => {
+    els.examSidebar?.classList.add('open');
+    els.sidebarBackdrop?.classList.remove('hidden');
+  });
+  const closeSidebar = () => {
+    els.examSidebar?.classList.remove('open');
+    els.sidebarBackdrop?.classList.add('hidden');
+  };
+  els.sidebarCloseBtn?.addEventListener('click', closeSidebar);
+  els.sidebarBackdrop?.addEventListener('click', closeSidebar);
+
+  // ── Settings Modal: Language & Theme Switches ──
+  wireSettingsModalSwitches({ els });
+
   // 初期表示
   setExam(defaultExamId);
 
@@ -1291,8 +1311,20 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // Re-render dashboard when locale changes
   onLocaleChange(() => {
     translateStaticElements();
+
+    // Special: if on beginner guide, just re-render that
+    if (state.examId === '__beginner__') {
+      renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
+      // Re-apply beginner title in new locale
+      if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
+      if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
+      renderContent({ els, exam: { domains: [], steps: [] }, state });
+      return;
+    }
+
     const exam = getExamById(state.examId);
     renderExamMeta({ els, exam });
+    renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
     renderXpDashboard({ els, exam, state });
     renderLearningStatus({ els, exam, state });
     renderDailyHighlight({ els, exam, state });
@@ -1302,11 +1334,53 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
 
   function setExam(examId) {
+    // Special: Beginner guide (not a real exam)
+    if (examId === '__beginner__') {
+      state.examId = '__beginner__';
+      state.currentDomainId = null;
+
+      // Update URL hash
+      const newHash = '#beginner';
+      if (location.hash !== newHash) {
+        history.replaceState(null, '', newHash);
+      }
+
+      // Update header
+      if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
+      if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
+
+      // Hide left aside (chart), learning status, XP dashboard, domain tabs
+      const chartAside = els.examWeightChart?.closest('aside');
+      if (chartAside) chartAside.classList.add('hidden');
+      if (els.learningStatusPanel) els.learningStatusPanel.classList.add('hidden');
+      if (els.xpDashboard) els.xpDashboard.classList.add('hidden');
+      if (els.domainTabs) els.domainTabs.innerHTML = '';
+
+      renderContent({ els, exam: { domains: [], steps: [] }, state });
+
+      // Update sidebar active state
+      updateSidebarActiveState({ els, examId });
+      return;
+    }
+
     const exam = getExamById(examId);
 
     state.examId = examId;
     const hasExamSteps = Array.isArray(exam.steps) && exam.steps.length > 0;
     state.currentDomainId = hasExamSteps ? 'all' : (exam.domains?.[0]?.id ?? null);
+
+    // Update URL hash (without triggering hashchange re-entry)
+    const hashCode = EXAM_ID_TO_HASH[examId] || examId;
+    const newHash = '#' + hashCode;
+    if (location.hash !== newHash) {
+      history.replaceState(null, '', newHash);
+    }
+
+    // Restore chart visibility if hidden by beginner guide
+    const chartAside = els.examWeightChart?.closest('aside');
+    if (chartAside) chartAside.classList.remove('hidden');
+    if (els.learningStatusPanel) els.learningStatusPanel.classList.remove('hidden');
+    if (els.xpDashboard) els.xpDashboard.classList.remove('hidden');
 
     renderExamMeta({ els, exam });
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
@@ -1319,6 +1393,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Reset chat on exam change & update badge
     resetChat();
     if (els.chatExamBadge) els.chatExamBadge.textContent = exam?.code || '';
+
+    // Update sidebar active state
+    updateSidebarActiveState({ els, examId });
   }
 
   function switchDomain(domainId) {
@@ -1398,6 +1475,119 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
 
   wireXpLinkHandlers({ els, state, getExamById });
+
+  // Return public API for external callers (e.g. hashchange routing)
+  return { setExam };
+}
+
+function renderExamSidebar({ els, exams, state, onSelect }) {
+  const container = els.examSidebarContent;
+  if (!container) return;
+
+  const locale = getLocale();
+  container.innerHTML = '';
+
+  // Special: Beginner guide item
+  const beginnerItem = document.createElement('div');
+  beginnerItem.className = 'exam-sidebar-item beginner-guide-item' + (state.examId === '__beginner__' ? ' active' : '');
+  beginnerItem.dataset.examId = '__beginner__';
+  beginnerItem.innerHTML = `<i class="fas fa-hand-holding-heart text-pink-500 text-sm"></i><span class="truncate">${t('sidebar.beginnerGuide')}</span>`;
+  beginnerItem.addEventListener('click', () => {
+    onSelect('__beginner__');
+    els.examSidebar?.classList.remove('open');
+    els.sidebarBackdrop?.classList.add('hidden');
+  });
+  container.appendChild(beginnerItem);
+
+  // Separator
+  const sep = document.createElement('hr');
+  sep.className = 'my-3 border-gray-200';
+  container.appendChild(sep);
+
+  for (const category of EXAM_CATEGORIES) {
+    const categoryExams = category.examIds
+      .map(id => exams.find(e => e.id === id))
+      .filter(Boolean);
+    if (categoryExams.length === 0) continue;
+
+    const section = document.createElement('div');
+    section.className = 'exam-sidebar-category';
+
+    const label = document.createElement('div');
+    label.className = 'exam-sidebar-category-label';
+    label.innerHTML = `<i class="${category.icon} text-xs"></i> ${locale === 'ja' ? category.labelJa : category.labelEn}`;
+    section.appendChild(label);
+
+    for (const exam of categoryExams) {
+      const item = document.createElement('div');
+      item.className = 'exam-sidebar-item' + (exam.id === state.examId ? ' active' : '');
+      item.dataset.examId = exam.id;
+      item.innerHTML = `<span class="exam-code">${exam.code}</span><span class="truncate">${exam.shortLabel}</span>`;
+      item.addEventListener('click', () => {
+        onSelect(exam.id);
+        // Close sidebar
+        els.examSidebar?.classList.remove('open');
+        els.sidebarBackdrop?.classList.add('hidden');
+      });
+      section.appendChild(item);
+    }
+
+    container.appendChild(section);
+  }
+}
+
+function updateSidebarActiveState({ els, examId }) {
+  const container = els.examSidebarContent;
+  if (!container) return;
+  container.querySelectorAll('.exam-sidebar-item').forEach(item => {
+    item.classList.toggle('active', item.dataset.examId === examId);
+  });
+}
+
+function wireSettingsModalSwitches({ els }) {
+  // Language switch
+  if (els.langSwitch) {
+    const updateLangBtns = () => {
+      const current = getLocale();
+      els.langSwitch.querySelectorAll('button[data-lang]').forEach(btn => {
+        btn.classList.toggle('settings-switch-btn', true);
+        btn.classList.toggle('active', btn.dataset.lang === current);
+      });
+    };
+    updateLangBtns();
+    els.langSwitch.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-lang]');
+      if (!btn) return;
+      const lang = btn.dataset.lang;
+      if (lang && lang !== getLocale()) {
+        setLocale(lang);
+      }
+      updateLangBtns();
+    });
+    // Listen for locale changes from other sources
+    onLocaleChange(() => updateLangBtns());
+  }
+
+  // Theme switch
+  if (els.themeSwitch) {
+    const updateThemeBtns = () => {
+      const current = getTheme() || 'system';
+      els.themeSwitch.querySelectorAll('button[data-theme]').forEach(btn => {
+        btn.classList.toggle('settings-switch-btn', true);
+        btn.classList.toggle('active', btn.dataset.theme === current);
+      });
+    };
+    updateThemeBtns();
+    els.themeSwitch.addEventListener('click', (e) => {
+      const btn = e.target.closest('button[data-theme]');
+      if (!btn) return;
+      const theme = btn.dataset.theme;
+      if (!theme) return;
+      setTheme(theme);
+      applyTheme();
+      updateThemeBtns();
+    });
+  }
 }
 
 function wireXpLinkHandlers({ els, state, getExamById }) {
@@ -1511,6 +1701,17 @@ function getElements() {
     openaiKeySection: document.getElementById('openaiKeySection'),
     themeToggleBtn: document.getElementById('themeToggleBtn'),
     themeToggleIcon: document.getElementById('themeToggleIcon'),
+
+    // Exam Sidebar
+    examSidebar: document.getElementById('examSidebar'),
+    examSidebarContent: document.getElementById('examSidebarContent'),
+    sidebarToggleBtn: document.getElementById('sidebarToggleBtn'),
+    sidebarCloseBtn: document.getElementById('sidebarCloseBtn'),
+    sidebarBackdrop: document.getElementById('sidebarBackdrop'),
+
+    // Settings modal: language & theme switches
+    langSwitch: document.getElementById('langSwitch'),
+    themeSwitch: document.getElementById('themeSwitch'),
 
     // Quiz interactive
     quizArea: document.getElementById('quizArea'),
@@ -2820,6 +3021,12 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
 function renderContent({ els, exam, state }) {
   els.contentArea.innerHTML = '';
 
+  // Special: Beginner guide (common resources)
+  if (state.examId === '__beginner__') {
+    renderBeginnerGuide({ els, state });
+    return;
+  }
+
   if (!exam.domains || exam.domains.length === 0) {
     els.contentArea.innerHTML = `
       <div class="text-center py-12 text-gray-500">
@@ -2971,6 +3178,9 @@ function renderExamResources({ els, exam, state }) {
     return;
   }
 
+  // Separate exam-specific steps from common ones
+  const examSpecificSteps = steps.filter(step => !COMMON_STEP_TITLES.has(step.title));
+
   const term = '';
 
   // Header
@@ -2986,90 +3196,118 @@ function renderExamResources({ els, exam, state }) {
   `;
   els.contentArea.appendChild(headerEl);
 
-  // Render each step as a task card (reusing domain task card format)
-  for (const step of steps) {
-    const card = document.createElement('div');
-    card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
+  // Render exam-specific steps
+  let stepIndex = 1;
+  for (const step of examSpecificSteps) {
+    renderStepCard({ els, step, stepIndex: String(stepIndex), state, term });
+    stepIndex++;
+  }
+}
 
-    // Step header — mirrors the domain task header format
-    const stepDescLines = normalizeDescriptionLines(localizedDescription(step));
-    const stepDescHtml = stepDescLines.length
-      ? `<div class="mt-3 p-3 rounded-lg bg-orange-50 border border-orange-200 text-sm text-orange-900">
-           <div class="space-y-1">${stepDescLines.map((l) => `<div>${escapeHtml(l)}</div>`).join('')}</div>
-         </div>`
-      : '';
+function renderStepCard({ els, step, stepIndex, state, term }) {
+  const card = document.createElement('div');
+  card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
-    const header = document.createElement('div');
-    header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white';
-    header.innerHTML = `
-      <div class="flex items-center gap-3">
-        <span class="flex items-center justify-center w-9 h-9 rounded-full bg-orange-500 text-white font-bold text-sm flex-shrink-0 shadow-sm">${escapeHtml(step.id)}</span>
-        <div class="flex-1 min-w-0">
-          <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Step ${escapeHtml(step.id)}</div>
-          <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(step))}</h3>
-          ${getLocale() === 'ja' ? `<p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>` : ''}
-        </div>
+  const stepDescLines = normalizeDescriptionLines(localizedDescription(step));
+  const stepDescHtml = stepDescLines.length
+    ? `<div class="mt-3 p-3 rounded-lg bg-orange-50 border border-orange-200 text-sm text-orange-900">
+         <div class="space-y-1">${stepDescLines.map((l) => `<div>${escapeHtml(l)}</div>`).join('')}</div>
+       </div>`
+    : '';
+
+  const header = document.createElement('div');
+  header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white';
+  header.innerHTML = `
+    <div class="flex items-center gap-3">
+      <span class="flex items-center justify-center w-9 h-9 rounded-full bg-orange-500 text-white font-bold text-sm flex-shrink-0 shadow-sm">${escapeHtml(stepIndex)}</span>
+      <div class="flex-1 min-w-0">
+        <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Step ${escapeHtml(stepIndex)}</div>
+        <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(step))}</h3>
+        ${getLocale() === 'ja' ? `<p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>` : ''}
       </div>
-      ${stepDescHtml}
+    </div>
+    ${stepDescHtml}
+  `;
+  card.appendChild(header);
+
+  const resourceSections = buildResourceSections(step);
+  const hasResources = resourceSections.length > 0;
+  const hasKnowledge = Array.isArray(step.knowledge) && step.knowledge.length > 0;
+
+  const body = document.createElement('div');
+  body.className = (hasResources && hasKnowledge) ? 'p-5 grid md:grid-cols-2 gap-6' : 'p-5';
+
+  if (hasKnowledge) {
+    const knowledgeCol = document.createElement('div');
+    knowledgeCol.innerHTML = `
+      <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
+        <i class="fas fa-check-circle text-green-500"></i> ${t('roadmap.keyPoints')}
+      </h4>
+      <ul class="space-y-2">
+        ${(localizedKnowledge(step)).map((k) => `
+          <li class="text-sm text-gray-600 flex items-start gap-2 p-2 rounded hover:bg-gray-50 transition">
+            <span class="mt-1.5 w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
+            <span>${escapeHtml(k)}</span>
+          </li>
+        `).join('')}
+      </ul>
     `;
-    card.appendChild(header);
+    body.appendChild(knowledgeCol);
+  }
 
-    // Body: knowledge (optional) + resources
-    const resourceSections = buildResourceSections(step);
-    const hasResources = resourceSections.length > 0;
-    const hasKnowledge = Array.isArray(step.knowledge) && step.knowledge.length > 0;
+  if (hasResources) {
+    const resourceCol = document.createElement('div');
+    resourceCol.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200';
+    resourceCol.innerHTML = `
+      <div class="space-y-5">
+        ${resourceSections
+          .map((section) =>
+            renderResourceSection({
+              title: section.title,
+              iconClass: section.iconClass,
+              iconColorClass: section.iconColorClass,
+              items: section.items,
+              term,
+              context: {
+                examId: state.examId,
+                domainId: 'all',
+                taskId: String(step.id || ''),
+                taskTitle: String(localizedTitle(step) || ''),
+                resourceSection: String(section.key || ''),
+              },
+            })
+          )
+          .join('')}
+      </div>
+    `;
+    body.appendChild(resourceCol);
+  }
 
-    const body = document.createElement('div');
-    body.className = (hasResources && hasKnowledge) ? 'p-5 grid md:grid-cols-2 gap-6' : 'p-5';
+  card.appendChild(body);
+  els.contentArea.appendChild(card);
+}
 
-    if (hasKnowledge) {
-      const knowledgeCol = document.createElement('div');
-      knowledgeCol.innerHTML = `
-        <h4 class="font-semibold text-gray-800 mb-3 flex items-center gap-2">
-          <i class="fas fa-check-circle text-green-500"></i> ${t('roadmap.keyPoints')}
-        </h4>
-        <ul class="space-y-2">
-          ${(localizedKnowledge(step)).map((k) => `
-            <li class="text-sm text-gray-600 flex items-start gap-2 p-2 rounded hover:bg-gray-50 transition">
-              <span class="mt-1.5 w-1.5 h-1.5 bg-gray-400 rounded-full flex-shrink-0"></span>
-              <span>${escapeHtml(k)}</span>
-            </li>
-          `).join('')}
-        </ul>
-      `;
-      body.appendChild(knowledgeCol);
-    }
+function renderBeginnerGuide({ els, state }) {
+  const term = '';
 
-    if (hasResources) {
-      const resourceCol = document.createElement('div');
-      resourceCol.className = 'bg-gray-50 rounded-lg p-4 border border-gray-200';
-      resourceCol.innerHTML = `
-        <div class="space-y-5">
-          ${resourceSections
-            .map((section) =>
-              renderResourceSection({
-                title: section.title,
-                iconClass: section.iconClass,
-                iconColorClass: section.iconColorClass,
-                items: section.items,
-                term,
-                context: {
-                  examId: state.examId,
-                  domainId: 'all',
-                  taskId: String(step.id || ''),
-                  taskTitle: String(localizedTitle(step) || ''),
-                  resourceSection: String(section.key || ''),
-                },
-              })
-            )
-            .join('')}
-        </div>
-      `;
-      body.appendChild(resourceCol);
-    }
+  // Header
+  const headerEl = document.createElement('div');
+  headerEl.innerHTML = `
+    <div class="flex items-center gap-2 mb-4">
+      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-blue-500"><i class="fas fa-graduation-cap mr-1"></i>${t('roadmap.commonTitle')}</span>
+      <h2 class="text-xl font-bold text-gray-800">${t('roadmap.commonTitle')}</h2>
+    </div>
+    <p class="text-gray-600 mb-6 bg-blue-50 p-4 rounded-lg border-l-4 border-blue-400">
+      ${escapeHtml(t('roadmap.commonDescription'))}
+    </p>
+  `;
+  els.contentArea.appendChild(headerEl);
 
-    card.appendChild(body);
-    els.contentArea.appendChild(card);
+  // Render each common step
+  let stepIndex = 1;
+  for (const step of COMMON_STEPS) {
+    renderStepCard({ els, step, stepIndex: String(stepIndex), state, term });
+    stepIndex++;
   }
 }
 

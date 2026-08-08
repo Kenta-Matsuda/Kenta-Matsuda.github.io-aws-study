@@ -1,0 +1,26 @@
+{
+  "name": "kenta-matsuda.github.io-aws-study",
+  "version": "1.0.0",
+  "description": "![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=Kenta-Matsuda.github.io-aws-study&left_text=PageViews)",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues"
+  },
+  "homepage": "https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.62.1"
+  }
+}

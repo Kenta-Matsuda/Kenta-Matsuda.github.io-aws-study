@@ -29,6 +29,65 @@ export const ALL_EXAMS = [
   SCS_C03,
 ];
 
+/**
+ * Exam categories with display order.
+ * Each category contains exam IDs belonging to that level.
+ */
+export const EXAM_CATEGORIES = [
+  {
+    id: 'foundational',
+    labelJa: 'Foundational',
+    labelEn: 'Foundational',
+    icon: 'fas fa-seedling',
+    examIds: ['clf-c02', 'aif-c01'],
+  },
+  {
+    id: 'associate',
+    labelJa: 'Associate',
+    labelEn: 'Associate',
+    icon: 'fas fa-user-graduate',
+    examIds: ['saa-c03', 'dva-c02', 'soa-c03', 'mla-c01', 'dea-c01', 'aip-c01'],
+  },
+  {
+    id: 'professional',
+    labelJa: 'Professional',
+    labelEn: 'Professional',
+    icon: 'fas fa-award',
+    examIds: ['sap-c02', 'dop-c02'],
+  },
+  {
+    id: 'specialty',
+    labelJa: 'Specialty',
+    labelEn: 'Specialty',
+    icon: 'fas fa-star',
+    examIds: ['ans-c01', 'scs-c03'],
+  },
+];
+
+/**
+ * Short hash code to exam ID mapping for URL routing.
+ * e.g. #clf -> clf-c02, #saa -> saa-c03
+ */
+export const EXAM_HASH_MAP = {
+  'clf': 'clf-c02',
+  'aif': 'aif-c01',
+  'saa': 'saa-c03',
+  'sap': 'sap-c02',
+  'ans': 'ans-c01',
+  'dva': 'dva-c02',
+  'mla': 'mla-c01',
+  'dea': 'dea-c01',
+  'soa': 'soa-c03',
+  'dop': 'dop-c02',
+  'aip': 'aip-c01',
+  'scs': 'scs-c03',
+};
+
+/** Reverse map: exam ID -> hash code */
+export const EXAM_ID_TO_HASH = Object.fromEntries(
+  Object.entries(EXAM_HASH_MAP).map(([hash, id]) => [id, hash])
+);
+
 const EXAM_BY_ID = new Map(ALL_EXAMS.map((e) => [e.id, e]));
 
 export function getExamById(examId) {
@@ -39,4 +98,20 @@ export function getExamById(examId) {
 
 export function getPublicExams() {
   return PUBLIC_EXAM_IDS.map(getExamById);
+}
+
+/**
+ * Resolve a URL hash (without #) to an exam ID.
+ * Supports both short codes (clf) and full IDs (clf-c02).
+ */
+export function resolveExamFromHash(hash) {
+  if (!hash) return null;
+  const normalized = hash.toLowerCase().replace(/^#/, '');
+  // Special: beginner guide
+  if (normalized === 'beginner') return '__beginner__';
+  // Try short code first
+  if (EXAM_HASH_MAP[normalized]) return EXAM_HASH_MAP[normalized];
+  // Try full exam ID
+  if (EXAM_BY_ID.has(normalized)) return normalized;
+  return null;
 }

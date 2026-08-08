@@ -68,8 +68,17 @@ export function initChat({ els, getExamById, getState, openSettingsModal }) {
 
 function updateChatExamBadge(els, getExamById, getState) {
   if (!els.chatExamBadge) return;
-  const exam = getExamById(getState().examId);
-  els.chatExamBadge.textContent = exam?.code || '';
+  const examId = getState().examId;
+  if (!examId || examId === '__beginner__') {
+    els.chatExamBadge.textContent = '';
+    return;
+  }
+  try {
+    const exam = getExamById(examId);
+    els.chatExamBadge.textContent = exam?.code || '';
+  } catch {
+    els.chatExamBadge.textContent = '';
+  }
 }
 
 async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
@@ -92,7 +101,13 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
   if (els.chatSuggestions) els.chatSuggestions.classList.add('hidden');
 
   // Build system prompt with exam context
-  const exam = getExamById(getState().examId);
+  const examId = getState().examId;
+  let exam;
+  try {
+    exam = examId && examId !== '__beginner__' ? getExamById(examId) : null;
+  } catch {
+    exam = null;
+  }
   const systemPrompt = buildChatSystemPrompt(exam);
 
   // Add user message to history
