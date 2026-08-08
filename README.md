@@ -16,8 +16,8 @@
 | レベル | 資格 |
 |--------|------|
 | Foundational | CLF-C02 / AIF-C01 |
-| Associate | SAA-C03 / DVA-C02 / SOA-C03 / DEA-C01 / MLA-C01 / AIP-C01 |
-| Professional | SAP-C02 / DOP-C02 |
+| Associate | SAA-C03 / DVA-C02 / SOA-C03 / DEA-C01 / MLA-C01 |
+| Professional | SAP-C02 / DOP-C02 / AIP-C01 |
 | Specialty | ANS-C01 / SCS-C03 |
 
 ## 主な機能
