@@ -1155,9 +1155,9 @@ export const ANS_C01 = {
                 iconColorClass: 'text-red-500',
                 items: [
                     {
-                        title: 'AWS Transit Gateway Deep Dive',
+                        title: 'AWS Transit Gateway deep dive',
 
-                        titleEn: 'AWS Transit Gateway Deep Dive',
+                        titleEn: 'AWS Transit Gateway deep dive',
                         url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Transit%20Gateway%20deep%20dive',
                         urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=Transit%20Gateway%20deep%20dive',
                         note: 'PDF | Youtube: 2025/01',
@@ -1389,13 +1389,13 @@ export const ANS_C01 = {
                 iconColorClass: 'text-red-500',
                 items: [
                     {
-                        title: 'AWS Direct Connect Deep Dive',
+                        title: 'AWS Direct Connect',
 
-                        titleEn: 'AWS Direct Connect Deep Dive',
+                        titleEn: 'AWS Direct Connect',
                         url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2021/02%0AArchived-,AWS%20Direct%20Connect,-PDF',
                         urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=2021/02%0AArchived-,AWS%20Direct%20Connect,-PDF',
-                        note: 'PDF | Youtube: 2021/02',
-                        noteEn: 'PDF | Youtube: 2021/02',
+                        note: 'PDF | Youtube: 2021/02 (Archived)',
+                        noteEn: 'PDF | Youtube: 2021/02 (Archived)',
                     },
                     {
                         title: 'AWS Transit Gateway',
@@ -1407,16 +1407,16 @@ export const ANS_C01 = {
                         noteEn: 'PDF | Youtube: 2019/11',
                     },
                     {
-                        title: 'AWS Transit Gateway Deep Dive',
+                        title: 'AWS Transit Gateway deep dive',
 
-                        titleEn: 'AWS Transit Gateway Deep Dive',
+                        titleEn: 'AWS Transit Gateway deep dive',
                         url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Transit%20Gateway%20deep%20dive',
                         urlEn: 'https://aws.amazon.com/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Transit%20Gateway%20deep%20dive',
                         note: 'PDF | Youtube: 2025/01',
                         noteEn: 'PDF | Youtube: 2025/01',
                     },
                     {
-                        title: 'AWS Direct Connect 概要～これだけはおさえておきたいこと～',
+                        title: 'AWS Direct Connect 概要〜これだけはおさえておきたいこと〜',
 
                         titleEn: 'AWS Direct Connect Overview',
                         url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Direct%20Connect%20%E6%A6%82%E8%A6%81%E3%80%9C%E3%81%93%E3%82%8C%E3%81%A0%E3%81%91%E3%81%AF%E3%81%8A%E3%81%95%E3%81%88%E3%81%A6%E3%81%8A%E3%81%8D%E3%81%9F%E3%81%84%E3%81%93%E3%81%A8%E3%80%9C',

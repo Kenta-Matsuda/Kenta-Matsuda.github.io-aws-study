@@ -252,6 +252,38 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon GuardDuty',
+                  titleEn: 'Amazon GuardDuty',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2018/05%0AArchived-,Amazon%20GuardDuty,-PDF',
+                  note: 'PDF | Youtube: 2018/05 (Archived)',
+                  noteEn: 'PDF | Youtube: 2018/05 (Archived)',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Security Hub',
+                  titleEn: 'AWS Security Hub',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2020/10%0AArchived-,AWS%20Security%20Hub,-PDF',
+                  note: 'PDF | Youtube: 2020/10 (Archived)',
+                  noteEn: 'PDF | Youtube: 2020/10 (Archived)',
+                  recommend: true,
+                },
+                {
+                  title: 'Amazon Macie',
+                  titleEn: 'Amazon Macie',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2020/08%0AArchived-,Amazon%20Macie,-PDF',
+                  note: 'PDF | Youtube: 2020/08 (Archived)',
+                  noteEn: 'PDF | Youtube: 2020/08 (Archived)',
+                },
+              ],
+            },
+            {
               key: 'blogs',
               label: 'AWS Blogs',
               labelEn: 'AWS Blog',
@@ -409,6 +441,37 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS CloudTrail 基礎編',
+                  titleEn: 'AWS CloudTrail Fundamentals',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CloudTrail%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/09',
+                  noteEn: 'PDF | Youtube: 2024/09',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS CloudTrail',
+                  titleEn: 'AWS CloudTrail',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2021/01%0AArchived-,AWS%20CloudTrail,-PDF',
+                  note: 'PDF | Youtube: 2021/01 (Archived)',
+                  noteEn: 'PDF | Youtube: 2021/01 (Archived)',
+                },
+                {
+                  title: 'Amazon GuardDuty',
+                  titleEn: 'Amazon GuardDuty',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=2018/05%0AArchived-,Amazon%20GuardDuty,-PDF',
+                  note: 'PDF | Youtube: 2018/05 (Archived)',
+                  noteEn: 'PDF | Youtube: 2018/05 (Archived)',
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -481,6 +544,23 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Shield Advanced',
+                  titleEn: 'AWS Shield Advanced',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Shield%20Advanced',
+                  note: 'PDF | Youtube: 2024/09',
+                  noteEn: 'PDF | Youtube: 2024/09',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -541,6 +621,30 @@ export const SCS_C03 = {
             'Network containment controls',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon GuardDuty',
+                  titleEn: 'Amazon GuardDuty',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20GuardDuty',
+                  note: 'PDF | Youtube: 2018/05',
+                  noteEn: 'PDF | Youtube: 2018/05',
+                  recommend: true,
+                },
+                {
+                  title: 'Amazon GuardDuty Malware Protection',
+                  titleEn: 'Amazon GuardDuty Malware Protection',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20GuardDuty%20Malware%20Protection',
+                  note: 'PDF | Youtube: 2022/11',
+                  noteEn: 'PDF | Youtube: 2022/11',
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -621,11 +725,19 @@ export const SCS_C03 = {
               iconColorClass: 'text-red-500',
               items: [
                 {
-                  title: 'Amazon VPC',
-                  titleEn: 'Amazon VPC',
-                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Virtual%20Private%20Cloud%20(VPC)',
-                  note: 'PDF | Youtube: 2020/10',
-                  noteEn: 'PDF | Youtube: 2020/10',
+                  title: 'AWS Shield Advanced',
+                  titleEn: 'AWS Shield Advanced',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Shield%20Advanced',
+                  note: 'PDF | Youtube: 2024/09',
+                  noteEn: 'PDF | Youtube: 2024/09',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Managed Rules for AWS WAF の活用',
+                  titleEn: 'Leveraging AWS Managed Rules for AWS WAF',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Managed%20Rules%20for%20AWS%20WAF%20%E3%81%AE%E6%B4%BB%E7%94%A8',
+                  note: 'PDF | Youtube: 2022/05',
+                  noteEn: 'PDF | Youtube: 2022/05',
                   recommend: true,
                 },
               ],
@@ -700,6 +812,30 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Inspector',
+                  titleEn: 'Amazon Inspector',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Inspector',
+                  note: 'PDF | Youtube: 2023/02',
+                  noteEn: 'PDF | Youtube: 2023/02',
+                  recommend: true,
+                },
+                {
+                  title: 'Amazon GuardDuty Malware Protection',
+                  titleEn: 'Amazon GuardDuty Malware Protection',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20GuardDuty%20Malware%20Protection',
+                  note: 'PDF | Youtube: 2022/11',
+                  noteEn: 'PDF | Youtube: 2022/11',
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -766,6 +902,23 @@ export const SCS_C03 = {
             'Network Access Analyzer',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Network Firewall 入門',
+                  titleEn: 'AWS Network Firewall Introduction',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Network%20Firewall%20%E5%85%A5%E9%96%80',
+                  note: 'PDF | Youtube: 2021/06',
+                  noteEn: 'PDF | Youtube: 2021/06',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -836,6 +989,31 @@ export const SCS_C03 = {
             'AWS Directory Service',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'Amazon Cognito',
+                  titleEn: 'Amazon Cognito',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Cognito',
+                  note: 'PDF | Youtube: 2020/06',
+                  noteEn: 'PDF | Youtube: 2020/06',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Identity and Access Management (IAM) Part1',
+                  titleEn: 'AWS Identity and Access Management (IAM) Part1',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Identity%20and%20Access%20Management%20(IAM)%20Part1',
+                  note: 'PDF | Youtube: 2019/01',
+                  noteEn: 'PDF | Youtube: 2019/01',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -910,6 +1088,23 @@ export const SCS_C03 = {
             'IAM Access Analyzer',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Identity and Access Management (IAM) Part2',
+                  titleEn: 'AWS Identity and Access Management (IAM) Part2',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Identity%20and%20Access%20Management%20(IAM)%20Part2',
+                  note: 'PDF | Youtube: 2019/01',
+                  noteEn: 'PDF | Youtube: 2019/01',
+                  recommend: true,
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -995,6 +1190,13 @@ export const SCS_C03 = {
                   noteEn: 'PDF | Youtube: 2024/04',
                   recommend: true,
                 },
+                {
+                  title: 'AWS Certificate Manager',
+                  titleEn: 'AWS Certificate Manager',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Certificate%20Manager',
+                  note: 'PDF | Youtube: 2023/11',
+                  noteEn: 'PDF | Youtube: 2023/11',
+                },
               ],
             },
             {
@@ -1061,6 +1263,31 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Key Management Service Part.1 基礎編',
+                  titleEn: 'AWS Key Management Service Part.1 Fundamentals',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.1%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/03',
+                  noteEn: 'PDF | Youtube: 2024/03',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Key Management Service Part.2 発展編',
+                  titleEn: 'AWS Key Management Service Part.2 Advanced',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8',
+                  note: 'PDF | Youtube: 2024/04',
+                  noteEn: 'PDF | Youtube: 2024/04',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -1121,6 +1348,30 @@ export const SCS_C03 = {
             'AWS Private Certificate Authority',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Secrets Manager',
+                  titleEn: 'AWS Secrets Manager',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Secrets%20Manager',
+                  note: 'PDF | Youtube: 2023/09',
+                  noteEn: 'PDF | Youtube: 2023/09',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Certificate Manager',
+                  titleEn: 'AWS Certificate Manager',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Certificate%20Manager',
+                  note: 'PDF | Youtube: 2023/11',
+                  noteEn: 'PDF | Youtube: 2023/11',
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
@@ -1196,6 +1447,23 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Organizations 基礎編',
+                  titleEn: 'AWS Organizations Fundamentals',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Organizations%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
+                  note: 'PDF | Youtube: 2026/03',
+                  noteEn: 'PDF | Youtube: 2026/03',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -1265,6 +1533,23 @@ export const SCS_C03 = {
           ],
           resources: [
             {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Firewall Manager を用いたマルチアカウントでの AWS WAF の管理手法',
+                  titleEn: 'Managing AWS WAF Across Multiple Accounts with AWS Firewall Manager',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Firewall%20Manager%20%E3%82%92%E7%94%A8%E3%81%84%E3%81%9F%E3%83%9E%E3%83%AB%E3%83%81%E3%82%A2%E3%82%AB%E3%82%A6%E3%83%B3%E3%83%88%E3%81%A7%E3%81%AE%20AWS%20WAF%20%E3%81%AE%E7%AE%A1%E7%90%86%E6%89%8B%E6%B3%95',
+                  note: 'PDF | Youtube: 2022/06',
+                  noteEn: 'PDF | Youtube: 2022/06',
+                  recommend: true,
+                },
+              ],
+            },
+            {
               key: 'docs',
               label: '公式ドキュメント',
               labelEn: 'Official Documentation',
@@ -1323,6 +1608,37 @@ export const SCS_C03 = {
             'AWS Well-Architected',
           ],
           resources: [
+            {
+              key: 'blackbelts',
+              label: 'AWS Black Belt Online Seminar',
+              labelEn: 'AWS Black Belt Online Seminar',
+              iconClass: 'fas fa-video',
+              iconColorClass: 'text-red-500',
+              items: [
+                {
+                  title: 'AWS Config update',
+                  titleEn: 'AWS Config Update',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Config%20update',
+                  note: 'PDF | Youtube: 2020/12',
+                  noteEn: 'PDF | Youtube: 2020/12',
+                  recommend: true,
+                },
+                {
+                  title: 'AWS Audit Manager',
+                  titleEn: 'AWS Audit Manager',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Audit%20Manager',
+                  note: 'PDF | Youtube: 2021/03',
+                  noteEn: 'PDF | Youtube: 2021/03',
+                },
+                {
+                  title: 'AWS Artifact',
+                  titleEn: 'AWS Artifact',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Artifact',
+                  note: 'PDF | Youtube: 2021/03',
+                  noteEn: 'PDF | Youtube: 2021/03',
+                },
+              ],
+            },
             {
               key: 'docs',
               label: '公式ドキュメント',
