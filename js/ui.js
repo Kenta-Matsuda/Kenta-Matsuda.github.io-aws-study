@@ -1311,6 +1311,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // Re-render dashboard when locale changes
   onLocaleChange(() => {
     translateStaticElements();
+
+    // Special: if on beginner guide, just re-render that
+    if (state.examId === '__beginner__') {
+      renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
+      // Re-apply beginner title in new locale
+      if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
+      if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
+      renderContent({ els, exam: { domains: [], steps: [] }, state });
+      return;
+    }
+
     const exam = getExamById(state.examId);
     renderExamMeta({ els, exam });
     renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
@@ -1338,10 +1349,13 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
       if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
 
-      // Hide chart and domain tabs, show content
-      if (els.examWeightChart) els.examWeightChart.closest('.bg-white')?.classList.add('hidden');
-      if (els.domainLegend) els.domainLegend.closest('.bg-white')?.classList.add('hidden');
+      // Hide left aside (chart), learning status, XP dashboard, domain tabs
+      const chartAside = els.examWeightChart?.closest('aside');
+      if (chartAside) chartAside.classList.add('hidden');
+      if (els.learningStatusPanel) els.learningStatusPanel.classList.add('hidden');
+      if (els.xpDashboard) els.xpDashboard.classList.add('hidden');
       if (els.domainTabs) els.domainTabs.innerHTML = '';
+
       renderContent({ els, exam: { domains: [], steps: [] }, state });
 
       // Update sidebar active state
@@ -1363,8 +1377,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
 
     // Restore chart visibility if hidden by beginner guide
-    if (els.examWeightChart) els.examWeightChart.closest('.bg-white')?.classList.remove('hidden');
-    if (els.domainLegend) els.domainLegend.closest('.bg-white')?.classList.remove('hidden');
+    const chartAside = els.examWeightChart?.closest('aside');
+    if (chartAside) chartAside.classList.remove('hidden');
+    if (els.learningStatusPanel) els.learningStatusPanel.classList.remove('hidden');
+    if (els.xpDashboard) els.xpDashboard.classList.remove('hidden');
 
     renderExamMeta({ els, exam });
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
