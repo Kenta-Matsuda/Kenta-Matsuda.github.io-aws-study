@@ -175,7 +175,7 @@
   },
   "feedbackModal": {
     "title": "Feedback",
-    "description": "Please share your opinions and requests for improving this app. Submissions are recorded anonymously via Google Analytics.",
+    "description": "Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.",
     "categories": {
       "general": "General",
       "resources": "Add study resources (BlackBelt, official docs, etc.)",
@@ -187,7 +187,10 @@
     },
     "contentLabel": "Feedback",
     "contentPlaceholder": "Please describe improvements or features you'd like within 100 characters.",
-    "sent": "Feedback sent. Thank you!",
+    "submitToIssue": "Submit as GitHub Issue",
+    "issueTitle": "[Feedback] {{category}}",
+    "issueBody": "**Category:** {{category}}\n\n{{text}}\n\n---\nSent from the AWS Study Navigator app feedback form.",
+    "sent": "Opened the GitHub new-issue page in a new tab. Please review and submit.",
     "validationEmpty": "Please enter feedback content.",
     "validationLength": "Please keep it within 100 characters."
   },
