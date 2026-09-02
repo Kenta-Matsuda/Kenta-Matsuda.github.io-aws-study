@@ -1,6 +1,7 @@
 import { callAi, callAiStream, callAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
 import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
+import { applyResourceGroupDefaults } from './data/common-defaults.js';
 import {
   getApiKey,
   saveApiKeyFromInput,
@@ -3445,8 +3446,15 @@ function buildResourceSections(task) {
   if (!Array.isArray(nested) || nested.length === 0) return [];
 
   const sections = [];
-  for (const group of nested) {
-    if (!group || typeof group !== 'object') continue;
+  for (const rawGroup of nested) {
+    if (!rawGroup || typeof rawGroup !== 'object') continue;
+
+    // Apply shared presentation defaults (issue #11). This is opt-in and
+    // non-destructive: a group whose `key` is a known common one (e.g.
+    // blackbelts/docs/blogs) may OMIT iconClass/iconColorClass/label/labelEn
+    // and the common default is filled in here. Explicit fields on the group
+    // always win over the defaults, so existing exams render identically.
+    const group = applyResourceGroupDefaults(rawGroup);
 
     const key = String(group.key || group.id || group.type || '').trim();
     const title = String(localizedResourceLabel(group) || group.label || group.title || '').trim() || (key ? humanizeKey(key) : 'Resources');
