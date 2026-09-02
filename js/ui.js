@@ -598,6 +598,26 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
   });
 
+  // --- Share Score Button (issue #33: viral boost for a strong practice-exam result) ---
+  // Gated behind an explicit user click so the X intent tab opens on a user gesture
+  // (no auto-popup). Reuses the same intent-URL builder + window.open pattern as tweetBtn.
+  els.shareScoreBtn?.addEventListener('click', () => {
+    if (!quizSession) return;
+    const summary = getSessionSummary(quizSession);
+    const exam = getExamById(quizSession.examId);
+    const name = getUserName() || (getLocale() === 'ja' ? '名無し' : 'Anonymous');
+    const text = buildTweetScoreText({
+      userName: name,
+      examCode: exam ? exam.code : quizSession.examId,
+      accuracy: summary.accuracy,
+      correct: summary.correct,
+      total: summary.total,
+    });
+    const siteUrl = 'https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/';
+    const intentUrl = buildTweetIntentUrl({ text, url: siteUrl });
+    window.open(intentUrl, '_blank', 'noopener,noreferrer');
+  });
+
   // --- Timer ---
   let quizTimerInterval = null;
   let quizTimerRemaining = 0;
@@ -1763,6 +1783,8 @@ function getElements() {
     quizSumScheduleReview: document.getElementById('quizSumScheduleReview'),
     scheduleReviewBtn: document.getElementById('scheduleReviewBtn'),
     scheduleReviewMsg: document.getElementById('scheduleReviewMsg'),
+    quizSumShareScore: document.getElementById('quizSumShareScore'),
+    shareScoreBtn: document.getElementById('shareScoreBtn'),
     smartReviewCount: document.getElementById('smartReviewCount'),
 
     // Dashboard carousel
@@ -2085,6 +2107,24 @@ function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
   const total = Number(totalXp || 0);
   const week = Number(weekXp || 0);
   const tpl = t('tweet.template', { name, code, title: String(title || ''), total, week });
+  return [tpl, t('tweet.cta') + ' ' + t('tweet.hashtag')].filter(Boolean).join('\n');
+}
+
+// Build enriched tweet text for a strong practice-exam result (issue #33 viral boost).
+// NOTE: leaderboard triggers (#32), server-generated custom OGP images and
+// user-uploadable avatars/character icons are intentionally NOT handled here —
+// they require a backend/DB and are 要人間対応 (out of scope for this static client).
+function buildTweetScoreText({ userName, examCode, accuracy, correct, total }) {
+  const name = String(userName || (getLocale() === 'ja' ? '名無し' : 'Anonymous'));
+  const code = String(examCode || '');
+  const pct = Math.round(Number(accuracy || 0) * 100);
+  const tpl = t('tweet.scoreTemplate', {
+    name,
+    code,
+    accuracy: pct,
+    correct: Number(correct || 0),
+    total: Number(total || 0),
+  });
   return [tpl, t('tweet.cta') + ' ' + t('tweet.hashtag')].filter(Boolean).join('\n');
 }
 
@@ -4049,6 +4089,15 @@ function showQuizSummary({ els, session }) {
     els.quizSumScheduleReview.classList.remove('hidden');
     if (els.scheduleReviewMsg) els.scheduleReviewMsg.classList.add('hidden');
   }
+
+  // Offer a share affordance after a strong practice (mock) exam result (issue #33).
+  // Threshold: mock mode + accuracy >= 80% (a good, shareable score). The button
+  // itself opens the X intent URL on click, never as an auto popup.
+  const SCORE_SHARE_THRESHOLD = 0.8;
+  if (els.quizSumShareScore) {
+    const shareable = session.mode === 'mock' && acc >= SCORE_SHARE_THRESHOLD;
+    els.quizSumShareScore.classList.toggle('hidden', !shareable);
+  }
 }
 
 function resetQuizUi(els) {
@@ -4074,6 +4123,9 @@ function resetQuizUi(els) {
   if (els.quizSumExplanations) els.quizSumExplanations.classList.add('hidden');
   if (els.quizSumExplanationsList) els.quizSumExplanationsList.innerHTML = '';
   if (els.quizSumExplanationsArrow) els.quizSumExplanationsArrow.style.transform = '';
+
+  // Reset share-score affordance (issue #33)
+  if (els.quizSumShareScore) els.quizSumShareScore.classList.add('hidden');
 }
 
 function renderInteractiveQuiz({ els, quiz }) {
