@@ -1645,6 +1645,7 @@ function getElements() {
     xpNextTitle: document.getElementById('xpNextTitle'),
     xpRemaining: document.getElementById('xpRemaining'),
     xpProgressBar: document.getElementById('xpProgressBar'),
+    xpWalker: document.getElementById('xpWalker'),
     xpMotivation: document.getElementById('xpMotivation'),
     editUserNameBtn: document.getElementById('editUserNameBtn'),
     tweetBtn: document.getElementById('tweetBtn'),
@@ -2230,9 +2231,17 @@ function renderXpDashboard({ els, exam, state }) {
   if (els.xpTitleBadge) els.xpTitleBadge.textContent = summary.title || '-';
   if (els.xpNextTitle) els.xpNextTitle.textContent = summary.nextTitle ? String(summary.nextTitle) : '-';
   if (els.xpRemaining) els.xpRemaining.textContent = summary.nextTitle ? `${summary.remainingXp} XP` : '-';
+  const xpPct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
   if (els.xpProgressBar) {
-    const pct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
-    els.xpProgressBar.style.width = `${pct.toFixed(1)}%`;
+    els.xpProgressBar.style.width = `${xpPct.toFixed(1)}%`;
+    const track = els.xpProgressBar.parentElement;
+    if (track && track.getAttribute('role') === 'progressbar') {
+      track.setAttribute('aria-valuenow', String(Math.round(xpPct)));
+    }
+  }
+  // RPG walker tracks the same clamped progress position along the bar
+  if (els.xpWalker) {
+    els.xpWalker.style.left = `${xpPct.toFixed(1)}%`;
   }
 
   // Streak display
