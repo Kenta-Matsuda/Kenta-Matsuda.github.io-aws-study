@@ -141,7 +141,21 @@ const XP_RULES = {
   link: 2,
   explain: 5,
   quiz: 10,
+  feedback: 5, // XP for submitting text feedback (once per day, see FEEDBACK_XP_DAY_KEY guard)
 };
+
+// localStorage key used to record the last day feedback XP was awarded, so
+// repeated feedback submissions cannot farm unbounded XP. This guard only
+// gates the XP award; it never blocks the feedback submission itself.
+const FEEDBACK_XP_DAY_KEY = 'asn_feedback_xp_day';
+
+/** Local YYYY-MM-DD day string, matching storage.js's getLocalDayString(). */
+function feedbackLocalDayString(d = new Date()) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export function initApp({ exams, getExamById, defaultExamId }) {
   const els = getElements();
@@ -3566,6 +3580,32 @@ function submitFeedback(els) {
   showInlineMessage(els.feedbackMessage, t('feedbackModal.sent'), 'text-teal-600');
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   updateFeedbackCharCount(els);
+
+  // Award a modest XP bonus for submitting feedback, capped to once per day so
+  // it cannot be farmed by repeated submissions. The XP award is best-effort;
+  // any failure here must never block the feedback UX above.
+  try {
+    const today = feedbackLocalDayString();
+    let lastAwardedDay = '';
+    try {
+      lastAwardedDay = localStorage.getItem(FEEDBACK_XP_DAY_KEY) || '';
+    } catch {
+      lastAwardedDay = '';
+    }
+    if (lastAwardedDay !== today) {
+      const result = addXp({ amount: XP_RULES.feedback, reason: 'feedback' });
+      try {
+        localStorage.setItem(FEEDBACK_XP_DAY_KEY, today);
+      } catch {
+        // ignore storage write failures
+      }
+      if (result?.unlocked?.length) {
+        showMilestoneToast({ els, unlocked: result.unlocked });
+      }
+    }
+  } catch {
+    // ignore XP award failures — feedback submission already succeeded
+  }
 
   // Auto-close after a short delay
   setTimeout(() => {
