@@ -283,6 +283,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (req.type === 'explain') {
       const ok = await explainTerm({ els, exam, examId: req.examId, term: req.term, taskContext: req.taskContext });
       if (ok) {
+        sendGaEvent('ai_explain', { exam_id: req.examId, term: String(req.term || '') });
         const result = addXp({ amount: XP_RULES.explain, reason: 'explain' });
         if (result?.unlocked?.length) {
           showMilestoneToast({ els, unlocked: result.unlocked });
@@ -303,6 +304,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       isDashboardQuiz: req.isDashboardQuiz,
       domainId: typeof state.currentDomainId === 'number' ? state.currentDomainId : null,
     });
+    if (ok) {
+      sendGaEvent('ai_quiz_generate', { exam_id: req.examId, task_id: String(req.taskId || '') });
+    }
     if (ok && quizSession) {
       updateQuizProgress();
     }
@@ -2117,6 +2121,7 @@ function showMilestoneToast({ els, unlocked }) {
   if (!els.milestoneToast || !els.milestoneToastText) return;
   const latest = unlocked?.[unlocked.length - 1];
   if (!latest) return;
+  sendGaEvent('milestone_unlocked', { milestone_id: latest.id, xp: latest.xp });
   const localTitle = t(`milestones.${latest.id}`) !== `milestones.${latest.id}` ? t(`milestones.${latest.id}`) : latest.title;
   els.milestoneToastText.textContent = t('milestones.toastText', { title: localTitle, xp: latest.xp });
   els.milestoneToast.classList.remove('hidden');
@@ -3631,22 +3636,29 @@ function submitFeedback(els) {
   }, 1500);
 }
 
-function sendFeedbackToGa({ category, text }) {
+/**
+ * Guarded Google Analytics event sender. No-ops safely when gtag is
+ * unavailable (GA blocked/absent) and never throws. Mirrors the pattern in
+ * js/votes.js sendGaEvent.
+ */
+function sendGaEvent(eventName, params) {
   try {
     if (typeof window === 'undefined') return;
     const gtag = window.gtag;
     if (typeof gtag !== 'function') return;
-
-    const feedbackText = String(text || '').slice(0, FEEDBACK_MAX_LENGTH);
-
-    gtag('event', 'user_feedback', {
-      feedback_category: category,
-      feedback_text: feedbackText,
-      feedback_length: feedbackText.length,
-    });
+    gtag('event', eventName, params && typeof params === 'object' ? params : {});
   } catch {
     // ignore
   }
+}
+
+function sendFeedbackToGa({ category, text }) {
+  const feedbackText = String(text || '').slice(0, FEEDBACK_MAX_LENGTH);
+  sendGaEvent('user_feedback', {
+    feedback_category: category,
+    feedback_text: feedbackText,
+    feedback_length: feedbackText.length,
+  });
 }
 
 // --- Modals + AI actions ---
