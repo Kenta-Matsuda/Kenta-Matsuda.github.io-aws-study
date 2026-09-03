@@ -17,7 +17,7 @@ test.describe('parseQuizResponse robustness (#84)', () => {
     expect(result.correctIndex).toBe(0);
   });
 
-  test('numeric `correct` parses to the right index (1-based)', () => {
+  test('numeric `correct` prefers 1-based (2 choices)', () => {
     const input =
       '```json\n' +
       '{"question":"Q?","choices":["A. x","B. y"],"correct":2,"explanation":"e"}\n' +
@@ -27,7 +27,17 @@ test.describe('parseQuizResponse robustness (#84)', () => {
     expect(result.correctIndex).toBe(1);
   });
 
-  test('numeric `correct` parses to the right index (0-based)', () => {
+  test('numeric `correct` prefers 1-based in the previously ambiguous overlap (3+ choices)', () => {
+    // `correct: 2` on 3 choices must resolve to the 2nd choice (index 1),
+    // not index 2, since choices are labeled A/B/C (1-based positions).
+    const result = parseQuizResponse(
+      '{"question":"Q?","choices":["A. x","B. y","C. z"],"correct":2,"explanation":"e"}',
+    );
+    expect(result).not.toBeNull();
+    expect(result.correctIndex).toBe(1);
+  });
+
+  test('numeric `correct` of 0 falls back to 0-based (index 0)', () => {
     const result = parseQuizResponse(
       '{"question":"Q?","choices":["A. x","B. y","C. z"],"correct":0,"explanation":"e"}',
     );

@@ -101,7 +101,7 @@ function normalizeChoices(rawChoices) {
 /**
  * Resolve the index of the correct choice from a variety of `correct` shapes:
  *   - an A-D (case-insensitive) letter (e.g. "B")
- *   - a numeric index, accepting both 1-based (1..n) and 0-based (0..n-1)
+ *   - a numeric index, preferring 1-based (1..n), falling back to 0-based (0..n-1)
  *   - a string that exactly matches one of the choices (mapped back to index)
  * @param {unknown} correct
  * @param {string[]} choices
@@ -114,9 +114,12 @@ function resolveCorrectIndex(correct, choices) {
   if (typeof correct === 'number' || (typeof correct === 'string' && /^\d+$/.test(correct.trim()))) {
     const num = Number(correct);
     if (Number.isInteger(num)) {
-      // Prefer 0-based when in range; otherwise treat 1-based (1..n).
-      if (num >= 0 && num < choices.length) return num;
+      // Choices are labeled A/B/C/D (1st/2nd/...), so prefer 1-based (1..n):
+      // a positive numeric value denotes a 1-based position -> num - 1.
       if (num >= 1 && num <= choices.length) return num - 1;
+      // Fall back to 0-based (0..n-1) for 0 or values that are not a valid
+      // 1-based position.
+      if (num >= 0 && num < choices.length) return num;
     }
     return -1;
   }
