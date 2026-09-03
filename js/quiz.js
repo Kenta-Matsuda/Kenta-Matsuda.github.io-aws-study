@@ -14,19 +14,50 @@ import { getLocale } from './i18n.js';
  * @returns {{ question: string, choices: string[], correctIndex: number, explanation: string } | null}
  */
 export function parseQuizJson(text) {
-  // Strip markdown code fences that wrap JSON
-  const stripped = text.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/i, '');
+  if (text == null) return null;
+  const trimmed = String(text).trim();
+  if (!trimmed) return null;
+
+  // 1) Strip markdown code fences that wrap JSON. Tolerate leading
+  //    whitespace/newlines before the opening fence and any trailing content.
+  const stripped = trimmed
+    .replace(/^\s*```(?:json)?\s*/i, '')
+    .replace(/\s*```[\s\S]*$/i, '')
+    .trim();
+  const direct = tryParseQuizJson(stripped);
+  if (direct) return direct;
+
+  // 2) Try to find a JSON block embedded in a markdown code fence,
+  //    even when surrounded by prose before/after the fence.
+  const jsonMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (jsonMatch) {
+    const fenced = tryParseQuizJson(jsonMatch[1].trim());
+    if (fenced) return fenced;
+  }
+
+  // 3) Fallback: extract the first balanced-looking JSON object by slicing
+  //    from the first '{' to the last '}'. Handles leading/trailing prose and
+  //    fences that are missing a closing ```.
+  const first = trimmed.indexOf('{');
+  const last = trimmed.lastIndexOf('}');
+  if (first !== -1 && last > first) {
+    const candidate = tryParseQuizJson(trimmed.slice(first, last + 1));
+    if (candidate) return candidate;
+  }
+
+  return null;
+}
+
+/**
+ * Attempt JSON.parse + normalize, swallowing parse errors.
+ * @param {string} candidate
+ * @returns {{ question: string, choices: string[], correctIndex: number, explanation: string } | null}
+ */
+function tryParseQuizJson(candidate) {
+  if (!candidate) return null;
   try {
-    const obj = JSON.parse(stripped);
-    return normalizeQuizObject(obj);
+    return normalizeQuizObject(JSON.parse(candidate));
   } catch {
-    // Try to find JSON embedded in markdown
-    const jsonMatch = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
-    if (jsonMatch) {
-      try {
-        return normalizeQuizObject(JSON.parse(jsonMatch[1].trim()));
-      } catch { /* fall through */ }
-    }
     return null;
   }
 }
@@ -34,16 +65,87 @@ export function parseQuizJson(text) {
 function normalizeQuizObject(obj) {
   if (!obj || typeof obj !== 'object') return null;
   const question = String(obj.question || '').trim();
-  const choices = Array.isArray(obj.choices) ? obj.choices.map((c) => String(c || '').trim()) : [];
-  const correct = String(obj.correct || '').trim().toUpperCase();
+  const choices = normalizeChoices(obj.choices);
   const explanation = String(obj.explanation || '').trim();
 
   if (!question || choices.length < 2) return null;
 
-  const correctIndex = letterToIndex(correct);
+  const correctIndex = resolveCorrectIndex(obj.correct, choices);
   if (correctIndex < 0 || correctIndex >= choices.length) return null;
 
   return { question, choices, correctIndex, explanation };
+}
+
+/**
+ * Normalize `choices` into an ordered array of trimmed strings.
+ * Accepts an array, or an object keyed by A/B/C/D (converted to array order).
+ * @param {unknown} rawChoices
+ * @returns {string[]}
+ */
+function normalizeChoices(rawChoices) {
+  if (Array.isArray(rawChoices)) {
+    return rawChoices.map((c) => String(c ?? '').trim());
+  }
+  if (rawChoices && typeof rawChoices === 'object') {
+    // Order by A, B, C, D... using the letter keys when present.
+    const keys = Object.keys(rawChoices);
+    const letterKeys = keys.filter((k) => /^[A-Z]$/i.test(k.trim()));
+    const ordered = letterKeys.length
+      ? letterKeys.sort((a, b) => a.trim().toUpperCase().localeCompare(b.trim().toUpperCase()))
+      : keys;
+    return ordered.map((k) => String(rawChoices[k] ?? '').trim());
+  }
+  return [];
+}
+
+/**
+ * Resolve the index of the correct choice from a variety of `correct` shapes:
+ *   - an A-D (case-insensitive) letter (e.g. "B")
+ *   - a numeric index, accepting both 1-based (1..n) and 0-based (0..n-1)
+ *   - a string that exactly matches one of the choices (mapped back to index)
+ * @param {unknown} correct
+ * @param {string[]} choices
+ * @returns {number} index, or -1 when it cannot be resolved
+ */
+function resolveCorrectIndex(correct, choices) {
+  if (correct == null) return -1;
+
+  // Numeric index (or numeric-looking string).
+  if (typeof correct === 'number' || (typeof correct === 'string' && /^\d+$/.test(correct.trim()))) {
+    const num = Number(correct);
+    if (Number.isInteger(num)) {
+      // Prefer 0-based when in range; otherwise treat 1-based (1..n).
+      if (num >= 0 && num < choices.length) return num;
+      if (num >= 1 && num <= choices.length) return num - 1;
+    }
+    return -1;
+  }
+
+  const raw = String(correct).trim();
+  if (!raw) return -1;
+
+  // Single A-D letter.
+  if (/^[A-Za-z]$/.test(raw)) {
+    const letterIdx = letterToIndex(raw);
+    if (letterIdx >= 0) return letterIdx;
+  }
+
+  // Exact match against a choice (with or without a leading "A. " label).
+  const target = raw.toLowerCase();
+  const exact = choices.findIndex((c) => c.toLowerCase() === target);
+  if (exact >= 0) return exact;
+  const stripLabel = (s) => s.replace(/^\s*[A-Za-z][\.\)、]\s*/, '').trim().toLowerCase();
+  const byLabel = choices.findIndex((c) => stripLabel(c) === stripLabel(raw));
+  if (byLabel >= 0) return byLabel;
+
+  // Leading letter prefix like "B) ..." or "B."
+  const leadingLetter = raw.match(/^\s*([A-Za-z])[\.\)、]/);
+  if (leadingLetter) {
+    const idx = letterToIndex(leadingLetter[1]);
+    if (idx >= 0) return idx;
+  }
+
+  return -1;
 }
 
 /**
