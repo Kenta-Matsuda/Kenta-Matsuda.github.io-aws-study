@@ -3591,7 +3591,7 @@ function highlightHtml(escapedText, termLower) {
 }
 
 // --- Feedback ---
-const FEEDBACK_MAX_LENGTH = 100;
+const FEEDBACK_MAX_LENGTH = 1000;
 
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;

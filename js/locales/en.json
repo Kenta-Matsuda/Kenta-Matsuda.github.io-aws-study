@@ -186,13 +186,13 @@
       "other": "Other"
     },
     "contentLabel": "Feedback",
-    "contentPlaceholder": "Please describe improvements or features you'd like within 100 characters.",
+    "contentPlaceholder": "Please describe improvements or features you'd like within 1000 characters.",
     "submitToIssue": "Submit as GitHub Issue",
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**Category:** {{category}}\n\n{{text}}\n\n---\nSent from the AWS Study Navigator app feedback form.",
     "sent": "Opened the GitHub new-issue page in a new tab. Please review and submit.",
     "validationEmpty": "Please enter feedback content.",
-    "validationLength": "Please keep it within 100 characters."
+    "validationLength": "Please keep it within 1000 characters."
   },
   "chat": {
     "title": "AI Tutor",

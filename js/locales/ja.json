@@ -186,13 +186,13 @@
       "other": "その他"
     },
     "contentLabel": "フィードバック内容",
-    "contentPlaceholder": "改善してほしい点、追加してほしい機能などを100文字以内でお書きください。",
+    "contentPlaceholder": "改善してほしい点、追加してほしい機能などを1000文字以内でお書きください。",
     "submitToIssue": "GitHub Issue として送信",
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**カテゴリ:** {{category}}\n\n{{text}}\n\n---\nAWS Study Navigator アプリのフィードバックフォームから送信されました。",
     "sent": "GitHub の新規Issue作成画面を開きました。内容を確認して送信してください。",
     "validationEmpty": "フィードバック内容を入力してください。",
-    "validationLength": "100文字以内で入力してください。"
+    "validationLength": "1000文字以内で入力してください。"
   },
   "chat": {
     "title": "AI チューター",
