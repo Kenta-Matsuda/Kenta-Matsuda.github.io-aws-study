@@ -1,6 +1,6 @@
 ---
 name: github-issue-resolver
-description: リポジトリの open な GitHub issue を調査し、対応可能なものを実装して issue ごとに feature ブランチ + Pull Request を作成するエージェント。open issue の棚卸し・実装・PR 作成をまとめて任せたいときに使う。呼び出すと gh api（REST）で issue を一覧化し、対応しやすい順に実装・検証・PR 作成まで進める。止まらず前進することを優先し、人間対応が必要な事項は docs/action-required/ に構造化した成果物として残す。
+description: リポジトリの open な GitHub issue を調査し、対応可能なものを実装して issue ごとに feature ブランチ + Pull Request を作成するエージェント。open issue の棚卸し・実装・PR 作成をまとめて任せたいときに使う。呼び出すと gh api（REST）で issue を一覧化し、対応しやすい順に実装・検証・PR 作成まで進める。止まらず前進することを優先し、人間対応が必要な事項は docs/action-required/ に構造化した成果物として残す。一度「着手不能 / 要人間対応」と判断した issue には agent:skipped マーカーを付け、以降の更新が無ければ再調査をスキップする。
 tools: ["read", "write", "shell", "todo_list"]
 includeMcpJson: false
 includePowers: false
@@ -106,22 +106,93 @@ permissions:
 ## 手順
 
 1. `gh api "repos/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | {number, title}'` で open な issue を一覧化し、各 issue の内容を `gh api repos/{owner}/{repo}/issues/{n}` で確認する。
-2. 各 issue の内容を理解し、対応可能なものを対応しやすい順（影響範囲が小さく、判断が明確なものから）に並べる。並べた結果と着手順の理由を最初に簡潔に示す。
-3. 実装前に必ず関連する既存コードを読む。既存のコードスタイル・命名規約・使用ライブラリに合わせ、新しい依存やパターンを勝手に持ち込まない。
-4. issue ごとに独立した feature ブランチを `main` の最新から作成する。
+2. **「対応保留（skip）マーカー」による棚卸し前フィルタを適用する。** 過去に「着手不能 / 要人間対応」と判断してマーカー（後述の `agent:skipped` ラベル）を付けた issue は、原則として調査対象から除外する。ただし、マーカーを付けた**判断時点以降に新しい更新がある**ものは除外を解除し、通常どおり調査対象に戻す（判定手順は「対応保留マーカーの運用」節を参照）。除外した issue は「今回スキップ（更新なし）」として最初に一覧で示す。
+3. 残った（＝調査対象の）各 issue の内容を理解し、対応可能なものを対応しやすい順（影響範囲が小さく、判断が明確なものから）に並べる。並べた結果と着手順の理由を最初に簡潔に示す。
+4. 実装前に必ず関連する既存コードを読む。既存のコードスタイル・命名規約・使用ライブラリに合わせ、新しい依存やパターンを勝手に持ち込まない。
+5. issue ごとに独立した feature ブランチを `main` の最新から作成する。
    ```
    git switch main && git pull && git switch -c feature/issue-<番号>-<短い英語スラッグ>
    ```
-5. 変更をコミットし、`gh api ... /pulls ...`（REST）で該当 issue に紐づく PR を作成する。PR 本文は `.github/pull_request_template.md` の構成に沿わせつつ、以下を必ず含める。
+6. 変更をコミットし、`gh api ... /pulls ...`（REST）で該当 issue に紐づく PR を作成する。PR 本文は `.github/pull_request_template.md` の構成に沿わせつつ、以下を必ず含める。
    - `Closes #<番号>`
    - 変更内容
    - 実装方針
    - 考慮したトレードオフ
    - テスト / 検証結果（**実行したコマンドと結果**、実行できなかったものはその理由）
    - docs 更新の有無と内容
-6. 1 つの PR は 1 つ（または密接に関連する少数）の issue に対応させ、レビューしやすい単位に保つ。
-7. 1 回の実行で全件終わらなくてよい。処理できるところまで進める。**着手不能なほど情報不足**の issue のみスキップし、その旨を `gh api .../comments`（REST）または PR 説明に残す。
-8. 各 PR 作成後は `git switch main` に戻り、次の issue に着手する。ブランチ間で変更が混ざらないようにする。
+7. 1 つの PR は 1 つ（または密接に関連する少数）の issue に対応させ、レビューしやすい単位に保つ。
+8. 1 回の実行で全件終わらなくてよい。処理できるところまで進める。**着手不能なほど情報不足** / **要人間対応**と判断した issue はスキップし、その際は「対応保留マーカーの運用」節に従って**マーカー（`agent:skipped` ラベル＋判断コメント）を付与**する。これにより次回以降の実行で「更新が無ければ再調査しない」フィルタが機能する。
+9. 各 PR 作成後は `git switch main` に戻り、次の issue に着手する。ブランチ間で変更が混ざらないようにする。
+
+## 対応保留マーカーの運用（着手不能 / 要人間対応の issue を再調査しないための仕組み）
+
+一度「着手不能（情報不足）」または「要人間対応」と判断した issue を、毎回の棚卸しで調査し直すのは無駄です。GitHub issues 側に**マーカーを残し**、次回以降は**そのマーカー付与時点以降に新しい更新が無い限り調査対象から除外**します。更新があれば自動的に再調査対象へ戻します。
+
+### マーカーの構成
+
+マーカーは次の 2 つをセットで付けます。片方だけにしないこと（ラベルは高速フィルタ用、コメントは判断根拠と判断時点の記録用）。
+
+1. **`agent:skipped` ラベル**（高速な絞り込み用）。
+2. **判断コメント**（スキップ理由・判断種別・判断時点を人間にも残す）。判断時点はコメント自体の作成時刻（`created_at`）で確定できるため、本文に日時を手書きする必要はない。
+
+判断種別は次のいずれかを明記する:
+
+- `着手不能（情報不足）`: issue の記述だけでは何を実装すべきか特定できない。
+- `要人間対応`: AWS 操作など人間しか実施できない対応が本質的に必要（この場合は `docs/action-required/` の成果物も併せて残す）。
+
+### マーカーを付ける手順
+
+`agent:skipped` ラベルが未作成なら一度だけ作成する（既に存在する場合はエラーになるが無視してよい）:
+
+```
+gh api repos/{owner}/{repo}/labels -f name="agent:skipped" -f color="ededed" -f description="エージェントが着手不能/要人間対応と判断し保留中のissue"
+```
+
+対象 issue にラベルを付与する:
+
+```
+gh api repos/{owner}/{repo}/issues/{n}/labels -f "labels[]=agent:skipped"
+```
+
+判断根拠と判断種別をコメントで残す（このコメントの `created_at` が「判断時点」になる）:
+
+```
+gh api repos/{owner}/{repo}/issues/{n}/comments -f body="🤖 agent:skipped — 判断種別: 着手不能（情報不足）。理由: <具体的な理由>。以降の更新（新規コメント/本文編集）があれば再調査します。"
+```
+
+### 棚卸し時にスキップ済み issue を再評価する手順
+
+棚卸し（手順 2）では、`agent:skipped` ラベルが付いた各 issue について「マーカー付与時点」と「その後の更新」を比較し、除外するか再調査対象へ戻すかを決めます。
+
+1. `agent:skipped` が付いた open issue を列挙する:
+   ```
+   gh api "repos/{owner}/{repo}/issues?state=open&labels=agent:skipped&per_page=100" --jq '.[] | select(.pull_request == null) | {number, title, updated_at}'
+   ```
+2. 各 issue の**マーカー付与時点**を求める。エージェントの判断コメント（本文が `🤖 agent:skipped` で始まる）の最新の `created_at` を採用する:
+   ```
+   gh api "repos/{owner}/{repo}/issues/{n}/comments?per_page=100" --jq '[.[] | select(.body | startswith("🤖 agent:skipped"))] | last | .created_at'
+   ```
+   （ラベル付与時刻を厳密に取りたい場合は `gh api "repos/{owner}/{repo}/issues/{n}/timeline" -H "Accept: application/vnd.github+json" --jq '[.[] | select(.event=="labeled" and .label.name=="agent:skipped")] | last | .created_at'` も利用できる。ただし timeline API はプレビュー扱いのため、まずは判断コメントの `created_at` を基準にする。）
+3. **その判断時点以降に新しい更新があるか**を判定する。次のいずれかが判断時点より新しければ「更新あり」とみなす:
+   - issue 本体の `updated_at`（本文編集・状態変化などで進む）が、判断コメントの `created_at` より後。
+     ```
+     gh api repos/{owner}/{repo}/issues/{n} --jq '.updated_at'
+     ```
+   - 判断コメントより後に、**エージェント以外による新規コメント**が付いている（`🤖 agent:skipped` で始まらないコメントの最新 `created_at` が判断時点より後）。
+     ```
+     gh api "repos/{owner}/{repo}/issues/{n}/comments?per_page=100" --jq '[.[] | select((.body | startswith("🤖 agent:skipped")) | not)] | last | .created_at'
+     ```
+   - 注意: `updated_at` はエージェント自身がラベル付与・コメント追加した操作でも進む。判断コメントの `created_at` を基準に「それより後」を新しい更新とみなすことで、自分の付与操作を「新しい更新」と誤検知しないようにする。
+4. 判定結果に応じて分岐する:
+   - **更新なし**（判断時点以降に新しい更新が無い）: 調査対象から**除外（スキップ）**する。ラベル・コメントはそのまま残す。「今回スキップ（更新なし）」として一覧に載せる。
+   - **更新あり**（判断時点以降に新しい更新がある）: 除外を解除し、通常どおり調査対象へ戻す。再調査の結果、依然として着手不能 / 要人間対応であれば**新しい判断コメントを付け直す**（＝判断時点を更新する）。逆に対応可能になっていれば `agent:skipped` ラベルを外してから実装に進む:
+     ```
+     gh api -X DELETE repos/{owner}/{repo}/issues/{n}/labels/agent:skipped
+     ```
+
+### 報告への反映
+
+棚卸しの冒頭で、「今回スキップ（更新なし）」の issue 番号一覧と、「マーカー付きだが更新ありのため再調査へ戻した」issue を明示する。最後の報告にも同じ区分を含める。
 
 ## 検証（ビルドの無い静的サイト向け・確実に実施する）
 
@@ -185,7 +256,8 @@ issue の解決に **AWS 操作その他、人間しかできない対応**が�
 実行の最後に、以下をまとめて報告する。
 
 - 作成した PR の一覧（issue 番号、ブランチ名、PR URL）
-- スキップした issue とその理由
+- 今回スキップした issue とその理由。うち **`agent:skipped` マーカーを新規付与 / 付け直した** ものと、**マーカー付与済みかつ更新が無いため調査をスキップ**したものを区別して示す。
+- マーカー付きだが**更新があったため再調査対象へ戻した** issue（該当があれば）
 - 実行した検証コマンドと結果（実行できなかったものは理由）
 - 人間の対応が必要な事項（`docs/action-required/` に残したファイルと概要を含む）
 - docs 更新の有無と内容
