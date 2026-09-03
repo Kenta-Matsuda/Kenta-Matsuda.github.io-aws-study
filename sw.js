@@ -13,11 +13,16 @@
  *  - CACHE_VERSION を上げると activate で旧キャッシュが削除され、更新が反映される。
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `aws-study-nav-${CACHE_VERSION}`;
 
 // スコープ (登録元ディレクトリ) を基準にした相対パス。
 // GitHub Pages のサブディレクトリ配信でも動作するよう "./" 起点にする。
+//
+// 大きなラスター画像 (assets/og/*.png は各 ~8-9MB) は install 時の
+// プリキャッシュから意図的に除外している。install 完了前に約8MBの
+// ダウンロードを強制すると PWA インストールが遅くなるため (refs #80)。
+// 実行時に要求された画像は fetch の stale-while-revalidate で都度キャッシュされる。
 const APP_SHELL = [
   './',
   './index.html',
@@ -42,7 +47,6 @@ const APP_SHELL = [
   './js/locales/urls.json',
   './assets/vendor/marked.min.js',
   './assets/vendor/purify.min.js',
-  './assets/og/beginner.png',
 ];
 
 self.addEventListener('install', (event) => {
