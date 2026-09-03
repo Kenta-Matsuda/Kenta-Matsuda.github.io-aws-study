@@ -8,6 +8,7 @@
 
 - [UI構造の全面リファクタリング](issues/ui-restructure.md)
 - [試験作成/更新用エージェントの作成と最適化 (#69)](issues/exam-content-maintainer-agent.md)
+- [フィードバックのハードルを下げる (#100 / #101)](issues/feedback-nudge-and-account-free.md)
 
 ## LLM Wiki（docs/wiki/）
 
