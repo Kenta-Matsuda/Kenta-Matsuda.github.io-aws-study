@@ -54,7 +54,9 @@
       "title": "クイズチャレンジ",
       "subtitle": "全ドメイン横断で実力を試そう",
       "startBtn": "チャレンジ開始",
-      "reviewBtn": "過去の問題を見直す"
+      "reviewBtn": "過去の問題を見直す",
+      "dailyChallengeBtn": "デイリーチャレンジ",
+      "dailyChallengeHint": "APIキー不要・1日5問"
     },
     "xpCarousel": {
       "totalXp": "これまでの累積 XP",
