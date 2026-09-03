@@ -50,6 +50,7 @@ import {
   formatTime,
 } from './quiz.js';
 import { initChat, resetChat } from './chat.js';
+import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 
 /**
@@ -469,6 +470,54 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         : (getLocale() === 'ja' ? '📊 復習対象なし（まずクイズに挑戦！）' : '📊 No questions to review (try a quiz first!)');
     }
     openModal(els.quizModeModal);
+  });
+
+  // --- Daily Challenge Button (API-key-free, issue #34) ---
+  // 事前用意した静的問題プールから、その日の5問を決定的に出題する。
+  // AIプロバイダー/APIキーは一切使わないため、キー未設定でも遊べる。
+  els.dailyChallengeBtn?.addEventListener('click', () => {
+    const dailyExamId = state.examId || 'clf-c02';
+    const questions = getDailyChallengeQuestions(5, new Date(), getLocale());
+    if (!questions.length) return;
+
+    quizSession = createQuizSession({ examId: dailyExamId, mode: 'quick5' });
+    quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    quizSession.questionCount = questions.length;
+    quizSession.questions = questions.map(q => ({
+      question: q.question,
+      choices: q.choices,
+      correctIndex: q.correctIndex,
+      explanation: q.explanation,
+      domainId: null,
+    }));
+    quizSession.preGenerate = true;
+    quizSession.startedAt = Date.now();
+    quizSession._isDailyChallenge = true;
+
+    const dailyTitle = getLocale() === 'ja'
+      ? `デイリーチャレンジ（${questions.length}問）`
+      : `Daily Challenge (${questions.length} questions)`;
+
+    lastAiRequest = {
+      type: 'quiz',
+      examId: dailyExamId,
+      taskId: '',
+      taskTitle: getLocale() === 'ja' ? 'デイリーチャレンジ' : 'Daily Challenge',
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+
+    showAiModal(els, dailyTitle, true);
+    if (els.modalContent) els.modalContent.innerHTML = '';
+    if (els.modalLoading) els.modalLoading.classList.add('hidden');
+    resetQuizUi(els);
+    if (els.quizArea) els.quizArea.classList.remove('hidden');
+
+    renderInteractiveQuiz({ els, quiz: quizSession.questions[0] });
+    updateQuizProgress();
+    if (els.quizComboBar) els.quizComboBar.classList.remove('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+    if (els.quizChoices) els.quizChoices.classList.remove('hidden');
   });
 
   // --- Dashboard Quiz History Review Button ---
@@ -1811,6 +1860,7 @@ function getElements() {
     carouselNext: document.getElementById('carouselNext'),
     dashboardQuizBtn: document.getElementById('dashboardQuizBtn'),
     dashboardReviewBtn: document.getElementById('dashboardReviewBtn'),
+    dailyChallengeBtn: document.getElementById('dailyChallengeBtn'),
 
     // Quiz history review modal
     quizHistoryModal: document.getElementById('quizHistoryModal'),

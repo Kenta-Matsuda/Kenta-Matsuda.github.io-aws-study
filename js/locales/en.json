@@ -50,7 +50,9 @@
       "title": "Quiz Challenge",
       "subtitle": "Test your skills across all domains",
       "startBtn": "Start Challenge",
-      "reviewBtn": "Review Past Questions"
+      "reviewBtn": "Review Past Questions",
+      "dailyChallengeBtn": "Daily Challenge",
+      "dailyChallengeHint": "No API key needed \u00b7 5 questions a day"
     },
     "xpCarousel": {
       "totalXp": "Total XP",
