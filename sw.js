@@ -13,7 +13,7 @@
  *  - CACHE_VERSION を上げると activate で旧キャッシュが削除され、更新が反映される。
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `aws-study-nav-${CACHE_VERSION}`;
 
 // スコープ (登録元ディレクトリ) を基準にした相対パス。
@@ -42,6 +42,8 @@ const APP_SHELL = [
   './js/locales/urls.json',
   './assets/vendor/marked.min.js',
   './assets/vendor/purify.min.js',
+  './assets/icon.svg',
+  './assets/icon-maskable.svg',
   './assets/og/beginner.png',
 ];
 
