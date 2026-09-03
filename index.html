@@ -1283,6 +1283,11 @@
                 <div class="mt-4 h-2 rounded-full bg-gray-100 overflow-hidden">
                     <div id="statusProgressBar" class="h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
+                <!-- Primary CTA: start/resume today's study (issue #40) -->
+                <button id="mainStudyCtaBtn" type="button" class="sparkle-btn mt-5 w-full flex items-center justify-center gap-3 px-6 py-4 text-white rounded-xl text-base sm:text-lg font-bold shadow-md hover:shadow-lg transition duration-150 active:translate-y-px focus:outline-none focus:ring-2 focus:ring-indigo-400/50">
+                    <i class="fas fa-play"></i>
+                    <span id="mainStudyCtaLabel" data-i18n="dashboard.mainCta.start">Start today's study</span>
+                </button>
             </div>
             
             <!-- Context Header for Right Section -->
@@ -1355,6 +1360,10 @@
                                     <button id="dashboardReviewBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
                                         <i class="fas fa-book-open"></i> <span data-i18n="dashboard.quizCarousel.reviewBtn">Review Past Questions</span>
                                     </button>
+                                    <button id="dailyChallengeBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
+                                        <i class="fas fa-calendar-day"></i> <span data-i18n="dashboard.quizCarousel.dailyChallengeBtn">Daily Challenge</span>
+                                    </button>
+                                    <p class="text-xs text-gray-500 mt-1" data-i18n="dashboard.quizCarousel.dailyChallengeHint">No API key needed</p>
                                 </div>
                             </div>
                         </div>
@@ -1846,10 +1855,19 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackTextarea" data-i18n="feedbackModal.contentLabel">Feedback</label>
-                    <textarea id="feedbackTextarea" rows="5" maxlength="100" placeholder="Please describe improvements or features you'd like within 100 characters." data-i18n-placeholder="feedbackModal.contentPlaceholder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y"></textarea>
+                    <textarea id="feedbackTextarea" rows="5" maxlength="1000" placeholder="Please describe improvements or features you'd like within 1000 characters." data-i18n-placeholder="feedbackModal.contentPlaceholder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y"></textarea>
                     <div class="flex justify-end mt-1">
-                        <span id="feedbackCharCount" class="text-xs text-gray-400">0 / 100</span>
+                        <span id="feedbackCharCount" class="text-xs text-gray-400">0 / 1000</span>
                     </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="feedbackModal.imageLabel">Images (optional)</label>
+                    <input type="file" id="feedbackImageInput" accept="image/*" multiple class="hidden">
+                    <button type="button" id="feedbackImageTrigger" class="w-full border-2 border-dashed border-gray-300 hover:border-teal-400 rounded-lg py-4 px-3 text-sm text-gray-500 hover:text-teal-600 transition-colors flex items-center justify-center gap-2 focus:outline-none focus:border-teal-400">
+                        <i class="fas fa-image"></i> <span data-i18n="feedbackModal.imageAdd">Add images (click, or paste / drop here)</span>
+                    </button>
+                    <div id="feedbackImagePreview" class="flex flex-wrap gap-2 mt-2"></div>
+                    <p class="text-xs text-gray-500 mt-2" data-i18n="feedbackModal.imageHelp">Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.</p>
                 </div>
                 <div id="feedbackMessage" class="text-sm mb-4 hidden"></div>
             </div>
