@@ -37,10 +37,18 @@ APIキーが未登録でもすぐにクイズを体験できるようにする�
 - 既存の `createQuizSession` / `renderInteractiveQuiz` / `handleQuizAnswer` を再利用し、
   **`getApiKey()` / `getOpenAiApiKey()` やAIプロバイダを一切呼ばない**。
 
-### 5. 既存のXP機構の再利用
-- XP付与は既存の `addXp` の reason `'quiz'` パスを再利用。
-- `storage.js` 側で既に適用されているデイリーの初回ボーナス上限に従うため、
-  デイリーチャレンジによるXPの無制限ファーム（farming）は発生しない。
+### 5. XP付与は「1日1回」に制限（デイリーチャレンジ専用ガード）
+- XP付与は既存の `addXp` の reason `'quiz'` パスを再利用する。
+- ただし reason `'quiz'` のデイリー上限は **初回2xボーナスのみ** を抑制し、
+  1問あたりの基礎XP（10）は毎回加算される。デイリーチャレンジは決定論的・無料・
+  何度でも再挑戦できるため、この基礎XPを無制限にファーム（farming）できてしまう。
+- そこで `FEEDBACK_XP_DAY_KEY` と同じパターンで、デイリーチャレンジ専用の
+  1日1回ガード `DAILY_CHALLENGE_XP_DAY_KEY`（`asn_daily_challenge_xp_day`）を追加した。
+  - その日最初に開始したデイリーチャレンジのセッションのみが5問分のXPを獲得できる。
+  - 同一ローカル日での再挑戦（リロード・再オープン含む）ではXPは加算されない。
+  - **プレイ自体は無制限**で、制限されるのはXP付与だけ。
+  - このガードは `quizSession._isDailyChallenge` フラグで判定するため、
+    通常のAIクイズのXP挙動には一切影響しない。
 
 ## 技術的な実装方針
 
@@ -65,8 +73,20 @@ APIキーが未登録でもすぐにクイズを体験できるようにする�
 - 既存のクイズ体験（描画・採点・XP）はそのまま流用するため、UI/挙動の一貫性を保つ。
 
 ### XPの扱い
-- reason `'quiz'` の既存経路を利用し、`storage.js` のデイリーボーナス上限に委ねる。
-- 新たな上限ロジックは追加せず、XPファーム化を防止する。
+- reason `'quiz'` の既存経路を利用してXPを付与するが、reason `'quiz'` の
+  デイリー上限は初回2xボーナスのみを抑制し、基礎XPは毎回加算される点に注意。
+- デイリーチャレンジは決定論的・無料・再挑戦自由のため、基礎XPの無制限ファームを
+  防ぐ専用ガード `DAILY_CHALLENGE_XP_DAY_KEY`（1日1回）を `js/ui.js` に追加した。
+  `FEEDBACK_XP_DAY_KEY` の実装パターンを踏襲し、XP付与のみをローカル日単位で
+  1回に制限する（プレイは無制限、`_isDailyChallenge` セッション限定）。
+
+### 疑似試験ID（`__beginner__`）の結果タグ付け
+- ダッシュボードの選択が「初心者ガイド」擬似モード（`state.examId === '__beginner__'`）
+  の場合、`__beginner__` は truthy のため単純な `|| 'clf-c02'` フォールバックが効かず、
+  結果やXPが実在しない試験IDに紐づいてしまう（`getExamById('__beginner__')` は該当なし）。
+- そこで `isRealExamId()`（`getExamById` で実在判定）を追加し、実在する試験でない場合は
+  `clf-c02` にフォールバックするよう修正。`createQuizSession` / `lastAiRequest.examId` /
+  `addQuizResult` のすべてで実在する試験IDが使われるようにした。
 
 ## スコープ外 / 将来対応
 
