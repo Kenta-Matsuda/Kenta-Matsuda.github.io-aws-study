@@ -181,7 +181,7 @@
   },
   "feedbackModal": {
     "title": "フィードバック",
-    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信すると、内容を差し込んだ GitHub Issue の作成画面が新しいタブで開きます。内容を確認して投稿してください。",
+    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信すると、内容を差し込んだ GitHub Issue の作成画面が新しいタブで開きます。あとは内容を確認して送信するだけです。（入力内容はバックアップとしてクリップボードにもコピーされます。）",
     "categories": {
       "general": "全般",
       "resources": "学習リソースの追加（BlackBelt・公式ドキュメント等）",
@@ -193,10 +193,16 @@
     },
     "contentLabel": "フィードバック内容",
     "contentPlaceholder": "改善してほしい点、追加してほしい機能などを1000文字以内でお書きください。",
+    "imageLabel": "画像（任意）",
+    "imageAdd": "画像を追加（クリック、または貼り付け・ドロップ）",
+    "imageHelp": "添付画像は GitHub の事前入力フォームでは送信できません。Issue 作成画面が開いたら、本文に画像を直接貼り付けてアップロードしてください。",
+    "imageRemove": "画像を削除",
     "submitToIssue": "GitHub Issue として送信",
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**カテゴリ:** {{category}}\n\n{{text}}\n\n---\nAWS Study Navigator アプリのフィードバックフォームから送信されました。",
-    "sent": "GitHub の新規Issue作成画面を開きました。内容を確認して送信してください。",
+    "issueImageMarker": "<!-- ここに画像を{{count}}枚貼り付けてください -->",
+    "sent": "内容を差し込んだ GitHub の新規Issue作成画面を新しいタブで開きました。内容を確認して送信してください。（入力内容はバックアップとしてクリップボードにもコピーしてあります。）",
+    "sentWithImages": "内容を差し込んだ GitHub の新規Issue作成画面を新しいタブで開きました。本文に画像を貼り付けてから送信してください。（入力内容はバックアップとしてクリップボードにもコピーしてあります。）",
     "validationEmpty": "フィードバック内容を入力してください。",
     "validationLength": "1000文字以内で入力してください。"
   },

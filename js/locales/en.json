@@ -181,7 +181,7 @@
   },
   "feedbackModal": {
     "title": "Feedback",
-    "description": "Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.",
+    "description": "Please share your opinions and requests for improving this app. When you submit, a GitHub Issue page opens in a new tab already prefilled with your feedback, so just review it and click Submit. (Your text is also copied to the clipboard as a backup.)",
     "categories": {
       "general": "General",
       "resources": "Add study resources (BlackBelt, official docs, etc.)",
@@ -193,10 +193,16 @@
     },
     "contentLabel": "Feedback",
     "contentPlaceholder": "Please describe improvements or features you'd like within 1000 characters.",
+    "imageLabel": "Images (optional)",
+    "imageAdd": "Add images (click, or paste / drop here)",
+    "imageHelp": "Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.",
+    "imageRemove": "Remove image",
     "submitToIssue": "Submit as GitHub Issue",
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**Category:** {{category}}\n\n{{text}}\n\n---\nSent from the AWS Study Navigator app feedback form.",
-    "sent": "Opened the GitHub new-issue page in a new tab. Please review and submit.",
+    "issueImageMarker": "<!-- Paste your {{count}} image(s) here -->",
+    "sent": "The GitHub new-issue page opened in a new tab already prefilled with your feedback. Please review and submit. (A copy of your text is also on the clipboard as a backup.)",
+    "sentWithImages": "The GitHub new-issue page opened in a new tab already prefilled with your feedback. Please paste your image(s) into the issue body, then submit. (A copy of your text is also on the clipboard as a backup.)",
     "validationEmpty": "Please enter feedback content.",
     "validationLength": "Please keep it within 1000 characters."
   },
