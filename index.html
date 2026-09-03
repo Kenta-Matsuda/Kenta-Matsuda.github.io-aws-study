@@ -1837,9 +1837,13 @@
                 </button>
             </div>
             <div class="p-6">
-                <p class="text-sm text-gray-600 mb-4" data-i18n="feedbackModal.description">
+                <p class="text-sm text-gray-600 mb-3" data-i18n="feedbackModal.description">
                     Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.
                 </p>
+                <div class="mb-4 p-2.5 bg-teal-50 text-teal-800 text-xs rounded border border-teal-200 leading-snug">
+                    <i class="fas fa-circle-info mr-1"></i>
+                    <span data-i18n="feedbackModal.noAccountNote">No GitHub account? No problem. Use "Copy text" below and send it however you like (e.g. paste it to the developer). A GitHub account is only needed if you want to post the issue yourself.</span>
+                </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">Category</label>
                     <select id="feedbackCategorySelect" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
@@ -1871,8 +1875,11 @@
                 <div id="feedbackMessage" class="text-sm mb-4 hidden"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
-                <button type="button" data-close-modal="feedbackModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors" data-i18n="common.cancel">
+                <button type="button" data-close-modal="feedbackModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors mr-auto" data-i18n="common.cancel">
                     Cancel
+                </button>
+                <button id="feedbackCopyBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                    <i class="fas fa-copy"></i> <span data-i18n="feedbackModal.copyText">Copy text</span>
                 </button>
                 <button id="feedbackSubmitBtn" type="button" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <i class="fab fa-github"></i> <span data-i18n="feedbackModal.submitToIssue">Submit as GitHub Issue</span>
@@ -1929,6 +1936,28 @@
                     <div id="milestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
                 </div>
                 <button id="milestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Nudge Toast (fixed) — gentle, dismissible prompt (issue #100) -->
+    <div id="feedbackNudge" class="hidden fixed bottom-4 left-4 z-[1090] max-w-xs">
+        <div class="bg-white border border-teal-200 shadow-lg rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <div class="text-sm font-bold text-gray-900" data-i18n="feedbackNudge.title">Have a moment for feedback?</div>
+                    <div class="text-xs text-gray-600 mt-1 leading-snug" data-i18n="feedbackNudge.body">Your feedback helps improve a service used by 4,000+ people. Even one line is welcome.</div>
+                    <div class="flex items-center gap-2 mt-3">
+                        <button id="feedbackNudgeOpenBtn" type="button" class="text-xs font-bold bg-teal-600 hover:bg-teal-700 text-white rounded-md px-3 py-1.5" data-i18n="feedbackNudge.open">Give feedback</button>
+                        <button id="feedbackNudgeDismissBtn" type="button" class="text-xs font-medium text-gray-500 hover:text-gray-700 px-2 py-1.5" data-i18n="feedbackNudge.dismiss">Not now</button>
+                    </div>
+                </div>
+                <button id="feedbackNudgeCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
