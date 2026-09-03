@@ -40,6 +40,10 @@
     "defaultGreeting": "学習の総量を積み上げていきましょう。",
     "changeUsername": "ユーザー名変更",
     "tweetBtn": "Xに投稿",
+    "mainCta": {
+      "start": "今日の学習を始める",
+      "resume": "今日の学習を再開する"
+    },
     "bookPromo": {
       "onSale": "発売中",
       "title": "AWS認定",
