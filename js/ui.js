@@ -447,7 +447,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
 
   // --- Dashboard Quiz Button ---
-  els.dashboardQuizBtn?.addEventListener('click', () => {
+  // Shared cross-domain quiz launcher used by both the carousel #dashboardQuizBtn
+  // and the prominent top-screen #mainStudyCtaBtn (issue #40), so behavior is identical.
+  function startDashboardStudySession() {
     const exam = getExamById(state.examId);
     lastAiRequest = {
       type: 'quiz',
@@ -469,7 +471,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         : (getLocale() === 'ja' ? '📊 復習対象なし（まずクイズに挑戦！）' : '📊 No questions to review (try a quiz first!)');
     }
     openModal(els.quizModeModal);
-  });
+  }
+
+  els.dashboardQuizBtn?.addEventListener('click', startDashboardStudySession);
+  els.mainStudyCtaBtn?.addEventListener('click', startDashboardStudySession);
 
   // --- Dashboard Quiz History Review Button ---
   els.dashboardReviewBtn?.addEventListener('click', () => {
@@ -1671,6 +1676,8 @@ function getElements() {
     statusProgressBar: document.getElementById('statusProgressBar'),
     nextActionPanel: document.getElementById('nextActionPanel'),
     nextActionText: document.getElementById('nextActionText'),
+    mainStudyCtaBtn: document.getElementById('mainStudyCtaBtn'),
+    mainStudyCtaLabel: document.getElementById('mainStudyCtaLabel'),
 
     xpUserLine: document.getElementById('xpUserLine'),
     xpTotal: document.getElementById('xpTotal'),
@@ -2278,6 +2285,13 @@ function renderLearningStatus({ els, exam, state }) {
   const nextAction = computeNextAction({ exam, analytics, streakInfo });
   if (els.nextActionText) {
     els.nextActionText.textContent = nextAction;
+  }
+
+  // Main CTA label: start vs resume today's study (issue #40)
+  if (els.mainStudyCtaLabel) {
+    els.mainStudyCtaLabel.textContent = streakInfo.hadActivityToday
+      ? t('dashboard.mainCta.resume')
+      : t('dashboard.mainCta.start');
   }
 }
 
