@@ -256,8 +256,10 @@
   },
   "tweet": {
     "template": "{{name}} のAWS学習ログ（{{code}}を勉強中）\n称号：{{title}}\n累積XP：{{total}}（今週+{{week}}）",
+    "scoreTemplate": "{{name}} が {{code}} の本番模擬試験で {{accuracy}}%（{{correct}}/{{total}}問正解）を達成！🎉",
     "hashtag": "#AWS #AWS合格ナビゲーター",
-    "cta": "完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！"
+    "cta": "完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！",
+    "shareScore": "このスコアをXでシェア"
   },
   "batch": {
     "alreadyInProgress": "既にバッチ生成が進行中です。完了するまでお待ちください。",

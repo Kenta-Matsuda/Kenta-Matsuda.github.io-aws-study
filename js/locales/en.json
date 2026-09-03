@@ -256,8 +256,10 @@
   },
   "tweet": {
     "template": "{{name}}'s AWS Study Log (studying {{code}})\nTitle: {{title}}\nTotal XP: {{total}} (this week +{{week}})",
+    "scoreTemplate": "{{name}} scored {{accuracy}}% ({{correct}}/{{total}} correct) on the {{code}} Practice Exam! 🎉",
     "hashtag": "#AWS #AWSStudyNavigator",
-    "cta": "Study efficiently with the free \"AWS Study Navigator\"!"
+    "cta": "Study efficiently with the free \"AWS Study Navigator\"!",
+    "shareScore": "Share this score on X"
   },
   "batch": {
     "alreadyInProgress": "A batch generation is already in progress. Please wait until it completes.",
