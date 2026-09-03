@@ -3782,11 +3782,12 @@ function submitFeedback(els) {
   const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
   const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
 
-  // #79: auto-copy the composed body to the clipboard BEFORE opening the issue
-  // page so the hand-off reads as an automatic step. Best-effort — a copy
-  // failure must never block opening the prefilled issue. Fire-and-forget: the
-  // window.open below stays inside the user-gesture call stack so popup
-  // blockers don't trip.
+  // #79: the prefilled issue URL already carries the composed body, so the
+  // primary hand-off is the opened GitHub page below. We also copy the body to
+  // the clipboard as a backup so the user can re-paste it if GitHub truncates
+  // an over-long prefilled URL. Best-effort: a copy failure must never block
+  // opening the issue. Fire-and-forget so the window.open below stays inside
+  // the user-gesture call stack and popup blockers don't trip.
   copyTextToClipboard(issueBody).catch(() => {});
 
   window.open(issueUrl, '_blank', 'noopener,noreferrer');
@@ -3876,6 +3877,14 @@ function openModal(modalEl) {
 
 function closeModal(modalEl) {
   modalEl.style.display = 'none';
+  // Per-modal teardown so closing via the X button, Cancel button, backdrop,
+  // or a programmatic close all run the same cleanup. The feedback modal holds
+  // attached-image object URLs that must be revoked on every close path, not
+  // just on the next open. Otherwise cancelling with images attached leaks
+  // them until the modal is reopened (#81).
+  if (modalEl?.id === 'feedbackModal') {
+    clearFeedbackImages({ feedbackImagePreview: document.getElementById('feedbackImagePreview') });
+  }
 }
 
 // --- AI Provider UI ---
