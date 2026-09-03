@@ -283,7 +283,6 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (req.type === 'explain') {
       const ok = await explainTerm({ els, exam, examId: req.examId, term: req.term, taskContext: req.taskContext });
       if (ok) {
-        sendGaEvent('ai_explain', { exam_id: req.examId, term: String(req.term || '') });
         const result = addXp({ amount: XP_RULES.explain, reason: 'explain' });
         if (result?.unlocked?.length) {
           showMilestoneToast({ els, unlocked: result.unlocked });
@@ -304,9 +303,6 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       isDashboardQuiz: req.isDashboardQuiz,
       domainId: typeof state.currentDomainId === 'number' ? state.currentDomainId : null,
     });
-    if (ok) {
-      sendGaEvent('ai_quiz_generate', { exam_id: req.examId, task_id: String(req.taskId || '') });
-    }
     if (ok && quizSession) {
       updateQuizProgress();
     }
@@ -2157,11 +2153,26 @@ function buildTweetIntentUrl({ text, url }) {
   return `${base}?${params.toString()}`;
 }
 
+// Build GitHub's tokenless prefilled new-issue URL. URLSearchParams url-encodes
+// the values, so title/body/labels are safely escaped. `labels` may be an array
+// or comma-separated string; empty entries are dropped.
+function buildGitHubIssueUrl({ title, body, labels }) {
+  const base = 'https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues/new';
+  const params = new URLSearchParams();
+  params.set('title', String(title || ''));
+  params.set('body', String(body || ''));
+  const labelList = Array.isArray(labels)
+    ? labels
+    : String(labels || '').split(',');
+  const cleaned = labelList.map((l) => String(l || '').trim()).filter(Boolean);
+  if (cleaned.length) params.set('labels', cleaned.join(','));
+  return `${base}?${params.toString()}`;
+}
+
 function showMilestoneToast({ els, unlocked }) {
   if (!els.milestoneToast || !els.milestoneToastText) return;
   const latest = unlocked?.[unlocked.length - 1];
   if (!latest) return;
-  sendGaEvent('milestone_unlocked', { milestone_id: latest.id, xp: latest.xp });
   const localTitle = t(`milestones.${latest.id}`) !== `milestones.${latest.id}` ? t(`milestones.${latest.id}`) : latest.title;
   els.milestoneToastText.textContent = t('milestones.toastText', { title: localTitle, xp: latest.xp });
   els.milestoneToast.classList.remove('hidden');
@@ -3636,8 +3647,20 @@ function submitFeedback(els) {
     return;
   }
 
-  // Send to Google Analytics as a custom event
-  sendFeedbackToGa({ category, text });
+  // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
+  // user click (static site => no token => tokenless prefilled URL pattern,
+  // same as the X/tweet share). Never auto-popup.
+  const feedbackText = String(text).slice(0, FEEDBACK_MAX_LENGTH);
+  const categoryLabel = t(`feedbackModal.categories.${feedbackCategoryI18nKey(category)}`);
+  const issueTitle = t('feedbackModal.issueTitle', { category: categoryLabel });
+  // Interpolate the user-controlled `text` LAST (category first) so that any
+  // literal `{{...}}` sequence inside the user's feedback is never re-scanned
+  // by a subsequent replacement pass. t() substitutes params in object-key
+  // order, so key order here is load-bearing.
+  const issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
+  const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
+  const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
+  window.open(issueUrl, '_blank', 'noopener,noreferrer');
 
   showInlineMessage(els.feedbackMessage, t('feedbackModal.sent'), 'text-teal-600');
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
@@ -3676,29 +3699,33 @@ function submitFeedback(els) {
   }, 1500);
 }
 
-/**
- * Guarded Google Analytics event sender. No-ops safely when gtag is
- * unavailable (GA blocked/absent) and never throws. Mirrors the pattern in
- * js/votes.js sendGaEvent.
- */
-function sendGaEvent(eventName, params) {
-  try {
-    if (typeof window === 'undefined') return;
-    const gtag = window.gtag;
-    if (typeof gtag !== 'function') return;
-    gtag('event', eventName, params && typeof params === 'object' ? params : {});
-  } catch {
-    // ignore
-  }
+// Map a feedback category <option> value to its i18n category label key under
+// feedbackModal.categories.*. Falls back to 'general'.
+function feedbackCategoryI18nKey(category) {
+  const map = {
+    general: 'general',
+    resource_request: 'resources',
+    feature_request: 'feature',
+    bug_report: 'bug',
+    ai_quality: 'aiQuality',
+    ui_ux: 'ui',
+    other: 'other',
+  };
+  return map[String(category || '')] || 'general';
 }
 
-function sendFeedbackToGa({ category, text }) {
-  const feedbackText = String(text || '').slice(0, FEEDBACK_MAX_LENGTH);
-  sendGaEvent('user_feedback', {
-    feedback_category: category,
-    feedback_text: feedbackText,
-    feedback_length: feedbackText.length,
-  });
+// Map a feedback category to an extra GitHub Issue label. Bug reports use `bug`,
+// feature requests use `enhancement`; everything else has no extra label (the
+// `feedback` label is always applied by the caller).
+function categoryToIssueLabel(category) {
+  switch (String(category || '')) {
+    case 'bug_report':
+      return 'bug';
+    case 'feature_request':
+      return 'enhancement';
+    default:
+      return '';
+  }
 }
 
 // --- Modals + AI actions ---
