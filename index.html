@@ -708,6 +708,25 @@
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
+        /* Feedback nudge toast (issue #100): anchored to the bottom-LEFT corner.
+           The PWA install button (issue #98) also anchors bottom-left
+           (#pwaInstallBtn: bottom:24px left:24px, ~40px tall). To avoid the two
+           overlapping when both are visible, the nudge is stacked ABOVE the
+           install button: bottom = 24px inset + ~40px button + ~16px gap ≈ 80px.
+           ID specificity overrides the retained Tailwind `left-4` / `bottom-4`. */
+        #feedbackNudge {
+            bottom: 80px;
+            left: 24px;
+        }
+        @media (max-width: 480px) {
+            /* At ≤480px the install button drops to bottom:16px, so the nudge
+               clears it at 16px inset + ~40px button + ~16px gap ≈ 72px. */
+            #feedbackNudge {
+                bottom: 72px;
+                left: 16px;
+            }
+        }
+
         /* ── Chat Widget ── */
         .chat-widget {
             position: fixed;
@@ -1943,7 +1962,9 @@
     </div>
 
     <!-- Feedback Nudge Toast (fixed) — gentle, dismissible prompt (issue #100) -->
-    <div id="feedbackNudge" class="hidden fixed bottom-4 left-4 z-[1090] max-w-xs">
+    <!-- Position (bottom/left) is set by the #feedbackNudge CSS rule so it stacks
+         above the bottom-left PWA install button (issue #98) instead of overlapping it. -->
+    <div id="feedbackNudge" class="hidden fixed z-[1090] max-w-xs">
         <div class="bg-white border border-teal-200 shadow-lg rounded-xl p-4">
             <div class="flex items-start gap-3">
                 <div class="w-9 h-9 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center flex-shrink-0">
