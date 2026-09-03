@@ -156,6 +156,50 @@ export const AIBS_C01 = {
       ],
       resources: [
         {
+          key: 'blackbelts',
+          label: 'AWS Black Belt Online Seminar',
+          labelEn: 'AWS Black Belt Online Seminar',
+          iconClass: 'fas fa-video',
+          iconColorClass: 'text-red-500',
+          items: [
+            {
+              title: 'AWS Black Belt Online Seminar 資料一覧',
+              titleEn: 'AWS Black Belt Online Seminar Materials',
+              url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/',
+              urlEn: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/',
+              note: 'サービス別の解説スライド・動画のアーカイブ一覧',
+              noteEn: 'Archive of service-by-service slides and videos',
+              recommend: true,
+            },
+          ],
+        },
+        {
+          key: 'docs',
+          label: '公式ドキュメント',
+          labelEn: 'Official Documentation',
+          iconClass: 'fas fa-book-open',
+          iconColorClass: 'text-blue-600',
+          items: [
+            {
+              title: 'AWS の AI/ML サービス',
+              titleEn: 'AWS AI/ML Services',
+              url: 'https://aws.amazon.com/jp/machine-learning/',
+              urlEn: 'https://aws.amazon.com/machine-learning/',
+              note: 'AI/ML サービスの全体像',
+              noteEn: 'Overview of AI/ML services',
+              recommend: true,
+            },
+            {
+              title: 'AWS ドキュメント',
+              titleEn: 'AWS Documentation',
+              url: 'https://docs.aws.amazon.com/ja_jp/',
+              urlEn: 'https://docs.aws.amazon.com/',
+              note: '各 AWS サービスの公式ドキュメントハブ',
+              noteEn: 'Official documentation hub for each AWS service',
+            },
+          ],
+        },
+        {
           key: 'guide',
           label: '試験ガイド',
           labelEn: 'Exam Guide',
