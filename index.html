@@ -25,6 +25,12 @@
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#232f3e">
 
+    <!-- PWA (iOS / mobile) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AWS Study Nav">
+
     <!-- Open Graph / Facebook -->
     <meta property="og:locale" content="ja_JP">
     <meta property="og:locale:alternate" content="en_US">
@@ -1116,6 +1122,12 @@
 </head>
 <body class="min-h-screen flex flex-col">
 
+    <!-- PWA: install prompt (hidden until beforeinstallprompt fires) -->
+    <button id="pwaInstallBtn" type="button" class="hidden fixed bottom-4 right-4 z-50 items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 flex" aria-label="ホーム画面に追加">
+        <i class="fas fa-download"></i>
+        <span>アプリを追加</span>
+    </button>
+
     <!-- SEO: Static content for crawlers and AI indexers that may not fully execute JavaScript -->
     <noscript>
         <div style="max-width:800px;margin:2rem auto;padding:1rem;font-family:sans-serif;">
@@ -1984,6 +1996,42 @@
                 el.classList.remove('hidden');
             }
         }, 1500);
+    </script>
+    <script>
+        // PWA: Service Worker 登録 (相対パスでサブディレクトリ配信に対応)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch((err) => {
+                    console.warn('Service Worker registration failed:', err);
+                });
+            });
+        }
+
+        // PWA: 控えめな「ホーム画面に追加」導線
+        (() => {
+            let deferredPrompt = null;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                const btn = document.getElementById('pwaInstallBtn');
+                if (btn) btn.classList.remove('hidden');
+            });
+
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest && e.target.closest('#pwaInstallBtn');
+                if (!btn || !deferredPrompt) return;
+                btn.classList.add('hidden');
+                deferredPrompt.prompt();
+                try { await deferredPrompt.userChoice; } catch (_) {}
+                deferredPrompt = null;
+            });
+
+            window.addEventListener('appinstalled', () => {
+                deferredPrompt = null;
+                const btn = document.getElementById('pwaInstallBtn');
+                if (btn) btn.classList.add('hidden');
+            });
+        })();
     </script>
 </body>
 </html>
