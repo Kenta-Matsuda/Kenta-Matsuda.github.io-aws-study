@@ -680,28 +680,99 @@
             0% { left: -45%; }
             60%, 100% { left: 115%; }
         }
-        /* walking character that tracks progress */
+        /* explorer marker that tracks progress along the XP bar */
         .xp-walker {
             position: absolute;
             top: 0;
+            left: 0%;
             transform: translateX(-50%);
-            font-size: 18px;
-            line-height: 1;
+            line-height: 0;
             transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
-            animation: xpWalkBob 0.7s steps(1, end) infinite;
-            will-change: left, transform;
+            will-change: left;
+            pointer-events: none;
+        }
+        .xp-walker__svg {
+            display: block;
+            overflow: visible;
+            filter: drop-shadow(0 2px 3px rgba(35, 47, 62, 0.35));
+        }
+        /* the whole character gently bobs while walking */
+        .xp-walker__body {
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+            animation: xpWalkBob 0.72s ease-in-out infinite;
+        }
+        .xp-walker__shadow {
+            fill: rgba(35, 47, 62, 0.22);
+            transform-box: fill-box;
+            transform-origin: 50% 50%;
+            animation: xpWalkShadow 0.72s ease-in-out infinite;
+        }
+        .xp-walker__torso { fill: #ea580c; }
+        .xp-walker__pack { fill: #232f3e; }
+        .xp-walker__head { fill: #f8d9b0; }
+        .xp-walker__cap { fill: #f59e0b; }
+        .xp-walker__leg,
+        .xp-walker__arm {
+            fill: none;
+            stroke: #232f3e;
+            stroke-width: 3;
+        }
+        /* legs and arm swing in step with the bob */
+        .xp-walker__leg--front {
+            transform-box: fill-box;
+            transform-origin: 0% 0%;
+            animation: xpWalkLegFront 0.72s ease-in-out infinite;
+        }
+        .xp-walker__leg--back {
+            transform-box: fill-box;
+            transform-origin: 100% 0%;
+            animation: xpWalkLegBack 0.72s ease-in-out infinite;
+        }
+        .xp-walker__arm {
+            transform-box: fill-box;
+            transform-origin: 0% 0%;
+            animation: xpWalkArm 0.72s ease-in-out infinite;
         }
         @keyframes xpWalkBob {
-            0% { transform: translateX(-50%) translateY(0) scaleX(1); }
-            25% { transform: translateX(-50%) translateY(-2px) scaleX(1); }
-            50% { transform: translateX(-50%) translateY(0) scaleX(-1); }
-            75% { transform: translateX(-50%) translateY(-2px) scaleX(-1); }
-            100% { transform: translateX(-50%) translateY(0) scaleX(1); }
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-1.6px) rotate(-2deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-1.6px) rotate(2deg); }
+        }
+        @keyframes xpWalkLegFront {
+            0%, 100% { transform: rotate(22deg); }
+            50% { transform: rotate(-22deg); }
+        }
+        @keyframes xpWalkLegBack {
+            0%, 100% { transform: rotate(-22deg); }
+            50% { transform: rotate(22deg); }
+        }
+        @keyframes xpWalkArm {
+            0%, 100% { transform: rotate(-18deg); }
+            50% { transform: rotate(18deg); }
+        }
+        @keyframes xpWalkShadow {
+            0%, 100% { transform: scaleX(1); opacity: 0.55; }
+            50% { transform: scaleX(0.82); opacity: 0.35; }
         }
         @media (prefers-reduced-motion: reduce) {
             .xp-rpg-fill::after { animation: none; }
-            .xp-walker { animation: none; }
+            .xp-walker,
+            .xp-walker__body,
+            .xp-walker__shadow,
+            .xp-walker__leg--front,
+            .xp-walker__leg--back,
+            .xp-walker__arm { animation: none; }
         }
+        /* dark mode: keep the character readable against the dark track */
+        html.dark .xp-walker__svg {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+        }
+        html.dark .xp-walker__pack,
+        html.dark .xp-walker__leg,
+        html.dark .xp-walker__arm { stroke: #10151d; }
+        html.dark .xp-walker__pack { fill: #10151d; }
         html.dark .xp-rpg-track {
             background: #333333;
             border-color: rgba(255, 255, 255, 0.08);
@@ -1411,7 +1482,27 @@
                                     </div>
                                 </div>
                                 <div class="mt-5 xp-rpg-wrap">
-                                    <div id="xpWalker" class="xp-walker" aria-hidden="true" style="left: 0%">🚶</div>
+                                    <div id="xpWalker" class="xp-walker" aria-hidden="true" style="left: 0%">
+                                        <svg class="xp-walker__svg" viewBox="0 0 32 40" width="26" height="32" role="presentation" focusable="false" aria-hidden="true">
+                                            <ellipse class="xp-walker__shadow" cx="16" cy="37" rx="9" ry="2.4"/>
+                                            <g class="xp-walker__body">
+                                                <!-- back leg -->
+                                                <path class="xp-walker__leg xp-walker__leg--back" d="M15 26 l-4 8" stroke-linecap="round"/>
+                                                <!-- front leg -->
+                                                <path class="xp-walker__leg xp-walker__leg--front" d="M17 26 l4 7" stroke-linecap="round"/>
+                                                <!-- torso / tunic -->
+                                                <path class="xp-walker__torso" d="M11 15 q5 -3 10 0 l-1.5 12 h-7 z"/>
+                                                <!-- backpack -->
+                                                <rect class="xp-walker__pack" x="9.5" y="15.5" width="4.5" height="8" rx="1.6"/>
+                                                <!-- swinging arm -->
+                                                <path class="xp-walker__arm" d="M19 17 l4 6" stroke-linecap="round"/>
+                                                <!-- head -->
+                                                <circle class="xp-walker__head" cx="16" cy="9.5" r="5"/>
+                                                <!-- explorer cap brim -->
+                                                <path class="xp-walker__cap" d="M10.5 8 q5.5 -6 11 0 z"/>
+                                            </g>
+                                        </svg>
+                                    </div>
                                     <div class="xp-rpg-track h-4 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                                         <div id="xpProgressBar" class="xp-rpg-fill h-4 rounded-full" style="width: 0%"></div>
                                     </div>
