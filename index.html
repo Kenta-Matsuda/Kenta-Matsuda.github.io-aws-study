@@ -1850,6 +1850,15 @@
                         <span id="feedbackCharCount" class="text-xs text-gray-400">0 / 1000</span>
                     </div>
                 </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="feedbackModal.imageLabel">Images (optional)</label>
+                    <input type="file" id="feedbackImageInput" accept="image/*" multiple class="hidden">
+                    <button type="button" id="feedbackImageTrigger" class="w-full border-2 border-dashed border-gray-300 hover:border-teal-400 rounded-lg py-4 px-3 text-sm text-gray-500 hover:text-teal-600 transition-colors flex items-center justify-center gap-2 focus:outline-none focus:border-teal-400">
+                        <i class="fas fa-image"></i> <span data-i18n="feedbackModal.imageAdd">Add images (click, or paste / drop here)</span>
+                    </button>
+                    <div id="feedbackImagePreview" class="flex flex-wrap gap-2 mt-2"></div>
+                    <p class="text-xs text-gray-500 mt-2" data-i18n="feedbackModal.imageHelp">Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.</p>
+                </div>
                 <div id="feedbackMessage" class="text-sm mb-4 hidden"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">

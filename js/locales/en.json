@@ -175,7 +175,7 @@
   },
   "feedbackModal": {
     "title": "Feedback",
-    "description": "Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.",
+    "description": "Please share your opinions and requests for improving this app. When you submit, your text is copied to the clipboard automatically and a prefilled GitHub Issue page opens in a new tab — just review it and click Submit.",
     "categories": {
       "general": "General",
       "resources": "Add study resources (BlackBelt, official docs, etc.)",
@@ -187,10 +187,16 @@
     },
     "contentLabel": "Feedback",
     "contentPlaceholder": "Please describe improvements or features you'd like within 1000 characters.",
+    "imageLabel": "Images (optional)",
+    "imageAdd": "Add images (click, or paste / drop here)",
+    "imageHelp": "Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.",
+    "imageRemove": "Remove image",
     "submitToIssue": "Submit as GitHub Issue",
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**Category:** {{category}}\n\n{{text}}\n\n---\nSent from the AWS Study Navigator app feedback form.",
-    "sent": "Opened the GitHub new-issue page in a new tab. Please review and submit.",
+    "issueImageMarker": "<!-- Paste your {{count}} image(s) here -->",
+    "sent": "Your feedback text was copied to the clipboard and the GitHub new-issue page opened in a new tab. Please review and submit.",
+    "sentWithImages": "Your feedback text was copied to the clipboard and the GitHub new-issue page opened in a new tab. Please paste your image(s) into the issue body, then submit.",
     "validationEmpty": "Please enter feedback content.",
     "validationLength": "Please keep it within 1000 characters."
   },

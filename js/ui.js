@@ -1729,6 +1729,9 @@ function getElements() {
     feedbackCharCount: document.getElementById('feedbackCharCount'),
     feedbackMessage: document.getElementById('feedbackMessage'),
     feedbackSubmitBtn: document.getElementById('feedbackSubmitBtn'),
+    feedbackImageInput: document.getElementById('feedbackImageInput'),
+    feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
+    feedbackImagePreview: document.getElementById('feedbackImagePreview'),
     // OpenAI / Provider
     openaiKeyInput: document.getElementById('openaiKeyInput'),
     openaiKeyClearBtn: document.getElementById('openaiKeyClearBtn'),
@@ -3593,6 +3596,14 @@ function highlightHtml(escapedText, termLower) {
 // --- Feedback ---
 const FEEDBACK_MAX_LENGTH = 1000;
 
+// In-memory list of images the user attached to the current feedback draft.
+// Each entry: { file, url } where `url` is an object URL used only for the
+// preview thumbnail. Bytes are NEVER uploaded anywhere — GitHub's tokenless
+// prefilled new-issue URL cannot carry attachments, so the user is guided to
+// paste the images into the opened issue instead. The list is cleared (and its
+// object URLs revoked) on modal open/close to avoid leaks.
+let feedbackImages = [];
+
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
 
@@ -3614,6 +3625,106 @@ function wireFeedbackHandlers({ els }) {
       submitFeedback(els);
     }
   });
+
+  // Image attach affordances (#81). Files are kept in memory only for preview;
+  // they are never uploaded (static site, no backend / AWS out of bounds).
+  els.feedbackImageTrigger?.addEventListener('click', () => {
+    els.feedbackImageInput?.click();
+  });
+
+  els.feedbackImageInput?.addEventListener('change', () => {
+    addFeedbackImages(els, els.feedbackImageInput.files);
+    // Reset so selecting the same file again still fires `change`.
+    els.feedbackImageInput.value = '';
+  });
+
+  // Paste images (e.g. screenshots) directly into the textarea.
+  els.feedbackTextarea?.addEventListener('paste', (e) => {
+    const files = Array.from(e.clipboardData?.files || []).filter((f) => f.type.startsWith('image/'));
+    if (files.length) {
+      e.preventDefault();
+      addFeedbackImages(els, files);
+    }
+  });
+
+  // Drag-and-drop onto the dropzone trigger.
+  els.feedbackImageTrigger?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    els.feedbackImageTrigger.classList.add('border-teal-400', 'text-teal-600');
+  });
+  els.feedbackImageTrigger?.addEventListener('dragleave', () => {
+    els.feedbackImageTrigger.classList.remove('border-teal-400', 'text-teal-600');
+  });
+  els.feedbackImageTrigger?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    els.feedbackImageTrigger.classList.remove('border-teal-400', 'text-teal-600');
+    const files = Array.from(e.dataTransfer?.files || []).filter((f) => f.type.startsWith('image/'));
+    if (files.length) addFeedbackImages(els, files);
+  });
+}
+
+// Add image File objects to the in-memory list and re-render the previews.
+function addFeedbackImages(els, fileList) {
+  const files = Array.from(fileList || []).filter((f) => f && f.type && f.type.startsWith('image/'));
+  if (!files.length) return;
+  files.forEach((file) => {
+    feedbackImages.push({ file, url: URL.createObjectURL(file) });
+  });
+  renderFeedbackImagePreviews(els);
+}
+
+// Remove a single attached image (by index), revoking its object URL.
+function removeFeedbackImage(els, index) {
+  const entry = feedbackImages[index];
+  if (!entry) return;
+  try {
+    URL.revokeObjectURL(entry.url);
+  } catch {
+    // ignore
+  }
+  feedbackImages.splice(index, 1);
+  renderFeedbackImagePreviews(els);
+}
+
+// Clear all attached images and revoke their object URLs to avoid leaks.
+function clearFeedbackImages(els) {
+  feedbackImages.forEach((entry) => {
+    try {
+      URL.revokeObjectURL(entry.url);
+    } catch {
+      // ignore
+    }
+  });
+  feedbackImages = [];
+  if (els?.feedbackImagePreview) els.feedbackImagePreview.innerHTML = '';
+}
+
+// Render thumbnail previews with a per-thumbnail remove button.
+function renderFeedbackImagePreviews(els) {
+  const container = els?.feedbackImagePreview;
+  if (!container) return;
+  container.innerHTML = '';
+  feedbackImages.forEach((entry, index) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-50';
+
+    const img = document.createElement('img');
+    img.src = entry.url;
+    img.alt = entry.file?.name || 'image';
+    img.className = 'w-full h-full object-cover';
+    wrap.appendChild(img);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'absolute top-0 right-0 bg-black/60 hover:bg-black/80 text-white w-5 h-5 flex items-center justify-center text-xs rounded-bl-lg focus:outline-none';
+    removeBtn.setAttribute('aria-label', t('feedbackModal.imageRemove'));
+    removeBtn.title = t('feedbackModal.imageRemove');
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    removeBtn.addEventListener('click', () => removeFeedbackImage(els, index));
+    wrap.appendChild(removeBtn);
+
+    container.appendChild(wrap);
+  });
 }
 
 function openFeedbackModal(els) {
@@ -3621,6 +3732,8 @@ function openFeedbackModal(els) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
   els.feedbackMessage?.classList?.add('hidden');
+  // Start every session with a clean image list (revokes any stale URLs).
+  clearFeedbackImages(els);
   updateFeedbackCharCount(els);
   openModal(els.feedbackModal);
   setTimeout(() => els.feedbackTextarea?.focus(), 0);
@@ -3657,13 +3770,31 @@ function submitFeedback(els) {
   // literal `{{...}}` sequence inside the user's feedback is never re-scanned
   // by a subsequent replacement pass. t() substitutes params in object-key
   // order, so key order here is load-bearing.
-  const issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
+  let issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
+  // When images are attached (#81), append a marker line so the user knows
+  // where to paste them in the opened GitHub issue. The bytes are never
+  // uploaded — GitHub's tokenless prefilled URL cannot carry attachments, so
+  // GitHub itself auto-uploads images when the user pastes/drops them.
+  const hasImages = feedbackImages.length > 0;
+  if (hasImages) {
+    issueBody += `\n\n${t('feedbackModal.issueImageMarker', { count: feedbackImages.length })}`;
+  }
   const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
   const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
+
+  // #79: auto-copy the composed body to the clipboard BEFORE opening the issue
+  // page so the hand-off reads as an automatic step. Best-effort — a copy
+  // failure must never block opening the prefilled issue. Fire-and-forget: the
+  // window.open below stays inside the user-gesture call stack so popup
+  // blockers don't trip.
+  copyTextToClipboard(issueBody).catch(() => {});
+
   window.open(issueUrl, '_blank', 'noopener,noreferrer');
 
-  showInlineMessage(els.feedbackMessage, t('feedbackModal.sent'), 'text-teal-600');
+  const sentKey = hasImages ? 'feedbackModal.sentWithImages' : 'feedbackModal.sent';
+  showInlineMessage(els.feedbackMessage, t(sentKey), 'text-teal-600');
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
+  clearFeedbackImages(els);
   updateFeedbackCharCount(els);
 
   // Award a modest XP bonus for submitting feedback, capped to once per day so
