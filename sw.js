@@ -44,7 +44,6 @@ const APP_SHELL = [
   './assets/vendor/purify.min.js',
   './assets/icon.svg',
   './assets/icon-maskable.svg',
-  './assets/og/beginner.png',
 ];
 
 self.addEventListener('install', (event) => {
