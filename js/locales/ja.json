@@ -73,6 +73,7 @@
       "atRisk": "今日もアクセスしてストリークを守ろう！",
       "startNew": "今日から連続学習をスタートしよう！",
       "milestoneToast": "🔥 {{days}}日連続達成！この調子で続けよう！",
+      "milestoneToastTitle": "ストリークのマイルストーン達成！",
       "reminderTitle": "AWS Study Navigator",
       "reminderBody": "{{count}}日連続の学習ストリークが途切れそうです。今日も学習して継続しよう！",
       "reminderUnsupported": "このブラウザは通知に対応していないため、アプリを開いている間のみリマインドを表示します。",

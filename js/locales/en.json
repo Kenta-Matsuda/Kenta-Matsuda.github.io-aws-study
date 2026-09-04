@@ -73,6 +73,7 @@
       "atRisk": "Study today to keep your streak!",
       "startNew": "Start a new study streak today!",
       "milestoneToast": "🔥 {{days}}-day streak reached! Keep it up!",
+      "milestoneToastTitle": "Streak Milestone Reached!",
       "reminderTitle": "AWS Study Navigator",
       "reminderBody": "Your {{count}}-day streak is about to break. Study today to keep it going!",
       "reminderUnsupported": "This browser does not support notifications, so reminders show only while the app is open.",

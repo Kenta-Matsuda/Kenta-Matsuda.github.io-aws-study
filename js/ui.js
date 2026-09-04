@@ -1837,6 +1837,10 @@ function getElements() {
     milestoneToastText: document.getElementById('milestoneToastText'),
     milestoneToastCloseBtn: document.getElementById('milestoneToastCloseBtn'),
 
+    streakMilestoneToast: document.getElementById('streakMilestoneToast'),
+    streakMilestoneToastText: document.getElementById('streakMilestoneToastText'),
+    streakMilestoneToastCloseBtn: document.getElementById('streakMilestoneToastCloseBtn'),
+
     batchProgressToast: document.getElementById('batchProgressToast'),
     batchProgressIcon: document.getElementById('batchProgressIcon'),
     batchProgressTitle: document.getElementById('batchProgressTitle'),
@@ -2229,6 +2233,7 @@ function wireProfileHandlers({ els, state, getExamById }) {
 
 function wireToastHandlers({ els }) {
   els.milestoneToastCloseBtn?.addEventListener('click', () => hideMilestoneToast({ els }));
+  els.streakMilestoneToastCloseBtn?.addEventListener('click', () => hideStreakMilestoneToast({ els }));
 }
 
 function enforceUserNameIfNeeded({ els }) {
@@ -2629,15 +2634,25 @@ function maybeCelebrateStreakMilestone(els, streak) {
 
   setCelebratedStreakMilestone(reached);
 
-  if (els.milestoneToast && els.milestoneToastText) {
-    els.milestoneToastText.textContent = t('dashboard.streak.milestoneToast', { days: reached });
-    els.milestoneToast.classList.remove('hidden');
-    launchConfetti(els.confettiCanvas);
-    window.clearTimeout?.(els.__milestoneToastTimer);
-    els.__milestoneToastTimer = window.setTimeout(() => {
-      hideMilestoneToast({ els });
-    }, 4500);
-  }
+  showStreakMilestoneToast({ els, days: reached });
+}
+
+// Streak-milestone toast uses its OWN element + timer (distinct from the XP
+// milestone toast) so a single quiz answer that crosses both an XP title and a
+// streak milestone shows both celebrations instead of one clobbering the other.
+function showStreakMilestoneToast({ els, days }) {
+  if (!els.streakMilestoneToast || !els.streakMilestoneToastText) return;
+  els.streakMilestoneToastText.textContent = t('dashboard.streak.milestoneToast', { days });
+  els.streakMilestoneToast.classList.remove('hidden');
+  launchConfetti(els.confettiCanvas);
+  window.clearTimeout?.(els.__streakMilestoneToastTimer);
+  els.__streakMilestoneToastTimer = window.setTimeout(() => {
+    hideStreakMilestoneToast({ els });
+  }, 4500);
+}
+
+function hideStreakMilestoneToast({ els }) {
+  els.streakMilestoneToast?.classList?.add('hidden');
 }
 
 // ─── Study Reminder (opt-in local notification) ─────────────
@@ -2670,6 +2685,11 @@ function maybeFireStudyReminder(els) {
   showStreakNudge(els, body);
 
   // Local OS notification (best effort, feature-detected).
+  // NOTE: we intentionally reference the SVG icon here. Some platforms ignore
+  // SVG notification icons (falling back to a default glyph), but the raster
+  // PNG app icons only exist on the #97 branch and are not present on this
+  // branch, so pointing at a PNG now would be a dead asset reference. Once #97
+  // merges to main, switch this to a raster PNG (e.g. assets/icon-192.png).
   try {
     if (typeof Notification === 'undefined') return;
     if (Notification.permission === 'granted') {

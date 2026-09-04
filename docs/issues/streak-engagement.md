@@ -23,7 +23,7 @@
 
 ### 2. 内発的動機づけ：ストリークのマイルストーン祝福
 
-- 継続日数が **7 / 14 / 30 / 60 / 100 日** の節目に到達したとき、既存のマイルストーン用トースト + 紙吹雪演出（`launchConfetti`）を流用して**一度だけ**祝福する（`dashboard.streak.milestoneToast`）。
+- 継続日数が **7 / 14 / 30 / 60 / 100 日** の節目に到達したとき、専用のストリーク祝福トースト（`#streakMilestoneToast`）+ 紙吹雪演出（`launchConfetti`）で**一度だけ**祝福する（`dashboard.streak.milestoneToast`）。XP 称号のマイルストーントーストとは別要素・別タイマーにしているため、1 回の解答で XP 称号とストリークの節目を同時に達成しても両方の祝福が表示され、片方がもう片方を上書きしない。
 - 祝福済みのマイルストーンは `localStorage`（キー `asn_streak_celebrated_v1`）に記録し、同じ節目で繰り返し発火しないようにする。
 
 ## 技術的な実装方針
@@ -31,7 +31,7 @@
 - **通知はすべてクライアントサイド・フィーチャーディテクション付き**。`typeof Notification === 'undefined'` を必ずガードし、サーバ通信は行わない。
 - 既存インフラを再利用し、重複実装を避ける:
   - ストリーク情報は既存の `js/storage.js` の `getStreakInfo()`（7 日リングバッファ由来の `{ current, hadActivityToday }`）を使用。
-  - 祝福演出は既存の `showMilestoneToast` / `launchConfetti` と同じトースト・紙吹雪パターンを流用。
+  - 祝福演出は既存の `launchConfetti` と同じ紙吹雪パターンを流用しつつ、トーストは XP 称号用（`#milestoneToast`）とは独立した専用要素・専用タイマー（`showStreakMilestoneToast` / `hideStreakMilestoneToast` / `els.__streakMilestoneToastTimer`）で管理し、同一レンダー内で両方の祝福が競合しないようにする。
 - 設定の永続化は既存の `THEME_STORAGE_KEY` などと同じ「定数キー + getter / setter」パターンに合わせて `js/storage.js` に追加（`getStudyReminderEnabled` / `setStudyReminderEnabled` / `getCelebratedStreakMilestone` / `setCelebratedStreakMilestone`）。`resetAppStorage()` でも消去する。
 - 新規のユーザー向け文言は `js/locales/ja.json` と `en.json` の両方へ、キー集合をミラーさせて追加。
 
