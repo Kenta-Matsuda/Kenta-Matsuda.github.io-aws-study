@@ -1,5 +1,5 @@
 /*
- * AWS Certified AI Business Strategist (AIBS-C01)
+ * AWS Certified AI Business Strategist (AIB-C01)
  *
  * ⚠️ PLACEHOLDER DOMAINS - HUMAN VERIFICATION REQUIRED
  * ----------------------------------------------------
@@ -17,10 +17,10 @@
  * body (#67) and the known-safe AWS Training & Skill Builder landing pages.
  * No PDF guide URL or Skill Builder course ID has been invented.
  */
-export const AIBS_C01 = {
-  id: 'aibs-c01',
-  code: 'AIBS-C01',
-  shortLabel: 'AIBS',
+export const AIB_C01 = {
+  id: 'aib-c01',
+  code: 'AIB-C01',
+  shortLabel: 'AIB',
   title: 'AWS Certified AI Business Strategist',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
   subtitleEn: 'Study Resource Navigator based on the Exam Guide',

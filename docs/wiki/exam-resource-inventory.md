@@ -1,6 +1,6 @@
 # 試験リソース棚卸し台帳
 
-- 最終更新日: 2026-09-03
+- 最終更新日: 2026-09-04
 - 対象範囲: `js/data/` 配下の全 13 試験のリソース（`steps[].resources[].items[]` の `url` / `urlEn`）棚卸し状況
 - 出典/参照: issue #69 / `.kiro/agents/exam-content-maintainer.md` / `js/data/*.js`
 
@@ -17,7 +17,7 @@
 
 | 試験コード | データファイル | 最終棚卸し日 | 状態 | 備考 |
 | --- | --- | --- | --- | --- |
-| AIBS-C01 | `js/data/aibs-c01.js` | 未実施 | 未棚卸し | |
+| AIB-C01 | `js/data/aib-c01.js` | 未実施 | 未棚卸し | |
 | AIF-C01 | `js/data/aif-c01.js` | 未実施 | 未棚卸し | |
 | AIP-C01 | `js/data/aip-c01.js` | 未実施 | 未棚卸し | |
 | ANS-C01 | `js/data/ans-c01.js` | 未実施 | 未棚卸し | |
@@ -38,3 +38,4 @@
 ## 更新履歴
 
 - 2026-09-03: 初版作成（issue #69）。`js/data/` 配下の全 13 試験を「未棚卸し」で初期化。
+- 2026-09-04: 試験略称コードを AIBS-C01 から AIB-C01 に訂正（正しい略称コードは AIB-C01。データファイルも js/data/aibs-c01.js -> js/data/aib-c01.js にリネーム）。

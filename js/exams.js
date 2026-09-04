@@ -12,7 +12,7 @@ import { SOA_C03 } from './data/soa-c03.js';
 import { DOP_C02 } from './data/dop-c02.js';
 import { AIP_C01 } from './data/aip-c01.js';
 import { SCS_C03 } from './data/scs-c03.js';
-import { AIBS_C01 } from './data/aibs-c01.js';
+import { AIB_C01 } from './data/aib-c01.js';
 
 
 export const ALL_EXAMS = [
@@ -28,7 +28,7 @@ export const ALL_EXAMS = [
   DOP_C02,
   AIP_C01,
   SCS_C03,
-  AIBS_C01,
+  AIB_C01,
 ];
 
 /**
@@ -41,7 +41,7 @@ export const EXAM_CATEGORIES = [
     labelJa: 'Foundational',
     labelEn: 'Foundational',
     icon: 'fas fa-seedling',
-    examIds: ['clf-c02', 'aif-c01', 'aibs-c01'],
+    examIds: ['clf-c02', 'aif-c01', 'aib-c01'],
   },
   {
     id: 'associate',
@@ -83,7 +83,7 @@ export const EXAM_HASH_MAP = {
   'dop': 'dop-c02',
   'aip': 'aip-c01',
   'scs': 'scs-c03',
-  'aibs': 'aibs-c01',
+  'aib': 'aib-c01',
 };
 
 /** Reverse map: exam ID -> hash code */

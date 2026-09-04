@@ -17,7 +17,7 @@
 ## 変更内容
 
 ### 1. 保守エージェントの定義（`.kiro/agents/exam-content-maintainer.md`）
-- `js/data/` 配下の全 13 試験（`aibs-c01`, `aif-c01`, `aip-c01`, `ans-c01`, `clf-c02`, `dea-c01`, `dop-c02`, `dva-c02`, `mla-c01`, `saa-c03`, `sap-c02`, `scs-c03`, `soa-c03`）のリンク（`resources[].items[].url` / `urlEn`）を棚卸しし、差し替え・削除・追加する保守エージェントを定義。
+- `js/data/` 配下の全 13 試験（`aib-c01`, `aif-c01`, `aip-c01`, `ans-c01`, `clf-c02`, `dea-c01`, `dop-c02`, `dva-c02`, `mla-c01`, `saa-c03`, `sap-c02`, `scs-c03`, `soa-c03`）のリンク（`resources[].items[].url` / `urlEn`）を棚卸しし、差し替え・削除・追加する保守エージェントを定義。
 - 既存 `.kiro/agents/github-issue-resolver.md` の書式（YAML フロントマター + 日本語本文、`permissions.rules` による許可 / 拒否）に合わせる。
 - 主要機能として、(1) リソース棚卸し、(2) 探索ノウハウの LLM Wiki への永続化・最新化、(3) 自己レビューによる効率化・低コスト化、(4) 自己拡張（プロンプト・skill の改善）を規定。
 - 成果物は必ず **PR ベースで人間レビュー**を経てマージし、`main` へ直接反映しない。
