@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="AWS Study Navigator app icon">
+  <title>AWS Study Navigator</title>
+  <!-- Background: rounded square in AWS console dark navy theme color -->
+  <rect x="0" y="0" width="512" height="512" rx="112" ry="112" fill="#232f3e"/>
+  <!-- Open book base -->
+  <g fill="#ffffff">
+    <path d="M96 316c48-26 96-26 152 0 56-26 104-26 152 0v56c-48-26-96-26-152 0-56-26-104-26-152 0v-56z"/>
+    <rect x="240" y="304" width="16" height="80" rx="6"/>
+  </g>
+  <!-- Cloud outline in AWS orange -->
+  <path fill="#ff9900" d="M182 232c-30 0-54-24-54-54 0-28 21-51 48-54 9-27 34-46 63-46 33 0 61 24 65 56 27 3 48 26 48 54 0 30-24 54-54 54H182z"/>
+  <!-- Checkmark inside cloud in dark theme color -->
+  <path fill="none" stroke="#232f3e" stroke-width="20" stroke-linecap="round" stroke-linejoin="round" d="M212 178l26 28 54-58"/>
+</svg>
