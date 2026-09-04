@@ -12,6 +12,7 @@ import { SOA_C03 } from './data/soa-c03.js';
 import { DOP_C02 } from './data/dop-c02.js';
 import { AIP_C01 } from './data/aip-c01.js';
 import { SCS_C03 } from './data/scs-c03.js';
+import { AIB_C01 } from './data/aib-c01.js';
 
 
 export const ALL_EXAMS = [
@@ -27,6 +28,7 @@ export const ALL_EXAMS = [
   DOP_C02,
   AIP_C01,
   SCS_C03,
+  AIB_C01,
 ];
 
 /**
@@ -62,6 +64,13 @@ export const EXAM_CATEGORIES = [
     icon: 'fas fa-star',
     examIds: ['ans-c01', 'scs-c03'],
   },
+  {
+    id: 'business',
+    labelJa: 'Business',
+    labelEn: 'Business',
+    icon: 'fas fa-briefcase',
+    examIds: ['aib-c01'],
+  },
 ];
 
 /**
@@ -81,6 +90,7 @@ export const EXAM_HASH_MAP = {
   'dop': 'dop-c02',
   'aip': 'aip-c01',
   'scs': 'scs-c03',
+  'aib': 'aib-c01',
 };
 
 /** Reverse map: exam ID -> hash code */
