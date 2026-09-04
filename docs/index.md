@@ -25,3 +25,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 
 - [要人間対応事項の運用ルール（README）](action-required/README.md)
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](action-required/global-leaderboard.md) — 🔴 未対応（要対応） / 関連: #32
+- [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](action-required/mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 関連: #109
