@@ -71,3 +71,4 @@
 - [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](streak-push-notifications.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / Web Push サービス） / 関連: #107
 - [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / Web Push サービス） / 関連: #119
 - [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） / 関連: #117（関連 #109 #119 #32 #107）
+- [AWS Skill Builder のコース URL が全試験で失効している](skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 種別: 手動確認（ブラウザ操作 / Skill Builder サインイン） / 関連: #69
