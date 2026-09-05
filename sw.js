@@ -47,6 +47,8 @@ const APP_SHELL = [
   './js/locales/urls.json',
   './assets/vendor/marked.min.js',
   './assets/vendor/purify.min.js',
+  './assets/icon.svg',
+  './assets/icon-maskable.svg',
 ];
 
 self.addEventListener('install', (event) => {

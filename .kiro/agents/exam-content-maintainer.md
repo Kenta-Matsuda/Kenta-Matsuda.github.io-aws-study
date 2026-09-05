@@ -68,7 +68,7 @@ permissions:
   ```
   - 保守対象のリンクは `steps[].resources[].items[]` の **`url`（日本語向け）と `urlEn`（英語向け）の両方**。`title`/`titleEn`・`note`/`noteEn`・`recommend`（おすすめフラグ）も併せて見直す。
 - 棚卸し対象の全試験ファイル（`js/data/` 配下）:
-  `aibs-c01.js`, `aif-c01.js`, `aip-c01.js`, `ans-c01.js`, `clf-c02.js`, `dea-c01.js`, `dop-c02.js`, `dva-c02.js`, `mla-c01.js`, `saa-c03.js`, `sap-c02.js`, `scs-c03.js`, `soa-c03.js`（計 13 試験）。
+  `aib-c01.js`, `aif-c01.js`, `aip-c01.js`, `ans-c01.js`, `clf-c02.js`, `dea-c01.js`, `dop-c02.js`, `dva-c02.js`, `mla-c01.js`, `saa-c03.js`, `sap-c02.js`, `scs-c03.js`, `soa-c03.js`（計 13 試験）。
   - 補助データ: `common-steps.js`（全試験に共通の `url`/`urlEn` 付きリソース定義）, `common-defaults.js`（共通の既定値定義で URL は持たない）, `daily-challenge.js`, `_placeholder.js`。共通定義を変更すると全試験に波及するため、影響範囲に注意する。棚卸しでリンクを走査する共通ファイルは `common-steps.js` のみ。
 - i18n: `js/locales/` に `ja.json` / `en.json` / `urls.json`。i18n を触る場合は ja/en のキー集合を相互ミラーに保つ。
 - ドキュメント: `docs/` 配下。索引は `docs/index.md`、要人間対応事項は `docs/action-required/`、issue 単位の解説は `docs/issues/`、獲得ノウハウの **LLM Wiki は `docs/wiki/`**（後述）。
