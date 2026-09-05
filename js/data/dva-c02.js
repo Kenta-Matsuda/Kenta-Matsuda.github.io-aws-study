@@ -108,7 +108,7 @@ export const DVA_C02 = {
             {
               title: 'Exam Prep Standard Course: AWS Certified Developer - Associate',
               titleEn: 'Exam Prep Standard Course: AWS Certified Developer - Associate',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14724/exam-prep-standard-course-aws-certified-developer-associate-dva-c02',
+              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-developer-associate-dva-c02',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               noteEn: 'AWS Skill Builder: Exam prep course (free)',
               recommend: true,
@@ -193,7 +193,7 @@ export const DVA_C02 = {
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
               titleEn: 'AWS Certification Official Practice Question Set (DVA-C02)',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14060/aws-certified-developer-associate-official-practice-question-set-dva-c02-japanese',
+              url: 'https://skillbuilder.aws/search?searchText=aws-certified-developer-associate-official-practice-question-set-dva-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               noteEn: 'AWS Skill Builder: Free',
               recommend: true,
@@ -548,7 +548,7 @@ export const DVA_C02 = {
                 {
                   title: 'Lambda のベストプラクティス',
                   titleEn: 'Lambda Best Practices',
-                  url: 'https://docs.aws.amazon.com/lambda/latest/operatorguide/architecture-best-practice.html',
+                  url: 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html',
                   note: 'Operator Guide: パフォーマンスとコスト最適化',
                   noteEn: 'Operator Guide: Performance and cost optimization',
                   recommend: true,
@@ -709,8 +709,8 @@ export const DVA_C02 = {
                 {
                   title: 'Amazon ElastiCache ユーザーガイド',
                   titleEn: 'Amazon ElastiCache User Guide',
-                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/WhatIs.html',
-                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/dg/WhatIs.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html',
                   note: 'インメモリキャッシュサービスの概要',
                   noteEn: 'Overview of in-memory cache service',
                 },
@@ -1258,8 +1258,8 @@ export const DVA_C02 = {
                 {
                   title: 'Lambda デプロイパッケージ',
                   titleEn: 'Lambda Deployment Packages',
-                  url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/gettingstarted-package.html',
-                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-package.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/lambda/latest/dg/configuration-function-zip.html',
+                  urlEn: 'https://docs.aws.amazon.com/lambda/latest/dg/configuration-function-zip.html',
                   note: 'ZIP / コンテナイメージでのパッケージング',
                   noteEn: 'Packaging with ZIP / container images',
                 },
@@ -1538,11 +1538,12 @@ export const DVA_C02 = {
               iconColorClass: 'text-orange-500',
               items: [
                 {
-                  title: 'AWS CodeCommit、CodeBuild、CodeDeploy、CodePipeline で完全な CI/CD を実現する',
-                  titleEn: 'Complete CI/CD with AWS CodeCommit, AWS CodeBuild, AWS CodeDeploy, and AWS CodePipeline',
-                  url: 'https://aws.amazon.com/blogs/devops/complete-ci-cd-with-aws-codecommit-aws-codebuild-aws-codedeploy-and-aws-codepipeline/',
-                  note: 'DevOps Blog: Intermediate (Level 200)',
-                  noteEn: 'DevOps Blog: Intermediate (Level 200)',
+                  title: 'AWS CodePipeline で GitHub からの CI/CD を構築する',
+                  titleEn: 'Streamline your GitHub journey with AWS CodePipeline',
+                  url: 'https://aws.amazon.com/jp/blogs/devops/streamline-your-github-journey-with-aws-codepipeline-and-aws-devops-agent/',
+                  urlEn: 'https://aws.amazon.com/blogs/devops/streamline-your-github-journey-with-aws-codepipeline-and-aws-devops-agent/',
+                  note: 'DevOps Blog: Intermediate (Level 200)。旧記事が扱っていた AWS CodeCommit は新規顧客の受付を終了しているため、現行のソース連携を扱う記事に差し替え',
+                  noteEn: 'DevOps Blog: Intermediate (Level 200). AWS CodeCommit, covered by the previous article, is no longer open to new customers, so this article covers the current source integration',
                   recommend: true,
                 },
                 {
@@ -1996,8 +1997,8 @@ export const DVA_C02 = {
                 {
                   title: 'Amazon ElastiCache ユーザーガイド',
                   titleEn: 'Amazon ElastiCache User Guide',
-                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/WhatIs.html',
-                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/WhatIs.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/dg/WhatIs.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html',
                   note: 'キャッシュ戦略によるパフォーマンス最適化',
                   noteEn: 'Performance optimization through caching strategies',
                   recommend: true,
@@ -2005,7 +2006,7 @@ export const DVA_C02 = {
                 {
                   title: 'Lambda のベストプラクティス（Operator Guide）',
                   titleEn: 'Lambda Best Practices (Operator Guide)',
-                  url: 'https://docs.aws.amazon.com/lambda/latest/operatorguide/architecture-best-practice.html',
+                  url: 'https://docs.aws.amazon.com/lambda/latest/dg/best-practices.html',
                   note: '実行環境の再利用・SDK 初期化の外出し・/tmp キャッシュ',
                   noteEn: 'Execution environment reuse, SDK initialization outside handler, /tmp caching',
                   recommend: true,
