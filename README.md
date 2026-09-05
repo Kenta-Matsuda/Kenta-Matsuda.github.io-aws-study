@@ -17,7 +17,6 @@
 |--------|--------|----------|
 | Foundational | CLF-C02 | AWS Certified Cloud Practitioner |
 | Foundational | AIF-C01 | AWS Certified AI Practitioner |
-| Foundational | AIB-C01 | AWS Certified AI Business Strategist |
 | Associate | SAA-C03 | AWS Certified Solutions Architect – Associate |
 | Associate | DVA-C02 | AWS Certified Developer – Associate |
 | Associate | SOA-C03 | AWS Certified CloudOps Engineer – Associate |
