@@ -76,13 +76,39 @@ permissions:
 - `package.json` の `npm test` はプレースホルダで必ず `exit 1` を返すため **使わない**。
 - PR テンプレートが `.github/pull_request_template.md` にある（Summary / Changes / Type of Change / Testing / Checklist）。PR 本文はこの構成に沿わせる。
 
-## サンドボックス実行環境の事実（重要 / 事前に装備すべき回避策）
+## 実行環境の事実（重要 / 事前に装備すべき回避策）
 
-以下はこのサンドボックスの**実測に基づく事実**です。取り違えると無用に停止するため、必ず前提として扱ってください。
+以下は**実測に基づく事実**です。取り違えると無用に停止するため、必ず前提として扱ってください。
 
-### 1. OS / シェル
+> **実行環境は 1 種類ではありません。** 過去の版はここに「Linux / bash」「外部アクセス不可」と断定して書いていましたが、**Windows / PowerShell かつネットワークが利用できる環境**でも起動されることが実測で確認されました（2026-09-06）。したがって**着手時に必ず環境を判定**し、判定結果に応じた手順を選んでください。断定的な前提を置いて失敗するのが最悪です。
 
-- OS は **Linux**、シェルは **bash**。コマンド連結は **`&&` が使えます**。
+### 0. 着手時の環境判定（最初に必ず実行する）
+
+次を実行して、OS / シェル・`NODE_OPTIONS`・ネットワークの 3 点を確認します。
+
+```
+pwd
+node --version
+gh --version
+```
+
+- `uname` が通れば Linux/bash、通らず `pwd` が `Path` ヘッダ付きで表示されれば **Windows / PowerShell 7** です。
+- `NODE_OPTIONS` が空かどうかを確認する（bash: `echo "[$NODE_OPTIONS]"` / PowerShell: `echo "[$env:NODE_OPTIONS]"`）。
+- ネットワーク可否を確認する（PowerShell の例）:
+  ```
+  try { $r = Invoke-WebRequest -Uri "https://docs.aws.amazon.com/" -Method Head -TimeoutSec 15; echo "NET OK: $($r.StatusCode)" } catch { echo "NET FAIL: $($_.Exception.Message)" }
+  ```
+- 判定結果（OS / シェル・`NODE_OPTIONS`・ネットワーク可否）は最終報告に明記する。
+
+### 1. OS / シェル（環境によって異なる）
+
+- **Linux / bash の場合**: コマンド連結は `&&` が使えます。
+- **Windows / PowerShell 7 の場合**（2026-09-06 実測）:
+  - `&&` は使えますが、`uname` などの POSIX コマンドはありません。
+  - **ヒアドキュメント（`<<'EOF'`）は使えません。** 複数行のコミットメッセージや PR 本文は、いったんファイルへ書き出して `git commit -F <file>` / `gh api ... -f body="$(Get-Content <file> -Raw)"` で渡します。書き出し先は gitignored な `test-results/` 配下が便利です。
+  - **`env -u NODE_OPTIONS` は使えません。** 代わりに `$env:NODE_OPTIONS=''` を同一コマンド内の先頭で実行します。
+  - **コンソール出力の日本語が CP932 で復号されて文字化けします。** git のコミットメッセージ自体は正しい UTF-8 で保存されているので、**表示だけの問題と誤認しないよう注意**しつつ、確認が必要なときは `[Console]::OutputEncoding=[System.Text.Encoding]::UTF8` を同一コマンドの先頭に置きます。
+  - より確実なのは、**スクリプト側から UTF-8 でファイルに直接書き出し**、その結果をファイル読み取りツールで読むことです。PowerShell のパイプを通さないため文字化けしません。長い出力（リンクチェッカの結果など）は常にこの方式にしてください。
 
 ### 2. GitHub アクセスは `gh api`（REST）で行う
 
@@ -107,18 +133,72 @@ permissions:
     ```
 - `gh auth status` がログイン失敗のように報告することがありますが、これは**表示上のものだけで認証自体は機能しています**。`gh auth login` は**絶対に実行しないでください**。
 
-### 3. `NODE_OPTIONS` の落とし穴
+### 3. `NODE_OPTIONS` の落とし穴（環境によって異なる）
 
-- サンドボックスは `NODE_OPTIONS=--require /opt/amazon/kiro-agent/proxy-bootstrap.js` を設定していますが、**この preload ファイルは存在しません**。そのまま `node` / `npm` / `npx` を呼ぶと `MODULE_NOT_FOUND` で失敗します。
-- 回避策: node 系コマンドを呼ぶ前に **`unset NODE_OPTIONS`** するか、各コマンドを **`env -u NODE_OPTIONS`** で前置きする。
+- 一部のサンドボックスは `NODE_OPTIONS=--require /opt/amazon/kiro-agent/proxy-bootstrap.js` を設定しているのに、**この preload ファイルが存在しません**。そのまま `node` / `npm` / `npx` を呼ぶと `MODULE_NOT_FOUND` で失敗します。
+- 2026-09-06 の Windows 環境では `NODE_OPTIONS` は**空**で、解除は不要でした。設定されているかを手順 0 で確認してください。
+- 回避策（設定されている場合）:
+  - bash: `unset NODE_OPTIONS`、または各コマンドを `env -u NODE_OPTIONS` で前置きする。
+    ```
+    env -u NODE_OPTIONS node --check js/data/saa-c03.js
+    ```
+  - PowerShell: 同一コマンドの先頭で `$env:NODE_OPTIONS=''` を実行する。
+    ```
+    $env:NODE_OPTIONS=''; node --check js/data/saa-c03.js
+    ```
+
+### 4. ネットワーク（環境によって異なる / 断定しない）
+
+- **外部アクセスができる環境もあります。** 2026-09-06 の実行ではネットワークが利用可能で、`js/data/` 全 1,092 ユニーク URL の実アクセス検証と全 13 試験の差し替えを完遂できました。
+- 一方、INTEGRATIONS_ONLY 環境ではインターネットへの外部アクセスができません（web 検索、npm レジストリ、Playwright ブラウザ取得、外部 HTTP はいずれも不可）。
+- したがって**手順 0 でネットワーク可否を判定**し、次のように振る舞いを分けてください。
+  - **ネットワークが使える場合**: 本ドキュメントの手順に従って**実際の検証・差し替えを実行する**。web 検索ツールが無くても、`scripts/check-resource-links.mjs` と `scripts/list-aws-doc-pages.mjs` による HTTP アクセスで大半の判断ができます（後述）。
+  - **使えない場合**: `scripts/check-resource-links.mjs --no-fetch`（抽出と重複検出のみ）まで実施し、**未検証である旨を PR 本文に明記**する。手順・判断基準の整備と Wiki の更新に注力する。
+
+### 5. ラベルは存在しない場合がある
+
+- リポジトリに `content-review` / `large-diff` ラベルが未定義の場合、`gh api .../labels` での付与は失敗します。先に一覧を確認し、無ければ作成してから付与してください。
   ```
-  env -u NODE_OPTIONS node --check js/data/saa-c03.js
+  gh api repos/{owner}/{repo}/labels --jq ".[].name"
+  gh api repos/{owner}/{repo}/labels -f name="content-review" -f color="0e8a16" -f description="学習リソースの内容・出典の人手レビューが必要"
   ```
+- なお `gh api` の `--jq` に PowerShell から複雑な式を渡すとクォートが壊れやすいので、`--jq '.[] | [.number, .head.ref] | @tsv'` のように**シングルクォートで囲む**か、`| Select-String` で絞ってください。
 
-### 4. ネットワーク制約（web 検索・npm・ブラウザ取得）
+## ツールキット（棚卸しの第一手 / 推測で書き込まない）
 
-- **INTEGRATIONS_ONLY 環境ではインターネットへの外部アクセスができません**（web 検索、npm レジストリ、Playwright ブラウザ取得、外部 HTTP はいずれも不可）。
-- したがって「web 検索で公式リソースを検証・差し替える」実作業は、**ネットワーク可能な環境（利用者が設定する Kiro automations）で実行される前提**です。本サンドボックスでは、その環境で走らせる**手順・判断基準・成果物の形**を用意することが役割になります。ネットワークが利用可能な環境で起動された場合は、本ドキュメントの手順に従って実際の web 検証・差し替えを実行してください。
+リンク死活を LLM が 1 件ずつ自然言語で確認するのは非効率かつ不正確です。**必ず次のスクリプトを先に実行し、要約だけを読み込みます。**
+
+| スクリプト | 役割 |
+| --- | --- |
+| `scripts/check-resource-links.mjs` | `js/data/` 全試験から `url`/`urlEn` を抽出し、`broken` / `soft-404` / `fragment-miss` / `redirect` / `forbidden` / `locale-redirect` / `ok` に分類 |
+| `scripts/list-aws-doc-pages.mjs` | AWS 公式ドキュメントの目次（下位ページ）とページ内アンカーを抽出 |
+
+```
+# 全試験の検証（結果はファイルへ書き出して読む）
+node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json
+
+# 試験単位
+node scripts/check-resource-links.mjs --only saa-c03 --concurrency 8 --fragments
+
+# 差し替え候補の事前検証（書き込む前に必ず実行）
+node scripts/check-resource-links.mjs --urls "https://candidate-a,https://candidate-b" --all
+
+# ガイド内の実在ページ / アンカーを列挙して、より適切な章を事実ベースで選ぶ
+node scripts/list-aws-doc-pages.mjs <guide-url> --titles
+node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
+```
+
+**候補 URL を推測で書き込まないこと。** `--urls` で 200 かつリダイレクトなしを確認してからデータファイルへ反映します。差し替え先が見つからない場合は、**推測で埋めるより「削除 + PR に候補を列挙」を選ぶ**。
+
+### HTTP ステータスだけでは判定できない落とし穴（必読）
+
+詳細と実測値は `docs/wiki/aws-resource-discovery.md` にあります。要点のみ:
+
+1. **ロケールリダイレクトはリンク切れではない**。`aws.amazon.com/...` ↔ `/jp/...`、`docs.aws.amazon.com/...` ↔ `/ja_jp/...` は相互に飛びます（実測 206 件）。修正対象にしないこと。
+2. **ソフト 404 が最重要**。AWS は削除ページを 404 にせず**ガイドのルートへ 200 でリダイレクト**します（実測 24 件）。
+3. **テキストフラグメント（`#:~:text=`）の陳腐化はステータスに出ない**。`--fragments` で本文照合すること。
+4. **SPA ドメインは死活判定に使えない**。`skillbuilder.aws` は存在しないパスでも 200 を返します。
+5. **リンクが生きていてもサービスが「新規顧客の受付を終了」している場合がある**。本文冒頭の `Note` に `is no longer open to new customers` があるかを確認し、該当したら `recommend: true` を外して `note` に明記する。
 
 ## 主要機能 1: リソース棚卸し（全試験のリンク鮮度・品質の維持）
 
@@ -153,7 +233,9 @@ permissions:
 実行のたびに自分の作業を振り返り、**トークン消費と手間を減らす**方法を検討・実装します。
 
 1. 直近の作業で繰り返した定型作業（リンク死活チェック、URL 抽出、差分要約など）を洗い出す。
-2. スクリプト化で削減できるものは、**再利用可能なスクリプトとして `scripts/` 配下に提案・実装**する（例: `js/data/` から全 `url`/`urlEn` を抽出して HTTP ステータスを一覧化するリンクチェッカ）。スクリプトは静的検証（`env -u NODE_OPTIONS node --check`）を通す。
+2. スクリプト化で削減できるものは、**再利用可能なスクリプトとして `scripts/` 配下に提案・実装**する。スクリプトは静的検証（`node --check`）を通す。
+   - **既に実装済みのもの（再発明しないこと）**: `scripts/check-resource-links.mjs`（リンク死活・ソフト 404・フラグメント陳腐化の分類）、`scripts/list-aws-doc-pages.mjs`（ガイド内ページ / アンカー列挙）。詳細は上記「ツールキット」節。
+   - **一時的な調査用スクリプト**は gitignored な `test-results/tools/` に置き、リポジトリを汚さない（繰り返し使う価値が出たら `scripts/` へ昇格させて PR で提案する）。
 3. 「LLM が毎回自然言語で処理していた作業」を「スクリプト + 結果の要約読み込み」に置き換えることで、コンテキスト投入トークンを削減する方針を優先する。
 4. 検討結果と効果（削減の見込み・実測）を `docs/wiki/efficiency-log.md` に記録し、有益なスクリプトは PR で提案する。
 
@@ -170,17 +252,21 @@ permissions:
 
 検証は「実行できないから省略」ではなく、**実行できる範囲を必ず実施し、実行できなかったものは理由を記録**します。
 
+以下のコマンド例は `NODE_OPTIONS` を解除する前置き（bash: `env -u NODE_OPTIONS` / PowerShell: `$env:NODE_OPTIONS='';`）を、手順 0 の判定結果に応じて付けてください。
+
 - 変更した **JS**（`js/data/*.js` 等）は構文チェックする:
   ```
-  env -u NODE_OPTIONS node --check <ファイル>
+  node --check <ファイル>
   ```
 - 変更した **JSON** はパース可能か確認する:
   ```
-  env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<ファイル>','utf8'))"
+  node -e "JSON.parse(require('fs').readFileSync('<ファイル>','utf8'))"
   ```
+- **`js/data/` の URL を変更したら、必ず `scripts/check-resource-links.mjs --only <試験コード>` を実行し、`broken` / `soft-404` / `redirect` / `fragment-miss` が 0 件になったことを確認する**（ネットワークが使えない環境では `--no-fetch` に留め、未検証を明記する）。修正前後の件数を PR 本文に載せる。
 - **i18n**（`js/locales/`）に関わる変更をした場合、`ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、**デッドリンク・孤立ファイルを作らない**。`docs/wiki/` の内部相対リンクが実在ファイルを指すことを確認する。
-- **Playwright**（`npx playwright test`）は INTEGRATIONS_ONLY 環境ではブラウザ / npm を取得できず失敗する可能性が高い。実行可能なら実行し、そうでなければ「実行できなかった旨と理由」を記録する。
+- **Playwright**（`npx playwright test`）はブラウザ / npm を取得できず失敗する可能性があります。実行可能なら実行し、そうでなければ「実行できなかった旨と理由」を記録する。
+  - なお `js/data/*.js` の **URL / タイトル / 注記 / `recommend` フラグのみ**の変更で、データスキーマ（キー構成）を変えていない場合は、UI のレンダリング経路に影響しないため Playwright を省略して差し支えありません。**その判断理由を PR 本文に明記**してください。
 - `npm test` は使わない（プレースホルダで必ず失敗する）。
 
 ## docs 運用（LLM Wiki・索引の整合・要人間対応）
@@ -199,7 +285,8 @@ permissions:
 - `gh auth login` は実行しない（認証は機能している）。
 - `npm test` は使わない（プレースホルダのため必ず失敗する）。
 - 秘密情報（.env、認証情報、鍵ファイル等）はコミットしない。`git add` は変更ファイルを個別指定し、`git add -A` / `git add .` は使わない。
-- **INTEGRATIONS_ONLY 環境では web 検索 / npm / ブラウザ取得ができない**ため、リソース検証・差し替えの実作業はネットワーク可能環境（Kiro automations）前提であることを踏まえる。実行できない検証は理由を記録し、可能な静的検証は必ず実施する。
+- **実行環境（OS / シェル / ネットワーク可否）を断定しない。** 必ず手順 0 で判定する。外部アクセスができない場合は、実行できない検証の理由を記録し、可能な静的検証は必ず実施する。
+- **差し替え候補 URL を推測で書き込まない。** `scripts/check-resource-links.mjs --urls` で 200 かつリダイレクトなしを確認してから反映する。確認できない場合は「削除 + PR に候補を列挙」か「保留」を選ぶ。
 - 自身の権限（`permissions.rules`）を安易に緩めない。緩和が必要な場合は理由を明記して PR でレビューを仰ぐ。
 
 ## 報告
