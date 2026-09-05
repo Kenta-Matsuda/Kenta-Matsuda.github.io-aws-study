@@ -127,6 +127,7 @@
     "elapsed": "Time Taken",
     "explanationList": "Explanations",
     "nextQuestion": "Next Question",
+    "sourcesLabel": "Sources (AWS official documentation)",
     "correctFeedback": "Correct! {{combo}}",
     "incorrectFeedback": "Incorrect — Answer is {{letter}}",
     "summaryExcellent": "Excellent!",
@@ -340,7 +341,8 @@
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",
-    "recommend": "Recommended"
+    "recommend": "Recommended",
+    "level": "Technical level"
   },
   "learningStatus": {
     "selected": "Selected",

@@ -5,6 +5,13 @@ export const ANS_C01 = {
   title: 'AWS Certified Advanced Networking - Specialty',
   subtitle: '試験ガイド完全準拠の合格ナビゲーター',
   subtitleEn: 'Study Resource Navigator based on the Exam Guide',
+  // NOTE (issue #137): the optional `level` field mirrors the explicit
+  // '(Level NNN)' token already present in an item's note/noteEn. It is set
+  // by deterministic offline string extraction, not by guessing. A few Black
+  // Belt items instead derive `level` from a clear title signal
+  // ('Deep Dive' -> Level 300, '（基礎編）'/'(Basics)' -> Level 200); those
+  // carry an inline comment. Items with no such in-repo signal are left
+  // without a level (candidates for the network-gated follow-up).
   steps: [
     {
       id: '1',
@@ -267,6 +274,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/how-aws-improves-global-connectivity-via-automated-traffic-engineering/',
                     note: 'Content Delivery: Advanced (Level 300)',
                     noteEn: 'Content Delivery: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'CloudFrontとAWS Global Acceleratorを使用してオンラインアプリケーションを適切に設計する',
@@ -275,6 +283,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/well-architecting-online-applications-with-cloudfront-and-aws-global-accelerator/',
                     note: 'Networking: Introductory (Level 100)',
                     noteEn: 'Networking: Introductory (Level 100)',
+                    level: 'Level 100',
                 },
                 {
                     title: 'AWS Global Accelerator を使用してトラフィックを管理する',
@@ -283,6 +292,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/traffic-management-with-aws-global-accelerator/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS Global Accelerator による静的 IP アドレスを介した AWS API Gateway へのアクセス',
@@ -291,6 +301,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/accessing-an-aws-api-gateway-via-static-ip-addresses-provided-by-aws-global-accelerator/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -300,6 +311,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/implementing-http-strict-transport-security-hsts-across-aws-services/',
                     note: 'Security: Advanced (Level 300)',
                     noteEn: 'Security: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
               ],
             },
@@ -317,6 +329,9 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/events/aws-event-resource/archive/?ams%23interactive-card-vertical%23pattern-data--1962452770.search=cloudfront%20deep%20dive',
                         note: 'PDF | Youtube: 2020/10/28',
                         noteEn: 'PDF | Youtube: 2020/10/28',
+                        // In-repo signal: title contains 'Deep Dive', AWS's
+                        // conventional marker for advanced Level 300 content.
+                        level: 'Level 300',
                     },
                     {
                     title: 'Amazon CloudFront（基礎編）',
@@ -325,6 +340,9 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/news/2025-07-aws-blackbelt/#:~:text=Amazon%20CloudFront%EF%BC%88%E5%9F%BA%E7%A4%8E%E7%B7%A8%EF%BC%89',
                     note: 'PDF | Youtube: 2025/07',
                     noteEn: 'PDF | Youtube: 2025/07',
+                    // In-repo signal: title '（基礎編）' / '(Basics)' marks an
+                    // introductory Black Belt session (Level 200).
+                    level: 'Level 200',
                     recommend: true,
                     },
                 ],
@@ -410,6 +428,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/how-to-achieve-dns-high-availability-with-route-53-resolver-endpoints/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -419,6 +438,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/scaling-your-hybrid-dns-setup-with-amazon-route-53-resolver-endpoint-metrics/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'Route 53 Resolver を使用してマルチアカウント環境での DNS 管理を簡素化する',
@@ -427,6 +447,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 }
               ],
@@ -554,6 +575,7 @@ export const ANS_C01 = {
                   urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/scaling-strategies-for-elastic-load-balancing/',
                   note: 'Networking: Advanced (Level 300)',
                   noteEn: 'Networking: Advanced (Level 300)',
+                  level: 'Level 300',
                   recommend: true,
                 },
                 {
@@ -563,6 +585,7 @@ export const ANS_C01 = {
                   urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-quic-protocol-support-for-network-load-balancer-accelerating-mobile-first-applications/',
                   note: 'Networking: Introductory (Level 100)',
                   noteEn: 'Networking: Introductory (Level 100)',
+                  level: 'Level 100',
                 },
                 {
                   title: 'Gateway Load Balancer を使用したネットワークトラフィック検査のスケーリング',
@@ -571,6 +594,7 @@ export const ANS_C01 = {
                   urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/scaling-network-traffic-inspection-using-aws-gateway-load-balancer/',
                   note: 'Networking: Advanced (Level 300)',
                   noteEn: 'Networking: Advanced (Level 300)',
+                  level: 'Level 300',
                 },
                 {
                     title: 'Gateway Load Balancerのデプロイに関するベストプラクティス',
@@ -579,6 +603,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/best-practices-for-deploying-gateway-load-balancer/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Amazon EKS 上での AWS Load Balancer Controller のデプロイ',
@@ -587,6 +612,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deploying-aws-load-balancer-controller-on-amazon-eks/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'CloudFront と AWS Global Accelerator を使用してオンラインアプリケーションを適切に設計する',
@@ -595,6 +621,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/well-architecting-online-applications-with-cloudfront-and-aws-global-accelerator/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -604,6 +631,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/maximising-application-resiliency-with-aws-global-accelerator/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
               ],
@@ -712,6 +740,7 @@ export const ANS_C01 = {
                   url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
                   note: 'VPC Traffic Mirroring: Intermediate (Level 200)',
                   noteEn: 'VPC Traffic Mirroring: Intermediate (Level 200)',
+                  level: 'Level 200',
                   recommend: true,
                 },
                 {
@@ -722,6 +751,7 @@ export const ANS_C01 = {
                   urlEn: 'https://aws.amazon.com/blogs/aws/cloudwatch-internet-monitor-end-to-end-visibility-into-internet-performance-for-your-applications/',
                   note: 'CloudWatch Internet Monitor: Introductory (Level 100)',
                   noteEn: 'CloudWatch Internet Monitor: Introductory (Level 100)',
+                  level: 'Level 100',
                 },
                 {
                     title: 'AWS Transit Gateway Network Manager Route Analyzer を使用した高度なトラブルシューティング',
@@ -731,6 +761,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/advanced-troubleshooting-with-aws-transit-gateway-network-manager-route-analyzer/',
                     note: 'Transit Gateway Network Manager Route Analyzer: Advanced (Level 300)',
                     noteEn: 'Transit Gateway Network Manager Route Analyzer: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'VPC Reachability Analyzer を使用した接続性評価の自動化',
@@ -740,6 +771,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/automating-connectivity-assessments-with-vpc-reachability-analyzer/',
                     note: 'VPC Reachability Analyzer: Intermediate (Level 200)',
                     noteEn: 'VPC Reachability Analyzer: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
               ],
             },
@@ -884,6 +916,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                     recommend: true,
                 },
                 {
@@ -893,6 +926,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/adding-macsec-security-to-aws-direct-connect-connections/',
                     note: 'Networking: Foundational (Level 100)',
                     noteEn: 'Networking: Foundational (Level 100)',
+                    level: 'Level 100',
                 },
                 {
                     title: 'データセンターからクラウド接続までの AWS Direct Connect レイヤー 1 の説明',
@@ -901,6 +935,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/aws-direct-connect-layer-1-explained-from-data-centers-to-cloud-connectivity/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -910,6 +945,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -919,6 +955,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/apn/embracing-hybrid-cloud-with-citrix-sd-wan-and-aws-transit-gateway-connect/',
                     note: 'APN Blogs: Intermediate (Level 200)',
                     noteEn: 'APN Blogs: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'SD-WAN デバイスを AWS Transit Gateway と AWS Direct Connect に統合する',
@@ -927,6 +964,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/integrate-sd-wan-devices-with-aws-transit-gateway-and-aws-direct-connect/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'AWS Transit Gateway Connect を使用したハイブリッドネットワークのセグメンテーション',
@@ -935,6 +973,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/segmenting-hybrid-networks-with-aws-transit-gateway-connect/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'AWS site-to-site VPN: パフォーマンスを最適化するための適切なオプション',
@@ -943,6 +982,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/aws-site-to-site-vpn-choosing-the-right-options-to-optimize-performance/',
                     note: 'Networking: Expert (Level 400)',
                     noteEn: 'Networking: Expert (Level 400)',
+                    level: 'Level 400',
                 }
               ],
             },
@@ -1070,6 +1110,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/vpc-sharing-key-considerations-and-best-practices/',
                     note: 'VPC Sharing: Intermediate (Level 200)',
                     noteEn: 'VPC Sharing: Intermediate (Level 200)',
+                    level: 'Level 200',
                     recommend: true,
                 },
                 {
@@ -1080,6 +1121,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/best-practices-and-considerations-to-migrate-from-vpc-peering-to-aws-transit-gateway/',
                     note: 'Migration: Intermediate (Level 200)',
                     noteEn: 'Migration: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'IP アドレス範囲が重複するネットワークの接続',
@@ -1089,6 +1131,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/connecting-networks-with-overlapping-ip-ranges/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -1099,6 +1142,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/integrating-aws-transit-gateway-with-aws-privatelink-and-amazon-route-53-resolver/',
                     note: 'Networking: Expert (Level 400)',
                     noteEn: 'Networking: Expert (Level 400)',
+                    level: 'Level 400',
                 },
                 {
                     title: 'AWS マルチアカウント環境での、SCP を使用した VPC 共有の制御',
@@ -1108,6 +1152,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/control-vpc-sharing-in-an-aws-multi-account-setup-with-service-control-policies/',
                     note: 'Security: Intermediate (Level 200)',
                     noteEn: 'Security: Intermediate (Level 200)',
+                    level: 'Level 200',
                 }
               ],
             },
@@ -1286,6 +1331,7 @@ export const ANS_C01 = {
                     url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                     recommend: true,
                 },
                 {
@@ -1296,6 +1342,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Transit Gateway Connect を使用した SD-WAN 接続の簡素化',
@@ -1305,6 +1352,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/simplify-sd-wan-connectivity-with-aws-transit-gateway-connect/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS Transit Gateway と AWS Direct Connect を使用して SD-WAN デバイスを統合する',
@@ -1314,6 +1362,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/integrate-sd-wan-devices-with-aws-transit-gateway-and-aws-direct-connect/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Route 53 Resolver Endpoints を使用してハイブリッド DNS インフラストラクチャを自動化する',
@@ -1323,6 +1372,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/automating-dns-infrastructure-using-route-53-resolver-endpoints/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'VPC Reachability Analyzer を使用して Amazon RDS データベースへのネットワーク接続をトラブルシューティングする',
@@ -1332,6 +1382,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/database/troubleshoot-network-connectivity-to-amazon-rds-databases-using-vpc-reachability-analyzer/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 }
               ],
             },
@@ -1538,6 +1589,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/achieve-optimal-routing-with-aws-cloud-wan-for-multi-region-networks/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Amazon Route 53 profiles を使用して AWS PrivateLink 展開の DNS 管理を合理化する',
@@ -1547,6 +1599,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/streamline-dns-management-for-aws-privatelink-deployment-with-amazon-route-53-profiles/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS PrivateLink を使用して AWS カスタマー向けの SaaS サービスを構築する',
@@ -1556,6 +1609,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/architecture/building-saas-services-for-aws-customers-with-privatelink/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'マルチアカウント環境で Route 53 Resolver を使用して DNS 管理を簡素化する',
@@ -1565,6 +1619,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -1575,6 +1630,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/authenticate-aws-client-vpn-users-with-saml/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
               ],
@@ -1711,6 +1767,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/how-to-centralize-dns-management-in-a-multi-account-environment/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'クロスアカウント・マルチリージョンアーキテクチャのための Route 53 プライベートホストゾーンの使用',
@@ -1720,6 +1777,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/architecture/using-route-53-private-hosted-zones-for-cross-account-multi-region-architectures/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -1730,6 +1788,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/implementing-consistent-dns-query-logging-with-amazon-route-53-profiles/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'マルチアカウント DNS 環境を Amazon Route 53 プロファイルに移行する',
@@ -1739,6 +1798,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/migrating-your-multi-account-dns-environment-to-amazon-route-53-profiles/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
               ],
             },
@@ -2070,6 +2130,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/segmenting-hybrid-networks-with-aws-transit-gateway-connect/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                     },
                     {
                         title: '重複する IP 範囲を持つネットワークの接続',
@@ -2079,6 +2140,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/connecting-networks-with-overlapping-ip-ranges/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                         recommend: true,
                     },
                     {
@@ -2089,6 +2151,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                     },
                     {
                         title: 'AWS Direct Connect でのアクティブ/パッシブ BGP 接続の作成',
@@ -2098,6 +2161,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/creating-active-passive-bgp-connections-over-aws-direct-connect/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                     }
                     
                 ],
@@ -2194,6 +2258,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/analyze-network-traffic-of-amazon-virtual-private-cloud-vpc-by-cidr-blocks/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                     },
                     {
                         title: 'VPC トラフィックミラーリングを使用して AWS インフラストラクチャを監視および保護する',
@@ -2203,6 +2268,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-traffic-mirroring-to-monitor-and-secure-your-aws-infrastructure/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                         recommend: true,
                     },
                     {
@@ -2213,6 +2279,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/automating-connectivity-assessments-with-vpc-reachability-analyzer/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                     },
                     {
                         title: '複数の AWS リージョンにわたるネットワークパスを発見するための VPC Reachability Analyzer の使用',
@@ -2222,6 +2289,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-vpc-reachability-analyzer-to-discover-network-paths-across-multiple-aws-regions/',
                         note: 'Networking: Advanced (Level 300)',
                         noteEn: 'Networking: Advanced (Level 300)',
+                        level: 'Level 300',
                     },
                     {
                         title: 'VPC Reachability Analyzer を使用して接続を自動化する',
@@ -2231,6 +2299,7 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/automating-connectivity-assessments-with-vpc-reachability-analyzer/',
                         note: 'Networking: Intermediate (Level 200)',
                         noteEn: 'Networking: Intermediate (Level 200)',
+                        level: 'Level 200',
                     },
                 ],
             },
@@ -2372,6 +2441,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-ena-express-to-improve-workload-performance-on-aws/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'AWS Global Accelerator を使用してアプリケーションのパフォーマンスを向上させる',
@@ -2381,6 +2451,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/use-aws-global-accelerator-to-improve-application-performance/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS Direct Connect gateway を使用したハイブリッドクラウドアーキテクチャ',
@@ -2390,6 +2461,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/hybrid-cloud-architectures-using-aws-direct-connect-gateway/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS ネットワーク最適化のヒント',
@@ -2399,6 +2471,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/aws-network-optimization-tips/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                     recommend: true,
                 },
                 {
@@ -2409,6 +2482,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/design-and-build-ipv6-internet-inspection-architectures-on-aws/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'AWS での外部マルチキャストサービスの統合',
@@ -2418,6 +2492,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/integrating-external-multicast-services-with-aws/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: '透過的なフォワードプロキシを介してインターネットバウンドトラフィックをリダイレクトする',
@@ -2427,6 +2502,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/redirecting-internet-bound-traffic-through-a-transparent-forward-proxy/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 }
               ],
             },
@@ -2542,6 +2618,7 @@ export const ANS_C01 = {
                   url: 'https://aws.amazon.com/blogs/networking-and-content-delivery/deployment-models-for-aws-network-firewall/',
                   note: 'Networking: Advanced (Level 300)',
                   noteEn: 'Networking: Advanced (Level 300)',
+                  level: 'Level 300',
                   recommend: true,
                 },
                 {
@@ -2552,6 +2629,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/announcing-amazon-virtual-private-gateway-ingress-routing-support-for-gateway-load-balancer/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS Gateway Load Balancer と AWS Transit Gateway を使用した集中型検査アーキテクチャ',
@@ -2561,6 +2639,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/centralized-inspection-architecture-with-aws-gateway-load-balancer-and-aws-transit-gateway/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'AWS Gateway Load Balancer 対応アーキテクチャパターンの紹介',
@@ -2570,6 +2649,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/introducing-aws-gateway-load-balancer-supported-architecture-patterns/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title: 'Gateway Load Balancer の展開に関するベストプラクティス',
@@ -2579,6 +2659,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/best-practices-for-deploying-gateway-load-balancer/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    level: 'Level 300',
                 },
                 {
                     title : 'Amazon VPC エンドポイントを使用してコストを削減し、セキュリティを向上させる',
@@ -2587,6 +2668,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/architecture/reduce-cost-and-increase-security-with-amazon-vpc-endpoints/',
                     note: 'Architecture: Intermediate (Level 200)',
                     noteEn: 'Architecture: Intermediate (Level 200)',
+                    level: 'Level 200',
 
                 },
                 {
@@ -2597,6 +2679,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/how-to-approach-threat-modeling/',
                     note: 'Security: Intermediate (Level 200)',
                     noteEn: 'Security: Intermediate (Level 200)',
+                    level: 'Level 200',
                     recommend: true,
                 },
                 {
@@ -2607,6 +2690,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/how-get-started-security-response-automation-aws/',
                     note: 'Security: Advanced (Level 300)',
                     noteEn: 'Security: Advanced (Level 300)',
+                    level: 'Level 300',
                     recommend: true,
                 }
               ],
@@ -2780,6 +2864,7 @@ export const ANS_C01 = {
                   urlEn: 'https://aws.amazon.com/blogs/big-data/analyzing-vpc-flow-logs-using-amazon-athena-and-amazon-quicksight/',
                   note: 'Big Data: Intermediate (Level 200)',
                   noteEn: 'Big Data: Intermediate (Level 200)',
+                  level: 'Level 200',
                 },
                 {
                     title: 'Amazon Kinesis と Amazon Athena を使用して VPC ネットワークトラフィックを分析および可視化する',
@@ -2789,6 +2874,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/big-data/analyze-and-visualize-your-vpc-network-traffic-using-amazon-kinesis-and-amazon-athena/',
                     note: 'Big Data: Intermediate (Level 200)',
                     noteEn: 'Big Data: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Cyber Range とは何か、AWS でどのように構築するか',
@@ -2798,6 +2884,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/what-is-cyber-range-how-do-you-build-one-aws/',
                     note: 'Security: Intermediate (Level 200)',
                     noteEn: 'Security: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Route 53 Resolver DNS Firewall ログと CloudWatch Contributor Insights を利用し、異常検出する',
@@ -2807,6 +2894,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/using-route-53-resolver-dns-firewall-logs-with-cloudwatch-contributor-insights-and-anomaly-detection/',
                     note: 'Networking & Content Delivery: Advanced (Level 300)',
                     noteEn: 'Networking & Content Delivery: Advanced (Level 300)',
+                    level: 'Level 300',
                 }
               ],
             },
@@ -2892,6 +2980,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/encryption-in-transit-over-external-networks-aws-guidance-for-nydfs-and-beyond/',
                     note: 'Security: Intermediate (Level 200)',
                     noteEn: 'Security: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'VPC 暗号化コントロールの紹介-リージョン内およびリージョン間の VPC 内の転送中の暗号化を強制する',
@@ -2901,6 +2990,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/aws/introducing-vpc-encryption-controls-enforce-encryption-in-transit-within-and-across-vpcs-in-a-region/',
                     note: 'Security: Intermediate (Level 200)',
                     noteEn: 'Security: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS での HTTP Strict Transport Security (HSTS) の実装',
@@ -2910,6 +3000,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/implementing-http-strict-transport-security-hsts-across-aws-services/',
                     note: 'Security: Intermediate (Level 200)',
                     noteEn: 'Security: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: 'Amazon CloudFront を使用して Amazon API Gateway を安全な暗号化方式で保護する',
@@ -2919,6 +3010,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/securing-amazon-api-gateway-with-secure-ciphers-using-amazon-cloudfront/',
                     note: 'Networking & Content Delivery: Intermediate (Level 200)',
                     noteEn: 'Networking & Content Delivery: Intermediate (Level 200)',
+                    level: 'Level 200',
                 },
                 {
                     title: '自動車と製造業のためのエンタープライズ規模の ACM Private CA 階層を保護する方法',
@@ -2928,6 +3020,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/security/how-to-secure-an-enterprise-scale-acm-private-ca-hierarchy-for-automotive-and-manufacturing/',
                     note: 'Security: Expert (Level 400)',
                     noteEn: 'Security: Expert (Level 400)',
+                    level: 'Level 400',
                 },
                 {
                     title: 'Amazon Route 53 での DNSSEC の署名と検証の設定',
@@ -2937,6 +3030,7 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/configuring-dnssec-signing-and-validation-with-amazon-route-53/',
                     note: 'Networking & Content Delivery: Intermediate (Level 200)',
                     noteEn: 'Networking & Content Delivery: Intermediate (Level 200)',
+                    level: 'Level 200',
                     recommend: true,
                 }
               ],

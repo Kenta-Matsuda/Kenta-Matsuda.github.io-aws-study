@@ -124,6 +124,17 @@ function localizedResourceNote(item) {
 }
 
 /**
+ * Return locale-aware resource item technical level (issue #137).
+ * AWS numeric levels (e.g. 'Level 200') are language-neutral, so most items
+ * only set `level`; `levelEn` is optional for cases needing different phrasing.
+ */
+function localizedResourceLevel(item) {
+  if (!item) return '';
+  if (getLocale() === 'en' && item.levelEn) return item.levelEn;
+  return item.level || '';
+}
+
+/**
  * Return locale-aware domain description.
  */
 function localizedDomainDescription(domain) {
@@ -1361,9 +1372,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       const { html, usedMarkdown } = renderMarkdownToSafeHtml(quiz.explanation);
       if (usedMarkdown) {
         els.quizExplanation.innerHTML = html;
+        // Harden links (mirror updateAiModalContent): open safely in a new tab.
+        els.quizExplanation.querySelectorAll('a').forEach((a) => {
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener noreferrer');
+        });
       } else {
         els.quizExplanation.textContent = quiz.explanation;
       }
+      // Surface AWS official documentation citations as a distinct "Sources"
+      // block so they are not buried in the explanation prose (issue #109).
+      renderQuizSources(els.quizExplanation, quiz.explanation);
     }
 
     // Award XP. The Daily Challenge (issue #34) is deterministic, free, and
@@ -3927,6 +3946,20 @@ function renderBlogCard({ blog, term, context }) {
     `
     : '';
 
+  // Optional technical-level badge (issue #137). Rendered only when the item
+  // has a non-empty level; otherwise `levelBadge` is '' so the card output is
+  // byte-identical to before. Uses a muted indigo palette so it reads clearly
+  // as distinct from the orange recommend badge.
+  const levelSafe = escapeHtml(localizedResourceLevel(blog));
+  const levelTitle = escapeHtml(t('roadmap.level'));
+  const levelBadge = levelSafe
+    ? `
+      <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded px-2 py-0.5 whitespace-nowrap" title="${levelTitle}" aria-label="${levelTitle}: ${levelSafe}">
+        ${levelSafe}
+      </span>
+    `
+    : '';
+
   return `
     <div class="${cardClass}">
       <div class="flex items-start justify-between gap-3">
@@ -3943,6 +3976,7 @@ function renderBlogCard({ blog, term, context }) {
               <i class="fa-regular fa-thumbs-down"></i>
             </button>
           </div>
+          ${levelBadge}
           ${badge}
         </div>
       </div>
@@ -4013,6 +4047,11 @@ function normalizeResourceItems(items) {
       urlEn: item.urlEn ? String(item.urlEn) : undefined,
       note: String(item.note || ''),
       noteEn: item.noteEn ? String(item.noteEn) : undefined,
+      // Optional AWS technical-level annotation (issue #137). Numeric AWS
+      // levels like 'Level 200' are language-neutral, so most items set only
+      // `level`; `levelEn` is optional for cases needing different phrasing.
+      level: item.level ? String(item.level) : undefined,
+      levelEn: item.levelEn ? String(item.levelEn) : undefined,
       recommend: item.recommend === true,
     }))
     .filter((item) => item.title && item.url);
@@ -4559,6 +4598,67 @@ function configureMarkedOnce(marked) {
   } catch {
     // ignore
   }
+}
+
+/**
+ * Extract distinct AWS official documentation URLs (https://docs.aws.amazon.com/...)
+ * from a text blob, preserving first-seen order and de-duplicating.
+ */
+function extractAwsDocUrls(text) {
+  const urls = [];
+  const seen = new Set();
+  const re = /https:\/\/docs\.aws\.amazon\.com\/[^\s<>()"'`）】」、。]+/g;
+  const source = String(text ?? '');
+  let match;
+  while ((match = re.exec(source)) !== null) {
+    // Trim trailing punctuation that commonly abuts a URL in prose.
+    const url = match[0].replace(/[.,;:!?]+$/, '');
+    if (!seen.has(url)) {
+      seen.add(url);
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+/**
+ * Render a distinct "Sources / 出典" block listing AWS official documentation
+ * citations found in the quiz explanation. Built entirely from DOM nodes with
+ * textContent + href (no raw innerHTML of untrusted strings) to avoid XSS.
+ * Idempotent: any previously rendered block in the container is removed first.
+ */
+function renderQuizSources(container, explanation) {
+  if (!container) return;
+  // Remove any prior sources block (re-render on each new question).
+  container.querySelector('[data-quiz-sources]')?.remove();
+
+  const urls = extractAwsDocUrls(explanation);
+  if (urls.length === 0) return;
+
+  const wrap = document.createElement('div');
+  wrap.setAttribute('data-quiz-sources', '');
+  wrap.className = 'mt-3 pt-3 border-t border-gray-200';
+
+  const heading = document.createElement('div');
+  heading.className = 'text-xs font-bold text-gray-500 uppercase tracking-wide mb-1';
+  heading.textContent = t('quiz.sourcesLabel');
+  wrap.appendChild(heading);
+
+  const list = document.createElement('ul');
+  list.className = 'space-y-1';
+  for (const url of urls) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = url;
+    a.textContent = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'text-xs text-blue-700 hover:underline break-all';
+    li.appendChild(a);
+    list.appendChild(li);
+  }
+  wrap.appendChild(list);
+  container.appendChild(wrap);
 }
 
 function renderMarkdownToSafeHtml(markdown) {
