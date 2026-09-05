@@ -267,6 +267,8 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/how-aws-improves-global-connectivity-via-automated-traffic-engineering/',
                     note: 'Content Delivery: Advanced (Level 300)',
                     noteEn: 'Content Delivery: Advanced (Level 300)',
+                    // In-repo signal: note already states 'Advanced (Level 300)'.
+                    level: 'Level 300',
                 },
                 {
                     title: 'CloudFrontとAWS Global Acceleratorを使用してオンラインアプリケーションを適切に設計する',
@@ -275,6 +277,8 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/well-architecting-online-applications-with-cloudfront-and-aws-global-accelerator/',
                     note: 'Networking: Introductory (Level 100)',
                     noteEn: 'Networking: Introductory (Level 100)',
+                    // In-repo signal: note already states 'Introductory (Level 100)'.
+                    level: 'Level 100',
                 },
                 {
                     title: 'AWS Global Accelerator を使用してトラフィックを管理する',
@@ -283,6 +287,8 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/traffic-management-with-aws-global-accelerator/',
                     note: 'Networking: Intermediate (Level 200)',
                     noteEn: 'Networking: Intermediate (Level 200)',
+                    // In-repo signal: note already states 'Intermediate (Level 200)'.
+                    level: 'Level 200',
                 },
                 {
                     title: 'AWS Global Accelerator による静的 IP アドレスを介した AWS API Gateway へのアクセス',
@@ -291,6 +297,8 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/accessing-an-aws-api-gateway-via-static-ip-addresses-provided-by-aws-global-accelerator/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
+                    // In-repo signal: note already states 'Advanced (Level 300)'.
+                    level: 'Level 300',
                     recommend: true,
                 },
                 {
@@ -317,6 +325,9 @@ export const ANS_C01 = {
                         urlEn: 'https://aws.amazon.com/events/aws-event-resource/archive/?ams%23interactive-card-vertical%23pattern-data--1962452770.search=cloudfront%20deep%20dive',
                         note: 'PDF | Youtube: 2020/10/28',
                         noteEn: 'PDF | Youtube: 2020/10/28',
+                        // In-repo signal: title contains 'Deep Dive', AWS's
+                        // conventional marker for advanced Level 300 content.
+                        level: 'Level 300',
                     },
                     {
                     title: 'Amazon CloudFront（基礎編）',
@@ -325,6 +336,9 @@ export const ANS_C01 = {
                     urlEn: 'https://aws.amazon.com/blogs/news/2025-07-aws-blackbelt/#:~:text=Amazon%20CloudFront%EF%BC%88%E5%9F%BA%E7%A4%8E%E7%B7%A8%EF%BC%89',
                     note: 'PDF | Youtube: 2025/07',
                     noteEn: 'PDF | Youtube: 2025/07',
+                    // In-repo signal: title '（基礎編）' / '(Basics)' marks an
+                    // introductory Black Belt session (Level 200).
+                    level: 'Level 200',
                     recommend: true,
                     },
                 ],
