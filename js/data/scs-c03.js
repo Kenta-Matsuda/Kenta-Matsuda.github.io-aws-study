@@ -570,8 +570,8 @@ export const SCS_C03 = {
                 {
                   title: 'AWS セキュリティインシデント対応ガイド',
                   titleEn: 'AWS Security Incident Response Guide',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-security-incident-response-guide/',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-security-incident-response-guide/aws-security-incident-response-guide.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/aws-security-incident-response-guide.html',
                   note: 'インシデント対応のベストプラクティス',
                   noteEn: 'Incident response best practices',
                   recommend: true,
@@ -1490,7 +1490,7 @@ export const SCS_C03 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/introduction.html',
                   note: 'Prescriptive Guidance: マルチアカウントセキュリティ設計',
                   noteEn: 'Prescriptive Guidance: Multi-account security design',
                   recommend: true,
