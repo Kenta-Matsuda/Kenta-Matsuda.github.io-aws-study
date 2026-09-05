@@ -1310,6 +1310,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     btns.forEach((btn) => {
       btn.disabled = true;
       const idx = parseInt(btn.dataset.choiceIndex, 10);
+      if (idx === answerIndex) {
+        // Mark the choice the user actually picked, regardless of correctness,
+        // so it stays clearly visible against the correct/incorrect backgrounds
+        // (dark mode contrast, see issue #122).
+        btn.classList.add('quiz-choice-selected');
+      }
       if (idx === quiz.correctIndex) {
         btn.classList.add('quiz-choice-correct');
       }
