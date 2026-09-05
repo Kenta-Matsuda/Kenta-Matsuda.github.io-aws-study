@@ -1113,6 +1113,11 @@
         #examSidebar.open {
             transform: translateX(0);
         }
+        /* Keep the last sidebar item clear of the fixed PWA install
+           button (#pwaInstallBtn, bottom-left) so its label is not hidden. */
+        #examSidebar .p-4 {
+            padding-bottom: 5rem;
+        }
         .exam-sidebar-category {
             margin-bottom: 0.5rem;
         }
