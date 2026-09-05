@@ -172,10 +172,17 @@ gh --version
 | --- | --- |
 | `scripts/check-resource-links.mjs` | `js/data/` 全試験から `url`/`urlEn` を抽出し、`broken` / `soft-404` / `fragment-miss` / `redirect` / `forbidden` / `locale-redirect` / `ok` に分類 |
 | `scripts/list-aws-doc-pages.mjs` | AWS 公式ドキュメントの目次（下位ページ）とページ内アンカーを抽出 |
+| `scripts/check-link-descriptions.mjs` | **リンクを変更したときだけ**、`title` / `note` とリンク先ページの実際の内容がずれていないかを突き合わせる（変更検出は git diff に任せる） |
 
 ```
 # 全試験の検証（結果はファイルへ書き出して読む）
 node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json
+
+# 廃止 / 新規受付終了の告知と meta refresh スタブの検出（本文取得が必要なので低速）
+node scripts/check-resource-links.mjs --notices --concurrency 10 --json test-results/notices-all.json
+
+# リンクを変更したあと: 説明文とリンク先の内容がずれていないか（変更分のみ自動で絞られる）
+node scripts/check-link-descriptions.mjs --base main
 
 # 試験単位
 node scripts/check-resource-links.mjs --only saa-c03 --concurrency 8 --fragments
@@ -198,7 +205,9 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 2. **ソフト 404 が最重要**。AWS は削除ページを 404 にせず**ガイドのルートへ 200 でリダイレクト**します（実測 24 件）。
 3. **テキストフラグメント（`#:~:text=`）の陳腐化はステータスに出ない**。`--fragments` で本文照合すること。
 4. **SPA ドメインは死活判定に使えない**。`skillbuilder.aws` は存在しないパスでも 200 を返します。
-5. **リンクが生きていてもサービスが「新規顧客の受付を終了」している場合がある**。本文冒頭の `Note` に `is no longer open to new customers` があるかを確認し、該当したら `recommend: true` を外して `note` に明記する。
+5. **リンクが生きていてもサービスが「廃止 / 新規顧客の受付を終了」している場合がある**。`--notices` で検出する。**廃止済みだけでなく受付終了のサービスも掲載しない**（AWS が後継を明示していれば後継へ差し替え、無ければ削除）。ただし削除前に、そのサービスが**公式試験ガイドのスコープ内サービスに名前で載っていないか**を必ず確認し、載っていれば独断で削除せず PR で明示してレビューに委ねる。判断手順の詳細は `docs/wiki/aws-resource-discovery.md` を参照。
+6. **ガイドのディレクトリ URL は中身のないスタブで、`<meta http-equiv="refresh">` で 1 ページ目へ転送していることがある**。HTTP では 200 かつリダイレクトなしなので死活チェックでは検出できない。`meta-refresh` 分類が出たら**実体ページへ直リンク**する（`www.aws.training/certification` は意図的な入口なので例外）。
+7. **リンク先の内容と `title` / `note` がずれていないか**。リンクを変更したときは必ず `scripts/check-link-descriptions.mjs` を実行し、ページの `<title>` / `<h1>` / リード文と説明文を突き合わせる。**全件チェックは費用に見合わないので、変更したときだけ実施する**（変更検出は git diff に任せているので手作業の記録は不要）。`[!]` は機械的ヒントで、日本語では偽陽性が多い点に注意。
 
 ## 主要機能 1: リソース棚卸し（全試験のリンク鮮度・品質の維持）
 
@@ -262,7 +271,9 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
   ```
   node -e "JSON.parse(require('fs').readFileSync('<ファイル>','utf8'))"
   ```
-- **`js/data/` の URL を変更したら、必ず `scripts/check-resource-links.mjs --only <試験コード>` を実行し、`broken` / `soft-404` / `redirect` / `fragment-miss` が 0 件になったことを確認する**（ネットワークが使えない環境では `--no-fetch` に留め、未検証を明記する）。修正前後の件数を PR 本文に載せる。
+- **`js/data/` の URL を変更したら、次の 2 つを必ず実行する**（ネットワークが使えない環境では `--no-fetch` に留め、未検証を明記する）。修正前後の件数を PR 本文に載せる。
+  1. `scripts/check-resource-links.mjs --only <試験コード> --notices --fragments` — `broken` / `soft-404` / `deprecated` / `meta-refresh` / `redirect` / `fragment-miss` が 0 件（または既知の誤検知のみ）になったことを確認する。
+  2. `scripts/check-link-descriptions.mjs --base main` — **リンクを変更したときだけ**のチェック。`title` / `note` がリンク先の内容とずれていないかを、表示された `<title>` / `<h1>` / リード文と読み比べて確認する。
 - **i18n**（`js/locales/`）に関わる変更をした場合、`ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、**デッドリンク・孤立ファイルを作らない**。`docs/wiki/` の内部相対リンクが実在ファイルを指すことを確認する。
 - **Playwright**（`npx playwright test`）はブラウザ / npm を取得できず失敗する可能性があります。実行可能なら実行し、そうでなければ「実行できなかった旨と理由」を記録する。
