@@ -24,14 +24,14 @@
 | AIP-C01 | `js/data/aip-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 110 (83) | #145 | 403 の PDF 試験ガイドをドキュメント版へ。Bedrock 5 ページの再編に追随。Black Belt の IAM フラグメントを実表記へ。404 の RAG ブログを削除。保留: 削除ブログの代替候補 3 件・`troubleshooting` → `monitoring` の妥当性・Skill Builder 2 件 |
 | ANS-C01 | `js/data/ans-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 276 (245) | #146 | リポジトリ最大のファイル。404 の Route 53 Resolver ブログを同ファイル内で生きている `/blogs/security/` 版へ。TGW ソリューションと意思決定ガイドの移転に追随。保留: Skill Builder 3 件 |
 | CLF-C02 | `js/data/clf-c02.js` | 2026-09-06 | 棚卸し済み | 199 (184) | #147 | **Migration Hub のプロダクトページが AWS Transform へ転送される誤誘導**を公式ドキュメントで是正。404 のコンピューティング意思決定ガイドを docs 側へ。Snow ファミリー → Snowball に改称 |
-| DEA-C01 | `js/data/dea-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 98 (88) | #148 | Black Belt のテキストフラグメント 3 件を実表記へ。Lake Formation の権限 / アクセス制御ページのソフト 404 を後継ページへ。保留: Skill Builder 2 件 |
-| DOP-C02 | `js/data/dop-c02.js` | 2026-09-06 | 棚卸し済み / 保留あり | 190 (168) | #149 | **撤回済みの CodeCommit CI/CD ブログ**（CodeCommit は新規受付終了）を現行記事 + 公式チュートリアルへ。404 の DR ブログを `/blogs/architecture/` 版へ。保留: CI/CD ブログの選定・Skill Builder 2 件 |
-| DVA-C02 | `js/data/dva-c02.js` | 2026-09-06 | 棚卸し済み / 保留あり | 140 (128) | #150 | 撤回済み CodeCommit CI/CD ブログを差し替え。ElastiCache `red-ug` → `dg` 統合、Lambda 2 ページのリネームに追随。保留: CI/CD ブログの選定・Skill Builder 2 件 |
-| MLA-C01 | `js/data/mla-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 112 (98) | #151 | 403 の PDF 試験ガイドをドキュメント版へ。ML Lens が**単一ページ構成に再編**され `mlops.html` が消失したためレンズ本体へ。Black Belt の CodePipeline フラグメントを実表記へ。保留: 当該項目の表示名・PDF の閲覧可否・Skill Builder 2 件 |
-| SAA-C03 | `js/data/saa-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 106 (101) | #152 | 404 のコンピューティング意思決定ガイドを docs 側へ。ElastiCache / DynamoDB / VPC エンドポイントのリネームに追随。保留: Skill Builder 3 件 |
-| SAP-C02 | `js/data/sap-c02.js` | 2026-09-06 | 棚卸し済み / 保留あり | 131 (110) | #153 | **Prescriptive Guidance 5 ガイド**の `welcome.html` 移動に追随（3 件は 404）。後継のないデータ転送ページを移行意思決定ガイドへ。保留: 当該差し替え先・Skill Builder 2 件 |
-| SCS-C03 | `js/data/scs-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 109 (99) | #154 | 13 試験で**最も不具合が少なかった**（修正 5 箇所）。Security Reference Architecture / インシデント対応ガイドのソフト 404 を是正。保留: Skill Builder が**SCS-C02 版**を指している点・Skill Builder 2 件 |
-| SOA-C03 | `js/data/soa-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 97 (95) | #155 | 削除済みの SSM 運用イベント自動化ブログを現行記事 + 公式ドキュメントへ。ElastiCache / VPC エンドポイントのリネームに追随。保留: Skill Builder が**SOA-C02 版**を指している点・差し替えブログの選定・Skill Builder 2 件 |
+| DEA-C01 | `js/data/dea-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 98 (88) | #149 | Black Belt のテキストフラグメント 3 件を実表記へ。Lake Formation の権限 / アクセス制御ページのソフト 404 を後継ページへ。保留: Skill Builder 2 件 |
+| DOP-C02 | `js/data/dop-c02.js` | 2026-09-06 | 棚卸し済み / 保留あり | 190 (168) | #150 | **撤回済みの CodeCommit CI/CD ブログ**（CodeCommit は新規受付終了）を現行記事 + 公式チュートリアルへ。404 の DR ブログを `/blogs/architecture/` 版へ。保留: CI/CD ブログの選定・Skill Builder 2 件 |
+| DVA-C02 | `js/data/dva-c02.js` | 2026-09-06 | 棚卸し済み / 保留あり | 140 (128) | #151 | 撤回済み CodeCommit CI/CD ブログを差し替え。ElastiCache `red-ug` → `dg` 統合、Lambda 2 ページのリネームに追随。保留: CI/CD ブログの選定・Skill Builder 2 件 |
+| MLA-C01 | `js/data/mla-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 112 (98) | #152 | 403 の PDF 試験ガイドをドキュメント版へ。ML Lens が**単一ページ構成に再編**され `mlops.html` が消失したためレンズ本体へ。Black Belt の CodePipeline フラグメントを実表記へ。保留: 当該項目の表示名・PDF の閲覧可否・Skill Builder 2 件 |
+| SAA-C03 | `js/data/saa-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 106 (101) | #153 | 404 のコンピューティング意思決定ガイドを docs 側へ。ElastiCache / DynamoDB / VPC エンドポイントのリネームに追随。保留: Skill Builder 3 件 |
+| SAP-C02 | `js/data/sap-c02.js` | 2026-09-06 | 棚卸し済み / 保留あり | 131 (110) | #154 | **Prescriptive Guidance 5 ガイド**の `welcome.html` 移動に追随（3 件は 404）。後継のないデータ転送ページを移行意思決定ガイドへ。保留: 当該差し替え先・Skill Builder 2 件 |
+| SCS-C03 | `js/data/scs-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 109 (99) | #155 | 13 試験で**最も不具合が少なかった**（修正 5 箇所）。Security Reference Architecture / インシデント対応ガイドのソフト 404 を是正。保留: Skill Builder が**SCS-C02 版**を指している点・Skill Builder 2 件 |
+| SOA-C03 | `js/data/soa-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 97 (95) | #156 | 削除済みの SSM 運用イベント自動化ブログを現行記事 + 公式ドキュメントへ。ElastiCache / VPC エンドポイントのリネームに追随。保留: Skill Builder が**SOA-C02 版**を指している点・差し替えブログの選定・Skill Builder 2 件 |
 
 ## 共通定義の注記
 
