@@ -113,7 +113,7 @@ export const ANS_C01 = {
             {
               title: 'Exam Prep Standard Course: AWS Certified Advanced Networking - Specialty',
               titleEn: 'Exam Prep Standard Course: AWS Certified Advanced Networking - Specialty',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14952/exam-prep-standard-course-aws-certified-advanced-networking-specialty-ans-c01',
+              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-advanced-networking-specialty-ans-c01',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
@@ -121,7 +121,7 @@ export const ANS_C01 = {
             {
               title: 'Networking Learning Plan',
               titleEn: 'Networking Learning Plan',
-              url: 'https://explore.skillbuilder.aws/learn/learning_plan/view/89/networking-learning-plan',
+              url: 'https://skillbuilder.aws/search?searchText=networking-learning-plan',
               note: 'AWS Skill Builder: ネットワーク学習プラン',
               noteEn: 'AWS Skill Builder: Networking learning plan',
             },
@@ -203,7 +203,7 @@ export const ANS_C01 = {
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
               titleEn: 'AWS Certification Official Practice Question Set (ANS-C01)',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14837/aws-certified-advanced-networking-specialty-official-practice-question-set-ans-c01-japanese',
+              url: 'https://skillbuilder.aws/search?searchText=aws-certified-advanced-networking-specialty-official-practice-question-set-ans-c01-japanese',
               note: 'AWS Skill Builder: 無料',
               noteEn: 'AWS Skill Builder: Free',
               recommend: true,
@@ -1615,8 +1615,8 @@ export const ANS_C01 = {
                     title: 'マルチアカウント環境で Route 53 Resolver を使用して DNS 管理を簡素化する',
 
                     titleEn: 'Simplify DNS management in a multi-account environment with Route 53 Resolver',
-                    url: 'https://aws.amazon.com/jp/blogs/networking-and-content-delivery/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
-                    urlEn: 'https://aws.amazon.com/blogs/networking-and-content-delivery/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
+                    url: 'https://aws.amazon.com/jp/blogs/security/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
+                    urlEn: 'https://aws.amazon.com/blogs/security/simplify-dns-management-in-a-multiaccount-environment-with-route-53-resolver/',
                     note: 'Networking: Advanced (Level 300)',
                     noteEn: 'Networking: Advanced (Level 300)',
                     level: 'Level 300',
@@ -1963,8 +1963,8 @@ export const ANS_C01 = {
                     title: 'AWS Transit Gatewayを使用して、トランジットネットワークの設定と管理を自動化する',
 
                     titleEn: 'Automate transit network setup and management using AWS Transit Gateway',
-                    url: 'https://docs.aws.amazon.com/ja_jp/solutions/latest/network-orchestration-aws-transit-gateway/solution-overview.html',
-                    urlEn: 'https://docs.aws.amazon.com/solutions/latest/network-orchestration-aws-transit-gateway/solution-overview.html',
+                    url: 'https://docs.aws.amazon.com/ja_jp/solutions/latest/network-orchestration-aws-transit-gateway/',
+                    urlEn: 'https://docs.aws.amazon.com/solutions/latest/network-orchestration-aws-transit-gateway/',
                     note: 'Network Orchestration for AWS Transit Gateway',
                     noteEn: 'Network Orchestration for AWS Transit Gateway',
                     recommend: true,
@@ -2724,8 +2724,8 @@ export const ANS_C01 = {
                     title: 'AWS WAF or AWS Shield?',
 
                     titleEn: 'AWS WAF or AWS Shield?',
-                    url: 'https://docs.aws.amazon.com/ja_jp/decision-guides/latest/waf-or-shield/waf-or-shield.html',
-                    urlEn: 'https://docs.aws.amazon.com/decision-guides/latest/waf-or-shield/waf-or-shield.html',
+                    url: 'https://docs.aws.amazon.com/ja_jp/decision-guides/latest/decision-guides/waf-or-shield.html',
+                    urlEn: 'https://docs.aws.amazon.com/decision-guides/latest/decision-guides/waf-or-shield.html',
                     note: 'Prescriptive Guidance: AWS WAF or AWS Shield?',
                     noteEn: 'Prescriptive Guidance: AWS WAF or AWS Shield?',
                 }
