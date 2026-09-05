@@ -64,6 +64,13 @@ export const EXAM_CATEGORIES = [
     icon: 'fas fa-star',
     examIds: ['ans-c01', 'scs-c03'],
   },
+  {
+    id: 'business',
+    labelJa: 'Business',
+    labelEn: 'Business',
+    icon: 'fas fa-briefcase',
+    examIds: ['aib-c01'],
+  },
 ];
 
 /**

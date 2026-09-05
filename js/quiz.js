@@ -261,6 +261,7 @@ export const EXAM_MOCK_CONFIG = {
   'dea-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Associate' },
   'aif-c01':  { questionCount: 65, timeLimitMin: 120, level: 'Foundational' },
   'aip-c01':  { questionCount: 65, timeLimitMin: 120, level: 'Associate' },
+  'aib-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Foundational' },
 };
 
 /**
