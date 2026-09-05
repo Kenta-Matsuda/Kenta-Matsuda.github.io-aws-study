@@ -152,6 +152,15 @@ AWS は一部サービスを**廃止せずに新規受付のみ終了**します
 
 いずれも**ページは HTTP 200 を返し、リダイレクトもしません**。死活チェックだけを回していると永久に検出できないため、棚卸しのたびに `--notices` を実行してください。
 
+`--notices` で毎回ヒットするが**対応済みでスルーしてよいもの**（既知の誤検知 + 例外掲載）:
+
+| URL | 理由 |
+| --- | --- |
+| `docs.aws.amazon.com/AmazonS3/latest/userguide/Welcome.html` | 誤検知。告知は **SOAP API** の廃止についてで、Amazon S3 自体は現役 |
+| `docs.aws.amazon.com/bedrock/latest/APIReference/Welcome.html` | 誤検知。告知は API リファレンス内の **Bedrock Agents Classic** の節。API リファレンス自体は現役 |
+| `docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html` | 例外掲載（CLF-C02 / SAP-C02 のスコープ内。下記参照） |
+| `docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html` | 例外掲載（SCS-C03 のスコープ内。下記参照） |
+
 ### 機械的に検出する（`--notices`）
 
 告知はリンク死活チェックでは絶対に検出できないため、**本文を取得して告知フレーズを探す専用モード**を用意しています。
@@ -177,11 +186,23 @@ node scripts/check-resource-links.mjs --notices --concurrency 10 --json test-res
    - 例: Amazon Bedrock Agents (Classic) → **Amazon Bedrock AgentCore** / Amazon Q Business → **Amazon Quick** / AWS Migration Hub → **AWS Transform**
 2. **後継が明示されておらず、同じトピックが他のリソースでカバーされている場合は削除する。**
    - ただし**グループ（`resources[]`）の `items[]` を空にしない**こと。空になる場合は、現行の公式リソースを 1 件確保してから削除します。
-3. **例外の確認（必ず実施）**: 削除しようとしているサービスが、その試験の**公式試験ガイドの「スコープ内サービス」に明示的に名前で載っていないか**を確認します。載っている場合、削除すると**出題範囲のトピックが無資料になる**ため、**独断で削除せず PR で明示してレビューに委ねます**。
-   - 2026-09-06 実測の該当例: **AWS Audit Manager（SCS-C03 のスコープ内）**、**AWS Migration Hub（CLF-C02 のスコープ内）**。いずれも受付終了済みですが試験範囲には残っています。
+3. **例外の確認（必ず実施）**: 削除しようとしているサービスが、その試験の**公式試験ガイドの「スコープ内サービス」に明示的に名前で載っていないか**を確認します。
+   - **載っている場合は削除しません。** 削除すると出題範囲のトピックが無資料になり、学習ツールとしての目的に反します。**リンクは残し、`recommend` を外して `note` / `noteEn` に「新規顧客の受付を終了している事実」と「AWS が示す後継（あれば）」を明記**します。
    - 確認方法: `docs.aws.amazon.com/aws-certification/latest/<試験スラッグ>/<略称>-in-scope-services.html`（スラッグは公式認定ページ本文から `docs.aws.amazon.com/.../aws-certification/...` のリンクを抽出して特定する）。
    - 逆に、スコープ内一覧が**サービス単位**（例: MLA-C01 は「Amazon SageMaker」のみ）で個別機能を挙げていない場合、Ground Truth / Clarify / Debugger / Model Monitor のような**機能単位のリソースを削除しても記載スコープは損なわれません**。
-4. 削除・差し替えのいずれの場合も、**根拠（告知ページの URL と該当文言）を PR 本文に残す**。
+4. 削除・差し替え・例外掲載のいずれの場合も、**根拠（告知ページの URL と該当文言、スコープ内一覧の URL）を PR 本文と `note` に残す**。
+
+#### 例外として掲載を継続しているもの（2026-09-06 時点の確定事項）
+
+次の 3 件は受付終了済みですが、**公式試験ガイドのスコープ内サービスに明記されている**ため掲載を継続しています。同じ判断を毎回やり直さないよう記録します。
+
+| 試験 | サービス | 掲載しているリソース |
+| --- | --- | --- |
+| CLF-C02 | AWS Migration Hub | `docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html` |
+| SAP-C02 | AWS Migration Hub | 同上 |
+| SCS-C03 | AWS Audit Manager | `docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html` |
+
+いずれも `--notices` 実行時に `deprecated` としてヒットしますが、**対応済みなので再検討は不要**です。将来これらが試験ガイドのスコープ内一覧から外れたら、その時点で削除してください。
 
 ## ブログの技術レベル判定基準 (Level 100/200/300/400)
 
@@ -262,6 +283,7 @@ issue #137 では「AWS re:Post のリソースがほとんどないが、AWS �
 
 ## 更新履歴
 
+- 2026-09-06: 受付終了サービスのうち**公式試験ガイドのスコープ内に明記されている 3 件（Migration Hub の CLF-C02 / SAP-C02、Audit Manager の SCS-C03）は例外として掲載を継続する**と決定（利用者の判断）。削除すると出題範囲のトピックが無資料になるため。方針節を「レビューに委ねる」から「削除しない・`recommend` を外して `note` に明記する」に確定させ、確定事項の表と、`--notices` で毎回ヒットするがスルーしてよい URL の表を追加した。
 - 2026-09-06: **「リンク先の内容と説明文がずれていないか」のチェックを追加**（利用者の指示による）。全件では費用に見合わないため**リンクを変更したときだけ**実施する方針とし、変更検出を git diff に任せる `scripts/check-link-descriptions.mjs` を実装。日本語では分かち書きがないため機械的ヒントに偽陽性が多いことも明記した。あわせて、このチェックで発見した **`<meta http-equiv="refresh">` スタブ**の落とし穴（ガイドのディレクトリ URL は中身のないスタブで、HTTP では 200 かつリダイレクトなしのため死活チェックで検出不能）と、良性ケース（`www.aws.training/certification`）を追記。
 - 2026-09-06: **「新規顧客の受付を終了したサービスのリソースも掲載しない」方針へ改訂**（利用者の指示による）。従来は「リンクは残し `recommend` を外して `note` に明記する」としていたが、新規に使えないサービスの学習リソースは学習者にとって価値がなく誤解を招くため、**削除または後継サービスへの差し替え**を基本とする。あわせて (1) 告知を機械的に検出する `--notices` モードの使い方、(2) 実測で確認した受付終了サービス 8 件と AWS が示す後継の表、(3) 誤検知 2 件（S3 の SOAP API 廃止告知 / Bedrock API リファレンス内の Agents Classic 告知）、(4) 削除前に**公式試験ガイドのスコープ内サービスに名前で載っていないか確認する**手順（該当した Audit Manager / Migration Hub はレビューに委ねる）を追記。
 - 2026-09-06: 初のネットワーク接続下での全試験棚卸しを実施し、実測に基づいて大幅に更新。(1) 死活チェックを `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` によるスクリプト実行を必須の第一手とする手順へ変更。(2)「HTTP ステータスだけでは判定できない落とし穴」（ロケールリダイレクト / ソフト 404 / テキストフラグメント陳腐化 / SPA ドメイン / `d1.awsstatic.com` の 403）を追記。(3)「既知の URL 移転パターン」表と「新規顧客の受付を終了したサービスの扱い」節を新設。(4) **従来「本サンドボックス（INTEGRATIONS_ONLY）では外部アクセスができない」と断定していた記述を訂正**し、環境によってネットワークが利用可能である前提に改めた（実行環境に応じて判断し、未検証点を PR に明記する方針へ統一）。
