@@ -56,7 +56,8 @@
       "startBtn": "チャレンジ開始",
       "reviewBtn": "過去の問題を見直す",
       "dailyChallengeBtn": "デイリーチャレンジ",
-      "dailyChallengeHint": "APIキー不要・1日5問"
+      "dailyChallengeBadge": "APIキー不要",
+      "dailyChallengeHint": "APIキーなしで解ける問題はこちら・設定不要で1日5問"
     },
     "xpCarousel": {
       "totalXp": "これまでの累積 XP",

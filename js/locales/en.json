@@ -56,7 +56,8 @@
       "startBtn": "Start Challenge",
       "reviewBtn": "Review Past Questions",
       "dailyChallengeBtn": "Daily Challenge",
-      "dailyChallengeHint": "No API key needed \u00b7 5 questions a day"
+      "dailyChallengeBadge": "No API key",
+      "dailyChallengeHint": "Solve questions without an API key \u00b7 5 a day, no setup"
     },
     "xpCarousel": {
       "totalXp": "Total XP",
