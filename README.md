@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-green.svg)](./LICENSE)
 ![visitor badge](https://visitor-badge.laobi.icu/badge?page_id=Kenta-Matsuda.github.io-aws-study&left_text=visitors)
 
-**AWS認定全12資格に対応した、無料の学習ナビゲーター。**  
+**AWS認定全13資格に対応した、無料の学習ナビゲーター。**  
 試験ガイドに基づくドメイン別ロードマップと、AI搭載クイズで効率的に合格を目指せます。
 
 **https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/**
@@ -17,7 +17,6 @@
 |--------|--------|----------|
 | Foundational | CLF-C02 | AWS Certified Cloud Practitioner |
 | Foundational | AIF-C01 | AWS Certified AI Practitioner |
-| Foundational | AIB-C01 | AWS Certified AI Business Strategist |
 | Associate | SAA-C03 | AWS Certified Solutions Architect – Associate |
 | Associate | DVA-C02 | AWS Certified Developer – Associate |
 | Associate | SOA-C03 | AWS Certified CloudOps Engineer – Associate |
@@ -28,6 +27,7 @@
 | Professional | AIP-C01 | AWS Certified Generative AI Developer – Professional |
 | Specialty | ANS-C01 | AWS Certified Advanced Networking – Specialty |
 | Specialty | SCS-C03 | AWS Certified Security – Specialty |
+| Business | AIB-C01 | AWS Certified AI Business Strategist |
 
 ## 主な機能
 

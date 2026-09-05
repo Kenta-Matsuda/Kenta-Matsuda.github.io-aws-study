@@ -26,6 +26,7 @@
   - **Associate**: SAA-C03, DVA-C02, SOA-C03, MLA-C01, DEA-C01, AIP-C01
   - **Professional**: SAP-C02, DOP-C02
   - **Specialty**: ANS-C01, SCS-C03
+  - **Business**: AIB-C01
 - モバイルではハンバーガーメニューで開閉
 - デスクトップでは左サイドバーとして常時表示（折り畳み可）
 

@@ -8,7 +8,9 @@
 
 - [UI構造の全面リファクタリング](issues/ui-restructure.md)
 - [試験作成/更新用エージェントの作成と最適化 (#69)](issues/exam-content-maintainer-agent.md)
+- [フィードバックのハードルを下げる (#100 / #101)](issues/feedback-nudge-and-account-free.md)
 - [学習ダッシュボードのXPウォーカー刷新 (#102)](issues/xp-walker-redesign.md)
+- [PWAインストール後のアイコンが古い画像のまま表示される問題の修正 (#97)](issues/pwa-png-icons.md)
 - [Duolingo 風の学習継続エンゲージメント (#107)](issues/streak-engagement.md)
 
 ## LLM Wiki（docs/wiki/）
@@ -28,3 +30,5 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](action-required/global-leaderboard.md) — 🔴 未対応（要対応） / 関連: #32
 - [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](action-required/mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 関連: #109
 - [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](action-required/streak-push-notifications.md) — 🔴 未対応（要対応） / 関連: #107
+- [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](action-required/issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 関連: #119
+- [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](action-required/issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 関連: #117（関連 #109 #119 #32 #107）

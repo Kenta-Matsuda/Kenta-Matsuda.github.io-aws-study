@@ -261,6 +261,7 @@ export const EXAM_MOCK_CONFIG = {
   'dea-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Associate' },
   'aif-c01':  { questionCount: 65, timeLimitMin: 120, level: 'Foundational' },
   'aip-c01':  { questionCount: 65, timeLimitMin: 120, level: 'Associate' },
+  'aib-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Business' },
 };
 
 /**
@@ -490,6 +491,12 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
       choiceLength: '選択肢はそれぞれ1文（サービス名や基本概念を問う形式）',
       difficultyNote: 'AWS初学者が6ヶ月程度の学習で解答できるレベル',
     },
+    'Business': {
+      questionDesc: 'AIの導入判断・ガバナンス・ビジネス価値を問うシナリオ問題（技術実装の詳細は問わない）',
+      questionLength: '問題文は2〜4文で、ビジネス上の状況設定を含む',
+      choiceLength: '選択肢はそれぞれ1〜2文（戦略・判断・ガバナンスの選択肢）',
+      difficultyNote: 'AIの技術実装ではなくビジネス判断を問うレベル（AI/ML/生成AIの基礎用語の理解を前提とする）',
+    },
     'Associate': {
       questionDesc: '実務で直面するシナリオベースの問題',
       questionLength: '問題文は3〜5文の具体的なビジネスシナリオ（要件・制約を含む）',
@@ -519,6 +526,12 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
         questionLength: 'Question text is 2-4 sentences with basic situational context',
         choiceLength: 'Each choice is 1 sentence (testing service names or basic concepts)',
         difficultyNote: 'Level suitable for someone with ~6 months of AWS study',
+      },
+      'Business': {
+        questionDesc: 'Scenario questions about AI adoption decisions, governance, and business value (not technical implementation details)',
+        questionLength: 'Question text is 2-4 sentences with a business situational context',
+        choiceLength: 'Each choice is 1-2 sentences (strategy, judgment, or governance options)',
+        difficultyNote: 'Level testing business judgment rather than technical implementation (assumes command of foundational AI/ML/GenAI terminology)',
       },
       'Associate': {
         questionDesc: 'Scenario-based questions reflecting real-world situations',
