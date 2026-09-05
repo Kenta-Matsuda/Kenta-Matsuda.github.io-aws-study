@@ -383,6 +383,12 @@
             border-color: #ef4444 !important;
             color: #991b1b !important;
         }
+        /* Marks the choice the user actually selected. Uses a box-shadow ring so it
+           coexists with the correct (green) / incorrect (red) backgrounds and stays
+           legible in dark mode (issue #122). */
+        .quiz-choice-selected {
+            box-shadow: 0 0 0 2px #6366f1 !important;
+        }
         @keyframes quizCorrect {
             0% { transform: scale(1); }
             50% { transform: scale(1.03); }
@@ -912,6 +918,12 @@
             background: #3a1e1e !important;
             border-color: #c66;
             color: #e8b0b0 !important;
+        }
+        /* High-contrast ring for the user's selected choice in dark mode. A bright
+           indigo + subtle white halo reads clearly against both the dark green
+           correct (#1e3a2a) and dark red incorrect (#3a1e1e) backgrounds (issue #122). */
+        html.dark .quiz-choice-selected {
+            box-shadow: 0 0 0 2px #818cf8, 0 0 0 4px rgba(255, 255, 255, 0.25) !important;
         }
         html.dark .quiz-mode-card:hover {
             border-color: #6e6e6e;
