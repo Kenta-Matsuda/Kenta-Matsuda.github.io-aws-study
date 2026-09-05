@@ -638,8 +638,8 @@ export const CLF_C02 = {
                 {
                   title: 'AWS の料金の仕組み',
                   titleEn: 'How AWS Pricing Works',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/abstract-and-introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/abstract-and-introduction.html',
                   note: 'ホワイトペーパー: 料金モデルの基本',
                   noteEn: 'Whitepaper: Pricing model fundamentals',
                 },
@@ -2013,8 +2013,8 @@ export const CLF_C02 = {
                 {
                   title: 'AWS の料金の仕組み',
                   titleEn: 'How AWS Pricing Works',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/abstract-and-introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/abstract-and-introduction.html',
                   note: 'ホワイトペーパー: 料金モデルの基本',
                   noteEn: 'Whitepaper: Pricing model fundamentals',
                   recommend: true,
