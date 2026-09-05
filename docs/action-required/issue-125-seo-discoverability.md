@@ -55,11 +55,11 @@ issue #125 は「サイトが Web 検索や AI 検索（ChatGPT などの生成A
 
 以下は、サイト運用者（人間）が外部アカウント・外部媒体で実施するマーケティング／運用タスクです。**エージェントは実行しません**。この PR の時点で、記事公開や検索コンソール登録は**未実施**です。
 
-- [ ] **技術記事の執筆・公開**: Qiita / Zenn などにアプリの紹介記事を執筆・公開し、本サイトへのリンクを張る（被リンク獲得と認知拡大）。※内容・公開はアカウント所有者本人が行う。
-- [ ] **Google Search Console への登録**: サイト所有権を確認し、`sitemap.xml`（`https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/sitemap.xml`）を送信。主要 URL のインデックス登録をリクエスト。
-- [ ] **Bing Webmaster Tools への登録**: 同様にサイト登録とサイトマップ送信を実施（必要に応じて Search Console から取り込み）。
-- [ ] **被リンク・言及の獲得**: SNS（X 等）、技術コミュニティ、関連リポジトリの README などから本サイトへ言及・リンクしてもらう導線を作る。
-- [ ] **インデックス状況のモニタリング**: 公開後、Search Console のカバレッジ / 検索パフォーマンスでインデックス状況と検索クエリを定期確認し、`description` やコンテンツを改善する。
-- [ ] **（任意）構造化データの検証**: Google のリッチリザルトテストや Schema Markup Validator で `FAQPage` / `BreadcrumbList` / `WebApplication` の認識を確認する。
+- **技術記事の執筆・公開**: Qiita / Zenn などにアプリの紹介記事を執筆・公開し、本サイトへのリンクを張る（被リンク獲得と認知拡大）。※内容・公開はアカウント所有者本人が行う。
+- **Google Search Console への登録**: サイト所有権を確認し、`sitemap.xml`（`https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/sitemap.xml`）を送信。主要 URL のインデックス登録をリクエスト。
+- **Bing Webmaster Tools への登録**: 同様にサイト登録とサイトマップ送信を実施（必要に応じて Search Console から取り込み）。
+- **被リンク・言及の獲得**: SNS（X 等）、技術コミュニティ、関連リポジトリの README などから本サイトへ言及・リンクしてもらう導線を作る。
+- **インデックス状況のモニタリング**: 公開後、Search Console のカバレッジ / 検索パフォーマンスでインデックス状況と検索クエリを定期確認し、`description` やコンテンツを改善する。
+- **（任意）構造化データの検証**: Google のリッチリザルトテストや Schema Markup Validator で `FAQPage` / `BreadcrumbList` / `WebApplication` の認識を確認する。
 
 > これらはリポジトリ内のコード変更では完結しない外部作業のため、実行せずにここへ記録します。完了したら本ファイルを削除（または `docs/issues/` へ確定内容を移行）し、一覧と `docs/index.md` を更新してください。
