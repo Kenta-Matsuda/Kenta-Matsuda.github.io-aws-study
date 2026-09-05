@@ -106,7 +106,7 @@ export const SAP_C02 = {
             {
               title: 'Exam Prep Standard Course: AWS Certified Solutions Architect - Professional',
               titleEn: 'Exam Prep Standard Course: AWS Certified Solutions Architect - Professional',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/14951/exam-prep-standard-course-aws-certified-solutions-architect-professional-sap-c02',
+              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-solutions-architect-professional-sap-c02',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
@@ -198,7 +198,7 @@ export const SAP_C02 = {
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
               titleEn: 'AWS Certification Official Practice Question Set (SAP-C02)',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/13272/aws-certified-solutions-architect-professional-official-practice-question-set-sap-c02-japanese',
+              url: 'https://skillbuilder.aws/search?searchText=aws-certified-solutions-architect-professional-official-practice-question-set-sap-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               noteEn: 'AWS Skill Builder: Free',
               recommend: true,
@@ -461,7 +461,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
                   note: 'Prescriptive Guidance: セキュリティリファレンスアーキテクチャ',
                   noteEn: 'Prescriptive Guidance: Security reference architecture',
                   recommend: true,
@@ -582,7 +582,7 @@ export const SAP_C02 = {
                 {
                   title: 'データベースの DR 戦略',
                   titleEn: 'Strategy for Database Disaster Recovery',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-database-disaster-recovery/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-database-disaster-recovery/',
                   note: 'Prescriptive Guidance: データベース固有のDR設計',
                   noteEn: 'Prescriptive Guidance: Database-specific DR design',
                 },
@@ -1078,7 +1078,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
                   note: 'Prescriptive Guidance: 組織全体のセキュリティ設計',
                   noteEn: 'Prescriptive Guidance: Organization-wide security design',
                 },
@@ -1241,8 +1241,8 @@ export const SAP_C02 = {
                 {
                   title: 'Amazon ElastiCache キャッシュ戦略',
                   titleEn: 'Amazon ElastiCache Caching Strategies',
-                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/red-ug/Strategies.html',
-                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/red-ug/Strategies.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/AmazonElastiCache/latest/dg/Strategies.html',
+                  urlEn: 'https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/Strategies.html',
                   note: 'Lazy Loading / Write-Through パターン',
                   noteEn: 'Lazy Loading / Write-Through patterns',
                 },
@@ -1519,8 +1519,8 @@ export const SAP_C02 = {
                 {
                   title: 'AWS Systems Manager Patch Manager',
                   titleEn: 'AWS Systems Manager Patch Manager',
-                  url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-patch.html',
-                  urlEn: 'https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-patch.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/patch-manager.html',
+                  urlEn: 'https://docs.aws.amazon.com/systems-manager/latest/userguide/patch-manager.html',
                   note: 'パッチ適用の自動化と管理',
                   noteEn: 'Patch automation and management',
                 },
@@ -1863,7 +1863,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS への移行のベストプラクティス',
                   titleEn: 'AWS Migration Best Practices',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/',
                   note: 'Prescriptive Guidance: 7Rの評価と移行計画',
                   noteEn: 'Prescriptive Guidance: 7Rs evaluation and migration planning',
                   recommend: true,
@@ -1879,7 +1879,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS 大規模移行ガイド',
                   titleEn: 'AWS Large Migration Guide',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/large-migration-guide/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/large-migration-guide/',
                   note: 'Prescriptive Guidance: ウェーブプランニングと移行の進め方',
                   noteEn: 'Prescriptive Guidance: Wave planning and migration approach',
                 },
@@ -1988,11 +1988,12 @@ export const SAP_C02 = {
                   recommend: true,
                 },
                 {
-                  title: 'AWS クラウド移行のデータ転送サービス',
-                  titleEn: 'Data Transfer Services for AWS Cloud Migration',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/data-migration-tools.html',
-                  note: 'Prescriptive Guidance: DataSync / Snow Family / Transfer Family の選定',
-                  noteEn: 'Prescriptive Guidance: Selecting DataSync / Snow Family / Transfer Family',
+                  title: 'AWS への移行方法の選択（AWS 意思決定ガイド）',
+                  titleEn: 'Choosing a Migration Approach on AWS (AWS Decision Guide)',
+                  url: 'https://docs.aws.amazon.com/decision-guides/latest/decision-guides/migration-on-aws-how-to-choose.html',
+                  urlEn: 'https://docs.aws.amazon.com/decision-guides/latest/decision-guides/migration-on-aws-how-to-choose.html',
+                  note: '移行方式と移行ツール（DataSync / Snowball / Transfer Family など）の選定基準を AWS 公式が整理（英語ページのみ）',
+                  noteEn: 'AWS official guidance on choosing a migration approach and tooling (DataSync, Snowball, Transfer Family, and more)',
                 },
                 {
                   title: 'AWS Schema Conversion Tool ユーザーガイド',
@@ -2100,7 +2101,7 @@ export const SAP_C02 = {
                 {
                   title: 'コンテナ化されたマイクロサービスの分解',
                   titleEn: 'Decomposing Monoliths into Containerized Microservices',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-decomposing-monoliths/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-decomposing-monoliths/',
                   note: 'Prescriptive Guidance: モノリスの分解パターン',
                   noteEn: 'Prescriptive Guidance: Monolith decomposition patterns',
                 },
