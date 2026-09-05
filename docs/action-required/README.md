@@ -68,4 +68,4 @@
 ## 現在の一覧
 
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](global-leaderboard.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） / 関連: #32
-- [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / MCP サーバ / LLM パイプライン） / 関連: #109
+- [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンドプロキシ / LLM パイプライン。grounding は AWS 公式リモート MCP 利用で自前ホスト不要） / 関連: #109
