@@ -163,6 +163,17 @@ const FEEDBACK_XP_DAY_KEY = 'asn_feedback_xp_day';
 // gates only the XP award to once per local day; play stays unlimited.
 const DAILY_CHALLENGE_XP_DAY_KEY = 'asn_daily_challenge_xp_day';
 
+// localStorage key recording the last state of the lightweight feedback nudge
+// (issue #100). Stored value is one of: 'dismissed' (user closed/declined the
+// nudge) or 'opened' (user acted on it). Either way the nudge is not shown
+// again, so it stays gentle and non-repetitive. This only affects the optional
+// nudge; the feedback button/modal are always available regardless.
+const FEEDBACK_NUDGE_KEY = 'asn_feedback_nudge_v1';
+
+// How many questions a visitor must answer before the feedback nudge appears,
+// so it only surfaces after some genuine engagement (never on first load).
+const FEEDBACK_NUDGE_MIN_QUESTIONS = 5;
+
 /** Local YYYY-MM-DD day string, matching storage.js's getLocalDayString(). */
 function feedbackLocalDayString(d = new Date()) {
   const year = d.getFullYear();
@@ -1353,6 +1364,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     renderXpDashboard({ els, exam, state: appState });
     renderLearningStatus({ els, exam, state: appState });
 
+    // Once the user has answered enough questions, surface the gentle feedback
+    // nudge (issue #100). Shown at most once (storage-guarded).
+    maybeShowFeedbackNudge({ els });
+
     // Advance session index for next question
     quizSession.currentIndex += 1;
     setCurrentParsedQuiz(null);
@@ -1576,6 +1591,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   // AI vote buttons are enabled only when an AI result exists
   reflectAiVoteUi();
+
+  // Gentle feedback nudge (issue #100): only appears for returning users who
+  // have already answered enough questions, and only once (see storage guard).
+  maybeShowFeedbackNudge({ els });
 
   // Content actions (event delegation)
   els.contentArea.addEventListener('click', async (e) => {
@@ -1868,6 +1887,12 @@ function getElements() {
     feedbackImageInput: document.getElementById('feedbackImageInput'),
     feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
     feedbackImagePreview: document.getElementById('feedbackImagePreview'),
+    feedbackCopyBtn: document.getElementById('feedbackCopyBtn'),
+    // Feedback nudge (issue #100)
+    feedbackNudge: document.getElementById('feedbackNudge'),
+    feedbackNudgeOpenBtn: document.getElementById('feedbackNudgeOpenBtn'),
+    feedbackNudgeDismissBtn: document.getElementById('feedbackNudgeDismissBtn'),
+    feedbackNudgeCloseBtn: document.getElementById('feedbackNudgeCloseBtn'),
     // OpenAI / Provider
     openaiKeyInput: document.getElementById('openaiKeyInput'),
     openaiKeyClearBtn: document.getElementById('openaiKeyClearBtn'),
@@ -2234,6 +2259,64 @@ function wireProfileHandlers({ els, state, getExamById }) {
 function wireToastHandlers({ els }) {
   els.milestoneToastCloseBtn?.addEventListener('click', () => hideMilestoneToast({ els }));
   els.streakMilestoneToastCloseBtn?.addEventListener('click', () => hideStreakMilestoneToast({ els }));
+
+  // Feedback nudge (issue #100): opening the modal counts as "acted on"; the
+  // close/"Not now" buttons count as "dismissed". Either outcome persists so
+  // the gentle prompt is never shown again.
+  els.feedbackNudgeOpenBtn?.addEventListener('click', () => {
+    markFeedbackNudge('opened');
+    hideFeedbackNudge({ els });
+    openFeedbackModal(els);
+  });
+  els.feedbackNudgeDismissBtn?.addEventListener('click', () => {
+    markFeedbackNudge('dismissed');
+    hideFeedbackNudge({ els });
+  });
+  els.feedbackNudgeCloseBtn?.addEventListener('click', () => {
+    markFeedbackNudge('dismissed');
+    hideFeedbackNudge({ els });
+  });
+}
+
+// Read the persisted feedback-nudge state ('opened' | 'dismissed' | '').
+function getFeedbackNudgeState() {
+  try {
+    return localStorage.getItem(FEEDBACK_NUDGE_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+// Persist the feedback-nudge outcome so it is not shown again. Best-effort:
+// a storage write failure must never break the UI.
+function markFeedbackNudge(state) {
+  try {
+    localStorage.setItem(FEEDBACK_NUDGE_KEY, String(state || 'dismissed'));
+  } catch {
+    // ignore storage write failures
+  }
+}
+
+// Show the gentle feedback nudge once, only after real engagement and only if
+// the user has neither dismissed nor acted on it before. Never auto-opens the
+// modal; the feedback button/modal remain available independently.
+function maybeShowFeedbackNudge({ els }) {
+  if (!els.feedbackNudge) return;
+  if (getFeedbackNudgeState()) return; // already opened or dismissed
+
+  let answered = 0;
+  try {
+    answered = getQuizHistory().length;
+  } catch {
+    answered = 0;
+  }
+  if (answered < FEEDBACK_NUDGE_MIN_QUESTIONS) return;
+
+  els.feedbackNudge.classList.remove('hidden');
+}
+
+function hideFeedbackNudge({ els }) {
+  els.feedbackNudge?.classList?.add('hidden');
 }
 
 function enforceUserNameIfNeeded({ els }) {
@@ -3912,6 +3995,12 @@ function wireFeedbackHandlers({ els }) {
     submitFeedback(els);
   });
 
+  // #101: copy-only path so users WITHOUT a GitHub account can still send
+  // feedback (they copy the composed text and share it however they like).
+  els.feedbackCopyBtn?.addEventListener('click', () => {
+    copyFeedbackText(els);
+  });
+
   // Allow Ctrl+Enter / Cmd+Enter to submit
   els.feedbackTextarea?.addEventListener('keydown', (e) => {
     if (e.isComposing) return;
@@ -4042,6 +4131,58 @@ function updateFeedbackCharCount(els) {
   els.feedbackCharCount.classList.toggle('text-gray-400', len <= FEEDBACK_MAX_LENGTH * 0.95);
 }
 
+// Compose the issue title/body from the user's feedback text + category.
+// Shared by the GitHub-issue submit path and the account-free copy path (#101)
+// so both produce identical, correctly-escaped content.
+function composeFeedbackIssue({ text, category }) {
+  const feedbackText = String(text).slice(0, FEEDBACK_MAX_LENGTH);
+  const categoryLabel = t(`feedbackModal.categories.${feedbackCategoryI18nKey(category)}`);
+  const issueTitle = t('feedbackModal.issueTitle', { category: categoryLabel });
+  // Interpolate the user-controlled `text` LAST (category first) so that any
+  // literal `{{...}}` sequence inside the user's feedback is never re-scanned
+  // by a subsequent replacement pass. t() substitutes params in object-key
+  // order, so key order here is load-bearing.
+  let issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
+  // When images are attached (#81), append a marker line so the user knows
+  // where to paste them in the opened GitHub issue. The bytes are never
+  // uploaded — GitHub's tokenless prefilled URL cannot carry attachments, so
+  // GitHub itself auto-uploads images when the user pastes/drops them.
+  if (feedbackImages.length > 0) {
+    issueBody += `\n\n${t('feedbackModal.issueImageMarker', { count: feedbackImages.length })}`;
+  }
+  return { issueBody, categoryLabel, issueTitle };
+}
+
+// #101: account-free path. Copy the composed feedback text to the clipboard so
+// a user who does not have (or does not want to use) a GitHub account can send
+// it by any channel they prefer, without ever opening the GitHub issue screen.
+function copyFeedbackText(els) {
+  const text = String(els.feedbackTextarea?.value || '').trim();
+  const category = String(els.feedbackCategorySelect?.value || 'general');
+
+  if (!text) {
+    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationEmpty'), 'text-red-600');
+    return;
+  }
+  if (text.length > FEEDBACK_MAX_LENGTH) {
+    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationLength'), 'text-red-600');
+    return;
+  }
+
+  const { issueBody } = composeFeedbackIssue({ text, category });
+  copyTextToClipboard(issueBody)
+    .then((ok) => {
+      showInlineMessage(
+        els.feedbackMessage,
+        t(ok ? 'feedbackModal.copied' : 'feedbackModal.copyFailed'),
+        ok ? 'text-teal-600' : 'text-red-600',
+      );
+    })
+    .catch(() => {
+      showInlineMessage(els.feedbackMessage, t('feedbackModal.copyFailed'), 'text-red-600');
+    });
+}
+
 function submitFeedback(els) {
   const text = String(els.feedbackTextarea?.value || '').trim();
   const category = String(els.feedbackCategorySelect?.value || 'general');
@@ -4058,22 +4199,8 @@ function submitFeedback(els) {
   // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
   // user click (static site => no token => tokenless prefilled URL pattern,
   // same as the X/tweet share). Never auto-popup.
-  const feedbackText = String(text).slice(0, FEEDBACK_MAX_LENGTH);
-  const categoryLabel = t(`feedbackModal.categories.${feedbackCategoryI18nKey(category)}`);
-  const issueTitle = t('feedbackModal.issueTitle', { category: categoryLabel });
-  // Interpolate the user-controlled `text` LAST (category first) so that any
-  // literal `{{...}}` sequence inside the user's feedback is never re-scanned
-  // by a subsequent replacement pass. t() substitutes params in object-key
-  // order, so key order here is load-bearing.
-  let issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
-  // When images are attached (#81), append a marker line so the user knows
-  // where to paste them in the opened GitHub issue. The bytes are never
-  // uploaded — GitHub's tokenless prefilled URL cannot carry attachments, so
-  // GitHub itself auto-uploads images when the user pastes/drops them.
+  const { issueBody, categoryLabel, issueTitle } = composeFeedbackIssue({ text, category });
   const hasImages = feedbackImages.length > 0;
-  if (hasImages) {
-    issueBody += `\n\n${t('feedbackModal.issueImageMarker', { count: feedbackImages.length })}`;
-  }
   const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
   const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
 

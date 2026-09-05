@@ -209,6 +209,10 @@
     "imageAdd": "Add images (click, or paste / drop here)",
     "imageHelp": "Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.",
     "imageRemove": "Remove image",
+    "noAccountNote": "No GitHub account? No problem. Just press \"Copy text\" below to copy your feedback, then send it however you like (e.g. to the developer). A GitHub account is only needed if you want to post the issue yourself.",
+    "copyText": "Copy text",
+    "copied": "Your feedback was copied to the clipboard. Send it however you like.",
+    "copyFailed": "Copy failed. Please select and copy the text manually.",
     "submitToIssue": "Submit as GitHub Issue",
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**Category:** {{category}}\n\n{{text}}\n\n---\nSent from the AWS Study Navigator app feedback form.",
@@ -217,6 +221,12 @@
     "sentWithImages": "The GitHub new-issue page opened in a new tab already prefilled with your feedback. Please paste your image(s) into the issue body, then submit. (A copy of your text is also on the clipboard as a backup.)",
     "validationEmpty": "Please enter feedback content.",
     "validationLength": "Please keep it within 1000 characters."
+  },
+  "feedbackNudge": {
+    "title": "Have a moment for feedback?",
+    "body": "Your feedback helps improve a service used by 4,000+ people. Even one line is welcome.",
+    "open": "Give feedback",
+    "dismiss": "Later"
   },
   "chat": {
     "title": "AI Tutor",
