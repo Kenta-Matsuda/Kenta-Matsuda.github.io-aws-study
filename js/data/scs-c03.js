@@ -106,7 +106,7 @@ export const SCS_C03 = {
             {
               title: 'Exam Prep Standard Course: AWS Certified Security - Specialty',
               titleEn: 'Exam Prep Standard Course: AWS Certified Security - Specialty',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18291/exam-prep-standard-course-aws-certified-security-specialty-scs-c02-english',
+              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-security-specialty-scs-c02-english',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
@@ -194,7 +194,7 @@ export const SCS_C03 = {
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
               titleEn: 'AWS Certification Official Practice Question Set',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/15232/aws-certified-security-specialty-official-practice-question-set-scs-c02-japanese',
+              url: 'https://skillbuilder.aws/search?searchText=aws-certified-security-specialty-official-practice-question-set-scs-c02-japanese',
               note: 'AWS Skill Builder: 無料',
               noteEn: 'AWS Skill Builder: Free',
               recommend: true,
@@ -570,8 +570,8 @@ export const SCS_C03 = {
                 {
                   title: 'AWS セキュリティインシデント対応ガイド',
                   titleEn: 'AWS Security Incident Response Guide',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-security-incident-response-guide/welcome.html',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/welcome.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-security-incident-response-guide/',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/',
                   note: 'インシデント対応のベストプラクティス',
                   noteEn: 'Incident response best practices',
                   recommend: true,
@@ -1490,7 +1490,7 @@ export const SCS_C03 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/welcome.html',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
                   note: 'Prescriptive Guidance: マルチアカウントセキュリティ設計',
                   noteEn: 'Prescriptive Guidance: Multi-account security design',
                   recommend: true,
