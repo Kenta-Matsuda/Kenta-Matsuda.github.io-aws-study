@@ -127,6 +127,7 @@
     "elapsed": "所要時間",
     "explanationList": "解説一覧",
     "nextQuestion": "次の問題",
+    "sourcesLabel": "出典（AWS公式ドキュメント）",
     "correctFeedback": "正解！ {{combo}}",
     "incorrectFeedback": "不正解 — 正解は {{letter}}",
     "summaryExcellent": "素晴らしい！",
@@ -193,7 +194,7 @@
   },
   "feedbackModal": {
     "title": "フィードバック",
-    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信すると、内容を差し込んだ GitHub Issue の作成画面が新しいタブで開きます。あとは内容を確認して送信するだけです。（入力内容はバックアップとしてクリップボードにもコピーされます。）",
+    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信すると、内容を差し込んだ GitHub Issue の作成画面が新しいタブで開きます（入力内容はバックアップとしてクリップボードにもコピーされます）。",
     "categories": {
       "general": "全般",
       "resources": "学習リソースの追加（BlackBelt・公式ドキュメント等）",
@@ -218,8 +219,8 @@
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**カテゴリ:** {{category}}\n\n{{text}}\n\n---\nAWS Study Navigator アプリのフィードバックフォームから送信されました。",
     "issueImageMarker": "<!-- ここに画像を{{count}}枚貼り付けてください -->",
-    "sent": "内容を差し込んだ GitHub の新規Issue作成画面を新しいタブで開きました。内容を確認して送信してください。（入力内容はバックアップとしてクリップボードにもコピーしてあります。）",
-    "sentWithImages": "内容を差し込んだ GitHub の新規Issue作成画面を新しいタブで開きました。本文に画像を貼り付けてから送信してください。（入力内容はバックアップとしてクリップボードにもコピーしてあります。）",
+    "sent": "Issue 作成画面を新しいタブで開きました。内容を確認して送信してください。",
+    "sentWithImages": "Issue 作成画面を新しいタブで開きました。本文に画像を貼り付けてから送信してください。",
     "validationEmpty": "フィードバック内容を入力してください。",
     "validationLength": "1000文字以内で入力してください。"
   },
@@ -341,7 +342,8 @@
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "必要な知識・スキル",
     "keyPoints": "ポイント",
-    "recommend": "おススメ"
+    "recommend": "おススメ",
+    "level": "技術レベル"
   },
   "learningStatus": {
     "selected": "選択中",

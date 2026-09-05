@@ -360,13 +360,17 @@ export function buildQuizSystemPrompt(examCode, examShortLabel) {
   if (getLocale() === 'en') {
     return (
       `You are an AWS certification exam expert. Create 1 multiple-choice question at the ${examCode} (${examShortLabel}) level.\n\n` +
+      `[Reliability Rules]\n` +
+      `- Base the question ONLY on content documented in the official AWS documentation. Do NOT guess or speculate.\n` +
+      `- Do NOT include non-existent services or features.\n` +
+      `- Include at least one supporting AWS official documentation URL in the explanation. The URL MUST be on the https://docs.aws.amazon.com/ domain (format: Reference: https://docs.aws.amazon.com/...). Do NOT fabricate URLs.\n\n` +
       `You MUST output ONLY the following JSON format (no markdown or other text):\n` +
       '```json\n' +
       '{\n' +
       '  "question": "Scenario-based question text",\n' +
       '  "choices": ["A. Choice 1", "B. Choice 2", "C. Choice 3", "D. Choice 4"],\n' +
       '  "correct": "B",\n' +
-      '  "explanation": "Brief explanation of why the answer is correct and why others are incorrect"\n' +
+      '  "explanation": "Brief explanation of why the answer is correct and why others are incorrect. End with Reference: an AWS official documentation URL"\n' +
       '}\n' +
       '```\n' +
       'Create a practical scenario-based question. Cover a different AWS service or topic each time — do not repeat the same service.'
@@ -375,9 +379,9 @@ export function buildQuizSystemPrompt(examCode, examShortLabel) {
   return (
     `あなたはAWS認定試験のエキスパートです。${examCode}（${examShortLabel}）レベルの4択問題を1問作成してください。\n\n` +
     `【信頼性ルール】\n` +
-    `- AWS公式ドキュメントに記載がある内容のみに基づいて出題してください。\n` +
+    `- AWS公式ドキュメントに記載がある内容のみに基づいて出題してください。推測や憶測で出題しないでください。\n` +
     `- 存在しないサービスや機能を問題に含めないでください。\n` +
-    `- 解説には根拠となるAWS公式ドキュメントのURLを1件以上含めてください（形式: 参考: https://docs.aws.amazon.com/...）。\n\n` +
+    `- 解説には根拠となるAWS公式ドキュメントのURLを1件以上含めてください。URLは必ず https://docs.aws.amazon.com/ ドメインのものにしてください（形式: 参考: https://docs.aws.amazon.com/...）。URLを捏造しないでください。\n\n` +
     `必ず以下のJSON形式のみで出力してください（マークダウンやそれ以外のテキストは不要です）：\n` +
     '```json\n' +
     '{\n' +
@@ -419,7 +423,9 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
       `[IMPORTANT] This is a speed-run question:\n` +
       `- Question text should be 1-2 sentences (no scenario needed, directly test knowledge)\n` +
       `- Choices should be short (service names or feature names)\n` +
-      `- Should be answerable within 30 seconds\n\n` +
+      `- Should be answerable within 30 seconds\n` +
+      `- Base the question ONLY on content documented in the official AWS documentation; do NOT guess or speculate\n` +
+      `- Any reference URL in the explanation MUST be on the https://docs.aws.amazon.com/ domain; do NOT fabricate URLs\n\n` +
       `You MUST output ONLY the following JSON format (no markdown or other text):\n` +
       '```json\n' +
       '{\n' +
@@ -437,7 +443,8 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
     `- 問題文は1〜2文で簡潔に（シナリオは不要、知識を直接問う形式）\n` +
     `- 選択肢はサービス名や機能名など短いものにする\n` +
     `- 30秒以内に解答できるレベルの問題にする\n` +
-    `- AWS公式ドキュメントに記載がある内容のみ出題すること\n\n` +
+    `- AWS公式ドキュメントに記載がある内容のみ出題すること（推測や憶測で出題しない）\n` +
+    `- 解説に参考URLを載せる場合は必ず https://docs.aws.amazon.com/ ドメインのものにし、URLを捏造しないこと\n\n` +
     `必ず以下のJSON形式のみで出力してください（マークダウンやそれ以外のテキストは不要です）：\n` +
     '```json\n' +
     '{\n' +
@@ -565,7 +572,8 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
       `1. Explain specifically why the correct choice is right\n` +
       `2. Explain why each incorrect choice (A/B/C/D) is inappropriate in 1-2 sentences each\n` +
       `3. Reference relevant AWS best practices or Well-Architected Framework principles\n` +
-      `4. Cite 1-2 relevant AWS official documentation URLs (format: Reference: https://docs.aws.amazon.com/...)\n\n` +
+      `4. Cite 1-2 relevant AWS official documentation URLs. Every cited URL MUST be on the https://docs.aws.amazon.com/ domain (format: Reference: https://docs.aws.amazon.com/...). Do NOT fabricate URLs.\n` +
+      `Base every question and explanation ONLY on content documented in the official AWS documentation; do NOT guess or speculate.\n\n` +
       `You MUST output ONLY the following JSON format (no markdown or other text):\n` +
       '```json\n' +
       '{\n' +
@@ -590,7 +598,8 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
     `1. 正解の選択肢が正しい理由を具体的に説明\n` +
     `2. 不正解の各選択肢（A/B/C/D）がなぜ不適切かを個別に1〜2文で説明\n` +
     `3. 関連するAWSのベストプラクティスやWell-Architectedフレームワークの原則に言及\n` +
-    `4. 根拠として関連するAWS公式ドキュメントのURLを1〜2件引用（形式: 参考: https://docs.aws.amazon.com/...）\n\n` +
+    `4. 根拠として関連するAWS公式ドキュメントのURLを1〜2件引用。引用するURLは必ず https://docs.aws.amazon.com/ ドメインのものにし、URLを捏造しないこと（形式: 参考: https://docs.aws.amazon.com/...）\n` +
+    `問題文・解説はすべてAWS公式ドキュメントに記載がある内容のみに基づき、推測や憶測で出題しないでください。\n\n` +
     `必ず以下のJSON形式のみで出力してください（マークダウンやそれ以外のテキストは不要です）：\n` +
     '```json\n' +
     '{\n' +
