@@ -1,8 +1,8 @@
 # AWS 公式リソース探索ノウハウ
 
-- 最終更新日: 2026-09-05
+- 最終更新日: 2026-09-06
 - 対象範囲: `js/data/` 配下の学習リソース（`resources[].items[].url` / `urlEn`）を、より良い最新の AWS 公式ドキュメントへ差し替え・追加するための探索ノウハウ
-- 出典/参照: issue #69 / issue #137 / `.kiro/agents/exam-content-maintainer.md` / AWS 公式ドメイン
+- 出典/参照: issue #69 / issue #137 / `.kiro/agents/exam-content-maintainer.md` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / AWS 公式ドメイン
 
 > このページは、探索を実行するたびに得た知見を追記・更新して育てる Wiki ページです。スキーマ（メタデータ + 更新履歴）は [README](README.md) を参照してください。
 
@@ -44,7 +44,68 @@
 - **重複**: 同一テーマで複数リンクが重複していないか（重複は整理候補）。
 - 判断が割れるもの（どちらの公式ページが「より良い」か等）は無理に置換せず、**根拠と候補を残してレビューに委ねる**。
 
-> 実際の web 検索・実アクセスによる検証は、ネットワーク可能な環境（利用者の Kiro automations）で実行される前提です。本サンドボックス（INTEGRATIONS_ONLY）では外部アクセスができないため、ここには**判断基準と手順**を蓄積します。
+### 手作業ではなくスクリプトで検証する（必須の第一手）
+
+死活チェックを LLM が 1 件ずつ自然言語で行うのは非効率かつ不正確です。**必ず次のスクリプトを先に実行し、要約だけを読み込む**こと（詳細と実測効果は [効率化・自己拡張ログ](efficiency-log.md) 参照）。
+
+```bash
+# 全試験の死活・リダイレクト・ソフト 404・フラグメント陳腐化を分類して一覧化
+node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json
+
+# 差し替え候補の実在とリダイレクト先を、書き込む前に確認する
+node scripts/check-resource-links.mjs --urls "https://candidate-a,https://candidate-b" --all
+
+# ガイド内の実在ページ / ページ内アンカーを列挙して、より適切な章を事実ベースで選ぶ
+node scripts/list-aws-doc-pages.mjs <guide-url> --titles
+node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
+```
+
+**候補 URL を推測で書き込まないこと。** `--urls` で 200 かつリダイレクトなしを確認してからデータファイルへ反映します。
+
+### HTTP ステータスだけでは判定できない落とし穴（実測で確認済み）
+
+1. **ロケールリダイレクトはリンク切れではない**（実測 206 件）。`aws.amazon.com/certification/...` は `Accept-Language` や地域に応じて `aws.amazon.com/jp/certification/...` へ、`docs.aws.amazon.com/...` は `docs.aws.amazon.com/ja_jp/...` へ相互にリダイレクトされます。`url`（日本語）と `urlEn`（英語）を対で持つ本リポジトリでは大量に発生するため、**先頭のロケールセグメント（`jp` / `ja_jp` など）を除いて比較**しないと誤検知に埋もれます。`check-resource-links.mjs` はこれを `locale-redirect` として分離し、既定で出力しません。
+2. **ソフト 404（親ページへの吸収）が最重要シグナル**（実測 24 件）。AWS ドキュメントは削除されたページを 404 にせず、**そのガイドのルートへ 200 でリダイレクト**します（例: `.../sagemaker/latest/dg/clarify-fairness-and-explainability.html` → `.../sagemaker/latest/dg/`）。ステータスだけ見ると健全に見えるため、**リダイレクト先が元 URL のより浅いパスかどうか**で判定します（`soft-404` 分類）。
+3. **テキストフラグメント（`#:~:text=`）の陳腐化はステータスに出ない**（実測 19 件のうち偽陽性を除いて 5 件が実害）。Black Belt 一覧ページのように 1 ページへ多数のアンカーを張っている場合、ページは 200 でも**アンカー先の文字列が消えている**ことがあります。`--fragments` で本文を取得して実在を照合します。照合時は**本文と needle の両方に同じ空白正規化**をかけること（フラグメントに `%0A`（改行）が含まれると、正規化しないと全件が偽陽性になる）。
+4. **SPA ドメインは全パスで 200 を返すため死活判定に使えない**。`skillbuilder.aws` は存在しないパス（例: `/this-path-should-not-exist-xyz123`）でも 200 を返します。Skill Builder のリンクは**ステータスでは検証できない**ため、リダイレクト先のクエリパラメータなど別の証拠で判断します（下記参照）。
+5. **`d1.awsstatic.com` の PDF は 403 を返すことがある**（実測 4 件）。ボット対策の可能性が高く、リンク切れとは断定できません。`forbidden` として分離し、人間の目視確認に委ねます。
+
+### 実行環境について
+
+実際の HTTP アクセスによる検証は、**ネットワークが利用可能な環境**（利用者の Kiro automations 等）で実行します。外部アクセスが遮断された環境（INTEGRATIONS_ONLY）では上記スクリプトの `--no-fetch`（抽出と重複検出のみ）までしか実行できないため、その場合は**未検証である旨を PR 本文に明記**します。
+
+## 既知の URL 移転パターン（2026-09-06 実測）
+
+同じ形の移転が複数試験に波及します。1 件見つけたら**同じパターンを全試験で検索**してください。
+
+| パターン | 旧 | 新 | 備考 |
+| --- | --- | --- | --- |
+| AI/ML 系プロダクトページの `ai/` 配下への再編 | `aws.amazon.com/machine-learning/`<br>`aws.amazon.com/machine-learning/ai-services/`<br>`aws.amazon.com/machine-learning/responsible-ai/`<br>`aws.amazon.com/generative-ai/use-cases/` | `aws.amazon.com/ai/machine-learning/`<br>`aws.amazon.com/ai/services/`<br>`aws.amazon.com/ai/responsible-ai/`<br>`aws.amazon.com/ai/generative-ai/use-cases/` | 恒久リダイレクトあり |
+| SageMaker プロダクトページの `sagemaker/ai/` 配下への再編 | `aws.amazon.com/sagemaker/clarify/`<br>`aws.amazon.com/sagemaker/ml-governance/` | `aws.amazon.com/sagemaker/ai/clarify/`<br>`aws.amazon.com/sagemaker/ai/ml-governance/` | `sagemaker-ai/...` ではなく `sagemaker/ai/...` |
+| 意思決定ガイドのフラット化 | `docs.aws.amazon.com/decision-guides/latest/<slug>/<slug>.html` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/<slug>.html` | 例: `waf-or-shield.html` / `genai-guide.html`。日本語版は無く `ja_jp/` を付けても英語ページへ寄せられる |
+| 意思決定ガイドの `aws.amazon.com/getting-started/` からの移設 | `aws.amazon.com/getting-started/decision-guides/...` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/...` | 旧 URL は **404** |
+| ElastiCache ドキュメントのガイド統合 | `.../AmazonElastiCache/latest/red-ug/*`<br>`.../AmazonElastiCache/latest/UserGuide/*` | `.../AmazonElastiCache/latest/dg/*` | Redis/Memcached 別ガイドが `dg` に統合 |
+| Skill Builder の移転 | `explore.skillbuilder.aws/learn/course/internal/view/elearning/<id>/<slug>` | （個別コース URL は未確定） | 旧 URL は `skillbuilder.aws/search?searchText=<slug>&showRedirectNotFoundBanner=true` へ飛ぶ。**`showRedirectNotFoundBanner=true` は AWS 自身が「移行先を見つけられなかった」と示すフラグ**であり、旧コース ID が失効した確定的な証拠。SPA なのでステータスでは検証できない |
+| Amazon Quick（旧 Quick Suite） | `aws.amazon.com/quicksuite/` | `aws.amazon.com/quick/` | AIB-C01 試験ガイドの表記も「Amazon Quick」 |
+
+## 「新規顧客の受付を終了」したサービスの扱い（重要）
+
+AWS は一部サービスを**廃止せずに新規受付のみ終了**します。ページは 200 のまま残り、リンク死活チェックでは検出できないため、**リソースの内容確認時に本文の `Note` を読む**必要があります。
+
+判定の手掛かり:
+
+- 本文冒頭の `Note` に `is no longer open to new customers` / `we do not plan to introduce new features` が書かれている。
+- 同じガイド内に `<service>-availability-change.html` という「提供状況の変更」ページが存在する（`scripts/list-aws-doc-pages.mjs` の目次に現れる）。
+
+2026-09-06 時点で確認したもの:
+
+- **Amazon SageMaker Clarify** — 新規顧客の受付終了。出典: [Clarify availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-availability-change.html)。AWS は代替として SageMaker AI の監視リファレンス実装 / SHAP / SageMaker AI MLflow / Amazon CloudWatch / **Amazon Bedrock Evaluations**・**Amazon Bedrock Guardrails** を案内している。
+- **Amazon SageMaker Model Monitor** — 新規顧客の受付終了。出典: [Amazon SageMaker Model Monitor availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-availability-change.html)。
+
+取り扱い方針:
+
+- リンクが生きていても **`recommend: true` は外す**（新規に使えないサービスを「おすすめ」として提示しない）。
+- 試験範囲の概念理解に必要なら**リンクは残し、`note` / `noteEn` に受付終了の事実を明記**する。削除は、より適切な現行リソースに置き換えられる場合に限る。
 
 ## ブログの技術レベル判定基準 (Level 100/200/300/400)
 
@@ -118,12 +179,14 @@ issue #137 では「AWS re:Post のリソースがほとんどないが、AWS �
 3. 技術レベルが分かる場合は、上記「ブログの技術レベル判定基準」に従い `level` / `levelEn` を付与する。
 4. 変更した JS は `env -u NODE_OPTIONS node --check <ファイル>` で構文チェックする。
 
-### 実行環境（重要）
+### 実行環境
 
-- **新しい re:Post URL の実地収集・死活検証・執筆者や鮮度の確認は、外部 web アクセスを要するため本サンドボックス（INTEGRATIONS_ONLY）では実行不能**です。これらは**ネットワーク可能な環境（利用者の Kiro automations / `.kiro/agents/exam-content-maintainer.md` の `exam-content-maintainer` エージェント）**で実行してください。本ページには、その環境で走らせる**判断基準と手順**のみを蓄積します（issue #137）。
+- 新しい re:Post URL の実地収集・死活検証・執筆者や鮮度の確認は**外部 web アクセスを要します**。ネットワークが利用可能な環境なら本ページ冒頭のスクリプトでそのまま検証できます。外部アクセスが遮断された環境（INTEGRATIONS_ONLY）では実行できないため、その場合は**未検証である旨を PR 本文に明記**してください（issue #137）。
+- なお `repost.aws` は SPA 寄りの挙動をする可能性があるため、**HTTP ステータス 200 だけを根拠に「生きている」と判断しない**こと（[SPA ドメインの落とし穴](#http-ステータスだけでは判定できない落とし穴実測で確認済み)と同じ注意）。
 
 ## 更新履歴
 
+- 2026-09-06: 初のネットワーク接続下での全試験棚卸しを実施し、実測に基づいて大幅に更新。(1) 死活チェックを `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` によるスクリプト実行を必須の第一手とする手順へ変更。(2)「HTTP ステータスだけでは判定できない落とし穴」（ロケールリダイレクト / ソフト 404 / テキストフラグメント陳腐化 / SPA ドメイン / `d1.awsstatic.com` の 403）を追記。(3)「既知の URL 移転パターン」表と「新規顧客の受付を終了したサービスの扱い」節を新設。(4) **従来「本サンドボックス（INTEGRATIONS_ONLY）では外部アクセスができない」と断定していた記述を訂正**し、環境によってネットワークが利用可能である前提に改めた（実行環境に応じて判断し、未検証点を PR に明記する方針へ統一）。
 - 2026-09-03: 初版作成（issue #69）。信頼ドメイン一覧・検索クエリの型・評価基準・死活/鮮度チェックの観点を整理。
 - 2026-09-05: issue #137: 技術レベル(level)データフィールドの追加に伴う判定基準（Level 100/200/300/400 の規約・手掛かり・付与ルール）と、AWS re:Post (repost.aws) リソースの探索・検証手順を追記。
 - 2026-09-05: issue #137 レビュー反映: レベル付与作業を「(a) オフラインで完結する backfill（`note`/`title` に既存の明示的手掛かりがある場合は転記のみ・ネットワーク不要）」と「(b) ネットワークが必要な実地検証」に切り分けて明記。ANS の `note` に `(Level NNN)` を持つ全アイテムの `level` backfill を完了（オフラインで実施）。
