@@ -17,6 +17,10 @@ import {
   addXp,
   getXpSummary,
   getStreakInfo,
+  getStudyReminderEnabled,
+  setStudyReminderEnabled,
+  getCelebratedStreakMilestone,
+  setCelebratedStreakMilestone,
   addQuizResult,
   getQuizHistory,
   getQuizAnalytics,
@@ -1460,6 +1464,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // ── Settings Modal: Language & Theme Switches ──
   wireSettingsModalSwitches({ els });
 
+  // ── Settings Modal: opt-in local study reminder ──
+  wireStudyReminder(els);
+
   // 初期表示
   setExam(defaultExamId);
 
@@ -1830,6 +1837,10 @@ function getElements() {
     milestoneToastText: document.getElementById('milestoneToastText'),
     milestoneToastCloseBtn: document.getElementById('milestoneToastCloseBtn'),
 
+    streakMilestoneToast: document.getElementById('streakMilestoneToast'),
+    streakMilestoneToastText: document.getElementById('streakMilestoneToastText'),
+    streakMilestoneToastCloseBtn: document.getElementById('streakMilestoneToastCloseBtn'),
+
     batchProgressToast: document.getElementById('batchProgressToast'),
     batchProgressIcon: document.getElementById('batchProgressIcon'),
     batchProgressTitle: document.getElementById('batchProgressTitle'),
@@ -1954,6 +1965,13 @@ function getElements() {
     streakCount: document.getElementById('streakCount'),
     streakWeekDots: document.getElementById('streakWeekDots'),
     streakMessage: document.getElementById('streakMessage'),
+    streakNudge: document.getElementById('streakNudge'),
+    streakNudgeText: document.getElementById('streakNudgeText'),
+    streakNudgeCloseBtn: document.getElementById('streakNudgeCloseBtn'),
+
+    // Study reminder (opt-in local notification)
+    studyReminderToggle: document.getElementById('studyReminderToggle'),
+    studyReminderStatus: document.getElementById('studyReminderStatus'),
 
     // Daily Highlight (narrative)
     dailyHighlight: document.getElementById('dailyHighlight'),
@@ -2215,6 +2233,7 @@ function wireProfileHandlers({ els, state, getExamById }) {
 
 function wireToastHandlers({ els }) {
   els.milestoneToastCloseBtn?.addEventListener('click', () => hideMilestoneToast({ els }));
+  els.streakMilestoneToastCloseBtn?.addEventListener('click', () => hideStreakMilestoneToast({ els }));
 }
 
 function enforceUserNameIfNeeded({ els }) {
@@ -2454,10 +2473,9 @@ function renderXpDashboard({ els, exam, state }) {
   // Streak display
   renderStreakDisplay(els);
 
-  // Request notification permission early
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
+  // Opt-in local study reminder: only act when the user has enabled it.
+  // No permission is requested here unless the user opted in (see wireStudyReminder).
+  maybeFireStudyReminder(els);
 
   // Initialize carousel (only once)
   initDashboardCarousel(els);
@@ -2540,6 +2558,17 @@ function initDashboardCarousel(els) {
   update();
 }
 
+// Streak milestones (in days) that trigger an intrinsic-motivation celebration.
+const STREAK_MILESTONES = [7, 14, 30, 60, 100];
+
+function highestReachedStreakMilestone(current) {
+  let reached = 0;
+  for (const m of STREAK_MILESTONES) {
+    if (current >= m) reached = m;
+  }
+  return reached;
+}
+
 function renderStreakDisplay(els) {
   const streak = getStreakInfo();
   if (els.streakCount) {
@@ -2558,6 +2587,10 @@ function renderStreakDisplay(els) {
         : t('dashboard.streak.startNew');
     }
   }
+
+  // Intrinsic-motivation celebration: when the user crosses a new streak
+  // milestone (7/14/30/...), celebrate once with a toast + confetti.
+  maybeCelebrateStreakMilestone(els, streak);
   if (els.streakWeekDots) {
     const days = [t('days.mon'), t('days.tue'), t('days.wed'), t('days.thu'), t('days.fri'), t('days.sat'), t('days.sun')];
     const today = new Date().getDay(); // 0=Sun
@@ -2587,6 +2620,135 @@ function renderStreakDisplay(els) {
       `.trim();
     }).join('');
   }
+}
+
+// Celebrate crossing a new streak milestone once (intrinsic motivation).
+// Reuses the milestone toast + confetti pattern already used for XP milestones.
+function maybeCelebrateStreakMilestone(els, streak) {
+  if (!streak || !streak.hadActivityToday) return;
+  const reached = highestReachedStreakMilestone(streak.current);
+  if (reached <= 0) return;
+
+  const alreadyCelebrated = getCelebratedStreakMilestone();
+  if (reached <= alreadyCelebrated) return;
+
+  setCelebratedStreakMilestone(reached);
+
+  showStreakMilestoneToast({ els, days: reached });
+}
+
+// Streak-milestone toast uses its OWN element + timer (distinct from the XP
+// milestone toast) so a single quiz answer that crosses both an XP title and a
+// streak milestone shows both celebrations instead of one clobbering the other.
+function showStreakMilestoneToast({ els, days }) {
+  if (!els.streakMilestoneToast || !els.streakMilestoneToastText) return;
+  els.streakMilestoneToastText.textContent = t('dashboard.streak.milestoneToast', { days });
+  els.streakMilestoneToast.classList.remove('hidden');
+  launchConfetti(els.confettiCanvas);
+  window.clearTimeout?.(els.__streakMilestoneToastTimer);
+  els.__streakMilestoneToastTimer = window.setTimeout(() => {
+    hideStreakMilestoneToast({ els });
+  }, 4500);
+}
+
+function hideStreakMilestoneToast({ els }) {
+  els.streakMilestoneToast?.classList?.add('hidden');
+}
+
+// ─── Study Reminder (opt-in local notification) ─────────────
+
+// Show the in-app streak nudge banner (client-side only, no network).
+function showStreakNudge(els, message) {
+  if (!els.streakNudge) return;
+  if (els.streakNudgeText) els.streakNudgeText.textContent = message;
+  els.streakNudge.classList.remove('hidden');
+}
+
+function hideStreakNudge(els) {
+  els.streakNudge?.classList?.add('hidden');
+}
+
+// Fire a local (client-side) study reminder when the streak is at risk and the
+// user has opted in. Feature-detects the Notification API and degrades to an
+// in-app nudge; never throws when Notification is unavailable or denied.
+function maybeFireStudyReminder(els) {
+  if (!getStudyReminderEnabled()) return;
+
+  const streak = getStreakInfo();
+  // "At risk" = the user has an active streak but has not studied today yet.
+  if (streak.hadActivityToday || streak.current <= 0) return;
+
+  const title = t('dashboard.streak.reminderTitle');
+  const body = t('dashboard.streak.reminderBody', { count: streak.current });
+
+  // In-app nudge always shows as graceful degradation.
+  showStreakNudge(els, body);
+
+  // Local OS notification (best effort, feature-detected).
+  // NOTE: we intentionally reference the SVG icon here. Some platforms ignore
+  // SVG notification icons (falling back to a default glyph), but the raster
+  // PNG app icons only exist on the #97 branch and are not present on this
+  // branch, so pointing at a PNG now would be a dead asset reference. Once #97
+  // merges to main, switch this to a raster PNG (e.g. assets/icon-192.png).
+  try {
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body, icon: 'assets/icon.svg' });
+    }
+  } catch { /* ignore: notifications are optional */ }
+}
+
+// Wire the opt-in study reminder toggle in the settings modal.
+function wireStudyReminder(els) {
+  const toggle = els.studyReminderToggle;
+  const statusEl = els.studyReminderStatus;
+  const supported = typeof window !== 'undefined' && 'Notification' in window;
+
+  const reflect = () => {
+    const enabled = getStudyReminderEnabled();
+    if (toggle) toggle.checked = enabled;
+    if (!statusEl) return;
+    if (!supported) {
+      statusEl.textContent = t('dashboard.streak.reminderUnsupported');
+      return;
+    }
+    if (!enabled) {
+      statusEl.textContent = t('dashboard.streak.reminderOff');
+      return;
+    }
+    // Enabled: reflect the underlying permission state.
+    const perm = (typeof Notification !== 'undefined' && Notification.permission) || 'default';
+    if (perm === 'denied') {
+      statusEl.textContent = t('dashboard.streak.reminderDenied');
+    } else if (perm === 'granted') {
+      statusEl.textContent = t('dashboard.streak.reminderOn');
+    } else {
+      statusEl.textContent = t('dashboard.streak.reminderInApp');
+    }
+  };
+
+  if (toggle && !supported) {
+    toggle.disabled = true;
+  }
+
+  reflect();
+
+  els.streakNudgeCloseBtn?.addEventListener('click', () => hideStreakNudge(els));
+
+  toggle?.addEventListener('change', () => {
+    const wantOn = Boolean(toggle.checked);
+    setStudyReminderEnabled(wantOn);
+
+    // Request OS notification permission on opt-in (feature-detected, guarded).
+    if (wantOn && supported) {
+      try {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(() => reflect()).catch(() => reflect());
+        }
+      } catch { /* ignore */ }
+    }
+    reflect();
+  });
 }
 
 // ─── Daily Highlight (物語化) ────────────────────────────────
