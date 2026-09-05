@@ -71,7 +71,16 @@
       "ongoing": "{{count}} days in a row! Keep going 💪",
       "todayActive": "Great job learning today!",
       "atRisk": "Study today to keep your streak!",
-      "startNew": "Start a new study streak today!"
+      "startNew": "Start a new study streak today!",
+      "milestoneToast": "🔥 {{days}}-day streak reached! Keep it up!",
+      "milestoneToastTitle": "Streak Milestone Reached!",
+      "reminderTitle": "AWS Study Navigator",
+      "reminderBody": "Your {{count}}-day streak is about to break. Study today to keep it going!",
+      "reminderUnsupported": "This browser does not support notifications, so reminders show only while the app is open.",
+      "reminderOff": "Reminder is off.",
+      "reminderOn": "Reminder is on (notifications allowed).",
+      "reminderInApp": "Reminder is on (notifications not granted, so we will nudge you inside the app).",
+      "reminderDenied": "Notifications are blocked. Allow them in your browser settings to receive them (we will still nudge you in the app)."
     },
     "milestone": {
       "title": "Title",
@@ -154,6 +163,9 @@
     "themeLight": "Light",
     "themeDark": "Dark",
     "themeSystem": "System",
+    "reminderLabel": "Study Reminder",
+    "reminderToggle": "Remind me to keep my streak",
+    "reminderNote": "This is a local reminder shown while the app is open. Push notifications while the app is closed require a server and are not available on this static site.",
     "aiProvider": "AI Provider",
     "gemini": "Gemini",
     "openai": "OpenAI",

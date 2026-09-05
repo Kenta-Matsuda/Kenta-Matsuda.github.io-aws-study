@@ -1476,6 +1476,13 @@
                                 <div class="mt-4">
                                     <div id="streakWeekDots" class="flex gap-2 mt-1"></div>
                                     <p id="streakMessage" class="text-sm text-gray-500 mt-3" data-i18n="dashboard.streak.keepGoing">Keep learning today to extend your streak!</p>
+                                    <div id="streakNudge" class="hidden mt-3 flex items-start gap-2 rounded-lg border border-orange-200 bg-orange-50 p-3">
+                                        <i class="fas fa-bell text-orange-500 mt-0.5"></i>
+                                        <p id="streakNudgeText" class="flex-1 text-xs text-orange-800">-</p>
+                                        <button id="streakNudgeCloseBtn" type="button" class="text-orange-400 hover:text-orange-600" aria-label="Close">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1828,6 +1835,22 @@
 
                 <hr class="border-gray-200">
 
+                <!-- Study Reminder (opt-in local notification) -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.reminderLabel">Study Reminder</label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input id="studyReminderToggle" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-orange-500 focus:ring-orange-400">
+                        <span class="text-sm text-gray-700" data-i18n="settings.reminderToggle">Remind me to keep my streak</span>
+                    </label>
+                    <p id="studyReminderStatus" class="text-gray-500 text-xs mt-2">-</p>
+                    <p class="text-gray-400 text-xs mt-1" data-i18n="settings.reminderNote">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        This is a local reminder shown while the app is open. Push notifications while the app is closed require a server and are not available.
+                    </p>
+                </div>
+
+                <hr class="border-gray-200">
+
                 <!-- AI Provider Switch -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.aiProvider">AI Provider</label>
@@ -2035,6 +2058,24 @@
                     <div id="milestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
                 </div>
                 <button id="milestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Streak Milestone Toast (fixed, dedicated so it never clobbers the XP milestone toast) -->
+    <div id="streakMilestoneToast" class="hidden fixed top-24 right-4 z-[1100] max-w-sm">
+        <div class="bg-white border border-orange-200 shadow-lg rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-gray-900" data-i18n="dashboard.streak.milestoneToastTitle">Streak Milestone!</div>
+                    <div id="streakMilestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
+                </div>
+                <button id="streakMilestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

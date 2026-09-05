@@ -9,6 +9,7 @@
 - [UI構造の全面リファクタリング](issues/ui-restructure.md)
 - [試験作成/更新用エージェントの作成と最適化 (#69)](issues/exam-content-maintainer-agent.md)
 - [学習ダッシュボードのXPウォーカー刷新 (#102)](issues/xp-walker-redesign.md)
+- [Duolingo 風の学習継続エンゲージメント (#107)](issues/streak-engagement.md)
 
 ## LLM Wiki（docs/wiki/）
 
@@ -25,3 +26,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 
 - [要人間対応事項の運用ルール（README）](action-required/README.md)
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](action-required/global-leaderboard.md) — 🔴 未対応（要対応） / 関連: #32
+- [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](action-required/streak-push-notifications.md) — 🔴 未対応（要対応） / 関連: #107

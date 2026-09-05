@@ -4,6 +4,8 @@ const API_KEY_STORAGE_KEY = 'gemini_api_key';
 const OPENAI_KEY_STORAGE_KEY = 'openai_api_key';
 const AI_PROVIDER_STORAGE_KEY = 'ai_provider'; // 'gemini' | 'openai'
 const THEME_STORAGE_KEY = 'asn_theme'; // 'light' | 'dark' | 'system'
+const STUDY_REMINDER_STORAGE_KEY = 'asn_study_reminder'; // 'on' | 'off'
+const STREAK_CELEBRATION_STORAGE_KEY = 'asn_streak_celebrated_v1'; // last celebrated milestone (number)
 
 const STUDY_STATE_STORAGE_KEY = 'asn_study_state_v1';
 
@@ -13,6 +15,8 @@ export function resetAppStorage() {
   localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
   localStorage.removeItem(AI_PROVIDER_STORAGE_KEY);
   localStorage.removeItem(THEME_STORAGE_KEY);
+  localStorage.removeItem(STUDY_REMINDER_STORAGE_KEY);
+  localStorage.removeItem(STREAK_CELEBRATION_STORAGE_KEY);
   localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
   try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
 }
@@ -603,6 +607,49 @@ export function getStreakInfo() {
     current,
     hadActivityToday: offsets[0] > 0,
   };
+}
+
+// ─── Study Reminder (opt-in local notification) ─────────────
+
+/**
+ * Whether the user has opted in to a local study reminder.
+ * Purely client-side: gates the Web Notifications API and in-app nudge.
+ * @returns {boolean}
+ */
+export function getStudyReminderEnabled() {
+  return localStorage.getItem(STUDY_REMINDER_STORAGE_KEY) === 'on';
+}
+
+/**
+ * Save the study reminder opt-in preference.
+ * @param {boolean} enabled
+ * @returns {boolean} the stored value
+ */
+export function setStudyReminderEnabled(enabled) {
+  const on = Boolean(enabled);
+  localStorage.setItem(STUDY_REMINDER_STORAGE_KEY, on ? 'on' : 'off');
+  return on;
+}
+
+/**
+ * Milestone (in days) that has already been celebrated, so the same
+ * streak-milestone celebration does not fire repeatedly.
+ * @returns {number}
+ */
+export function getCelebratedStreakMilestone() {
+  const v = Number(localStorage.getItem(STREAK_CELEBRATION_STORAGE_KEY) || 0);
+  return Number.isFinite(v) && v > 0 ? v : 0;
+}
+
+/**
+ * Record the highest streak milestone (in days) that has been celebrated.
+ * @param {number} milestone
+ * @returns {number}
+ */
+export function setCelebratedStreakMilestone(milestone) {
+  const m = Math.max(0, Math.floor(Number(milestone || 0)));
+  localStorage.setItem(STREAK_CELEBRATION_STORAGE_KEY, String(m));
+  return m;
 }
 
 // ─── Theme (Dark Mode) ──────────────────────────────────────

@@ -71,7 +71,16 @@
       "ongoing": "{{count}}日連続！この調子で続けよう 💪",
       "todayActive": "今日もがんばってるね！",
       "atRisk": "今日もアクセスしてストリークを守ろう！",
-      "startNew": "今日から連続学習をスタートしよう！"
+      "startNew": "今日から連続学習をスタートしよう！",
+      "milestoneToast": "🔥 {{days}}日連続達成！この調子で続けよう！",
+      "milestoneToastTitle": "ストリークのマイルストーン達成！",
+      "reminderTitle": "AWS Study Navigator",
+      "reminderBody": "{{count}}日連続の学習ストリークが途切れそうです。今日も学習して継続しよう！",
+      "reminderUnsupported": "このブラウザは通知に対応していないため、アプリを開いている間のみリマインドを表示します。",
+      "reminderOff": "リマインダーはオフです。",
+      "reminderOn": "リマインダーはオンです（通知が許可されています）。",
+      "reminderInApp": "リマインダーはオンです（通知は未許可のため、アプリ内でお知らせします）。",
+      "reminderDenied": "通知がブロックされています。ブラウザの設定で許可すると通知が届きます（アプリ内では引き続きお知らせします）。"
     },
     "milestone": {
       "title": "称号",
@@ -154,6 +163,9 @@
     "themeLight": "ライト",
     "themeDark": "ダーク",
     "themeSystem": "システム",
+    "reminderLabel": "学習リマインダー",
+    "reminderToggle": "ストリーク継続をリマインドする",
+    "reminderNote": "アプリを開いている間に表示されるローカルなリマインダーです。アプリを閉じている間に届くプッシュ通知にはサーバーが必要なため、この静的サイトでは提供していません。",
     "aiProvider": "AIプロバイダ",
     "gemini": "Gemini",
     "openai": "OpenAI",
