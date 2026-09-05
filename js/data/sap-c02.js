@@ -1873,8 +1873,8 @@ export const SAP_C02 = {
                   titleEn: 'AWS Migration Hub',
                   url: 'https://docs.aws.amazon.com/ja_jp/migrationhub/latest/ug/whatishub.html',
                   urlEn: 'https://docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html',
-                  note: '移行の追跡と進捗管理',
-                  noteEn: 'Migration tracking and progress management',
+                  note: '移行の追跡と進捗管理。本サービスは 2025-11-07 付で新規顧客の受付を終了しており、AWS は後継として AWS Transform を案内しているが、SAP-C02 の試験ガイドではスコープ内サービスとして明記されているため掲載を継続する',
+                  noteEn: 'Migration tracking and progress management. The service is no longer open to new customers as of 2025-11-07 and AWS points to AWS Transform as the successor, but it remains listed here because the SAP-C02 exam guide still names it as an in-scope service',
                 },
                 {
                   title: 'AWS 大規模移行ガイド',
