@@ -1,0 +1,3 @@
+rules:
+  - capability: all
+    effect: allow
