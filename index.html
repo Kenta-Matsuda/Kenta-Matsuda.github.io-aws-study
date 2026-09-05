@@ -1682,6 +1682,12 @@
                         </div>
                     </div>
 
+                    <!-- Partial-generation notice (survives overlay teardown; shown when fewer questions were generated than requested) -->
+                    <div id="quizPartialNotice" class="hidden mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800 flex items-start gap-2">
+                        <i class="fas fa-exclamation-triangle mt-0.5 flex-shrink-0"></i>
+                        <span id="quizPartialNoticeText"></span>
+                    </div>
+
                     <!-- Timer + Progress header -->
                     <div id="quizComboBar" class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
