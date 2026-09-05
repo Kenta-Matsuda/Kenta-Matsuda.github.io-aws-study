@@ -12,6 +12,8 @@
 - [学習ダッシュボードのXPウォーカー刷新 (#102)](issues/xp-walker-redesign.md)
 - [PWAインストール後のアイコンが古い画像のまま表示される問題の修正 (#97)](issues/pwa-png-icons.md)
 - [Duolingo 風の学習継続エンゲージメント (#107)](issues/streak-engagement.md)
+- [解説の出典URL可視化とプロンプトgroundingの厳格化（クライアント側） (#109)](issues/citation-grounding-clientside.md)
+- [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
 
 ## LLM Wiki（docs/wiki/）
 
@@ -29,3 +31,5 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [要人間対応事項の運用ルール（README）](action-required/README.md)
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](action-required/global-leaderboard.md) — 🔴 未対応（要対応） / 関連: #32
 - [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](action-required/streak-push-notifications.md) — 🔴 未対応（要対応） / 関連: #107
+- [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](action-required/issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 関連: #119
+- [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](action-required/issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 関連: #117（関連 #109 #119 #32 #107）

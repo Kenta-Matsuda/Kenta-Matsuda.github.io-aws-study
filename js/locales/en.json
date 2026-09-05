@@ -128,6 +128,7 @@
     "elapsed": "Time Taken",
     "explanationList": "Explanations",
     "nextQuestion": "Next Question",
+    "sourcesLabel": "Sources (AWS official documentation)",
     "correctFeedback": "Correct! {{combo}}",
     "incorrectFeedback": "Incorrect — Answer is {{letter}}",
     "summaryExcellent": "Excellent!",
@@ -194,7 +195,7 @@
   },
   "feedbackModal": {
     "title": "Feedback",
-    "description": "Please share your opinions and requests for improving this app. When you submit, a GitHub Issue page opens in a new tab already prefilled with your feedback, so just review it and click Submit. (Your text is also copied to the clipboard as a backup.)",
+    "description": "Please share your opinions and requests for improving this app. When you submit, a GitHub Issue page opens in a new tab already prefilled with your feedback (your text is also copied to the clipboard as a backup).",
     "categories": {
       "general": "General",
       "resources": "Add study resources (BlackBelt, official docs, etc.)",
@@ -218,8 +219,8 @@
     "issueTitle": "[Feedback] {{category}}",
     "issueBody": "**Category:** {{category}}\n\n{{text}}\n\n---\nSent from the AWS Study Navigator app feedback form.",
     "issueImageMarker": "<!-- Paste your {{count}} image(s) here -->",
-    "sent": "The GitHub new-issue page opened in a new tab already prefilled with your feedback. Please review and submit. (A copy of your text is also on the clipboard as a backup.)",
-    "sentWithImages": "The GitHub new-issue page opened in a new tab already prefilled with your feedback. Please paste your image(s) into the issue body, then submit. (A copy of your text is also on the clipboard as a backup.)",
+    "sent": "The issue page opened in a new tab. Please review and submit.",
+    "sentWithImages": "The issue page opened in a new tab. Please paste your image(s) into the issue body, then submit.",
     "validationEmpty": "Please enter feedback content.",
     "validationLength": "Please keep it within 1000 characters."
   },
@@ -341,7 +342,8 @@
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",
-    "recommend": "Recommended"
+    "recommend": "Recommended",
+    "level": "Technical level"
   },
   "learningStatus": {
     "selected": "Selected",
