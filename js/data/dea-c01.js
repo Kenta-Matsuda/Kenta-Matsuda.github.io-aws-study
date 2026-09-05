@@ -106,7 +106,7 @@ export const DEA_C01 = {
             {
               title: 'Exam Prep Standard Course: AWS Certified Data Engineer - Associate',
               titleEn: 'Exam Prep Standard Course: AWS Certified Data Engineer - Associate',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18546/exam-prep-standard-course-aws-certified-data-engineer-associate-dea-c01',
+              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-data-engineer-associate-dea-c01',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
@@ -162,7 +162,7 @@ export const DEA_C01 = {
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
               titleEn: 'AWS Certification Official Practice Question Set',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/18608/aws-certified-data-engineer-associate-official-practice-question-set-dea-c01-japanese',
+              url: 'https://skillbuilder.aws/search?searchText=aws-certified-data-engineer-associate-official-practice-question-set-dea-c01-japanese',
               note: 'AWS Skill Builder: 無料',
               noteEn: 'AWS Skill Builder: Free',
               recommend: true,
@@ -291,7 +291,7 @@ export const DEA_C01 = {
             'LLM',
           ],
           resources: [
-            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon EMR Serverless', titleEn:'Amazon EMR Serverless', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20Serverless', note:'PDF | Youtube: 2024/02', noteEn:'PDF | Youtube: 2024/02', recommend:true}, {title:'Amazon EMR 基礎編', titleEn:'Amazon EMR Basics', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20%E5%9F%BA%E7%A4%8E%E7%B7%A8', note:'PDF | Youtube: 2023/09', noteEn:'PDF | Youtube: 2023/09'}, {title:'Amazon EMR コスト最適化編', titleEn:'Amazon EMR Cost Optimization', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20%E3%82%B3%E3%82%B9%E3%83%88%E6%9C%80%E9%81%A9%E5%8C%96%E7%B7%A8', note:'PDF | Youtube: 2024/03', noteEn:'PDF | Youtube: 2024/03'}]},
+            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon EMR Serverless', titleEn:'Amazon EMR Serverless', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=EMR%20Serverless%20%E7%B7%A8', note:'PDF | Youtube: 2024/02', noteEn:'PDF | Youtube: 2024/02', recommend:true}, {title:'Amazon EMR 基礎編', titleEn:'Amazon EMR Basics', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20%E5%9F%BA%E7%A4%8E%E7%B7%A8', note:'PDF | Youtube: 2023/09', noteEn:'PDF | Youtube: 2023/09'}, {title:'Amazon EMR コスト最適化編', titleEn:'Amazon EMR Cost Optimization', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20EMR%20%E3%82%B3%E3%82%B9%E3%83%88%E6%9C%80%E9%81%A9%E5%8C%96%E7%B7%A8', note:'PDF | Youtube: 2024/03', noteEn:'PDF | Youtube: 2024/03'}]},
             {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Glue ETL ジョブの最適化', titleEn:'Optimizing AWS Glue ETL Jobs', url:'https://docs.aws.amazon.com/ja_jp/glue/latest/dg/aws-glue-programming-etl-partitions.html', urlEn:'https://docs.aws.amazon.com/glue/latest/dg/aws-glue-programming-etl-partitions.html', note:'パーティション分割・データ形式変換', noteEn:'Partitioning and data format conversion'}, {title:'Amazon EMR ベストプラクティスガイド', titleEn:'Amazon EMR Best Practices Guide', url:'https://docs.aws.amazon.com/ja_jp/emr/latest/ManagementGuide/emr-plan.html', urlEn:'https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-plan.html', note:'クラスター設計・コスト最適化', noteEn:'Cluster design and cost optimization'}]},
           ],
         },
@@ -446,7 +446,7 @@ export const DEA_C01 = {
           ],
           resources: [
             {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon DynamoDB – How it works', titleEn:'Amazon DynamoDB – How it works', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20DynamoDB%20%E2%80%93%20How%20it%20works', note:'PDF | Youtube: 2023/12', noteEn:'PDF | Youtube: 2023/12', recommend:true}, {title:'Amazon Redshift', titleEn:'Amazon Redshift', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Redshift', note:'PDF | Youtube: 2020/03', noteEn:'PDF | Youtube: 2020/03'}]},
-            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS データベースサービスの選択ガイド', titleEn:'How to Choose AWS Database Services', url:'https://aws.amazon.com/jp/getting-started/decision-guides/databases-on-aws-how-to-choose/', urlEn:'https://aws.amazon.com/getting-started/decision-guides/databases-on-aws-how-to-choose/', note:'ユースケース別のデータストア選定', noteEn:'Choosing data stores by use case', recommend:true}, {title:'Amazon Redshift 開始方法', titleEn:'Amazon Redshift Getting Started', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/gsg/new-user.html', urlEn:'https://docs.aws.amazon.com/redshift/latest/gsg/new-user.html', note:'データウェアハウスの基礎', noteEn:'Data warehouse fundamentals'}]},
+            {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS データベースサービスの選択ガイド', titleEn:'How to Choose AWS Database Services', url:'https://docs.aws.amazon.com/decision-guides/latest/decision-guides/databases-on-aws-how-to-choose.html', urlEn:'https://docs.aws.amazon.com/decision-guides/latest/decision-guides/databases-on-aws-how-to-choose.html', note:'ユースケース別のデータストア選定', noteEn:'Choosing data stores by use case', recommend:true}, {title:'Amazon Redshift 開始方法', titleEn:'Amazon Redshift Getting Started', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/gsg/new-user.html', urlEn:'https://docs.aws.amazon.com/redshift/latest/gsg/new-user.html', note:'データウェアハウスの基礎', noteEn:'Data warehouse fundamentals'}]},
           ],
         },
         {
@@ -523,7 +523,7 @@ export const DEA_C01 = {
             'Amazon Redshift',
           ],
           resources: [
-            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon S3 入門編', titleEn:'Amazon S3 Introduction', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20S3%20%E5%85%A5%E9%96%80%E7%B7%A8', note:'PDF | Youtube: 2022/12', noteEn:'PDF | Youtube: 2022/12', recommend:true}, {title:'Amazon S3 コスト最適化編', titleEn:'Amazon S3 Cost Optimization', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20S3%20%E3%82%B3%E3%82%B9%E3%83%88%E6%9C%80%E9%81%A9%E5%8C%96%E7%B7%A8', note:'PDF | Youtube: 2023/06', noteEn:'PDF | Youtube: 2023/06'}]},
+            {key:'blackbelts', label:'AWS Black Belt Online Seminar', labelEn:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'Amazon S3 入門編', titleEn:'Amazon S3 Introduction', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Simple%20Storage%20Service%20(Amazon%20S3)%20%E5%85%A5%E9%96%80%E7%B7%A8', note:'PDF | Youtube: 2022/12', noteEn:'PDF | Youtube: 2022/12', recommend:true}, {title:'Amazon S3 コスト最適化編', titleEn:'Amazon S3 Cost Optimization', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=Amazon%20Simple%20Storage%20Service%20(Amazon%20S3)%20%E3%82%B3%E3%82%B9%E3%83%88%E6%9C%80%E9%81%A9%E5%8C%96%E7%B7%A8', note:'PDF | Youtube: 2023/06', noteEn:'PDF | Youtube: 2023/06'}]},
             {key:'docs', label:'公式ドキュメント', labelEn:'Official Documentation', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon S3 ライフサイクル管理', titleEn:'Amazon S3 Lifecycle Management', url:'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/object-lifecycle-mgmt.html', urlEn:'https://docs.aws.amazon.com/AmazonS3/latest/userguide/object-lifecycle-mgmt.html', note:'ストレージクラス移行・有効期限ポリシー', noteEn:'Storage class transitions and expiration policies', recommend:true}, {title:'Amazon S3 Glacier', titleEn:'Amazon S3 Glacier', url:'https://docs.aws.amazon.com/ja_jp/amazonglacier/latest/dev/introduction.html', urlEn:'https://docs.aws.amazon.com/amazonglacier/latest/dev/introduction.html', note:'長期アーカイブストレージ', noteEn:'Long-term archive storage'}]},
           ],
         },
@@ -719,7 +719,7 @@ export const DEA_C01 = {
           ],
           resources: [
             {key:'blackbelts', label:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'AWS Lake Formation', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Lake%20Formation', note:'PDF | Youtube: 2023/10', recommend:true}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Lake Formation 権限管理', url:'https://docs.aws.amazon.com/ja_jp/lake-formation/latest/dg/lake-formation-permissions.html', note:'テーブル・列レベルのアクセス制御', recommend:true}, {title:'IAM でのセキュリティのベストプラクティス', url:'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html', note:'最小権限・ロール設計'}, {title:'AWS Secrets Manager ユーザーガイド', url:'https://docs.aws.amazon.com/ja_jp/secretsmanager/latest/userguide/intro.html', note:'認証情報の安全な管理とローテーション'}]},
+            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'AWS Lake Formation 権限管理', url:'https://docs.aws.amazon.com/ja_jp/lake-formation/latest/dg/tag-based-access-control.html', note:'テーブル・列レベルのアクセス制御', recommend:true}, {title:'IAM でのセキュリティのベストプラクティス', url:'https://docs.aws.amazon.com/ja_jp/IAM/latest/UserGuide/best-practices.html', note:'最小権限・ロール設計'}, {title:'AWS Secrets Manager ユーザーガイド', url:'https://docs.aws.amazon.com/ja_jp/secretsmanager/latest/userguide/intro.html', note:'認証情報の安全な管理とローテーション'}]},
           ],
         },
         {
@@ -743,7 +743,7 @@ export const DEA_C01 = {
           ],
           resources: [
             {key:'blackbelts', label:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'AWS Key Management Service Part.2 発展編', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Key%20Management%20Service%20Part.2%20%E7%99%BA%E5%B1%95%E7%B7%A8', note:'PDF | Youtube: 2024/04', recommend:true}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon S3 のデフォルト暗号化', url:'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/bucket-encryption.html', note:'SSE-S3 / SSE-KMS / SSE-C の選択', recommend:true}, {title:'AWS Lake Formation アクセス制御', url:'https://docs.aws.amazon.com/ja_jp/lake-formation/latest/dg/access-control-overview.html', note:'タグベース・名前ベースのアクセス許可管理'}, {title:'AWS Systems Manager Parameter Store', url:'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-parameter-store.html', note:'設定データと認証情報の階層的管理'}]},
+            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'Amazon S3 のデフォルト暗号化', url:'https://docs.aws.amazon.com/ja_jp/AmazonS3/latest/userguide/bucket-encryption.html', note:'SSE-S3 / SSE-KMS / SSE-C の選択', recommend:true}, {title:'AWS Lake Formation アクセス制御', url:'https://docs.aws.amazon.com/ja_jp/lake-formation/latest/dg/data-filtering.html', note:'タグベース・名前ベースのアクセス許可管理'}, {title:'AWS Systems Manager Parameter Store', url:'https://docs.aws.amazon.com/ja_jp/systems-manager/latest/userguide/systems-manager-parameter-store.html', note:'設定データと認証情報の階層的管理'}]},
           ],
         },
         {
@@ -814,7 +814,7 @@ export const DEA_C01 = {
           ],
           resources: [
             {key:'blackbelts', label:'AWS Black Belt Online Seminar', iconClass:'fas fa-video', iconColorClass:'text-red-500', items:[{title:'AWS Lake Formation', url:'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20Lake%20Formation', note:'PDF | Youtube: 2023/10 データガバナンス', recommend:true}]},
-            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'VPC エンドポイント (PrivateLink)', url:'https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/vpc-endpoints.html', note:'S3/Glue/Redshift へのプライベート接続', recommend:true}, {title:'Amazon Redshift クラスターのネットワーク分離', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/mgmt/enhanced-vpc-routing.html', note:'拡張 VPC ルーティングの設定'}, {title:'Amazon Macie ユーザーガイド', url:'https://docs.aws.amazon.com/ja_jp/macie/latest/user/what-is-macie.html', note:'機密データの自動検出と PII 識別'}]},
+            {key:'docs', label:'公式ドキュメント', iconClass:'fas fa-book-open', iconColorClass:'text-blue-600', items:[{title:'VPC エンドポイント (PrivateLink)', url:'https://docs.aws.amazon.com/ja_jp/vpc/latest/privatelink/concepts.html', note:'S3/Glue/Redshift へのプライベート接続', recommend:true}, {title:'Amazon Redshift クラスターのネットワーク分離', url:'https://docs.aws.amazon.com/ja_jp/redshift/latest/mgmt/enhanced-vpc-routing.html', note:'拡張 VPC ルーティングの設定'}, {title:'Amazon Macie ユーザーガイド', url:'https://docs.aws.amazon.com/ja_jp/macie/latest/user/what-is-macie.html', note:'機密データの自動検出と PII 識別'}]},
           ],
         },
       ],
