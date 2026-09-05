@@ -200,7 +200,7 @@ gh api repos/{owner}/{repo}/issues/{n}/comments -f body="🤖 agent:skipped — 
 
 ### 棚卸し時にスキップ済み issue を再評価する手順
 
-棚卸し（手順 2）では、`agent:skipped` ラベルが付いた各 issue について「マーカー付与時点」と「その後の更新」を比較し、除外するか再調査対象へ戻すかを決めます。
+棚卸し（手順 3）では、`agent:skipped` ラベルが付いた各 issue について「マーカー付与時点」と「その後の更新」を比較し、除外するか再調査対象へ戻すかを決めます。
 
 1. `agent:skipped` が付いた open issue を列挙する:
    ```
