@@ -1361,9 +1361,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       const { html, usedMarkdown } = renderMarkdownToSafeHtml(quiz.explanation);
       if (usedMarkdown) {
         els.quizExplanation.innerHTML = html;
+        // Harden links (mirror updateAiModalContent): open safely in a new tab.
+        els.quizExplanation.querySelectorAll('a').forEach((a) => {
+          a.setAttribute('target', '_blank');
+          a.setAttribute('rel', 'noopener noreferrer');
+        });
       } else {
         els.quizExplanation.textContent = quiz.explanation;
       }
+      // Surface AWS official documentation citations as a distinct "Sources"
+      // block so they are not buried in the explanation prose (issue #109).
+      renderQuizSources(els.quizExplanation, quiz.explanation);
     }
 
     // Award XP. The Daily Challenge (issue #34) is deterministic, free, and
@@ -4559,6 +4567,67 @@ function configureMarkedOnce(marked) {
   } catch {
     // ignore
   }
+}
+
+/**
+ * Extract distinct AWS official documentation URLs (https://docs.aws.amazon.com/...)
+ * from a text blob, preserving first-seen order and de-duplicating.
+ */
+function extractAwsDocUrls(text) {
+  const urls = [];
+  const seen = new Set();
+  const re = /https:\/\/docs\.aws\.amazon\.com\/[^\s<>()"'`）】」、。]+/g;
+  const source = String(text ?? '');
+  let match;
+  while ((match = re.exec(source)) !== null) {
+    // Trim trailing punctuation that commonly abuts a URL in prose.
+    const url = match[0].replace(/[.,;:!?]+$/, '');
+    if (!seen.has(url)) {
+      seen.add(url);
+      urls.push(url);
+    }
+  }
+  return urls;
+}
+
+/**
+ * Render a distinct "Sources / 出典" block listing AWS official documentation
+ * citations found in the quiz explanation. Built entirely from DOM nodes with
+ * textContent + href (no raw innerHTML of untrusted strings) to avoid XSS.
+ * Idempotent: any previously rendered block in the container is removed first.
+ */
+function renderQuizSources(container, explanation) {
+  if (!container) return;
+  // Remove any prior sources block (re-render on each new question).
+  container.querySelector('[data-quiz-sources]')?.remove();
+
+  const urls = extractAwsDocUrls(explanation);
+  if (urls.length === 0) return;
+
+  const wrap = document.createElement('div');
+  wrap.setAttribute('data-quiz-sources', '');
+  wrap.className = 'mt-3 pt-3 border-t border-gray-200';
+
+  const heading = document.createElement('div');
+  heading.className = 'text-xs font-bold text-gray-500 uppercase tracking-wide mb-1';
+  heading.textContent = t('quiz.sourcesLabel');
+  wrap.appendChild(heading);
+
+  const list = document.createElement('ul');
+  list.className = 'space-y-1';
+  for (const url of urls) {
+    const li = document.createElement('li');
+    const a = document.createElement('a');
+    a.href = url;
+    a.textContent = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.className = 'text-xs text-blue-700 hover:underline break-all';
+    li.appendChild(a);
+    list.appendChild(li);
+  }
+  wrap.appendChild(list);
+  container.appendChild(wrap);
 }
 
 function renderMarkdownToSafeHtml(markdown) {

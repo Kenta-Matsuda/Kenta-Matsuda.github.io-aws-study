@@ -12,6 +12,7 @@
 - [学習ダッシュボードのXPウォーカー刷新 (#102)](issues/xp-walker-redesign.md)
 - [PWAインストール後のアイコンが古い画像のまま表示される問題の修正 (#97)](issues/pwa-png-icons.md)
 - [Duolingo 風の学習継続エンゲージメント (#107)](issues/streak-engagement.md)
+- [解説の出典URL可視化とプロンプトgroundingの厳格化（クライアント側） (#109)](issues/citation-grounding-clientside.md)
 
 ## LLM Wiki（docs/wiki/）
 

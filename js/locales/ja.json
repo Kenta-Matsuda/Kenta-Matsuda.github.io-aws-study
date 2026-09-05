@@ -127,6 +127,7 @@
     "elapsed": "所要時間",
     "explanationList": "解説一覧",
     "nextQuestion": "次の問題",
+    "sourcesLabel": "出典（AWS公式ドキュメント）",
     "correctFeedback": "正解！ {{combo}}",
     "incorrectFeedback": "不正解 — 正解は {{letter}}",
     "summaryExcellent": "素晴らしい！",
