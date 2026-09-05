@@ -2041,7 +2041,7 @@ export const DOP_C02 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/introduction.html',
                   note: 'Prescriptive Guidance: 組織全体のセキュリティ設計',
                   noteEn: 'Prescriptive Guidance: Organization-wide security design',
                   recommend: true,
