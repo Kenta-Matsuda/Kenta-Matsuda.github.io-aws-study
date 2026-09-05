@@ -568,12 +568,12 @@ export const SCS_C03 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS セキュリティインシデント対応ガイド',
-                  titleEn: 'AWS Security Incident Response Guide',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-security-incident-response-guide/aws-security-incident-response-guide.html',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-security-incident-response-guide/aws-security-incident-response-guide.html',
-                  note: 'インシデント対応のベストプラクティス',
-                  noteEn: 'Incident response best practices',
+                  title: 'AWS Security Incident Response ユーザーガイド',
+                  titleEn: 'AWS Security Incident Response User Guide',
+                  url: 'https://docs.aws.amazon.com/ja_jp/security-ir/latest/userguide/what-is.html',
+                  urlEn: 'https://docs.aws.amazon.com/security-ir/latest/userguide/what-is.html',
+                  note: 'インシデント対応のベストプラクティス（旧「AWS セキュリティインシデント対応ガイド」ホワイトペーパーの後継）',
+                  noteEn: 'Incident response best practices (successor to the former "AWS Security Incident Response Guide" whitepaper)',
                   recommend: true,
                 },
                 {
