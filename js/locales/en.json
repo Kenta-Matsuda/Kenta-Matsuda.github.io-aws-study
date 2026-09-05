@@ -341,7 +341,8 @@
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",
-    "recommend": "Recommended"
+    "recommend": "Recommended",
+    "level": "Technical level"
   },
   "learningStatus": {
     "selected": "Selected",

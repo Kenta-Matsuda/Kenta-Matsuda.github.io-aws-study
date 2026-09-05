@@ -341,7 +341,8 @@
     "taskStatement": "Task Statement {{id}}",
     "knowledge": "必要な知識・スキル",
     "keyPoints": "ポイント",
-    "recommend": "おススメ"
+    "recommend": "おススメ",
+    "level": "技術レベル"
   },
   "learningStatus": {
     "selected": "選択中",

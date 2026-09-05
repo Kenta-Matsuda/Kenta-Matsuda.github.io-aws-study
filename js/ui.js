@@ -124,6 +124,17 @@ function localizedResourceNote(item) {
 }
 
 /**
+ * Return locale-aware resource item technical level (issue #137).
+ * AWS numeric levels (e.g. 'Level 200') are language-neutral, so most items
+ * only set `level`; `levelEn` is optional for cases needing different phrasing.
+ */
+function localizedResourceLevel(item) {
+  if (!item) return '';
+  if (getLocale() === 'en' && item.levelEn) return item.levelEn;
+  return item.level || '';
+}
+
+/**
  * Return locale-aware domain description.
  */
 function localizedDomainDescription(domain) {
@@ -3935,6 +3946,20 @@ function renderBlogCard({ blog, term, context }) {
     `
     : '';
 
+  // Optional technical-level badge (issue #137). Rendered only when the item
+  // has a non-empty level; otherwise `levelBadge` is '' so the card output is
+  // byte-identical to before. Uses a muted indigo palette so it reads clearly
+  // as distinct from the orange recommend badge.
+  const levelSafe = escapeHtml(localizedResourceLevel(blog));
+  const levelTitle = escapeHtml(t('roadmap.level'));
+  const levelBadge = levelSafe
+    ? `
+      <span class="inline-flex items-center gap-1 text-[10px] font-bold text-indigo-700 bg-indigo-100 border border-indigo-200 rounded px-2 py-0.5 whitespace-nowrap" title="${levelTitle}" aria-label="${levelTitle}: ${levelSafe}">
+        ${levelSafe}
+      </span>
+    `
+    : '';
+
   return `
     <div class="${cardClass}">
       <div class="flex items-start justify-between gap-3">
@@ -3951,6 +3976,7 @@ function renderBlogCard({ blog, term, context }) {
               <i class="fa-regular fa-thumbs-down"></i>
             </button>
           </div>
+          ${levelBadge}
           ${badge}
         </div>
       </div>
@@ -4021,6 +4047,11 @@ function normalizeResourceItems(items) {
       urlEn: item.urlEn ? String(item.urlEn) : undefined,
       note: String(item.note || ''),
       noteEn: item.noteEn ? String(item.noteEn) : undefined,
+      // Optional AWS technical-level annotation (issue #137). Numeric AWS
+      // levels like 'Level 200' are language-neutral, so most items set only
+      // `level`; `levelEn` is optional for cases needing different phrasing.
+      level: item.level ? String(item.level) : undefined,
+      levelEn: item.levelEn ? String(item.levelEn) : undefined,
       recommend: item.recommend === true,
     }))
     .filter((item) => item.title && item.url);
