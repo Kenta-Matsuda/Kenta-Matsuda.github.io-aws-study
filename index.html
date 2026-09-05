@@ -2013,8 +2013,13 @@
                     Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.
                 </p>
                 <div class="mb-4 p-2.5 bg-teal-50 text-teal-800 text-xs rounded border border-teal-200 leading-snug">
-                    <i class="fas fa-circle-info mr-1"></i>
-                    <span data-i18n="feedbackModal.noAccountNote">No GitHub account? No problem. Use "Copy text" below and send it however you like (e.g. paste it to the developer). A GitHub account is only needed if you want to post the issue yourself.</span>
+                    <span class="inline-flex items-center gap-1 font-bold mr-1">
+                        <i class="fas fa-circle-info"></i><span data-i18n="feedbackModal.noAccountLead">Posting to GitHub requires sign-in</span>
+                    </span>
+                    <span data-i18n="feedbackModal.noAccountNote">Pressing "Submit" opens GitHub's prefilled issue page, and you must sign in to a GitHub account to post it there. If you don't have or don't want a GitHub account, press "Copy text" below and send it any way you like (e.g. to the developer). You can also browse existing feedback without signing in.</span>
+                    <a href="https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues" target="_blank" rel="noopener" class="inline-flex items-center gap-1 underline font-medium hover:text-teal-900">
+                        <i class="fas fa-arrow-up-right-from-square"></i><span data-i18n="feedbackModal.browseIssues">Browse existing issues (no sign-in needed to view)</span>
+                    </a>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">Category</label>
