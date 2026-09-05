@@ -209,6 +209,7 @@
     "imageAdd": "Add images (click, or paste / drop here)",
     "imageHelp": "Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.",
     "imageRemove": "Remove image",
+    "noAccountLead": "No GitHub account needed",
     "noAccountNote": "No GitHub account? No problem. Just press \"Copy text\" below to copy your feedback, then send it however you like (e.g. to the developer). A GitHub account is only needed if you want to post the issue yourself.",
     "copyText": "Copy text",
     "copied": "Your feedback was copied to the clipboard. Send it however you like.",
