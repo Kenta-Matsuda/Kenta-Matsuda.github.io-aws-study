@@ -1888,8 +1888,8 @@ export const SAA_C03 = {
                 {
                   title: 'AWS の料金の仕組み（ホワイトペーパー）',
                   titleEn: 'How AWS Pricing Works (Whitepaper)',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/',
+                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/how-aws-pricing-works/abstract-and-introduction.html',
+                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/how-aws-pricing-works/abstract-and-introduction.html',
                   note: 'データ転送コストの全体像を把握',
                   noteEn: 'Understanding the overall picture of data transfer costs',
                 },
