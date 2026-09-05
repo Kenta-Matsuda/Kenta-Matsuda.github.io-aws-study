@@ -9,6 +9,7 @@
 - [UI構造の全面リファクタリング](issues/ui-restructure.md)
 - [試験作成/更新用エージェントの作成と最適化 (#69)](issues/exam-content-maintainer-agent.md)
 - [学習ダッシュボードのXPウォーカー刷新 (#102)](issues/xp-walker-redesign.md)
+- [PWAインストール後のアイコンが古い画像のまま表示される問題の修正 (#97)](issues/pwa-png-icons.md)
 - [Duolingo 風の学習継続エンゲージメント (#107)](issues/streak-engagement.md)
 
 ## LLM Wiki（docs/wiki/）
