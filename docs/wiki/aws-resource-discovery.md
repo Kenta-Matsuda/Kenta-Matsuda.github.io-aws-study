@@ -52,6 +52,9 @@
 # 全試験の死活・リダイレクト・ソフト 404・フラグメント陳腐化を分類して一覧化
 node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json
 
+# 廃止 / 新規顧客の受付終了の告知を検出（リンクが 200 でも掲載対象外にすべきものを拾う）
+node scripts/check-resource-links.mjs --notices --concurrency 10 --json test-results/notices-all.json
+
 # 差し替え候補の実在とリダイレクト先を、書き込む前に確認する
 node scripts/check-resource-links.mjs --urls "https://candidate-a,https://candidate-b" --all
 
@@ -69,6 +72,7 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 3. **テキストフラグメント（`#:~:text=`）の陳腐化はステータスに出ない**（実測 19 件のうち偽陽性を除いて 5 件が実害）。Black Belt 一覧ページのように 1 ページへ多数のアンカーを張っている場合、ページは 200 でも**アンカー先の文字列が消えている**ことがあります。`--fragments` で本文を取得して実在を照合します。照合時は**本文と needle の両方に同じ空白正規化**をかけること（フラグメントに `%0A`（改行）が含まれると、正規化しないと全件が偽陽性になる）。
 4. **SPA ドメインは全パスで 200 を返すため死活判定に使えない**。`skillbuilder.aws` は存在しないパス（例: `/this-path-should-not-exist-xyz123`）でも 200 を返します。Skill Builder のリンクは**ステータスでは検証できない**ため、リダイレクト先のクエリパラメータなど別の証拠で判断します（下記参照）。
 5. **`d1.awsstatic.com` の PDF は 403 を返すことがある**（実測 4 件）。ボット対策の可能性が高く、リンク切れとは断定できません。`forbidden` として分離し、人間の目視確認に委ねます。
+6. **サービスが「廃止 / 新規顧客の受付終了」になってもリンクは 200 のまま**（実測 11 件）。**最も気づきにくい陳腐化**で、死活チェックだけでは永久に検出できません。`--notices` で本文の告知を検出します（後述の「新規顧客の受付を終了したサービスの扱い」を参照）。
 
 ### 実行環境について
 
@@ -97,15 +101,51 @@ AWS は一部サービスを**廃止せずに新規受付のみ終了**します
 - 本文冒頭の `Note` に `is no longer open to new customers` / `we do not plan to introduce new features` が書かれている。
 - 同じガイド内に `<service>-availability-change.html` という「提供状況の変更」ページが存在する（`scripts/list-aws-doc-pages.mjs` の目次に現れる）。
 
-2026-09-06 時点で確認したもの:
+2026-09-06 に `--notices` で全 911 ページを走査して確認した**新規顧客の受付終了サービス**（掲載対象外）:
 
-- **Amazon SageMaker Clarify** — 新規顧客の受付終了。出典: [Clarify availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-availability-change.html)。AWS は代替として SageMaker AI の監視リファレンス実装 / SHAP / SageMaker AI MLflow / Amazon CloudWatch / **Amazon Bedrock Evaluations**・**Amazon Bedrock Guardrails** を案内している。
-- **Amazon SageMaker Model Monitor** — 新規顧客の受付終了。出典: [Amazon SageMaker Model Monitor availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-availability-change.html)。
+| サービス | AWS が示す後継 | 出典（告知が載っているページ） |
+| --- | --- | --- |
+| **Amazon Bedrock Agents**（現 Bedrock Agents Classic） | **Amazon Bedrock AgentCore** | [Bedrock Agents](https://docs.aws.amazon.com/bedrock/latest/userguide/agents.html) |
+| **Amazon Q Business** | **Amazon Quick** | [What is Amazon Q Business](https://docs.aws.amazon.com/amazonq/latest/qbusiness-ug/what-is.html) |
+| **AWS Migration Hub**（2025-11-07 付） | **AWS Transform** | [What is AWS Migration Hub](https://docs.aws.amazon.com/migrationhub/latest/ug/whatishub.html) |
+| **Amazon SageMaker Clarify** | 後継の明示なし（SHAP / SageMaker AI MLflow / CloudWatch / **Bedrock Evaluations**・**Bedrock Guardrails** を案内） | [Clarify availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-availability-change.html) |
+| **Amazon SageMaker Model Monitor** | 後継の明示なし（同上） | [Model Monitor availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-availability-change.html) |
+| **Amazon SageMaker Ground Truth** | 後継の明示なし | [SageMaker Ground Truth](https://docs.aws.amazon.com/sagemaker/latest/dg/sms.html) |
+| **Amazon SageMaker Debugger** | 後継の明示なし | [SageMaker Debugger](https://docs.aws.amazon.com/sagemaker/latest/dg/train-debugger.html) |
+| **AWS Audit Manager** | 後継の明示なし | [What is AWS Audit Manager](https://docs.aws.amazon.com/audit-manager/latest/userguide/what-is.html) |
 
-取り扱い方針:
+いずれも**ページは HTTP 200 を返し、リダイレクトもしません**。死活チェックだけを回していると永久に検出できないため、棚卸しのたびに `--notices` を実行してください。
 
-- リンクが生きていても **`recommend: true` は外す**（新規に使えないサービスを「おすすめ」として提示しない）。
-- 試験範囲の概念理解に必要なら**リンクは残し、`note` / `noteEn` に受付終了の事実を明記**する。削除は、より適切な現行リソースに置き換えられる場合に限る。
+### 機械的に検出する（`--notices`）
+
+告知はリンク死活チェックでは絶対に検出できないため、**本文を取得して告知フレーズを探す専用モード**を用意しています。
+
+```bash
+node scripts/check-resource-links.mjs --notices --concurrency 10 --json test-results/notices-all.json
+```
+
+- 検出フレーズは `scripts/check-resource-links.mjs` の `DEPRECATION_PATTERNS` に定義しています（`no longer open to new customers` / `closed to new customers` / `do not plan to introduce new features` / `新規のお客様…` / `提供を終了しました` など、英語・日本語の両方）。
+- 分類は `deprecated` で、`broken` / `soft-404` に次ぐ優先度で出力されます。
+- **ヒットは「候補の提示」であり最終判断ではありません。** 必ず出力される告知の周辺テキストを読み、**誤検知でないか**を確認してください。2026-09-06 の実測では 13 件ヒットし、そのうち 2 件が誤検知でした。
+  - `AmazonS3/latest/userguide/Welcome.html` — 告知は **SOAP API の廃止**についてで、Amazon S3 自体は現役。
+  - `bedrock/latest/APIReference/welcome.html` — 告知は API リファレンス内の **Bedrock Agents Classic** についてで、API リファレンス自体は現役。
+- 新しい告知フレーズを見つけたら `DEPRECATION_PATTERNS` に追加し、ここにも記録してください。
+
+### 取り扱い方針（掲載しない / 2026-09-06 改訂）
+
+**廃止済みのサービスだけでなく、新規顧客の受付を終了したサービスのリソースも掲載しません。** 新規に使えないサービスの学習リソースを提示することは、学習者にとって価値がないどころか誤解を招きます。
+
+判断の順序は次のとおりです。
+
+1. **AWS が後継サービスを明示している場合は、後継サービスのリソースへ差し替える。** 学習導線を切らずに現行の内容へ載せ替えられるので最優先です。告知本文に `For capabilities similar to X, explore Y` のように書かれていることが多いので、そこから後継を特定します。
+   - 例: Amazon Bedrock Agents (Classic) → **Amazon Bedrock AgentCore** / Amazon Q Business → **Amazon Quick** / AWS Migration Hub → **AWS Transform**
+2. **後継が明示されておらず、同じトピックが他のリソースでカバーされている場合は削除する。**
+   - ただし**グループ（`resources[]`）の `items[]` を空にしない**こと。空になる場合は、現行の公式リソースを 1 件確保してから削除します。
+3. **例外の確認（必ず実施）**: 削除しようとしているサービスが、その試験の**公式試験ガイドの「スコープ内サービス」に明示的に名前で載っていないか**を確認します。載っている場合、削除すると**出題範囲のトピックが無資料になる**ため、**独断で削除せず PR で明示してレビューに委ねます**。
+   - 2026-09-06 実測の該当例: **AWS Audit Manager（SCS-C03 のスコープ内）**、**AWS Migration Hub（CLF-C02 のスコープ内）**。いずれも受付終了済みですが試験範囲には残っています。
+   - 確認方法: `docs.aws.amazon.com/aws-certification/latest/<試験スラッグ>/<略称>-in-scope-services.html`（スラッグは公式認定ページ本文から `docs.aws.amazon.com/.../aws-certification/...` のリンクを抽出して特定する）。
+   - 逆に、スコープ内一覧が**サービス単位**（例: MLA-C01 は「Amazon SageMaker」のみ）で個別機能を挙げていない場合、Ground Truth / Clarify / Debugger / Model Monitor のような**機能単位のリソースを削除しても記載スコープは損なわれません**。
+4. 削除・差し替えのいずれの場合も、**根拠（告知ページの URL と該当文言）を PR 本文に残す**。
 
 ## ブログの技術レベル判定基準 (Level 100/200/300/400)
 
@@ -186,6 +226,7 @@ issue #137 では「AWS re:Post のリソースがほとんどないが、AWS �
 
 ## 更新履歴
 
+- 2026-09-06: **「新規顧客の受付を終了したサービスのリソースも掲載しない」方針へ改訂**（利用者の指示による）。従来は「リンクは残し `recommend` を外して `note` に明記する」としていたが、新規に使えないサービスの学習リソースは学習者にとって価値がなく誤解を招くため、**削除または後継サービスへの差し替え**を基本とする。あわせて (1) 告知を機械的に検出する `--notices` モードの使い方、(2) 実測で確認した受付終了サービス 8 件と AWS が示す後継の表、(3) 誤検知 2 件（S3 の SOAP API 廃止告知 / Bedrock API リファレンス内の Agents Classic 告知）、(4) 削除前に**公式試験ガイドのスコープ内サービスに名前で載っていないか確認する**手順（該当した Audit Manager / Migration Hub はレビューに委ねる）を追記。
 - 2026-09-06: 初のネットワーク接続下での全試験棚卸しを実施し、実測に基づいて大幅に更新。(1) 死活チェックを `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` によるスクリプト実行を必須の第一手とする手順へ変更。(2)「HTTP ステータスだけでは判定できない落とし穴」（ロケールリダイレクト / ソフト 404 / テキストフラグメント陳腐化 / SPA ドメイン / `d1.awsstatic.com` の 403）を追記。(3)「既知の URL 移転パターン」表と「新規顧客の受付を終了したサービスの扱い」節を新設。(4) **従来「本サンドボックス（INTEGRATIONS_ONLY）では外部アクセスができない」と断定していた記述を訂正**し、環境によってネットワークが利用可能である前提に改めた（実行環境に応じて判断し、未検証点を PR に明記する方針へ統一）。
 - 2026-09-03: 初版作成（issue #69）。信頼ドメイン一覧・検索クエリの型・評価基準・死活/鮮度チェックの観点を整理。
 - 2026-09-05: issue #137: 技術レベル(level)データフィールドの追加に伴う判定基準（Level 100/200/300/400 の規約・手掛かり・付与ルール）と、AWS re:Post (repost.aws) リソースの探索・検証手順を追記。

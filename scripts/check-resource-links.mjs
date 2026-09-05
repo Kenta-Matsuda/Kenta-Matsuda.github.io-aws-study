@@ -31,6 +31,9 @@
  *   --all              問題のない URL も標準出力に一覧表示する。
  *   --fragments        `#:~:text=` テキストフラグメントが本文に実在するかも検証する
  *                      （Black Belt 一覧ページ内アンカーの陳腐化検出。GET が必要なので低速）。
+ *   --notices          ページ本文から「廃止 / 新規顧客の受付終了」の告知を検出する。
+ *                      リンクは 200 のままなので死活チェックでは絶対に検出できない種類の
+ *                      陳腐化を拾うためのモード（本文取得が必要なので低速）。
  *   --urls <list>      js/data/ ではなく、カンマ区切りで渡した URL を検証する。
  *                      差し替え候補の当たりを付けるのに使う（同じ分類ロジックで判定できる）。
  *                      例: node scripts/check-resource-links.mjs --urls "https://a,https://b" --all
@@ -78,6 +81,7 @@ function parseArgs(argv) {
     timeout: 20000,
     all: false,
     fragments: false,
+    notices: false,
   };
   for (let i = 0; i < argv.length; i += 1) {
     const a = argv[i];
@@ -87,6 +91,7 @@ function parseArgs(argv) {
     else if (a === '--urls') opts.urls = String(argv[++i] || '').split(',').map((s) => s.trim()).filter(Boolean);
     else if (a === '--json') opts.json = argv[++i];
     else if (a === '--fragments') opts.fragments = true;
+    else if (a === '--notices') opts.notices = true;
     else if (a === '--concurrency') opts.concurrency = Number(argv[++i]) || 8;
     else if (a === '--timeout') opts.timeout = Number(argv[++i]) || 20000;
     else if (a === '--help' || a === '-h') opts.help = true;
@@ -223,6 +228,47 @@ function textFragment(u) {
     .filter((s) => s.length > 0);
 }
 
+/**
+ * 「廃止 / 新規顧客の受付終了」を示す告知フレーズ。
+ *
+ * リンクが 200 を返してもサービス自体が終息していることがあり、死活チェックでは
+ * 検出できない。本リポジトリの方針として、**廃止済みだけでなく新規顧客の受付を
+ * 終了したサービスのリソースも掲載しない**ため、機械的に検出できるようにする。
+ *
+ * 判定は「候補の提示」であり最終判断ではない。ヒットしたら必ず本文を読んで、
+ * 記事が別サービスの終息に触れているだけ（誤検知）でないかを確認する。
+ */
+const DEPRECATION_PATTERNS = [
+  // 新規顧客の受付終了（英語 / 日本語のドキュメント表記）
+  /no longer open to new customers/i,
+  /not available to new customers/i,
+  /no longer available to new customers/i,
+  /closed to new customers/i,
+  /新規(の)?(お)?客(様|さま)?(への提供|の受付)?を終了/,
+  /新規のお客様[^。]{0,20}(利用|ご利用)(いただけ|でき)ま(せん|せんでした)/,
+  // 廃止 / サポート終了
+  /(has been|will be|is being) discontinued/i,
+  /end of support for/i,
+  /will (be )?end of life/i,
+  /提供を終了(いたし)?ました/,
+  /廃止(され|いたし)ました/,
+  /サポートを終了(いたし)?ました/,
+  // 新機能を追加しない宣言（実質の終息サイン）
+  /do not plan to introduce new features/i,
+];
+
+/** 告知フレーズを本文から探し、ヒットした周辺テキストを返す。 */
+function findDeprecationNotices(html) {
+  const text = visibleText(html);
+  const hits = [];
+  for (const re of DEPRECATION_PATTERNS) {
+    const m = re.exec(text);
+    if (!m) continue;
+    hits.push(text.slice(Math.max(0, m.index - 100), m.index + 160).trim());
+  }
+  return hits;
+}
+
 /** HTML から可視テキストを大まかに取り出す（フラグメント照合用の緩い正規化）。 */
 function visibleText(html) {
   return html
@@ -304,6 +350,8 @@ function classify(check, originalUrl) {
   const moved = normalizeForCompare(check.finalUrl) !== normalizeForCompare(original);
   // 個別ページが失われて親ページへ吸収された（ソフト 404）。最優先で確認すべき。
   if (moved && isShallower(original, check.finalUrl)) return 'soft-404';
+  // 廃止 / 新規受付終了はリンク切れより優先して人間の目に入れる（掲載対象外にするため）
+  if (check.notices && check.notices.length > 0) return 'deprecated';
   if (check.fragmentMiss) return 'fragment-miss';
   if (!moved) return 'ok';
   // ロケールセグメント（/jp/ ・/ja_jp/）の付け外しだけならリンク切れではない
@@ -314,6 +362,7 @@ function classify(check, originalUrl) {
 const CLASS_ORDER = [
   'broken',
   'soft-404',
+  'deprecated',
   'error',
   'server-error',
   'fragment-miss',
@@ -363,7 +412,9 @@ async function main() {
   const needBody = new Set(
     opts.fragments ? urls.filter((u) => textFragment(u)).map(stripFragment) : [],
   );
-  console.log(`http requests : ${fetchKeys.length}${opts.fragments ? ` (body fetch: ${needBody.size})` : ''}`);
+  // --notices は本文が必要。全 URL を対象にする（告知はどのドメインにも出しうる）
+  if (opts.notices) for (const key of fetchKeys) needBody.add(key);
+  console.log(`http requests : ${fetchKeys.length}${needBody.size > 0 ? ` (body fetch: ${needBody.size})` : ''}`);
 
   let done = 0;
   const checks = await runPool(
@@ -377,9 +428,18 @@ async function main() {
   );
   const byKey = new Map(fetchKeys.map((k, i) => [k, checks[i]]));
 
+  // 告知検出はページ単位で 1 回だけ行い、同じページを指す複数 URL で結果を共有する
+  const noticeCache = new Map();
+  if (opts.notices) {
+    for (const [key, res] of byKey) {
+      noticeCache.set(key, res.body ? findDeprecationNotices(res.body) : []);
+    }
+  }
+
   const rows = urls.map((url) => {
     const base = byKey.get(stripFragment(url));
     const check = { ...base };
+    if (opts.notices) check.notices = noticeCache.get(stripFragment(url)) ?? [];
     // テキストフラグメントの実在確認（本文を取得できた場合のみ）
     const frag = textFragment(url);
     if (frag && base.body) {
@@ -398,6 +458,7 @@ async function main() {
       finalUrl: check.finalUrl,
       error: check.error ?? null,
       missingFragments: check.missingFragments ?? null,
+      notices: check.notices && check.notices.length > 0 ? check.notices : null,
       klass: classify(check, url),
       uses: byUrl.get(url).map((u) => ({ file: u.file, field: u.field, step: u.step ?? null, group: u.group ?? null, title: u.title })),
     };
@@ -418,6 +479,7 @@ async function main() {
       console.log(`- [${r.status}${r.error ? ` ${r.error}` : ''}] ${r.url}`);
       if (k === 'redirect' || k === 'soft-404' || k === 'locale-redirect') console.log(`    -> ${r.finalUrl}`);
       if (k === 'fragment-miss') console.log(`    missing text: ${JSON.stringify(r.missingFragments)}`);
+      if (k === 'deprecated') for (const n of r.notices) console.log(`    notice: ...${n}...`);
       console.log(`    used: ${files}`);
     }
   }
