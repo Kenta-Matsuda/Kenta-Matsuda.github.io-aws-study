@@ -461,7 +461,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/introduction.html',
                   note: 'Prescriptive Guidance: セキュリティリファレンスアーキテクチャ',
                   noteEn: 'Prescriptive Guidance: Security reference architecture',
                   recommend: true,
@@ -582,7 +582,7 @@ export const SAP_C02 = {
                 {
                   title: 'データベースの DR 戦略',
                   titleEn: 'Strategy for Database Disaster Recovery',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-database-disaster-recovery/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-database-disaster-recovery/introduction.html',
                   note: 'Prescriptive Guidance: データベース固有のDR設計',
                   noteEn: 'Prescriptive Guidance: Database-specific DR design',
                 },
@@ -1078,7 +1078,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS Security Reference Architecture',
                   titleEn: 'AWS Security Reference Architecture',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/security-reference-architecture/introduction.html',
                   note: 'Prescriptive Guidance: 組織全体のセキュリティ設計',
                   noteEn: 'Prescriptive Guidance: Organization-wide security design',
                 },
@@ -1863,7 +1863,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS への移行のベストプラクティス',
                   titleEn: 'AWS Migration Best Practices',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/strategy-migration/introduction.html',
                   note: 'Prescriptive Guidance: 7Rの評価と移行計画',
                   noteEn: 'Prescriptive Guidance: 7Rs evaluation and migration planning',
                   recommend: true,
@@ -1879,7 +1879,7 @@ export const SAP_C02 = {
                 {
                   title: 'AWS 大規模移行ガイド',
                   titleEn: 'AWS Large Migration Guide',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/large-migration-guide/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/large-migration-guide/introduction.html',
                   note: 'Prescriptive Guidance: ウェーブプランニングと移行の進め方',
                   noteEn: 'Prescriptive Guidance: Wave planning and migration approach',
                 },
@@ -2101,7 +2101,7 @@ export const SAP_C02 = {
                 {
                   title: 'コンテナ化されたマイクロサービスの分解',
                   titleEn: 'Decomposing Monoliths into Containerized Microservices',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-decomposing-monoliths/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-decomposing-monoliths/introduction.html',
                   note: 'Prescriptive Guidance: モノリスの分解パターン',
                   noteEn: 'Prescriptive Guidance: Monolith decomposition patterns',
                 },
