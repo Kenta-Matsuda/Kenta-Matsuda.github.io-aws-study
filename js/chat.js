@@ -7,6 +7,7 @@ import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
 import { getLocale, t } from './i18n.js';
+import { getExamCategoryLabel } from './exams.js';
 
 /** Conversation history (role/content pairs) */
 let history = [];
@@ -154,31 +155,63 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
 }
 
 function buildChatSystemPrompt(exam) {
+  const isJa = getLocale() === 'ja';
   const code = exam?.code || 'AWS';
-  const label = exam?.shortLabel || (getLocale() === 'ja' ? '認定試験' : 'Certification');
+  const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
+  // Authoritative identity sourced from the repository's own exam definitions (js/data/*.js).
+  const category = getExamCategoryLabel(exam?.id);
+  const categoryLabel = category ? (isJa ? category.labelJa : category.labelEn) : null;
+
   if (getLocale() === 'en') {
-    return (
+    let prompt =
       `You are a friendly AWS study assistant. ` +
-      `The user is currently studying for ${code} (${label}).\n` +
-      `Answer questions clearly and concisely, using concrete examples.\n` +
+      `The user is currently studying for ${code} (${label}).\n`;
+    if (exam) {
+      prompt +=
+        `\n[Authoritative exam identity — repository source of truth]\n` +
+        `- Full name: ${exam.title}\n` +
+        `- Exam code: ${exam.code}\n` +
+        `- Short label: ${exam.shortLabel}\n` +
+        (categoryLabel ? `- Category / level: ${categoryLabel}\n` : '') +
+        `- The exam identity above is provided by this repository and is the authoritative source of truth. This exam, with exactly this title and code, definitely exists.\n` +
+        `- Do NOT claim that this exam code or name does not exist, and do NOT deny or rename it, even if it conflicts with your internal knowledge.\n` +
+        `- Do NOT substitute or redirect the answer to a different exam (for example, do not swap ${exam.code} for another exam code). If the user asks about this exam, answer about THIS exam only.\n` +
+        `- Treat this repository-provided exam definition as more reliable than your own prior knowledge.\n`;
+    }
+    prompt +=
+      `\nAnswer questions clearly and concisely, using concrete examples.\n` +
       `Use Markdown format with bullet points and code examples as appropriate.\n` +
-      `Respond in English.`
-    );
+      `Respond in English.`;
+    return prompt;
   }
-  return (
+
+  let prompt =
     `あなたはフレンドリーなAWS学習アシスタントです。` +
     `現在ユーザーは${code}（${label}）の学習をしています。\n\n` +
     `【回答ルール】\n` +
     `- 質問にはわかりやすく簡潔に回答し、具体例を交えてください。\n` +
     `- 回答はMarkdown形式で、箇条書きやコード例を適宜使ってください。\n` +
-    `- 日本語で回答してください。\n\n` +
+    `- 日本語で回答してください。\n\n`;
+  if (exam) {
+    prompt +=
+      `【学習中の試験（信頼できる一次情報 / このリポジトリが保持する正）】\n` +
+      `- 正式名称: ${exam.title}\n` +
+      `- 試験コード: ${exam.code}\n` +
+      `- 略称: ${exam.shortLabel}\n` +
+      (categoryLabel ? `- 区分（レベル）: ${categoryLabel}\n` : '') +
+      `- 上記の試験情報はこのリポジトリが保持する一次情報であり、信頼できる正（source of truth）です。この試験は、この正式名称・試験コードで確かに実在します。\n` +
+      `- あなたの内部知識と食い違う場合でも、この試験コードや名称が「存在しない」と決めつけたり、否定・改名したりしないでください。\n` +
+      `- 別の試験にすり替えたり誘導したりしないでください（例: ${exam.code} を別の試験コードに置き換えて回答しない）。ユーザーがこの試験について尋ねた場合は、この試験についてのみ回答してください。\n` +
+      `- 試験の実在・正式名称・試験コード・区分については、あなたの内部知識よりも、このリポジトリが提供する上記の定義を優先してください。\n\n`;
+  }
+  prompt +=
     `【信頼性に関する厳格なルール】\n` +
     `- AWS公式ドキュメントに記載がある情報のみに基づいて回答してください。\n` +
     `- 推測や不確実な情報を提供しないでください。確信が持てない場合は「この点については公式ドキュメントで確認することをお勧めします」と明示してください。\n` +
     `- 回答の末尾には、参照したAWS公式ドキュメントのURLを可能な限り記載してください（形式: 📚 参考: https://docs.aws.amazon.com/...）。\n` +
     `- 廃止されたサービスや古い情報を提供しないよう注意してください。\n` +
-    `- AWSの料金やSLAなど頻繁に変わる数値は「最新の公式ページを参照してください」と案内してください。`
-  );
+    `- AWSの料金やSLAなど頻繁に変わる数値は「最新の公式ページを参照してください」と案内してください。`;
+  return prompt;
 }
 
 function appendBubble(container, text, role) {

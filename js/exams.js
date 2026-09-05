@@ -111,6 +111,19 @@ export function getPublicExams() {
 }
 
 /**
+ * Resolve the category/level label for an exam ID.
+ * Null-safe: returns null when examId is falsy or does not belong to any category.
+ * @param {string} examId
+ * @returns {{ id: string, labelJa: string, labelEn: string } | null}
+ */
+export function getExamCategoryLabel(examId) {
+  if (!examId) return null;
+  const category = EXAM_CATEGORIES.find((c) => c.examIds.includes(examId));
+  if (!category) return null;
+  return { id: category.id, labelJa: category.labelJa, labelEn: category.labelEn };
+}
+
+/**
  * Resolve a URL hash (without #) to an exam ID.
  * Supports both short codes (clf) and full IDs (clf-c02).
  */
