@@ -869,10 +869,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       let parsed = null;
       let slotErrored = false;
       for (let attempt = 0; attempt < MAX_ATTEMPTS_PER_QUESTION && !parsed; attempt++) {
+        // On regeneration attempts, nudge the model to emit strictly valid JSON so
+        // the retry can recover a previous parse failure rather than re-rolling the
+        // byte-identical prompt (which only helps under non-deterministic sampling).
+        const attemptPrompt = attempt === 0
+          ? userPrompt
+          : `${userPrompt}\n\n【重要】前回の応答は解析できませんでした。有効なJSONオブジェクトのみを返してください（コードフェンスや説明文は不要です）。/ The previous response could not be parsed. Return only a single valid JSON object (no code fences or prose).`;
         let response = '';
         try {
           response = await callAiStream({
-            userPrompt,
+            userPrompt: attemptPrompt,
             systemPrompt,
             onRequireApiKey: () => openSettingsModal(els),
             onTextDelta: () => {},  // silent during pre-gen
@@ -880,7 +886,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
           if (String(response || '').includes('ストリーミングに対応していない環境')) {
             response = await callAi({
-              userPrompt,
+              userPrompt: attemptPrompt,
               systemPrompt,
               onRequireApiKey: () => openSettingsModal(els),
             });
@@ -890,7 +896,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
           // retry once on error via the non-streaming path
           try {
             response = await callAi({
-              userPrompt,
+              userPrompt: attemptPrompt,
               systemPrompt,
               onRequireApiKey: () => openSettingsModal(els),
             });
@@ -930,17 +936,28 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     // Partial success: fewer questions were produced than requested. Let the user
     // know how many were generated while still starting the quiz.
-    if (generated.length < total) {
+    const isPartial = generated.length < total;
+    if (isPartial) {
       // eslint-disable-next-line no-console
       console.warn(`[pregen] partial generation ${generated.length}/${total} (errors: ${errorCount}, parse failures: ${parseFailCount})`);
-      if (els.quizPregenStatus) {
-        els.quizPregenStatus.textContent = t('errors.partialGenerate', { count: generated.length, total });
-      }
     }
     session.questionCount = generated.length;
 
     // Hide pre-gen overlay, show quiz
     if (els.quizPregenOverlay) els.quizPregenOverlay.classList.add('hidden');
+
+    // Surface the partial-generation notice on a durable banner that lives in the
+    // quiz area (not inside the pregen overlay, which is hidden above), so the user
+    // actually sees how many of the requested questions were produced.
+    if (isPartial && els.quizPartialNotice && els.quizPartialNoticeText) {
+      const startingNote = getLocale() === 'ja'
+        ? '生成できた問題でクイズを開始します。'
+        : 'Starting the quiz with the questions that were created.';
+      els.quizPartialNoticeText.textContent = `${t('errors.partialGenerate', { count: generated.length, total })}${getLocale() === 'ja' ? '' : ' '}${startingNote}`;
+      els.quizPartialNotice.classList.remove('hidden');
+    } else if (els.quizPartialNotice) {
+      els.quizPartialNotice.classList.add('hidden');
+    }
 
     // Browser notification
     if (Notification.permission === 'granted') {
@@ -1162,15 +1179,23 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const requested = result.texts.length;
     const isPartial = generated.length < requested;
     const modelLabel = result.model || 'gemini-3';
+    const isJa = getLocale() === 'ja';
+    const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
     const readyMessage = isPartial
-      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}（モデル: ${modelLabel}）`
-      : `${generated.length} 問の準備が完了しました（モデル: ${modelLabel}）`;
+      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}${modelSuffix}`
+      : (isJa
+        ? `${generated.length} 問の準備が完了しました${modelSuffix}`
+        : `${generated.length} questions ready${modelSuffix}`);
     setBatchToastState('ready', readyMessage);
     notifyBrowser(
-      '問題の準備ができました！',
+      isJa ? '問題の準備ができました！' : 'Questions are ready!',
       isPartial
-        ? `${requested}問中${generated.length}問のクイズを開始できます`
-        : `${generated.length} 問のクイズを開始できます`
+        ? (isJa
+          ? `${requested}問中${generated.length}問のクイズを開始できます`
+          : `${generated.length} of ${requested} quiz questions ready to start`)
+        : (isJa
+          ? `${generated.length} 問のクイズを開始できます`
+          : `${generated.length} quiz questions ready to start`)
     );
   }
 
@@ -1984,6 +2009,8 @@ function getElements() {
     quizPregenOverlay: document.getElementById('quizPregenOverlay'),
     quizPregenStatus: document.getElementById('quizPregenStatus'),
     quizPregenFill: document.getElementById('quizPregenFill'),
+    quizPartialNotice: document.getElementById('quizPartialNotice'),
+    quizPartialNoticeText: document.getElementById('quizPartialNoticeText'),
     quizSummary: document.getElementById('quizSummary'),
     quizSummaryEmoji: document.getElementById('quizSummaryEmoji'),
     quizSummaryTitle: document.getElementById('quizSummaryTitle'),
@@ -4808,6 +4835,8 @@ function resetQuizUi(els) {
 
   // Reset mode-specific elements
   if (els.quizPregenOverlay) els.quizPregenOverlay.classList.add('hidden');
+  if (els.quizPartialNotice) els.quizPartialNotice.classList.add('hidden');
+  if (els.quizPartialNoticeText) els.quizPartialNoticeText.textContent = '';
   if (els.quizTimerDisplay) els.quizTimerDisplay.classList.add('hidden');
   if (els.quizProgressBar) els.quizProgressBar.classList.add('hidden');
   if (els.quizProgressFill) els.quizProgressFill.style.width = '0%';

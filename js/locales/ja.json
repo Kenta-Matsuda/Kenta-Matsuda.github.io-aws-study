@@ -313,7 +313,7 @@
   },
   "errors": {
     "cannotGenerate": "エラー: 問題を生成できませんでした。もう一度お試しください。",
-    "partialGenerate": "{{total}}問中{{count}}問を生成しました。生成できた問題でクイズを開始します。",
+    "partialGenerate": "{{total}}問中{{count}}問を生成しました。",
     "noResponse": "回答を生成できませんでした。",
     "invalidApiKey": "APIキーが無効であるか、権限がありません。設定を確認してください。",
     "rateLimited": "混雑しています（429）。少し待って再試行してください。",
