@@ -53,7 +53,7 @@ permissions:
 - `package.json` の `npm test` はプレースホルダで必ず `exit 1` を返すため **使わない**。
 - `gh` CLI が利用可能。ただし後述のとおり **REST の `gh api` 経由で使う**。
 - デフォルトブランチは `main`。
-- PR テンプレートが `.github/pull_request_template.md` にある（Summary / Changes / Type of Change / Testing / Checklist）。PR 本文はこの構成に沿わせる。
+- PR テンプレートが `.github/pull_request_template.md` にある（Summary / Changes / Type of Change / Testing など）。PR 本文はこの構成を参考にしてよいが、**PR 本文には GitHub タスクリスト記法（行頭が `- [ ]` / `- [x]` のチェックボックス）を使わないこと。** GitHub は PR 本文中のタスクリストを横断集計し「7/11 tasks completed」のような進捗として表示するため、実装タスクの進捗と誤解される。Type of Change / Testing / Checklist 相当の情報は、チェックボックスではなく通常の箇条書き（`- ...`）や本文で記述する（例: 種別は「Bug fix」と一文で示す、実施した検証は箇条書きで列挙する）。なお `.agents/tasks/` 配下など**実装計画のチェックリストは従来どおりチェックボックス（`- [ ]` / `- [x]`）でよい**（そちらはタスクの完了管理が目的で正しい用途）。
 - 開発サーバは `dev-server.mjs`。長時間実行プロセスなのでフォアグラウンドでは起動しない。
 - ドキュメント: `docs/` 配下。索引は `docs/index.md`、要人間対応事項は `docs/action-required/`、issue 単位の解説は `docs/issues/`。
 
@@ -113,7 +113,7 @@ permissions:
    ```
    git switch main && git pull && git switch -c feature/issue-<番号>-<短い英語スラッグ>
    ```
-6. 変更をコミットし、`gh api ... /pulls ...`（REST）で該当 issue に紐づく PR を作成する。PR 本文は `.github/pull_request_template.md` の構成に沿わせつつ、以下を必ず含める。
+6. 変更をコミットし、`gh api ... /pulls ...`（REST）で該当 issue に紐づく PR を作成する。PR 本文は `.github/pull_request_template.md` の構成を参考にしつつ、以下を必ず含める。**PR 本文には GitHub タスクリスト記法（`- [ ]` / `- [x]`）を使わない**（GitHub のタスク進捗集計に誤カウントされるため）。種別・検証・確認事項は通常の箇条書きや本文で書く。
    - `Closes #<番号>`
    - 変更内容
    - 実装方針
