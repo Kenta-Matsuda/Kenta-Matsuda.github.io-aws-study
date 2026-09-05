@@ -1,6 +1,7 @@
 import { callAi, callAiStream, callAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
 import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
+import { applyResourceGroupDefaults } from './data/common-defaults.js';
 import {
   getApiKey,
   saveApiKeyFromInput,
@@ -16,6 +17,10 @@ import {
   addXp,
   getXpSummary,
   getStreakInfo,
+  getStudyReminderEnabled,
+  setStudyReminderEnabled,
+  getCelebratedStreakMilestone,
+  setCelebratedStreakMilestone,
   addQuizResult,
   getQuizHistory,
   getQuizAnalytics,
@@ -49,6 +54,7 @@ import {
   formatTime,
 } from './quiz.js';
 import { initChat, resetChat } from './chat.js';
+import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 
 /**
@@ -141,10 +147,53 @@ const XP_RULES = {
   link: 2,
   explain: 5,
   quiz: 10,
+  feedback: 5, // XP for submitting text feedback (once per day, see FEEDBACK_XP_DAY_KEY guard)
 };
+
+// localStorage key used to record the last day feedback XP was awarded, so
+// repeated feedback submissions cannot farm unbounded XP. This guard only
+// gates the XP award; it never blocks the feedback submission itself.
+const FEEDBACK_XP_DAY_KEY = 'asn_feedback_xp_day';
+
+// localStorage key used to record the last day Daily Challenge XP was awarded.
+// The Daily Challenge (issue #34) is deterministic, free, and replayable, so
+// without a guard a user could re-enter the same five questions and farm the
+// base `quiz` XP without limit (reason 'quiz' only caps the once-daily 2x
+// bonus, never the base award). This guard mirrors FEEDBACK_XP_DAY_KEY: it
+// gates only the XP award to once per local day; play stays unlimited.
+const DAILY_CHALLENGE_XP_DAY_KEY = 'asn_daily_challenge_xp_day';
+
+/** Local YYYY-MM-DD day string, matching storage.js's getLocalDayString(). */
+function feedbackLocalDayString(d = new Date()) {
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 
 export function initApp({ exams, getExamById, defaultExamId }) {
   const els = getElements();
+
+  /**
+   * True only when `examId` maps to a real exam in the exams catalog. Guards
+   * against pseudo-exam sentinels like '__beginner__' (which are truthy but
+   * have no exam record) leaking into result/XP tagging.
+   * @param {string | undefined | null} examId
+   * @returns {boolean}
+   */
+  function isRealExamId(examId) {
+    if (!examId) return false;
+    try {
+      return Boolean(getExamById(examId));
+    } catch {
+      return false;
+    }
+  }
+
+  // Session id of the Daily Challenge session that first claimed today's XP
+  // award. Only that session keeps awarding base XP for its questions; later
+  // replays on the same local day award nothing (see DAILY_CHALLENGE_XP_DAY_KEY).
+  let dailyXpAwardedSessionId = '';
 
   /** @type {null | { type: 'explain', examId: string, term: string, taskContext: string } | { type: 'quiz', examId: string, taskId: string, taskTitle: string, taskContext: string }} */
   let lastAiRequest = null;
@@ -432,7 +481,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
 
   // --- Dashboard Quiz Button ---
-  els.dashboardQuizBtn?.addEventListener('click', () => {
+  // Shared cross-domain quiz launcher used by both the carousel #dashboardQuizBtn
+  // and the prominent top-screen #mainStudyCtaBtn (issue #40), so behavior is identical.
+  function startDashboardStudySession() {
     const exam = getExamById(state.examId);
     lastAiRequest = {
       type: 'quiz',
@@ -454,6 +505,61 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         : (getLocale() === 'ja' ? '📊 復習対象なし（まずクイズに挑戦！）' : '📊 No questions to review (try a quiz first!)');
     }
     openModal(els.quizModeModal);
+  }
+
+  els.dashboardQuizBtn?.addEventListener('click', startDashboardStudySession);
+  els.mainStudyCtaBtn?.addEventListener('click', startDashboardStudySession);
+
+  // --- Daily Challenge Button (API-key-free, issue #34) ---
+  // 事前用意した静的問題プールから、その日の5問を決定的に出題する。
+  // AIプロバイダー/APIキーは一切使わないため、キー未設定でも遊べる。
+  els.dailyChallengeBtn?.addEventListener('click', () => {
+    // Fall back to a real exam id whenever the current selection is not a real
+    // exam (e.g. the '__beginner__' pseudo-mode, which is truthy so a plain
+    // `|| 'clf-c02'` would never fire). Tagging results/XP to a non-exam id
+    // would break per-exam history and getExamById lookups downstream.
+    const dailyExamId = isRealExamId(state.examId) ? state.examId : 'clf-c02';
+    const questions = getDailyChallengeQuestions(5, new Date(), getLocale());
+    if (!questions.length) return;
+
+    quizSession = createQuizSession({ examId: dailyExamId, mode: 'quick5' });
+    quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    quizSession.questionCount = questions.length;
+    quizSession.questions = questions.map(q => ({
+      question: q.question,
+      choices: q.choices,
+      correctIndex: q.correctIndex,
+      explanation: q.explanation,
+      domainId: null,
+    }));
+    quizSession.preGenerate = true;
+    quizSession.startedAt = Date.now();
+    quizSession._isDailyChallenge = true;
+
+    const dailyTitle = getLocale() === 'ja'
+      ? `デイリーチャレンジ（${questions.length}問）`
+      : `Daily Challenge (${questions.length} questions)`;
+
+    lastAiRequest = {
+      type: 'quiz',
+      examId: dailyExamId,
+      taskId: '',
+      taskTitle: getLocale() === 'ja' ? 'デイリーチャレンジ' : 'Daily Challenge',
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+
+    showAiModal(els, dailyTitle, true);
+    if (els.modalContent) els.modalContent.innerHTML = '';
+    if (els.modalLoading) els.modalLoading.classList.add('hidden');
+    resetQuizUi(els);
+    if (els.quizArea) els.quizArea.classList.remove('hidden');
+
+    renderInteractiveQuiz({ els, quiz: quizSession.questions[0] });
+    updateQuizProgress();
+    if (els.quizComboBar) els.quizComboBar.classList.remove('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+    if (els.quizChoices) els.quizChoices.classList.remove('hidden');
   });
 
   // --- Dashboard Quiz History Review Button ---
@@ -596,6 +702,26 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         : `${wrongQuestions.length} questions scheduled for tomorrow's review`;
       els.scheduleReviewMsg.classList.remove('hidden');
     }
+  });
+
+  // --- Share Score Button (issue #33: viral boost for a strong practice-exam result) ---
+  // Gated behind an explicit user click so the X intent tab opens on a user gesture
+  // (no auto-popup). Reuses the same intent-URL builder + window.open pattern as tweetBtn.
+  els.shareScoreBtn?.addEventListener('click', () => {
+    if (!quizSession) return;
+    const summary = getSessionSummary(quizSession);
+    const exam = getExamById(quizSession.examId);
+    const name = getUserName() || (getLocale() === 'ja' ? '名無し' : 'Anonymous');
+    const text = buildTweetScoreText({
+      userName: name,
+      examCode: exam ? exam.code : quizSession.examId,
+      accuracy: summary.accuracy,
+      correct: summary.correct,
+      total: summary.total,
+    });
+    const siteUrl = 'https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/';
+    const intentUrl = buildTweetIntentUrl({ text, url: siteUrl });
+    window.open(intentUrl, '_blank', 'noopener,noreferrer');
   });
 
   // --- Timer ---
@@ -1159,10 +1285,40 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
     }
 
-    // Award XP
-    const xpResult = addXp({ amount: result.xpEarned, reason: 'quiz' });
-    if (xpResult?.unlocked?.length) {
-      showMilestoneToast({ els, unlocked: xpResult.unlocked });
+    // Award XP. The Daily Challenge (issue #34) is deterministic, free, and
+    // replayable, so its base `quiz` XP is gated to at most once per local day
+    // (mirroring the FEEDBACK_XP_DAY_KEY guard). Normal AI quizzes are never
+    // affected — each session is unique and API-gated. Play stays unlimited;
+    // only the XP award is capped.
+    let awardDailyXp = true;
+    if (quizSession?._isDailyChallenge) {
+      const today = feedbackLocalDayString();
+      let lastAwardedDay = '';
+      try {
+        lastAwardedDay = localStorage.getItem(DAILY_CHALLENGE_XP_DAY_KEY) || '';
+      } catch {
+        lastAwardedDay = '';
+      }
+      // Allow every question of the FIRST session to run each day to award XP,
+      // but block XP once a different day-stamped session has already claimed
+      // today. The session that first claims today keeps awarding for all its
+      // questions; any later replay on the same day awards nothing.
+      if (lastAwardedDay === today && dailyXpAwardedSessionId !== quizSession.sessionId) {
+        awardDailyXp = false;
+      } else if (lastAwardedDay !== today) {
+        dailyXpAwardedSessionId = quizSession.sessionId;
+        try {
+          localStorage.setItem(DAILY_CHALLENGE_XP_DAY_KEY, today);
+        } catch {
+          // ignore storage write failures — still award XP this session
+        }
+      }
+    }
+    if (awardDailyXp) {
+      const xpResult = addXp({ amount: result.xpEarned, reason: 'quiz' });
+      if (xpResult?.unlocked?.length) {
+        showMilestoneToast({ els, unlocked: xpResult.unlocked });
+      }
     }
 
     // Store quiz result
@@ -1171,8 +1327,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Determine domainId: from pre-generated question, or from current domain tab
     const quizDomainId = quiz.domainId
       ?? (typeof appState.currentDomainId === 'number' ? appState.currentDomainId : null);
+    // Tag results to a real exam id. For the Daily Challenge the session already
+    // resolved a real exam id (falling back to clf-c02 for pseudo-modes like
+    // '__beginner__'), so prefer it over the possibly-pseudo appState.examId.
+    const resultExamId = quizSession?._isDailyChallenge && quizSession.examId
+      ? quizSession.examId
+      : appState.examId;
     addQuizResult({
-      examId: appState.examId,
+      examId: resultExamId,
       domainId: quizDomainId,
       taskId: lastAiRequest?.taskId || '',
       isCorrect,
@@ -1301,6 +1463,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   // ── Settings Modal: Language & Theme Switches ──
   wireSettingsModalSwitches({ els });
+
+  // ── Settings Modal: opt-in local study reminder ──
+  wireStudyReminder(els);
 
   // 初期表示
   setExam(defaultExamId);
@@ -1636,6 +1801,8 @@ function getElements() {
     statusProgressBar: document.getElementById('statusProgressBar'),
     nextActionPanel: document.getElementById('nextActionPanel'),
     nextActionText: document.getElementById('nextActionText'),
+    mainStudyCtaBtn: document.getElementById('mainStudyCtaBtn'),
+    mainStudyCtaLabel: document.getElementById('mainStudyCtaLabel'),
 
     xpUserLine: document.getElementById('xpUserLine'),
     xpTotal: document.getElementById('xpTotal'),
@@ -1645,6 +1812,7 @@ function getElements() {
     xpNextTitle: document.getElementById('xpNextTitle'),
     xpRemaining: document.getElementById('xpRemaining'),
     xpProgressBar: document.getElementById('xpProgressBar'),
+    xpWalker: document.getElementById('xpWalker'),
     xpMotivation: document.getElementById('xpMotivation'),
     editUserNameBtn: document.getElementById('editUserNameBtn'),
     tweetBtn: document.getElementById('tweetBtn'),
@@ -1668,6 +1836,10 @@ function getElements() {
     milestoneToast: document.getElementById('milestoneToast'),
     milestoneToastText: document.getElementById('milestoneToastText'),
     milestoneToastCloseBtn: document.getElementById('milestoneToastCloseBtn'),
+
+    streakMilestoneToast: document.getElementById('streakMilestoneToast'),
+    streakMilestoneToastText: document.getElementById('streakMilestoneToastText'),
+    streakMilestoneToastCloseBtn: document.getElementById('streakMilestoneToastCloseBtn'),
 
     batchProgressToast: document.getElementById('batchProgressToast'),
     batchProgressIcon: document.getElementById('batchProgressIcon'),
@@ -1693,6 +1865,9 @@ function getElements() {
     feedbackCharCount: document.getElementById('feedbackCharCount'),
     feedbackMessage: document.getElementById('feedbackMessage'),
     feedbackSubmitBtn: document.getElementById('feedbackSubmitBtn'),
+    feedbackImageInput: document.getElementById('feedbackImageInput'),
+    feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
+    feedbackImagePreview: document.getElementById('feedbackImagePreview'),
     // OpenAI / Provider
     openaiKeyInput: document.getElementById('openaiKeyInput'),
     openaiKeyClearBtn: document.getElementById('openaiKeyClearBtn'),
@@ -1763,6 +1938,8 @@ function getElements() {
     quizSumScheduleReview: document.getElementById('quizSumScheduleReview'),
     scheduleReviewBtn: document.getElementById('scheduleReviewBtn'),
     scheduleReviewMsg: document.getElementById('scheduleReviewMsg'),
+    quizSumShareScore: document.getElementById('quizSumShareScore'),
+    shareScoreBtn: document.getElementById('shareScoreBtn'),
     smartReviewCount: document.getElementById('smartReviewCount'),
 
     // Dashboard carousel
@@ -1773,6 +1950,7 @@ function getElements() {
     carouselNext: document.getElementById('carouselNext'),
     dashboardQuizBtn: document.getElementById('dashboardQuizBtn'),
     dashboardReviewBtn: document.getElementById('dashboardReviewBtn'),
+    dailyChallengeBtn: document.getElementById('dailyChallengeBtn'),
 
     // Quiz history review modal
     quizHistoryModal: document.getElementById('quizHistoryModal'),
@@ -1787,6 +1965,13 @@ function getElements() {
     streakCount: document.getElementById('streakCount'),
     streakWeekDots: document.getElementById('streakWeekDots'),
     streakMessage: document.getElementById('streakMessage'),
+    streakNudge: document.getElementById('streakNudge'),
+    streakNudgeText: document.getElementById('streakNudgeText'),
+    streakNudgeCloseBtn: document.getElementById('streakNudgeCloseBtn'),
+
+    // Study reminder (opt-in local notification)
+    studyReminderToggle: document.getElementById('studyReminderToggle'),
+    studyReminderStatus: document.getElementById('studyReminderStatus'),
 
     // Daily Highlight (narrative)
     dailyHighlight: document.getElementById('dailyHighlight'),
@@ -2048,6 +2233,7 @@ function wireProfileHandlers({ els, state, getExamById }) {
 
 function wireToastHandlers({ els }) {
   els.milestoneToastCloseBtn?.addEventListener('click', () => hideMilestoneToast({ els }));
+  els.streakMilestoneToastCloseBtn?.addEventListener('click', () => hideStreakMilestoneToast({ els }));
 }
 
 function enforceUserNameIfNeeded({ els }) {
@@ -2088,12 +2274,46 @@ function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
   return [tpl, t('tweet.cta') + ' ' + t('tweet.hashtag')].filter(Boolean).join('\n');
 }
 
+// Build enriched tweet text for a strong practice-exam result (issue #33 viral boost).
+// NOTE: leaderboard triggers (#32), server-generated custom OGP images and
+// user-uploadable avatars/character icons are intentionally NOT handled here —
+// they require a backend/DB and are 要人間対応 (out of scope for this static client).
+function buildTweetScoreText({ userName, examCode, accuracy, correct, total }) {
+  const name = String(userName || (getLocale() === 'ja' ? '名無し' : 'Anonymous'));
+  const code = String(examCode || '');
+  const pct = Math.round(Number(accuracy || 0) * 100);
+  const tpl = t('tweet.scoreTemplate', {
+    name,
+    code,
+    accuracy: pct,
+    correct: Number(correct || 0),
+    total: Number(total || 0),
+  });
+  return [tpl, t('tweet.cta') + ' ' + t('tweet.hashtag')].filter(Boolean).join('\n');
+}
+
 function buildTweetIntentUrl({ text, url }) {
   // X current endpoint (twitter.com still works, but this reduces redirects)
   const base = 'https://x.com/intent/post';
   const params = new URLSearchParams();
   params.set('text', String(text || '').slice(0, 800));
   if (url) params.set('url', String(url));
+  return `${base}?${params.toString()}`;
+}
+
+// Build GitHub's tokenless prefilled new-issue URL. URLSearchParams url-encodes
+// the values, so title/body/labels are safely escaped. `labels` may be an array
+// or comma-separated string; empty entries are dropped.
+function buildGitHubIssueUrl({ title, body, labels }) {
+  const base = 'https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues/new';
+  const params = new URLSearchParams();
+  params.set('title', String(title || ''));
+  params.set('body', String(body || ''));
+  const labelList = Array.isArray(labels)
+    ? labels
+    : String(labels || '').split(',');
+  const cleaned = labelList.map((l) => String(l || '').trim()).filter(Boolean);
+  if (cleaned.length) params.set('labels', cleaned.join(','));
   return `${base}?${params.toString()}`;
 }
 
@@ -2207,6 +2427,13 @@ function renderLearningStatus({ els, exam, state }) {
   if (els.nextActionText) {
     els.nextActionText.textContent = nextAction;
   }
+
+  // Main CTA label: start vs resume today's study (issue #40)
+  if (els.mainStudyCtaLabel) {
+    els.mainStudyCtaLabel.textContent = streakInfo.hadActivityToday
+      ? t('dashboard.mainCta.resume')
+      : t('dashboard.mainCta.start');
+  }
 }
 
 function renderXpDashboard({ els, exam, state }) {
@@ -2230,18 +2457,25 @@ function renderXpDashboard({ els, exam, state }) {
   if (els.xpTitleBadge) els.xpTitleBadge.textContent = summary.title || '-';
   if (els.xpNextTitle) els.xpNextTitle.textContent = summary.nextTitle ? String(summary.nextTitle) : '-';
   if (els.xpRemaining) els.xpRemaining.textContent = summary.nextTitle ? `${summary.remainingXp} XP` : '-';
+  const xpPct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
   if (els.xpProgressBar) {
-    const pct = Math.max(0, Math.min(1, Number(summary.progress01 || 0))) * 100;
-    els.xpProgressBar.style.width = `${pct.toFixed(1)}%`;
+    els.xpProgressBar.style.width = `${xpPct.toFixed(1)}%`;
+    const track = els.xpProgressBar.parentElement;
+    if (track && track.getAttribute('role') === 'progressbar') {
+      track.setAttribute('aria-valuenow', String(Math.round(xpPct)));
+    }
+  }
+  // RPG walker tracks the same clamped progress position along the bar
+  if (els.xpWalker) {
+    els.xpWalker.style.left = `${xpPct.toFixed(1)}%`;
   }
 
   // Streak display
   renderStreakDisplay(els);
 
-  // Request notification permission early
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
-  }
+  // Opt-in local study reminder: only act when the user has enabled it.
+  // No permission is requested here unless the user opted in (see wireStudyReminder).
+  maybeFireStudyReminder(els);
 
   // Initialize carousel (only once)
   initDashboardCarousel(els);
@@ -2324,6 +2558,17 @@ function initDashboardCarousel(els) {
   update();
 }
 
+// Streak milestones (in days) that trigger an intrinsic-motivation celebration.
+const STREAK_MILESTONES = [7, 14, 30, 60, 100];
+
+function highestReachedStreakMilestone(current) {
+  let reached = 0;
+  for (const m of STREAK_MILESTONES) {
+    if (current >= m) reached = m;
+  }
+  return reached;
+}
+
 function renderStreakDisplay(els) {
   const streak = getStreakInfo();
   if (els.streakCount) {
@@ -2342,6 +2587,10 @@ function renderStreakDisplay(els) {
         : t('dashboard.streak.startNew');
     }
   }
+
+  // Intrinsic-motivation celebration: when the user crosses a new streak
+  // milestone (7/14/30/...), celebrate once with a toast + confetti.
+  maybeCelebrateStreakMilestone(els, streak);
   if (els.streakWeekDots) {
     const days = [t('days.mon'), t('days.tue'), t('days.wed'), t('days.thu'), t('days.fri'), t('days.sat'), t('days.sun')];
     const today = new Date().getDay(); // 0=Sun
@@ -2371,6 +2620,135 @@ function renderStreakDisplay(els) {
       `.trim();
     }).join('');
   }
+}
+
+// Celebrate crossing a new streak milestone once (intrinsic motivation).
+// Reuses the milestone toast + confetti pattern already used for XP milestones.
+function maybeCelebrateStreakMilestone(els, streak) {
+  if (!streak || !streak.hadActivityToday) return;
+  const reached = highestReachedStreakMilestone(streak.current);
+  if (reached <= 0) return;
+
+  const alreadyCelebrated = getCelebratedStreakMilestone();
+  if (reached <= alreadyCelebrated) return;
+
+  setCelebratedStreakMilestone(reached);
+
+  showStreakMilestoneToast({ els, days: reached });
+}
+
+// Streak-milestone toast uses its OWN element + timer (distinct from the XP
+// milestone toast) so a single quiz answer that crosses both an XP title and a
+// streak milestone shows both celebrations instead of one clobbering the other.
+function showStreakMilestoneToast({ els, days }) {
+  if (!els.streakMilestoneToast || !els.streakMilestoneToastText) return;
+  els.streakMilestoneToastText.textContent = t('dashboard.streak.milestoneToast', { days });
+  els.streakMilestoneToast.classList.remove('hidden');
+  launchConfetti(els.confettiCanvas);
+  window.clearTimeout?.(els.__streakMilestoneToastTimer);
+  els.__streakMilestoneToastTimer = window.setTimeout(() => {
+    hideStreakMilestoneToast({ els });
+  }, 4500);
+}
+
+function hideStreakMilestoneToast({ els }) {
+  els.streakMilestoneToast?.classList?.add('hidden');
+}
+
+// ─── Study Reminder (opt-in local notification) ─────────────
+
+// Show the in-app streak nudge banner (client-side only, no network).
+function showStreakNudge(els, message) {
+  if (!els.streakNudge) return;
+  if (els.streakNudgeText) els.streakNudgeText.textContent = message;
+  els.streakNudge.classList.remove('hidden');
+}
+
+function hideStreakNudge(els) {
+  els.streakNudge?.classList?.add('hidden');
+}
+
+// Fire a local (client-side) study reminder when the streak is at risk and the
+// user has opted in. Feature-detects the Notification API and degrades to an
+// in-app nudge; never throws when Notification is unavailable or denied.
+function maybeFireStudyReminder(els) {
+  if (!getStudyReminderEnabled()) return;
+
+  const streak = getStreakInfo();
+  // "At risk" = the user has an active streak but has not studied today yet.
+  if (streak.hadActivityToday || streak.current <= 0) return;
+
+  const title = t('dashboard.streak.reminderTitle');
+  const body = t('dashboard.streak.reminderBody', { count: streak.current });
+
+  // In-app nudge always shows as graceful degradation.
+  showStreakNudge(els, body);
+
+  // Local OS notification (best effort, feature-detected).
+  // NOTE: we intentionally reference the SVG icon here. Some platforms ignore
+  // SVG notification icons (falling back to a default glyph), but the raster
+  // PNG app icons only exist on the #97 branch and are not present on this
+  // branch, so pointing at a PNG now would be a dead asset reference. Once #97
+  // merges to main, switch this to a raster PNG (e.g. assets/icon-192.png).
+  try {
+    if (typeof Notification === 'undefined') return;
+    if (Notification.permission === 'granted') {
+      new Notification(title, { body, icon: 'assets/icon.svg' });
+    }
+  } catch { /* ignore: notifications are optional */ }
+}
+
+// Wire the opt-in study reminder toggle in the settings modal.
+function wireStudyReminder(els) {
+  const toggle = els.studyReminderToggle;
+  const statusEl = els.studyReminderStatus;
+  const supported = typeof window !== 'undefined' && 'Notification' in window;
+
+  const reflect = () => {
+    const enabled = getStudyReminderEnabled();
+    if (toggle) toggle.checked = enabled;
+    if (!statusEl) return;
+    if (!supported) {
+      statusEl.textContent = t('dashboard.streak.reminderUnsupported');
+      return;
+    }
+    if (!enabled) {
+      statusEl.textContent = t('dashboard.streak.reminderOff');
+      return;
+    }
+    // Enabled: reflect the underlying permission state.
+    const perm = (typeof Notification !== 'undefined' && Notification.permission) || 'default';
+    if (perm === 'denied') {
+      statusEl.textContent = t('dashboard.streak.reminderDenied');
+    } else if (perm === 'granted') {
+      statusEl.textContent = t('dashboard.streak.reminderOn');
+    } else {
+      statusEl.textContent = t('dashboard.streak.reminderInApp');
+    }
+  };
+
+  if (toggle && !supported) {
+    toggle.disabled = true;
+  }
+
+  reflect();
+
+  els.streakNudgeCloseBtn?.addEventListener('click', () => hideStreakNudge(els));
+
+  toggle?.addEventListener('change', () => {
+    const wantOn = Boolean(toggle.checked);
+    setStudyReminderEnabled(wantOn);
+
+    // Request OS notification permission on opt-in (feature-detected, guarded).
+    if (wantOn && supported) {
+      try {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(() => reflect()).catch(() => reflect());
+        }
+      } catch { /* ignore */ }
+    }
+    reflect();
+  });
 }
 
 // ─── Daily Highlight (物語化) ────────────────────────────────
@@ -3445,8 +3823,15 @@ function buildResourceSections(task) {
   if (!Array.isArray(nested) || nested.length === 0) return [];
 
   const sections = [];
-  for (const group of nested) {
-    if (!group || typeof group !== 'object') continue;
+  for (const rawGroup of nested) {
+    if (!rawGroup || typeof rawGroup !== 'object') continue;
+
+    // Apply shared presentation defaults (issue #11). This is opt-in and
+    // non-destructive: a group whose `key` is a known common one (e.g.
+    // blackbelts/docs/blogs) may OMIT iconClass/iconColorClass/label/labelEn
+    // and the common default is filled in here. Explicit fields on the group
+    // always win over the defaults, so existing exams render identically.
+    const group = applyResourceGroupDefaults(rawGroup);
 
     const key = String(group.key || group.id || group.type || '').trim();
     const title = String(localizedResourceLabel(group) || group.label || group.title || '').trim() || (key ? humanizeKey(key) : 'Resources');
@@ -3504,7 +3889,15 @@ function highlightHtml(escapedText, termLower) {
 }
 
 // --- Feedback ---
-const FEEDBACK_MAX_LENGTH = 100;
+const FEEDBACK_MAX_LENGTH = 1000;
+
+// In-memory list of images the user attached to the current feedback draft.
+// Each entry: { file, url } where `url` is an object URL used only for the
+// preview thumbnail. Bytes are NEVER uploaded anywhere — GitHub's tokenless
+// prefilled new-issue URL cannot carry attachments, so the user is guided to
+// paste the images into the opened issue instead. The list is cleared (and its
+// object URLs revoked) on modal open/close to avoid leaks.
+let feedbackImages = [];
 
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
@@ -3527,6 +3920,106 @@ function wireFeedbackHandlers({ els }) {
       submitFeedback(els);
     }
   });
+
+  // Image attach affordances (#81). Files are kept in memory only for preview;
+  // they are never uploaded (static site, no backend / AWS out of bounds).
+  els.feedbackImageTrigger?.addEventListener('click', () => {
+    els.feedbackImageInput?.click();
+  });
+
+  els.feedbackImageInput?.addEventListener('change', () => {
+    addFeedbackImages(els, els.feedbackImageInput.files);
+    // Reset so selecting the same file again still fires `change`.
+    els.feedbackImageInput.value = '';
+  });
+
+  // Paste images (e.g. screenshots) directly into the textarea.
+  els.feedbackTextarea?.addEventListener('paste', (e) => {
+    const files = Array.from(e.clipboardData?.files || []).filter((f) => f.type.startsWith('image/'));
+    if (files.length) {
+      e.preventDefault();
+      addFeedbackImages(els, files);
+    }
+  });
+
+  // Drag-and-drop onto the dropzone trigger.
+  els.feedbackImageTrigger?.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    els.feedbackImageTrigger.classList.add('border-teal-400', 'text-teal-600');
+  });
+  els.feedbackImageTrigger?.addEventListener('dragleave', () => {
+    els.feedbackImageTrigger.classList.remove('border-teal-400', 'text-teal-600');
+  });
+  els.feedbackImageTrigger?.addEventListener('drop', (e) => {
+    e.preventDefault();
+    els.feedbackImageTrigger.classList.remove('border-teal-400', 'text-teal-600');
+    const files = Array.from(e.dataTransfer?.files || []).filter((f) => f.type.startsWith('image/'));
+    if (files.length) addFeedbackImages(els, files);
+  });
+}
+
+// Add image File objects to the in-memory list and re-render the previews.
+function addFeedbackImages(els, fileList) {
+  const files = Array.from(fileList || []).filter((f) => f && f.type && f.type.startsWith('image/'));
+  if (!files.length) return;
+  files.forEach((file) => {
+    feedbackImages.push({ file, url: URL.createObjectURL(file) });
+  });
+  renderFeedbackImagePreviews(els);
+}
+
+// Remove a single attached image (by index), revoking its object URL.
+function removeFeedbackImage(els, index) {
+  const entry = feedbackImages[index];
+  if (!entry) return;
+  try {
+    URL.revokeObjectURL(entry.url);
+  } catch {
+    // ignore
+  }
+  feedbackImages.splice(index, 1);
+  renderFeedbackImagePreviews(els);
+}
+
+// Clear all attached images and revoke their object URLs to avoid leaks.
+function clearFeedbackImages(els) {
+  feedbackImages.forEach((entry) => {
+    try {
+      URL.revokeObjectURL(entry.url);
+    } catch {
+      // ignore
+    }
+  });
+  feedbackImages = [];
+  if (els?.feedbackImagePreview) els.feedbackImagePreview.innerHTML = '';
+}
+
+// Render thumbnail previews with a per-thumbnail remove button.
+function renderFeedbackImagePreviews(els) {
+  const container = els?.feedbackImagePreview;
+  if (!container) return;
+  container.innerHTML = '';
+  feedbackImages.forEach((entry, index) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'relative w-16 h-16 rounded-lg overflow-hidden border border-gray-200 bg-gray-50';
+
+    const img = document.createElement('img');
+    img.src = entry.url;
+    img.alt = entry.file?.name || 'image';
+    img.className = 'w-full h-full object-cover';
+    wrap.appendChild(img);
+
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'absolute top-0 right-0 bg-black/60 hover:bg-black/80 text-white w-5 h-5 flex items-center justify-center text-xs rounded-bl-lg focus:outline-none';
+    removeBtn.setAttribute('aria-label', t('feedbackModal.imageRemove'));
+    removeBtn.title = t('feedbackModal.imageRemove');
+    removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+    removeBtn.addEventListener('click', () => removeFeedbackImage(els, index));
+    wrap.appendChild(removeBtn);
+
+    container.appendChild(wrap);
+  });
 }
 
 function openFeedbackModal(els) {
@@ -3534,6 +4027,8 @@ function openFeedbackModal(els) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
   els.feedbackMessage?.classList?.add('hidden');
+  // Start every session with a clean image list (revokes any stale URLs).
+  clearFeedbackImages(els);
   updateFeedbackCharCount(els);
   openModal(els.feedbackModal);
   setTimeout(() => els.feedbackTextarea?.focus(), 0);
@@ -3560,12 +4055,69 @@ function submitFeedback(els) {
     return;
   }
 
-  // Send to Google Analytics as a custom event
-  sendFeedbackToGa({ category, text });
+  // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
+  // user click (static site => no token => tokenless prefilled URL pattern,
+  // same as the X/tweet share). Never auto-popup.
+  const feedbackText = String(text).slice(0, FEEDBACK_MAX_LENGTH);
+  const categoryLabel = t(`feedbackModal.categories.${feedbackCategoryI18nKey(category)}`);
+  const issueTitle = t('feedbackModal.issueTitle', { category: categoryLabel });
+  // Interpolate the user-controlled `text` LAST (category first) so that any
+  // literal `{{...}}` sequence inside the user's feedback is never re-scanned
+  // by a subsequent replacement pass. t() substitutes params in object-key
+  // order, so key order here is load-bearing.
+  let issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
+  // When images are attached (#81), append a marker line so the user knows
+  // where to paste them in the opened GitHub issue. The bytes are never
+  // uploaded — GitHub's tokenless prefilled URL cannot carry attachments, so
+  // GitHub itself auto-uploads images when the user pastes/drops them.
+  const hasImages = feedbackImages.length > 0;
+  if (hasImages) {
+    issueBody += `\n\n${t('feedbackModal.issueImageMarker', { count: feedbackImages.length })}`;
+  }
+  const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
+  const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
 
-  showInlineMessage(els.feedbackMessage, t('feedbackModal.sent'), 'text-teal-600');
+  // #79: the prefilled issue URL already carries the composed body, so the
+  // primary hand-off is the opened GitHub page below. We also copy the body to
+  // the clipboard as a backup so the user can re-paste it if GitHub truncates
+  // an over-long prefilled URL. Best-effort: a copy failure must never block
+  // opening the issue. Fire-and-forget so the window.open below stays inside
+  // the user-gesture call stack and popup blockers don't trip.
+  copyTextToClipboard(issueBody).catch(() => {});
+
+  window.open(issueUrl, '_blank', 'noopener,noreferrer');
+
+  const sentKey = hasImages ? 'feedbackModal.sentWithImages' : 'feedbackModal.sent';
+  showInlineMessage(els.feedbackMessage, t(sentKey), 'text-teal-600');
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
+  clearFeedbackImages(els);
   updateFeedbackCharCount(els);
+
+  // Award a modest XP bonus for submitting feedback, capped to once per day so
+  // it cannot be farmed by repeated submissions. The XP award is best-effort;
+  // any failure here must never block the feedback UX above.
+  try {
+    const today = feedbackLocalDayString();
+    let lastAwardedDay = '';
+    try {
+      lastAwardedDay = localStorage.getItem(FEEDBACK_XP_DAY_KEY) || '';
+    } catch {
+      lastAwardedDay = '';
+    }
+    if (lastAwardedDay !== today) {
+      const result = addXp({ amount: XP_RULES.feedback, reason: 'feedback' });
+      try {
+        localStorage.setItem(FEEDBACK_XP_DAY_KEY, today);
+      } catch {
+        // ignore storage write failures
+      }
+      if (result?.unlocked?.length) {
+        showMilestoneToast({ els, unlocked: result.unlocked });
+      }
+    }
+  } catch {
+    // ignore XP award failures — feedback submission already succeeded
+  }
 
   // Auto-close after a short delay
   setTimeout(() => {
@@ -3574,21 +4126,32 @@ function submitFeedback(els) {
   }, 1500);
 }
 
-function sendFeedbackToGa({ category, text }) {
-  try {
-    if (typeof window === 'undefined') return;
-    const gtag = window.gtag;
-    if (typeof gtag !== 'function') return;
+// Map a feedback category <option> value to its i18n category label key under
+// feedbackModal.categories.*. Falls back to 'general'.
+function feedbackCategoryI18nKey(category) {
+  const map = {
+    general: 'general',
+    resource_request: 'resources',
+    feature_request: 'feature',
+    bug_report: 'bug',
+    ai_quality: 'aiQuality',
+    ui_ux: 'ui',
+    other: 'other',
+  };
+  return map[String(category || '')] || 'general';
+}
 
-    const feedbackText = String(text || '').slice(0, FEEDBACK_MAX_LENGTH);
-
-    gtag('event', 'user_feedback', {
-      feedback_category: category,
-      feedback_text: feedbackText,
-      feedback_length: feedbackText.length,
-    });
-  } catch {
-    // ignore
+// Map a feedback category to an extra GitHub Issue label. Bug reports use `bug`,
+// feature requests use `enhancement`; everything else has no extra label (the
+// `feedback` label is always applied by the caller).
+function categoryToIssueLabel(category) {
+  switch (String(category || '')) {
+    case 'bug_report':
+      return 'bug';
+    case 'feature_request':
+      return 'enhancement';
+    default:
+      return '';
   }
 }
 
@@ -3609,6 +4172,14 @@ function openModal(modalEl) {
 
 function closeModal(modalEl) {
   modalEl.style.display = 'none';
+  // Per-modal teardown so closing via the X button, Cancel button, backdrop,
+  // or a programmatic close all run the same cleanup. The feedback modal holds
+  // attached-image object URLs that must be revoked on every close path, not
+  // just on the next open. Otherwise cancelling with images attached leaks
+  // them until the modal is reopened (#81).
+  if (modalEl?.id === 'feedbackModal') {
+    clearFeedbackImages({ feedbackImagePreview: document.getElementById('feedbackImagePreview') });
+  }
 }
 
 // --- AI Provider UI ---
@@ -4049,6 +4620,15 @@ function showQuizSummary({ els, session }) {
     els.quizSumScheduleReview.classList.remove('hidden');
     if (els.scheduleReviewMsg) els.scheduleReviewMsg.classList.add('hidden');
   }
+
+  // Offer a share affordance after a strong practice (mock) exam result (issue #33).
+  // Threshold: mock mode + accuracy >= 80% (a good, shareable score). The button
+  // itself opens the X intent URL on click, never as an auto popup.
+  const SCORE_SHARE_THRESHOLD = 0.8;
+  if (els.quizSumShareScore) {
+    const shareable = session.mode === 'mock' && acc >= SCORE_SHARE_THRESHOLD;
+    els.quizSumShareScore.classList.toggle('hidden', !shareable);
+  }
 }
 
 function resetQuizUi(els) {
@@ -4074,6 +4654,9 @@ function resetQuizUi(els) {
   if (els.quizSumExplanations) els.quizSumExplanations.classList.add('hidden');
   if (els.quizSumExplanationsList) els.quizSumExplanationsList.innerHTML = '';
   if (els.quizSumExplanationsArrow) els.quizSumExplanationsArrow.style.transform = '';
+
+  // Reset share-score affordance (issue #33)
+  if (els.quizSumShareScore) els.quizSumShareScore.classList.add('hidden');
 }
 
 function renderInteractiveQuiz({ els, quiz }) {

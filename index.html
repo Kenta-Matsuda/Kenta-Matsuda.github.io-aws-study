@@ -19,11 +19,18 @@
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="./assets/og/favicon.ico">
-    <link rel="apple-touch-icon" href="./assets/og/beginner.png">
+    <link rel="icon" type="image/svg+xml" href="./assets/icon.svg">
+    <link rel="apple-touch-icon" href="./assets/icon.svg">
 
     <!-- Web App Manifest -->
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#232f3e">
+
+    <!-- PWA (iOS / mobile) -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AWS Study Nav">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:locale" content="ja_JP">
@@ -629,12 +636,170 @@
             50% { transform: scale(1.15); }
         }
 
+        /* ── RPG-style XP Bar (dashboard title slide) ── */
+        .xp-rpg-wrap {
+            position: relative;
+            padding-top: 20px; /* room for the walker standing on the bar */
+        }
+        .xp-rpg-track {
+            position: relative;
+            background: #e5e7eb;
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.12);
+        }
+        .xp-rpg-fill {
+            position: relative;
+            width: 0%;
+            background: linear-gradient(180deg, #fbbf24 0%, #f59e0b 45%, #ea580c 100%);
+            box-shadow: 0 0 8px rgba(245, 158, 11, 0.55);
+            transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            overflow: hidden;
+        }
+        /* segmented + glossy overlay */
+        .xp-rpg-fill::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0) 55%),
+                repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.18) 0 8px, rgba(255, 255, 255, 0) 8px 16px);
+            pointer-events: none;
+        }
+        /* moving shine */
+        .xp-rpg-fill::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 40%;
+            background: linear-gradient(100deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.55) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-18deg);
+            animation: xpShine 2.6s ease-in-out infinite;
+        }
+        @keyframes xpShine {
+            0% { left: -45%; }
+            60%, 100% { left: 115%; }
+        }
+        /* explorer marker that tracks progress along the XP bar */
+        .xp-walker {
+            position: absolute;
+            top: 0;
+            left: 0%;
+            transform: translateX(-50%);
+            line-height: 0;
+            transition: left 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+            will-change: left;
+            pointer-events: none;
+        }
+        .xp-walker__svg {
+            display: block;
+            overflow: visible;
+            filter: drop-shadow(0 2px 3px rgba(35, 47, 62, 0.35));
+        }
+        /* the whole character gently bobs while walking */
+        .xp-walker__body {
+            transform-box: fill-box;
+            transform-origin: 50% 100%;
+            animation: xpWalkBob 0.72s ease-in-out infinite;
+        }
+        .xp-walker__shadow {
+            fill: rgba(35, 47, 62, 0.22);
+            transform-box: fill-box;
+            transform-origin: 50% 50%;
+            animation: xpWalkShadow 0.72s ease-in-out infinite;
+        }
+        .xp-walker__torso { fill: #ea580c; }
+        .xp-walker__pack { fill: #232f3e; }
+        .xp-walker__head { fill: #f8d9b0; }
+        .xp-walker__cap { fill: #f59e0b; }
+        .xp-walker__leg,
+        .xp-walker__arm {
+            fill: none;
+            stroke: #232f3e;
+            stroke-width: 3;
+        }
+        /* legs and arm swing in step with the bob */
+        .xp-walker__leg--front {
+            transform-box: fill-box;
+            transform-origin: 0% 0%;
+            animation: xpWalkLegFront 0.72s ease-in-out infinite;
+        }
+        .xp-walker__leg--back {
+            transform-box: fill-box;
+            transform-origin: 100% 0%;
+            animation: xpWalkLegBack 0.72s ease-in-out infinite;
+        }
+        .xp-walker__arm {
+            transform-box: fill-box;
+            transform-origin: 0% 0%;
+            animation: xpWalkArm 0.72s ease-in-out infinite;
+        }
+        @keyframes xpWalkBob {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-1.6px) rotate(-2deg); }
+            50% { transform: translateY(0) rotate(0deg); }
+            75% { transform: translateY(-1.6px) rotate(2deg); }
+        }
+        @keyframes xpWalkLegFront {
+            0%, 100% { transform: rotate(22deg); }
+            50% { transform: rotate(-22deg); }
+        }
+        @keyframes xpWalkLegBack {
+            0%, 100% { transform: rotate(-22deg); }
+            50% { transform: rotate(22deg); }
+        }
+        @keyframes xpWalkArm {
+            0%, 100% { transform: rotate(-18deg); }
+            50% { transform: rotate(18deg); }
+        }
+        @keyframes xpWalkShadow {
+            0%, 100% { transform: scaleX(1); opacity: 0.55; }
+            50% { transform: scaleX(0.82); opacity: 0.35; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .xp-rpg-fill::after { animation: none; }
+            .xp-walker,
+            .xp-walker__body,
+            .xp-walker__shadow,
+            .xp-walker__leg--front,
+            .xp-walker__leg--back,
+            .xp-walker__arm { animation: none; }
+        }
+        /* dark mode: keep the character readable against the dark track */
+        html.dark .xp-walker__svg {
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.6));
+        }
+        html.dark .xp-walker__pack,
+        html.dark .xp-walker__leg,
+        html.dark .xp-walker__arm { stroke: #10151d; }
+        html.dark .xp-walker__pack { fill: #10151d; }
+        html.dark .xp-rpg-track {
+            background: #333333;
+            border-color: rgba(255, 255, 255, 0.08);
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
         /* ── Chat Widget ── */
         .chat-widget {
             position: fixed;
             bottom: 24px;
             right: 24px;
             z-index: 999;
+        }
+        /* PWA install button: anchor to the bottom-LEFT corner so it never overlaps
+           the chat FAB (bottom-right, 56px) nor the chat panel that opens above it
+           (bottom:88px right:24px width:380px). */
+        #pwaInstallBtn {
+            bottom: 24px;
+            left: 24px;
+            right: auto;
+        }
+        @media (max-width: 480px) {
+            #pwaInstallBtn {
+                bottom: 16px;
+                left: 16px;
+            }
         }
         .chat-fab {
             width: 56px;
@@ -1041,16 +1206,13 @@
         }
     </style>
 </head>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-HGYPRYH7Q1"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-    gtag('config', 'G-HGYPRYH7Q1');
-</script>
 <body class="min-h-screen flex flex-col">
+
+    <!-- PWA: install prompt (hidden until beforeinstallprompt fires) -->
+    <button id="pwaInstallBtn" type="button" class="hidden fixed z-50 items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 flex" aria-label="ホーム画面に追加">
+        <i class="fas fa-download"></i>
+        <span>アプリを追加</span>
+    </button>
 
     <!-- SEO: Static content for crawlers and AI indexers that may not fully execute JavaScript -->
     <noscript>
@@ -1207,6 +1369,11 @@
                 <div class="mt-4 h-2 rounded-full bg-gray-100 overflow-hidden">
                     <div id="statusProgressBar" class="h-2 bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
+                <!-- Primary CTA: start/resume today's study (issue #40) -->
+                <button id="mainStudyCtaBtn" type="button" class="sparkle-btn mt-5 w-full flex items-center justify-center gap-3 px-6 py-4 text-white rounded-xl text-base sm:text-lg font-bold shadow-md hover:shadow-lg transition duration-150 active:translate-y-px focus:outline-none focus:ring-2 focus:ring-indigo-400/50">
+                    <i class="fas fa-play"></i>
+                    <span id="mainStudyCtaLabel" data-i18n="dashboard.mainCta.start">Start today's study</span>
+                </button>
             </div>
             
             <!-- Context Header for Right Section -->
@@ -1279,6 +1446,10 @@
                                     <button id="dashboardReviewBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
                                         <i class="fas fa-book-open"></i> <span data-i18n="dashboard.quizCarousel.reviewBtn">Review Past Questions</span>
                                     </button>
+                                    <button id="dailyChallengeBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
+                                        <i class="fas fa-calendar-day"></i> <span data-i18n="dashboard.quizCarousel.dailyChallengeBtn">Daily Challenge</span>
+                                    </button>
+                                    <p class="text-xs text-gray-500 mt-1" data-i18n="dashboard.quizCarousel.dailyChallengeHint">No API key needed</p>
                                 </div>
                             </div>
                         </div>
@@ -1306,6 +1477,13 @@
                                 <div class="mt-4">
                                     <div id="streakWeekDots" class="flex gap-2 mt-1"></div>
                                     <p id="streakMessage" class="text-sm text-gray-500 mt-3" data-i18n="dashboard.streak.keepGoing">Keep learning today to extend your streak!</p>
+                                    <div id="streakNudge" class="hidden mt-3 flex items-start gap-2 rounded-lg border border-orange-200 bg-orange-50 p-3">
+                                        <i class="fas fa-bell text-orange-500 mt-0.5"></i>
+                                        <p id="streakNudgeText" class="flex-1 text-xs text-orange-800">-</p>
+                                        <button id="streakNudgeCloseBtn" type="button" class="text-orange-400 hover:text-orange-600" aria-label="Close">
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1326,8 +1504,31 @@
                                         <span id="xpRemaining" class="whitespace-nowrap font-semibold">0 XP</span>
                                     </div>
                                 </div>
-                                <div class="mt-4 h-2.5 rounded-full bg-gray-200 overflow-hidden">
-                                    <div id="xpProgressBar" class="h-2.5 bg-orange-500 rounded-full" style="width: 0%"></div>
+                                <div class="mt-5 xp-rpg-wrap">
+                                    <div id="xpWalker" class="xp-walker" aria-hidden="true" style="left: 0%">
+                                        <svg class="xp-walker__svg" viewBox="0 0 32 40" width="26" height="32" role="presentation" focusable="false" aria-hidden="true">
+                                            <ellipse class="xp-walker__shadow" cx="16" cy="37" rx="9" ry="2.4"/>
+                                            <g class="xp-walker__body">
+                                                <!-- back leg -->
+                                                <path class="xp-walker__leg xp-walker__leg--back" d="M15 26 l-4 8" stroke-linecap="round"/>
+                                                <!-- front leg -->
+                                                <path class="xp-walker__leg xp-walker__leg--front" d="M17 26 l4 7" stroke-linecap="round"/>
+                                                <!-- torso / tunic -->
+                                                <path class="xp-walker__torso" d="M11 15 q5 -3 10 0 l-1.5 12 h-7 z"/>
+                                                <!-- backpack -->
+                                                <rect class="xp-walker__pack" x="9.5" y="15.5" width="4.5" height="8" rx="1.6"/>
+                                                <!-- swinging arm -->
+                                                <path class="xp-walker__arm" d="M19 17 l4 6" stroke-linecap="round"/>
+                                                <!-- head -->
+                                                <circle class="xp-walker__head" cx="16" cy="9.5" r="5"/>
+                                                <!-- explorer cap brim -->
+                                                <path class="xp-walker__cap" d="M10.5 8 q5.5 -6 11 0 z"/>
+                                            </g>
+                                        </svg>
+                                    </div>
+                                    <div class="xp-rpg-track h-4 rounded-full overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                                        <div id="xpProgressBar" class="xp-rpg-fill h-4 rounded-full" style="width: 0%"></div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -1560,6 +1761,12 @@
                             </button>
                             <p id="scheduleReviewMsg" class="hidden text-xs text-emerald-600 mt-2 text-center"></p>
                         </div>
+                        <!-- Share Score Button (shown after a strong practice-exam result) -->
+                        <div id="quizSumShareScore" class="hidden mt-4">
+                            <button id="shareScoreBtn" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 rounded-lg text-sm font-bold transition-colors">
+                                <i class="fa-brands fa-x-twitter"></i> <span data-i18n="tweet.shareScore">Share this score on X</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1625,6 +1832,22 @@
                             <i class="fas fa-desktop mr-1"></i> <span data-i18n="settings.themeSystem">System</span>
                         </button>
                     </div>
+                </div>
+
+                <hr class="border-gray-200">
+
+                <!-- Study Reminder (opt-in local notification) -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.reminderLabel">Study Reminder</label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input id="studyReminderToggle" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-orange-500 focus:ring-orange-400">
+                        <span class="text-sm text-gray-700" data-i18n="settings.reminderToggle">Remind me to keep my streak</span>
+                    </label>
+                    <p id="studyReminderStatus" class="text-gray-500 text-xs mt-2">-</p>
+                    <p class="text-gray-400 text-xs mt-1" data-i18n="settings.reminderNote">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        This is a local reminder shown while the app is open. Push notifications while the app is closed require a server and are not available.
+                    </p>
                 </div>
 
                 <hr class="border-gray-200">
@@ -1745,7 +1968,7 @@
             </div>
             <div class="p-6">
                 <p class="text-sm text-gray-600 mb-4" data-i18n="feedbackModal.description">
-                    Please share your opinions and requests for improving this app. Submissions are recorded anonymously via Google Analytics.
+                    Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.
                 </p>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">Category</label>
@@ -1761,10 +1984,19 @@
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackTextarea" data-i18n="feedbackModal.contentLabel">Feedback</label>
-                    <textarea id="feedbackTextarea" rows="5" maxlength="100" placeholder="Please describe improvements or features you'd like within 100 characters." data-i18n-placeholder="feedbackModal.contentPlaceholder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y"></textarea>
+                    <textarea id="feedbackTextarea" rows="5" maxlength="1000" placeholder="Please describe improvements or features you'd like within 1000 characters." data-i18n-placeholder="feedbackModal.contentPlaceholder" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline resize-y"></textarea>
                     <div class="flex justify-end mt-1">
-                        <span id="feedbackCharCount" class="text-xs text-gray-400">0 / 100</span>
+                        <span id="feedbackCharCount" class="text-xs text-gray-400">0 / 1000</span>
                     </div>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="feedbackModal.imageLabel">Images (optional)</label>
+                    <input type="file" id="feedbackImageInput" accept="image/*" multiple class="hidden">
+                    <button type="button" id="feedbackImageTrigger" class="w-full border-2 border-dashed border-gray-300 hover:border-teal-400 rounded-lg py-4 px-3 text-sm text-gray-500 hover:text-teal-600 transition-colors flex items-center justify-center gap-2 focus:outline-none focus:border-teal-400">
+                        <i class="fas fa-image"></i> <span data-i18n="feedbackModal.imageAdd">Add images (click, or paste / drop here)</span>
+                    </button>
+                    <div id="feedbackImagePreview" class="flex flex-wrap gap-2 mt-2"></div>
+                    <p class="text-xs text-gray-500 mt-2" data-i18n="feedbackModal.imageHelp">Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.</p>
                 </div>
                 <div id="feedbackMessage" class="text-sm mb-4 hidden"></div>
             </div>
@@ -1773,7 +2005,7 @@
                     Cancel
                 </button>
                 <button id="feedbackSubmitBtn" type="button" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fas fa-paper-plane"></i> <span data-i18n="common.send">Send</span>
+                    <i class="fab fa-github"></i> <span data-i18n="feedbackModal.submitToIssue">Submit as GitHub Issue</span>
                 </button>
             </div>
         </div>
@@ -1827,6 +2059,24 @@
                     <div id="milestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
                 </div>
                 <button id="milestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Streak Milestone Toast (fixed, dedicated so it never clobbers the XP milestone toast) -->
+    <div id="streakMilestoneToast" class="hidden fixed top-24 right-4 z-[1100] max-w-sm">
+        <div class="bg-white border border-orange-200 shadow-lg rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-orange-100 text-orange-700 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-gray-900" data-i18n="dashboard.streak.milestoneToastTitle">Streak Milestone!</div>
+                    <div id="streakMilestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
+                </div>
+                <button id="streakMilestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -1912,6 +2162,42 @@
                 el.classList.remove('hidden');
             }
         }, 1500);
+    </script>
+    <script>
+        // PWA: Service Worker 登録 (相対パスでサブディレクトリ配信に対応)
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch((err) => {
+                    console.warn('Service Worker registration failed:', err);
+                });
+            });
+        }
+
+        // PWA: 控えめな「ホーム画面に追加」導線
+        (() => {
+            let deferredPrompt = null;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                const btn = document.getElementById('pwaInstallBtn');
+                if (btn) btn.classList.remove('hidden');
+            });
+
+            document.addEventListener('click', async (e) => {
+                const btn = e.target.closest && e.target.closest('#pwaInstallBtn');
+                if (!btn || !deferredPrompt) return;
+                btn.classList.add('hidden');
+                deferredPrompt.prompt();
+                try { await deferredPrompt.userChoice; } catch (_) {}
+                deferredPrompt = null;
+            });
+
+            window.addEventListener('appinstalled', () => {
+                deferredPrompt = null;
+                const btn = document.getElementById('pwaInstallBtn');
+                if (btn) btn.classList.add('hidden');
+            });
+        })();
     </script>
 </body>
 </html>

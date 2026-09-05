@@ -41,7 +41,7 @@ export const EXAM_CATEGORIES = [
     labelJa: 'Foundational',
     labelEn: 'Foundational',
     icon: 'fas fa-seedling',
-    examIds: ['clf-c02', 'aif-c01'],
+    examIds: ['clf-c02', 'aif-c01', 'aib-c01'],
   },
   {
     id: 'associate',

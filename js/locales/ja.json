@@ -40,6 +40,10 @@
     "defaultGreeting": "学習の総量を積み上げていきましょう。",
     "changeUsername": "ユーザー名変更",
     "tweetBtn": "Xに投稿",
+    "mainCta": {
+      "start": "今日の学習を始める",
+      "resume": "今日の学習を再開する"
+    },
     "bookPromo": {
       "onSale": "発売中",
       "title": "AWS認定",
@@ -50,7 +54,9 @@
       "title": "クイズチャレンジ",
       "subtitle": "全ドメイン横断で実力を試そう",
       "startBtn": "チャレンジ開始",
-      "reviewBtn": "過去の問題を見直す"
+      "reviewBtn": "過去の問題を見直す",
+      "dailyChallengeBtn": "デイリーチャレンジ",
+      "dailyChallengeHint": "APIキー不要・1日5問"
     },
     "xpCarousel": {
       "totalXp": "これまでの累積 XP",
@@ -65,7 +71,16 @@
       "ongoing": "{{count}}日連続！この調子で続けよう 💪",
       "todayActive": "今日もがんばってるね！",
       "atRisk": "今日もアクセスしてストリークを守ろう！",
-      "startNew": "今日から連続学習をスタートしよう！"
+      "startNew": "今日から連続学習をスタートしよう！",
+      "milestoneToast": "🔥 {{days}}日連続達成！この調子で続けよう！",
+      "milestoneToastTitle": "ストリークのマイルストーン達成！",
+      "reminderTitle": "AWS Study Navigator",
+      "reminderBody": "{{count}}日連続の学習ストリークが途切れそうです。今日も学習して継続しよう！",
+      "reminderUnsupported": "このブラウザは通知に対応していないため、アプリを開いている間のみリマインドを表示します。",
+      "reminderOff": "リマインダーはオフです。",
+      "reminderOn": "リマインダーはオンです（通知が許可されています）。",
+      "reminderInApp": "リマインダーはオンです（通知は未許可のため、アプリ内でお知らせします）。",
+      "reminderDenied": "通知がブロックされています。ブラウザの設定で許可すると通知が届きます（アプリ内では引き続きお知らせします）。"
     },
     "milestone": {
       "title": "称号",
@@ -148,6 +163,9 @@
     "themeLight": "ライト",
     "themeDark": "ダーク",
     "themeSystem": "システム",
+    "reminderLabel": "学習リマインダー",
+    "reminderToggle": "ストリーク継続をリマインドする",
+    "reminderNote": "アプリを開いている間に表示されるローカルなリマインダーです。アプリを閉じている間に届くプッシュ通知にはサーバーが必要なため、この静的サイトでは提供していません。",
     "aiProvider": "AIプロバイダ",
     "gemini": "Gemini",
     "openai": "OpenAI",
@@ -175,7 +193,7 @@
   },
   "feedbackModal": {
     "title": "フィードバック",
-    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信内容は Google Analytics に匿名で記録されます。",
+    "description": "このアプリの改善に向けたご意見・ご要望をお聞かせください。送信すると、内容を差し込んだ GitHub Issue の作成画面が新しいタブで開きます。あとは内容を確認して送信するだけです。（入力内容はバックアップとしてクリップボードにもコピーされます。）",
     "categories": {
       "general": "全般",
       "resources": "学習リソースの追加（BlackBelt・公式ドキュメント等）",
@@ -186,10 +204,19 @@
       "other": "その他"
     },
     "contentLabel": "フィードバック内容",
-    "contentPlaceholder": "改善してほしい点、追加してほしい機能などを100文字以内でお書きください。",
-    "sent": "フィードバックを送信しました。ありがとうございます！",
+    "contentPlaceholder": "改善してほしい点、追加してほしい機能などを1000文字以内でお書きください。",
+    "imageLabel": "画像（任意）",
+    "imageAdd": "画像を追加（クリック、または貼り付け・ドロップ）",
+    "imageHelp": "添付画像は GitHub の事前入力フォームでは送信できません。Issue 作成画面が開いたら、本文に画像を直接貼り付けてアップロードしてください。",
+    "imageRemove": "画像を削除",
+    "submitToIssue": "GitHub Issue として送信",
+    "issueTitle": "[Feedback] {{category}}",
+    "issueBody": "**カテゴリ:** {{category}}\n\n{{text}}\n\n---\nAWS Study Navigator アプリのフィードバックフォームから送信されました。",
+    "issueImageMarker": "<!-- ここに画像を{{count}}枚貼り付けてください -->",
+    "sent": "内容を差し込んだ GitHub の新規Issue作成画面を新しいタブで開きました。内容を確認して送信してください。（入力内容はバックアップとしてクリップボードにもコピーしてあります。）",
+    "sentWithImages": "内容を差し込んだ GitHub の新規Issue作成画面を新しいタブで開きました。本文に画像を貼り付けてから送信してください。（入力内容はバックアップとしてクリップボードにもコピーしてあります。）",
     "validationEmpty": "フィードバック内容を入力してください。",
-    "validationLength": "100文字以内で入力してください。"
+    "validationLength": "1000文字以内で入力してください。"
   },
   "chat": {
     "title": "AI チューター",
@@ -256,8 +283,10 @@
   },
   "tweet": {
     "template": "{{name}} のAWS学習ログ（{{code}}を勉強中）\n称号：{{title}}\n累積XP：{{total}}（今週+{{week}}）",
+    "scoreTemplate": "{{name}} が {{code}} の本番模擬試験で {{accuracy}}%（{{correct}}/{{total}}問正解）を達成！🎉",
     "hashtag": "#AWS #AWS合格ナビゲーター",
-    "cta": "完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！"
+    "cta": "完全無料の「AWS合格ナビゲーター」で、効率的に学習しよう！",
+    "shareScore": "このスコアをXでシェア"
   },
   "batch": {
     "alreadyInProgress": "既にバッチ生成が進行中です。完了するまでお待ちください。",
