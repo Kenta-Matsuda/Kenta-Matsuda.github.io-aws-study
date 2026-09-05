@@ -627,7 +627,7 @@ export const AIP_C01 = {
                 {
                   title: 'RAG のオプションとアーキテクチャ',
                   titleEn: 'RAG Options and Architectures',
-                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/retrieval-augmented-generation-options/',
+                  url: 'https://docs.aws.amazon.com/prescriptive-guidance/latest/retrieval-augmented-generation-options/introduction.html',
                   note: 'Prescriptive Guidance: RAG 設計パターンの包括的ガイド',
                   noteEn: 'Prescriptive Guidance: Comprehensive guide to RAG design patterns',
                   recommend: true,
