@@ -1963,8 +1963,8 @@ export const ANS_C01 = {
                     title: 'AWS Transit Gatewayを使用して、トランジットネットワークの設定と管理を自動化する',
 
                     titleEn: 'Automate transit network setup and management using AWS Transit Gateway',
-                    url: 'https://docs.aws.amazon.com/ja_jp/solutions/latest/network-orchestration-aws-transit-gateway/',
-                    urlEn: 'https://docs.aws.amazon.com/solutions/latest/network-orchestration-aws-transit-gateway/',
+                    url: 'https://docs.aws.amazon.com/ja_jp/solutions/latest/network-orchestration-aws-transit-gateway/guidance-overview.html',
+                    urlEn: 'https://docs.aws.amazon.com/solutions/latest/network-orchestration-aws-transit-gateway/guidance-overview.html',
                     note: 'Network Orchestration for AWS Transit Gateway',
                     noteEn: 'Network Orchestration for AWS Transit Gateway',
                     recommend: true,
