@@ -846,7 +846,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       ? assignDomainTargets(exam.domains, total)
       : [];
 
+    // Strictly bound the number of generation attempts per question slot so a
+    // 65-question flow cannot blow up in time: one initial attempt plus at most
+    // one extra regeneration when the response fails to parse.
+    const MAX_ATTEMPTS_PER_QUESTION = 2;
+
     const generated = [];
+    let errorCount = 0;      // slots whose generation threw (callAi fallback also failed)
+    let parseFailCount = 0;  // slots where every attempt returned an unparseable response
     for (let i = 0; i < total; i++) {
       // Build dedup hint: list topics/services already covered to avoid repetition
       const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
@@ -859,40 +866,52 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
         + dedupSuffix;
 
-      let response = '';
-      try {
-        response = await callAiStream({
-          userPrompt,
-          systemPrompt,
-          onRequireApiKey: () => openSettingsModal(els),
-          onTextDelta: () => {},  // silent during pre-gen
-        });
-
-        if (String(response || '').includes('ストリーミングに対応していない環境')) {
-          response = await callAi({
-            userPrompt,
-            systemPrompt,
-            onRequireApiKey: () => openSettingsModal(els),
-          });
-        }
-      } catch (err) {
-        // retry once on error
+      let parsed = null;
+      let slotErrored = false;
+      for (let attempt = 0; attempt < MAX_ATTEMPTS_PER_QUESTION && !parsed; attempt++) {
+        let response = '';
         try {
-          response = await callAi({
+          response = await callAiStream({
             userPrompt,
             systemPrompt,
             onRequireApiKey: () => openSettingsModal(els),
+            onTextDelta: () => {},  // silent during pre-gen
           });
-        } catch {
-          continue;
+
+          if (String(response || '').includes('ストリーミングに対応していない環境')) {
+            response = await callAi({
+              userPrompt,
+              systemPrompt,
+              onRequireApiKey: () => openSettingsModal(els),
+            });
+          }
+          slotErrored = false;
+        } catch (err) {
+          // retry once on error via the non-streaming path
+          try {
+            response = await callAi({
+              userPrompt,
+              systemPrompt,
+              onRequireApiKey: () => openSettingsModal(els),
+            });
+            slotErrored = false;
+          } catch {
+            slotErrored = true;
+            continue; // try the next bounded attempt (if any)
+          }
         }
+
+        parsed = parseQuizResponse(response);
       }
 
-      const parsed = parseQuizResponse(response);
       if (parsed) {
         parsed.domainId = targetDomain?.id ?? null;
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
+      } else if (slotErrored) {
+        errorCount++;
+      } else {
+        parseFailCount++;
       }
 
       // Update progress
@@ -901,10 +920,22 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.quizPregenFill) els.quizPregenFill.style.width = `${(done / total) * 100}%`;
     }
 
-    // If we couldn't generate enough, adjust session
+    // If we couldn't generate anything, surface the total-failure message.
     if (generated.length === 0) {
+      // eslint-disable-next-line no-console
+      console.warn(`[pregen] generated 0/${total} questions (errors: ${errorCount}, parse failures: ${parseFailCount})`);
       updateAiModalContent(els, t('errors.cannotGenerate'));
       return;
+    }
+
+    // Partial success: fewer questions were produced than requested. Let the user
+    // know how many were generated while still starting the quiz.
+    if (generated.length < total) {
+      // eslint-disable-next-line no-console
+      console.warn(`[pregen] partial generation ${generated.length}/${total} (errors: ${errorCount}, parse failures: ${parseFailCount})`);
+      if (els.quizPregenStatus) {
+        els.quizPregenStatus.textContent = t('errors.partialGenerate', { count: generated.length, total });
+      }
     }
     session.questionCount = generated.length;
 
@@ -1128,11 +1159,19 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     pendingBatchSession = session;
     pendingBatchRequest = request;
 
-    setBatchToastState(
-      'ready',
-      `${generated.length} 問の準備が完了しました（モデル: ${result.model || 'gemini-3'}）`
+    const requested = result.texts.length;
+    const isPartial = generated.length < requested;
+    const modelLabel = result.model || 'gemini-3';
+    const readyMessage = isPartial
+      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}（モデル: ${modelLabel}）`
+      : `${generated.length} 問の準備が完了しました（モデル: ${modelLabel}）`;
+    setBatchToastState('ready', readyMessage);
+    notifyBrowser(
+      '問題の準備ができました！',
+      isPartial
+        ? `${requested}問中${generated.length}問のクイズを開始できます`
+        : `${generated.length} 問のクイズを開始できます`
     );
-    notifyBrowser('問題の準備ができました！', `${generated.length} 問のクイズを開始できます`);
   }
 
   function startReadyMockSession() {

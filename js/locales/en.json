@@ -313,6 +313,7 @@
   },
   "errors": {
     "cannotGenerate": "Error: Could not generate questions. Please try again.",
+    "partialGenerate": "Generated {{count}} of {{total}} questions. Starting the quiz with the questions that were created.",
     "noResponse": "Could not generate a response.",
     "invalidApiKey": "API key is invalid or permissions are insufficient. Please check settings.",
     "rateLimited": "Server is busy (429). Please wait and try again.",
