@@ -34,6 +34,10 @@
  *   --notices          ページ本文から「廃止 / 新規顧客の受付終了」の告知を検出する。
  *                      リンクは 200 のままなので死活チェックでは絶対に検出できない種類の
  *                      陳腐化を拾うためのモード（本文取得が必要なので低速）。
+ *
+ * なお `<meta http-equiv="refresh">` による**クライアント側リダイレクト**（中身のない
+ * スタブページ）の検出は、本文を取得したときに自動で行われます。つまり `--notices`
+ * または `--fragments` を付けた実行で `meta-refresh` 分類として報告されます。
  *   --urls <list>      js/data/ ではなく、カンマ区切りで渡した URL を検証する。
  *                      差し替え候補の当たりを付けるのに使う（同じ分類ロジックで判定できる）。
  *                      例: node scripts/check-resource-links.mjs --urls "https://a,https://b" --all
@@ -257,6 +261,25 @@ const DEPRECATION_PATTERNS = [
   /do not plan to introduce new features/i,
 ];
 
+/**
+ * `<meta http-equiv="refresh">` による**クライアント側リダイレクト**の転送先を返す。
+ *
+ * AWS ドキュメントのガイドのディレクトリ URL（例: `.../large-migration-guide/`）は、
+ * HTTP では 200 を返しリダイレクトもしないが、実体は中身のないスタブで
+ * `<meta http-equiv="refresh" content="0;URL=introduction.html">` によって
+ * 実際の 1 ページ目へ飛ばしている。ステータスだけを見ていると気づけないため、
+ * 本文を取得したときは必ずこれも確認する。
+ */
+function metaRefreshTarget(html, baseUrl) {
+  const m = /<meta[^>]*http-equiv=["']?refresh["']?[^>]*content=["'][^"']*URL=([^"']+)["']/i.exec(html);
+  if (!m) return null;
+  try {
+    return new URL(m[1], baseUrl).href;
+  } catch {
+    return null;
+  }
+}
+
 /** 告知フレーズを本文から探し、ヒットした周辺テキストを返す。 */
 function findDeprecationNotices(html) {
   const text = visibleText(html);
@@ -352,6 +375,8 @@ function classify(check, originalUrl) {
   if (moved && isShallower(original, check.finalUrl)) return 'soft-404';
   // 廃止 / 新規受付終了はリンク切れより優先して人間の目に入れる（掲載対象外にするため）
   if (check.notices && check.notices.length > 0) return 'deprecated';
+  // 中身のないスタブで、クライアント側リダイレクトに頼っている
+  if (check.metaRefresh) return 'meta-refresh';
   if (check.fragmentMiss) return 'fragment-miss';
   if (!moved) return 'ok';
   // ロケールセグメント（/jp/ ・/ja_jp/）の付け外しだけならリンク切れではない
@@ -363,6 +388,7 @@ const CLASS_ORDER = [
   'broken',
   'soft-404',
   'deprecated',
+  'meta-refresh',
   'error',
   'server-error',
   'fragment-miss',
@@ -428,18 +454,21 @@ async function main() {
   );
   const byKey = new Map(fetchKeys.map((k, i) => [k, checks[i]]));
 
-  // 告知検出はページ単位で 1 回だけ行い、同じページを指す複数 URL で結果を共有する
+  // 告知検出と meta refresh 検出はページ単位で 1 回だけ行い、結果を共有する
   const noticeCache = new Map();
-  if (opts.notices) {
-    for (const [key, res] of byKey) {
-      noticeCache.set(key, res.body ? findDeprecationNotices(res.body) : []);
-    }
+  const metaCache = new Map();
+  for (const [key, res] of byKey) {
+    if (!res.body) continue;
+    if (opts.notices) noticeCache.set(key, findDeprecationNotices(res.body));
+    const target = metaRefreshTarget(res.body, res.finalUrl || key);
+    if (target) metaCache.set(key, target);
   }
 
   const rows = urls.map((url) => {
     const base = byKey.get(stripFragment(url));
     const check = { ...base };
     if (opts.notices) check.notices = noticeCache.get(stripFragment(url)) ?? [];
+    check.metaRefresh = metaCache.get(stripFragment(url)) ?? null;
     // テキストフラグメントの実在確認（本文を取得できた場合のみ）
     const frag = textFragment(url);
     if (frag && base.body) {
@@ -459,6 +488,7 @@ async function main() {
       error: check.error ?? null,
       missingFragments: check.missingFragments ?? null,
       notices: check.notices && check.notices.length > 0 ? check.notices : null,
+      metaRefresh: check.metaRefresh ?? null,
       klass: classify(check, url),
       uses: byUrl.get(url).map((u) => ({ file: u.file, field: u.field, step: u.step ?? null, group: u.group ?? null, title: u.title })),
     };
@@ -480,6 +510,7 @@ async function main() {
       if (k === 'redirect' || k === 'soft-404' || k === 'locale-redirect') console.log(`    -> ${r.finalUrl}`);
       if (k === 'fragment-miss') console.log(`    missing text: ${JSON.stringify(r.missingFragments)}`);
       if (k === 'deprecated') for (const n of r.notices) console.log(`    notice: ...${n}...`);
+      if (k === 'meta-refresh') console.log(`    meta refresh -> ${r.metaRefresh}（実体ページへ直リンクすべき）`);
       console.log(`    used: ${files}`);
     }
   }

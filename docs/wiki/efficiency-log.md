@@ -14,6 +14,7 @@
 | --- | --- | --- |
 | `scripts/check-resource-links.mjs` | `js/data/` 全試験から `url` / `urlEn` を抽出し、HTTP 死活・リダイレクト・ソフト 404・テキストフラグメントの陳腐化を分類して一覧化 | `node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json` |
 | `scripts/list-aws-doc-pages.mjs` | AWS 公式ドキュメント 1 ページから同一ガイド内の下位ページ / ページ内アンカーを抽出 | `node scripts/list-aws-doc-pages.mjs <url> --titles` / `... --anchors` |
+| `scripts/check-link-descriptions.mjs` | **リンクを変更したときだけ**、`title` / `note` とリンク先ページの実際の内容がずれていないかを突き合わせる（変更検出は git diff に任せる） | `node scripts/check-link-descriptions.mjs --base main` |
 
 `check-resource-links.mjs` は差し替え候補の当たり付けにも使えます（`--urls "https://a,https://b" --all`）。候補を推測で書き込む前に、必ずこのモードで実在とリダイレクト先を確認してください。
 
@@ -69,6 +70,28 @@
   - AWS CAF for AI ホワイトペーパーは**単一ページ構成**（下位ページは改訂履歴のみ、ページ内アンカーも 4 個）であることを確定。同一 URL を複数タスクで使い回すのは仕様上避けられないと結論でき、無駄な差し替え検討を打ち切れた。
   - SageMaker Clarify の後継ページ名（`clarify-configure-processing-jobs.html` = "Fairness, model explainability and bias detection"）を、推測ではなく目次から特定できた。
 - **状態**: 実装済み。静的検証は `node --check scripts/list-aws-doc-pages.mjs` を通過。
+
+### 2026-09-06: 説明文の整合チェックを「変更時のみ」に絞ってスクリプト化（実装済み）
+
+- **日付**: 2026-09-06
+- **対象作業**: リンク先の実際の内容と、データ側の `title` / `note` がずれていないかの確認。
+- **課題**: 全 1,771 フィールドを毎回突き合わせるのは費用に見合わない。一方、URL を差し替えるとページの主題が変わりやすく、**リンクを変更した箇所こそ最もずれやすい**。
+- **実装**: `scripts/check-link-descriptions.mjs`。**変更検出を `git diff <base>...HEAD -- js/data` に任せる**ことで、「リンクを変更したときだけ」を人間の記憶やチェックリストに頼らず自動化した。追加行に現れた URL と、差分のあったファイルの両方で絞り込む。
+- **実測効果**:
+  - 全 13 試験ブランチで実行し、**検査対象は合計 126 件**（全 1,771 フィールドの約 7%）に収束。1 ブランチあたり 4〜18 件で、LLM が読んで判断できる分量。
+  - 実装時に **URL だけで絞ると未変更ファイルのアイテムまで拾う**バグを踏んだ（AIB で 12 件 → ファイル条件を追加して 8 件に）。同一 URL が複数試験で共有されている本リポジトリでは必須の絞り込み。
+  - このチェックにより、死活チェック・告知チェックの両方をすり抜けていた **`<meta http-equiv="refresh">` スタブ 10 件**を発見できた（下記）。
+- **状態**: 実装済み。静的検証は `node --check scripts/check-link-descriptions.mjs` を通過。
+
+### 2026-09-06: meta refresh スタブの検出を追加（実装済み）
+
+- **日付**: 2026-09-06
+- **きっかけ**: 上記の説明文チェックで、Prescriptive Guidance のディレクトリ URL が「ページ `<title>` は `AWS Prescriptive Guidance` のみ・`<h1>` なし・リード文なし」という不自然な結果を返した。
+- **判明したこと**: AWS ドキュメントのガイドのディレクトリ URL（例: `.../large-migration-guide/`）は**中身のないスタブ**で、`<meta http-equiv="refresh" content="0;URL=introduction.html">` によってクライアント側で 1 ページ目へ転送している。**HTTP では 200 でリダイレクトもしないため、死活チェックでは健全に見える。**
+- **実装**: `scripts/check-resource-links.mjs` に `metaRefreshTarget()` を追加し、本文取得時（`--notices` / `--fragments`）に自動検出して `meta-refresh` 分類として転送先を報告する。
+- **効果**: 前段の棚卸しで `welcome.html` → ディレクトリ URL に直した 10 件が、実は**実体ページへ直リンクすべき**だったことが分かった。ブラウザでは動くが 1 ホップ余分で、説明文との突き合わせもできない状態だった。
+- **教訓**: 「リダイレクト先が 200 だから正しい」ではなく、**そのページに実際に中身があるか**を確認する必要がある。`<h1>` とリード文が取れないページは疑う。
+- **状態**: 実装済み。
 
 ## 自己拡張提案ログ（実績）
 

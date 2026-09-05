@@ -52,8 +52,12 @@
 # 全試験の死活・リダイレクト・ソフト 404・フラグメント陳腐化を分類して一覧化
 node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json
 
-# 廃止 / 新規顧客の受付終了の告知を検出（リンクが 200 でも掲載対象外にすべきものを拾う）
+# 廃止 / 新規顧客の受付終了の告知と、meta refresh スタブを検出
+# （リンクが 200 でも掲載対象外にすべきもの・実体ページへ直リンクすべきものを拾う）
 node scripts/check-resource-links.mjs --notices --concurrency 10 --json test-results/notices-all.json
+
+# リンクを変更したときだけ: 説明文（title / note）とリンク先の内容がずれていないか
+node scripts/check-link-descriptions.mjs --base main
 
 # 差し替え候補の実在とリダイレクト先を、書き込む前に確認する
 node scripts/check-resource-links.mjs --urls "https://candidate-a,https://candidate-b" --all
@@ -73,6 +77,35 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 4. **SPA ドメインは全パスで 200 を返すため死活判定に使えない**。`skillbuilder.aws` は存在しないパス（例: `/this-path-should-not-exist-xyz123`）でも 200 を返します。Skill Builder のリンクは**ステータスでは検証できない**ため、リダイレクト先のクエリパラメータなど別の証拠で判断します（下記参照）。
 5. **`d1.awsstatic.com` の PDF は 403 を返すことがある**（実測 4 件）。ボット対策の可能性が高く、リンク切れとは断定できません。`forbidden` として分離し、人間の目視確認に委ねます。
 6. **サービスが「廃止 / 新規顧客の受付終了」になってもリンクは 200 のまま**（実測 11 件）。**最も気づきにくい陳腐化**で、死活チェックだけでは永久に検出できません。`--notices` で本文の告知を検出します（後述の「新規顧客の受付を終了したサービスの扱い」を参照）。
+7. **ガイドのディレクトリ URL は「中身のないスタブ + `<meta http-equiv="refresh">`」であることがある**（実測 10 件）。HTTP では 200 でリダイレクトもしないため死活チェックでは健全に見えますが、実体は 1 ページ目（多くは `introduction.html`）へのクライアント側転送です。**実体ページへ直リンクすべき**なので、`meta-refresh` 分類として報告します（本文を取得する `--notices` / `--fragments` 実行時に自動検出）。
+
+## リンク先の内容と説明文の整合チェック（リンクを変更したときだけ）
+
+リンクが 200 を返し、サービスも現役でも、**`title` / `note` がリンク先の内容と合っていなければ学習者を誤誘導します。** URL を差し替えるとページの主題が変わりやすく、ここが最もずれやすい箇所です。
+
+一方、全 1,000 件超を毎回突き合わせるのは費用に見合いません。**リンクを変更したときだけ**チェックすれば十分なので、変更検出は git diff に任せます。
+
+```bash
+# main との差分で「追加された url / urlEn」を持つアイテムだけを検査する
+node scripts/check-link-descriptions.mjs
+
+# 比較対象のベースを変える / 特定ファイルに絞る / URL を直接指定する
+node scripts/check-link-descriptions.mjs --base origin/main --only saa-c03
+node scripts/check-link-descriptions.mjs --urls "https://a,https://b"
+```
+
+出力は、アイテムの `title` / `titleEn` / `note` / `noteEn` と、リンク先ページの `<title>` / `<h1>` / リード文を並べて表示します。
+
+- `[!] 要確認` は「データ側 `title` の主要語がページ側に 1 つも現れなかった」という**機械的なヒント**です。**判定の根拠ではありません。**
+- **日本語では分かち書きがないため偽陽性が多く出ます**（例: データ側「AWS での責任ある AI」／ページ側「責任ある AI を理論から実践に変える」は実際には一致しているが `[!]` が付く）。必ず表示内容を読んで判断してください。
+- 逆に `[!]` が付かなくてもずれていることがあります。
+- 選択対象は「**変更されたファイル** かつ **変更された URL を含むアイテム**」に限定しています。URL だけで絞ると、同じ URL を使っている未変更のファイルまで拾ってしまうためです。
+
+チェックで見るべき観点:
+
+- ページの主題がアイテムの `title` と一致しているか（差し替えでページの粒度が変わっていないか）。
+- `note` に書いた内容が実際にそのページで扱われているか（例: 「7R の評価」と書いたのに、そのページには 7R の記述がない）。
+- 日本語向け `url` が実際に日本語ページを返しているか（英語ページへ寄せられていないか）。
 
 ### 実行環境について
 
