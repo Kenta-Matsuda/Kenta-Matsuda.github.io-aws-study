@@ -1794,6 +1794,23 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       return;
     }
 
+    // "全般" tab shortcut: jump to a domain tab (#163)
+    if (action === 'domain-jump') {
+      const domainId = btn.dataset.domainId;
+      if (!domainId) return;
+      // Domain ids are numbers in the data files but strings in dataset.
+      const target = (exam?.domains || []).find((d) => String(d.id) === String(domainId));
+      switchDomain(target ? target.id : domainId);
+      els.contentArea?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    // "全般" tab shortcut: start this site's own AI question generator (#163)
+    if (action === 'dashboard-quiz') {
+      startDashboardStudySession();
+      return;
+    }
+
     if (action === 'quiz') {
       lastAiRequest = { type: 'quiz', examId, taskId: btn.dataset.taskId || '', taskTitle: btn.dataset.taskTitle || '', taskContext };
       reflectAiVoteUi();
@@ -3608,7 +3625,10 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
       allBtn.style.borderColor = '#f97316';
       allBtn.style.color = '#f97316';
     }
-    allBtn.innerHTML = `<i class="fas fa-star text-xs mr-1"></i>${t('common.all')}`;
+    // The tab shows exam-wide steps, so label it "全般 / General" rather than
+    // "★すべて", which read like "all resources" and confused users (#163).
+    allBtn.textContent = t('roadmap.examWide');
+    allBtn.setAttribute('data-domain-tab', 'all');
     allBtn.addEventListener('click', () => onDomainSelect('all'));
     els.domainTabs.appendChild(allBtn);
   }
@@ -3631,6 +3651,7 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
     }
 
     btn.textContent = `Domain ${domain.id}`;
+    btn.setAttribute('data-domain-tab', String(domain.id));
     btn.addEventListener('click', () => onDomainSelect(domain.id));
     els.domainTabs.appendChild(btn);
   }
@@ -3805,7 +3826,7 @@ function renderExamResources({ els, exam, state }) {
   const headerEl = document.createElement('div');
   headerEl.innerHTML = `
     <div class="flex items-center gap-2 mb-4">
-      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-orange-500"><i class="fas fa-star mr-1"></i>${t('common.all')}</span>
+      <span class="px-3 py-1 rounded text-xs font-bold text-white bg-orange-500">${t('roadmap.examWide')}</span>
       <h2 class="text-xl font-bold text-gray-800">${t('roadmap.title')}</h2>
     </div>
     <p class="text-gray-600 mb-6 bg-gray-50 p-4 rounded-lg border-l-4 border-orange-400">
@@ -3817,12 +3838,112 @@ function renderExamResources({ els, exam, state }) {
   // Render exam-specific steps
   let stepIndex = 1;
   for (const step of examSpecificSteps) {
-    renderStepCard({ els, step, stepIndex: String(stepIndex), state, term });
+    renderStepCard({ els, step, stepIndex: String(stepIndex), state, term, exam });
     stepIndex++;
   }
 }
 
-function renderStepCard({ els, step, stepIndex, state, term }) {
+// Step titles are identical across all 13 exam data files, so keying the
+// "全般" tab shortcuts off them is deterministic (#163).
+const STEP_TITLE_DOMAIN_DEEP_DIVE = 'Deep dive into each domain';
+const STEP_TITLE_PRACTICE = 'Practice with sample questions';
+
+/**
+ * Extra navigation for the exam-wide ("全般") tab (issue #163).
+ *
+ * - "Deep dive into each domain": jump straight to the matching domain tab
+ *   instead of re-listing per-domain resources here.
+ * - "Practice with sample questions": offer this site's own AI question
+ *   generator next to the official practice set, so the entry point is not
+ *   only on the dashboard carousel.
+ *
+ * Returns null when the step needs no shortcuts.
+ */
+function buildStepShortcuts({ step, exam }) {
+  // Only for a real exam's "全般" tab. The beginner guide reuses the same step
+  // titles but has no exam context (and no domain tabs), so it gets nothing.
+  if (!exam || !exam.code) return null;
+
+  const title = String(step?.title || '');
+
+  if (title === STEP_TITLE_DOMAIN_DEEP_DIVE) {
+    const domains = Array.isArray(exam?.domains) ? exam.domains : [];
+    if (domains.length === 0) return null;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'px-5 pb-5 pt-0';
+    wrap.setAttribute('data-step-shortcuts', 'domains');
+
+    const heading = document.createElement('h4');
+    heading.className = 'font-semibold text-gray-800 mb-3 flex items-center gap-2';
+    heading.innerHTML = `<i class="fas fa-diagram-project text-orange-500"></i> ${escapeHtml(t('roadmap.domainShortcutsTitle'))}`;
+    wrap.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'text-xs text-gray-500 mb-3';
+    hint.textContent = t('roadmap.domainShortcutsHint');
+    wrap.appendChild(hint);
+
+    const list = document.createElement('div');
+    list.className = 'flex flex-wrap gap-2';
+    for (const domain of domains) {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.dataset.action = 'domain-jump';
+      btn.dataset.domainId = String(domain.id);
+      btn.className = 'px-3 py-2 bg-white hover:bg-gray-50 border rounded-lg text-xs font-bold text-left transition-colors flex items-center gap-2 max-w-full';
+      btn.style.borderColor = domain.color || '#e5e7eb';
+
+      const badge = document.createElement('span');
+      badge.className = 'px-2 py-0.5 rounded text-white text-[10px] font-bold flex-shrink-0';
+      badge.style.backgroundColor = domain.color || '#6b7280';
+      badge.textContent = `Domain ${domain.id}`;
+      btn.appendChild(badge);
+
+      const label = document.createElement('span');
+      label.className = 'text-gray-700 truncate';
+      label.textContent = localizedTitle(domain);
+      btn.appendChild(label);
+
+      list.appendChild(btn);
+    }
+    wrap.appendChild(list);
+    return wrap;
+  }
+
+  if (title === STEP_TITLE_PRACTICE) {
+    const wrap = document.createElement('div');
+    wrap.className = 'px-5 pb-5 pt-0';
+    wrap.setAttribute('data-step-shortcuts', 'ai-quiz');
+
+    const inner = document.createElement('div');
+    inner.className = 'rounded-lg border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-4';
+
+    const heading = document.createElement('h4');
+    heading.className = 'font-semibold text-gray-800 mb-1 flex items-center gap-2';
+    heading.innerHTML = `<i class="fas fa-wand-magic-sparkles text-indigo-500"></i> ${escapeHtml(t('roadmap.aiQuizShortcutTitle'))}`;
+    inner.appendChild(heading);
+
+    const hint = document.createElement('p');
+    hint.className = 'text-xs text-gray-500 mb-3';
+    hint.textContent = t('roadmap.aiQuizShortcutHint');
+    inner.appendChild(hint);
+
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.action = 'dashboard-quiz';
+    btn.className = 'sparkle-btn text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md hover:shadow-lg transition flex items-center gap-2';
+    btn.innerHTML = `<i class="fas fa-gamepad"></i> ${escapeHtml(t('roadmap.aiQuizShortcutBtn'))}`;
+    inner.appendChild(btn);
+
+    wrap.appendChild(inner);
+    return wrap;
+  }
+
+  return null;
+}
+
+function renderStepCard({ els, step, stepIndex, state, term, exam }) {
   const card = document.createElement('div');
   card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
@@ -3902,6 +4023,12 @@ function renderStepCard({ els, step, stepIndex, state, term }) {
   }
 
   card.appendChild(body);
+
+  // Exam-wide tab navigation shortcuts (#163). The beginner guide passes no
+  // `exam`, so nothing is added there.
+  const shortcuts = buildStepShortcuts({ step, exam });
+  if (shortcuts) card.appendChild(shortcuts);
+
   els.contentArea.appendChild(card);
 }
 

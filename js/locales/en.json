@@ -342,6 +342,12 @@
   "roadmap": {
     "title": "Study Roadmap",
     "description": "Follow the {{code}} exam study steps from top to bottom.",
+    "examWide": "General",
+    "domainShortcutsTitle": "Go to a domain",
+    "domainShortcutsHint": "Detailed resources for each domain live in the domain tabs. Pick the domain you want to study.",
+    "aiQuizShortcutTitle": "Check your skills with this site's AI questions",
+    "aiQuizShortcutHint": "In addition to the official practice set, you can test yourself with AI-generated questions across all domains.",
+    "aiQuizShortcutBtn": "Start AI questions",
     "commonTitle": "Common Learning Resources",
     "commonDescription": "Learning steps and resources common to all AWS certification exams.",
     "taskStatement": "Task Statement {{id}}",

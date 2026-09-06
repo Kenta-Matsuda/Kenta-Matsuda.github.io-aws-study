@@ -15,6 +15,7 @@
 - [解説の出典URL可視化とプロンプトgroundingの厳格化（クライアント側） (#109)](issues/citation-grounding-clientside.md)
 - [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
 - [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
+- [「★すべて」タブの項目名と導線の整理 (#163)](issues/general-tab-navigation-163.md)
 
 ## LLM Wiki（docs/wiki/）
 
