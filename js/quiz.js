@@ -196,6 +196,28 @@ export function parseQuizResponse(text) {
   return parseQuizJson(text) || parseQuizMarkdown(text);
 }
 
+/**
+ * True when the text looks like an attempt at the quiz JSON contract
+ * (fenced or bare object mentioning the expected keys), even if it cannot be
+ * parsed into a usable quiz.
+ *
+ * Used by the UI to decide between "show the model output as prose" and
+ * "show a generation error", so a broken JSON payload is never dumped on the
+ * user as raw text (issue #166).
+ *
+ * @param {string} text
+ * @returns {boolean}
+ */
+export function looksLikeQuizJson(text) {
+  const raw = String(text ?? '').trim();
+  if (!raw) return false;
+
+  // Strip a leading code fence so ```json blocks are recognized too.
+  const unfenced = raw.replace(/^```[a-zA-Z]*\s*/, '');
+  const hasObject = unfenced.includes('{') && /"\s*(question|choices|correct|explanation)\s*"\s*:/.test(unfenced);
+  return hasObject;
+}
+
 function letterToIndex(letter) {
   const map = { A: 0, B: 1, C: 2, D: 3 };
   return map[String(letter || '').toUpperCase()] ?? -1;

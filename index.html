@@ -1482,31 +1482,8 @@
                     <button class="dashboard-carousel-nav dashboard-carousel-prev" id="carouselPrev" aria-label="Previous" data-i18n-aria="common.prev"><i class="fas fa-chevron-left"></i></button>
                     <button class="dashboard-carousel-nav dashboard-carousel-next" id="carouselNext" aria-label="Next" data-i18n-aria="common.next"><i class="fas fa-chevron-right"></i></button>
                     <div class="dashboard-carousel-track" id="carouselTrack">
-                        <!-- Slide 1: Book Promo -->
-                        <div class="dashboard-carousel-slide">
-                            <div class="book-promo-card rounded-xl border border-orange-200 p-5 md:p-6 h-full overflow-hidden">
-                                <div class="book-promo-layout">
-                                    <img src="./assets/books/aws-zenkan-kouryakubon-cover.jpg" alt="AWS認定 全冠攻略本の表紙" class="book-promo-cover" loading="lazy">
-                                    <div class="min-w-0">
-                                        <div class="book-promo-badge">
-                                            <i class="fas fa-book-open"></i> <span data-i18n="dashboard.bookPromo.onSale">On Sale</span>
-                                        </div>
-                                        <div class="book-promo-title mt-3"><span data-i18n="dashboard.bookPromo.title">AWS Certification</span><span data-i18n="dashboard.bookPromo.subtitle">Complete Guide</span></div>
-                                        <p class="mt-2 text-xs md:text-sm leading-relaxed text-orange-50/90" data-i18n="dashboard.bookPromo.description">All AWS certification know-how in one book!</p>
-                                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                            <a href="https://amzn.asia/d/0hIOAXuc" target="_blank" rel="noopener noreferrer" class="book-promo-link book-promo-amazon" aria-label="AWS認定 全冠攻略本をAmazonで見る">
-                                                <i class="fa-brands fa-amazon"></i>
-                                            </a>
-                                            <a href="https://techbookfest.org/product/1Vy2rcDFtWJuK15ihfVwns" target="_blank" rel="noopener noreferrer" class="book-promo-link bg-green-500 text-white hover:bg-green-400" aria-label="AWS認定 全冠攻略本を技術書典で見る">
-                                                技術<br>書典
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <!-- Slide 2: Quiz Challenge -->
-                        <div class="dashboard-carousel-slide">
+                        <!-- Slide 1: Quiz Challenge (first so the question generation entry point is what users see, #168) -->
+                        <div class="dashboard-carousel-slide" data-carousel-slide="quiz">
                             <div class="rounded-xl border-2 border-indigo-200 bg-gradient-to-br from-indigo-50 to-purple-50 p-5 md:p-6 h-full flex flex-col items-center justify-center text-center">
                                 <span class="text-4xl mb-3">🎯</span>
                                 <div class="text-base font-bold text-gray-800 mb-1" data-i18n="dashboard.quizCarousel.title">Quiz Challenge</div>
@@ -1531,7 +1508,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Slide 3: XP -->
+                        <!-- Slide 2: XP -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.xpCarousel.totalXp">Total XP</div>
@@ -1543,7 +1520,7 @@
                                 <div id="xpRecentActions" class="mt-2 space-y-1.5 text-xs text-gray-600"></div>
                             </div>
                         </div>
-                        <!-- Slide 4: Streak -->
+                        <!-- Slide 3: Streak -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.streak.title">Study Streak</div>
@@ -1565,7 +1542,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Slide 5: Title -->
+                        <!-- Slide 4: Title -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
                                 <div class="flex items-center gap-2">
@@ -1610,7 +1587,7 @@
                                 </div>
                             </div>
                         </div>
-                        <!-- Slide 6: Skill Radar Chart -->
+                        <!-- Slide 5: Skill Radar Chart -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-4 md:p-5 h-full flex flex-col">
                                 <div class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.skillRadar.title">Skills by Domain</div>
@@ -1619,6 +1596,29 @@
                                 </div>
                                 <p id="skillRadarEmpty" class="hidden text-center text-xs text-gray-400 mt-1" data-i18n="dashboard.skillRadar.placeholder">Answer quizzes to see your skill chart</p>
                                 <div id="skillRadarLegend" class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[10px] leading-tight"></div>
+                            </div>
+                        </div>
+                        <!-- Slide 6: Book Promo (last so the promotion comes after the study features, #168) -->
+                        <div class="dashboard-carousel-slide" data-carousel-slide="book-promo">
+                            <div class="book-promo-card rounded-xl border border-orange-200 p-5 md:p-6 h-full overflow-hidden">
+                                <div class="book-promo-layout">
+                                    <img src="./assets/books/aws-zenkan-kouryakubon-cover.jpg" alt="AWS認定 全冠攻略本の表紙" class="book-promo-cover" loading="lazy">
+                                    <div class="min-w-0">
+                                        <div class="book-promo-badge">
+                                            <i class="fas fa-book-open"></i> <span data-i18n="dashboard.bookPromo.onSale">On Sale</span>
+                                        </div>
+                                        <div class="book-promo-title mt-3"><span data-i18n="dashboard.bookPromo.title">AWS Certification</span><span data-i18n="dashboard.bookPromo.subtitle">Complete Guide</span></div>
+                                        <p class="mt-2 text-xs md:text-sm leading-relaxed text-orange-50/90" data-i18n="dashboard.bookPromo.description">All AWS certification know-how in one book!</p>
+                                        <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            <a href="https://amzn.asia/d/0hIOAXuc" target="_blank" rel="noopener noreferrer" class="book-promo-link book-promo-amazon" aria-label="AWS認定 全冠攻略本をAmazonで見る">
+                                                <i class="fa-brands fa-amazon"></i>
+                                            </a>
+                                            <a href="https://techbookfest.org/product/1Vy2rcDFtWJuK15ihfVwns" target="_blank" rel="noopener noreferrer" class="book-promo-link bg-green-500 text-white hover:bg-green-400" aria-label="AWS認定 全冠攻略本を技術書典で見る">
+                                                技術<br>書典
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1722,7 +1722,7 @@
             <div class="p-6">
                 <div id="modalLoading" class="hidden flex flex-col items-center justify-center py-8">
                     <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-purple-600 mb-4"></div>
-                    <p class="text-gray-500 text-sm animate-pulse" data-i18n="quiz.thinking">Gemini is thinking...</p>
+                    <p id="modalLoadingText" class="text-gray-500 text-sm animate-pulse" data-i18n="quiz.thinking">Gemini is thinking...</p>
                 </div>
                 <div id="modalContent" class="text-gray-700 ai-response-area text-sm md:text-base"></div>
 
