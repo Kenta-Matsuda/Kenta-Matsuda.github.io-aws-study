@@ -57,6 +57,7 @@ import { initChat, resetChat } from './chat.js';
 import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
+import { renderMarkdownToSafeHtml } from './markdown.js';
 
 /**
  * Return locale-aware title: jpTitle for 'ja', title (English) for 'en'.
@@ -4602,70 +4603,6 @@ function showAiModal(els, title, isLoading) {
   }
 }
 
-function normalizeMarkdownForJapanese(markdown) {
-  const input = String(markdown ?? '');
-
-  // Japanese IMEs/editors sometimes emit:
-  // - Fullwidth asterisk: U+FF0A '＊' (looks like '*')
-  // - Zero-width space/BOM around delimiters
-  // These can prevent Markdown emphasis parsing (e.g. **「...」** / ＊＊「...」＊＊).
-  // To avoid breaking code samples, we normalize only outside fenced/inline code.
-
-  const FENCE_RE = /(^|\n)( {0,3})(`{3,}|~{3,})[^\n]*\n[\s\S]*?\n\2\3[ \t]*($|\n)/g;
-  const CODE_SPAN_RE = /`+[^`]*?`+/g;
-
-  function normalizeTextSegment(segment) {
-    let s = segment
-      .replaceAll('\u200B', '')
-      .replaceAll('\uFEFF', '')
-      .replaceAll('\u200C', '')
-      .replaceAll('\u2060', '')
-      .replaceAll('＊', '*');
-
-    // Fix emphasis broken by spaces/invisible chars adjacent to Japanese brackets.
-    // CommonMark forbids whitespace right after opening ** or right before closing **.
-    // AI models sometimes output: ** 「text」 ** instead of **「text」**
-    s = s.replace(/(\*{2,3})[ \t\u00A0\u3000]+([「【（『])/g, '$1$2');
-    s = s.replace(/([」】）』])[ \t\u00A0\u3000]+(\*{2,3})/g, '$1$2');
-
-    return s;
-  }
-
-  function normalizeOutsideCode(segment) {
-    // Preserve inline code spans as-is.
-    return segment.replace(CODE_SPAN_RE, (codeSpan) => `\u0000${codeSpan}\u0000`).split('\u0000').map((part) => {
-      if (part.startsWith('`')) return part;
-      return normalizeTextSegment(part);
-    }).join('');
-  }
-
-  // Preserve fenced code blocks as-is.
-  let out = '';
-  let lastIndex = 0;
-  for (const match of input.matchAll(FENCE_RE)) {
-    const index = match.index ?? 0;
-    out += normalizeOutsideCode(input.slice(lastIndex, index));
-    out += match[0];
-    lastIndex = index + match[0].length;
-  }
-  out += normalizeOutsideCode(input.slice(lastIndex));
-  return out;
-}
-
-let __markedConfigured = false;
-
-function configureMarkedOnce(marked) {
-  if (__markedConfigured) return;
-  if (!marked || typeof marked.setOptions !== 'function') return;
-  try {
-    // keep it simple: gfm + line breaks
-    marked.setOptions({ gfm: true, breaks: true });
-    __markedConfigured = true;
-  } catch {
-    // ignore
-  }
-}
-
 /**
  * Extract distinct AWS official documentation URLs (https://docs.aws.amazon.com/...)
  * from a text blob, preserving first-seen order and de-duplicating.
@@ -4725,23 +4662,6 @@ function renderQuizSources(container, explanation) {
   }
   wrap.appendChild(list);
   container.appendChild(wrap);
-}
-
-function renderMarkdownToSafeHtml(markdown) {
-  const md = normalizeMarkdownForJapanese(markdown);
-
-  const marked = typeof window !== 'undefined' ? window.marked : undefined;
-  const DOMPurify = typeof window !== 'undefined' ? window.DOMPurify : undefined;
-
-  if (!marked || typeof marked.parse !== 'function' || !DOMPurify || typeof DOMPurify.sanitize !== 'function') {
-    return { html: '', usedMarkdown: false };
-  }
-
-  configureMarkedOnce(marked);
-
-  const rawHtml = marked.parse(md);
-  const cleanHtml = DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } });
-  return { html: cleanHtml, usedMarkdown: true };
 }
 
 function updateAiModalContent(els, text) {
