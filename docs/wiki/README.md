@@ -1,15 +1,16 @@
 # LLM Wiki（docs/wiki/）
 
-- 最終更新日: 2026-09-03
+- 最終更新日: 2026-09-06
 - 対象範囲: LLM Wiki 全体の目的・置き場所・ページスキーマ・更新（最新化）ルール・過去ドキュメントとの整合性確保ルール・索引運用
-- 出典/参照: issue #69 / `.kiro/agents/exam-content-maintainer.md`
+- 出典/参照: issue #69 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md`
 
 ## 目的
 
-`exam-content-maintainer` エージェント（`.kiro/agents/exam-content-maintainer.md`）が作業を通じて獲得した知見を、**構造化して永続化**し、繰り返し利用・改善できるようにするための Wiki です。主に次の知見を蓄積します。
+自己改善型エージェント（`exam-content-maintainer`（`.kiro/agents/exam-content-maintainer.md`）および `github-issue-resolver`（`.kiro/agents/github-issue-resolver.md`））が作業を通じて獲得した知見を、**構造化して永続化**し、繰り返し利用・改善できるようにするための Wiki です。主に次の知見を蓄積します。
 
 - より良い AWS 公式リソースを探すための**探索ノウハウ**。
 - 全試験（`js/data/` 配下）のリソース**棚卸し状況**。
+- open issue を解決する際の**既知の落とし穴・判定基準・再利用可能なコマンド**（issue 解決プレイブック）。
 - 作業を振り返って得た**効率化・低コスト化（トークン削減）**の検討と、**自己拡張（プロンプト・skill の改善）**のログ。
 
 この Wiki は、**最新化（棚卸しによる更新）と過去ドキュメントとの整合性確保が可能であること**を前提に採用しています。したがって本 README で定めるルールに従って運用しない Wiki ページは作らないでください。
@@ -78,8 +79,10 @@
 - [LLM Wiki 運用ルール（本ページ / README）](README.md)
 - [AWS 公式リソース探索ノウハウ](aws-resource-discovery.md)
 - [試験リソース棚卸し台帳](exam-resource-inventory.md)
+- [issue 解決プレイブック](issue-resolution-playbook.md)
 - [効率化・自己拡張ログ](efficiency-log.md)
 
 ## 更新履歴
 
 - 2026-09-03: 初版作成（issue #69）。LLM Wiki の目的・置き場所・ページスキーマ・更新/整合性/索引運用ルールと現在のページ一覧を定義。
+- 2026-09-06: `github-issue-resolver` を自己改善型へ再構成したことに伴い、Wiki の対象エージェントを 2 つに拡張し、[issue 解決プレイブック](issue-resolution-playbook.md) をページ一覧に追加（出典: `.kiro/agents/github-issue-resolver.md`）。

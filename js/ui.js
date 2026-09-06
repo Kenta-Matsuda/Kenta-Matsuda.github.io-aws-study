@@ -55,6 +55,7 @@ import {
 } from './quiz.js';
 import { initChat, resetChat } from './chat.js';
 import { getDailyChallengeQuestions } from './data/daily-challenge.js';
+import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 
 /**
@@ -576,6 +577,70 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.modalLoading) els.modalLoading.classList.add('hidden');
     resetQuizUi(els);
     if (els.quizArea) els.quizArea.classList.remove('hidden');
+
+    renderInteractiveQuiz({ els, quiz: quizSession.questions[0] });
+    updateQuizProgress();
+    if (els.quizComboBar) els.quizComboBar.classList.remove('hidden');
+    if (els.quizQuestion) els.quizQuestion.classList.remove('hidden');
+    if (els.quizChoices) els.quizChoices.classList.remove('hidden');
+  });
+
+  // --- Offline Production-Format Exam Button (API-key-free, issue #124) ---
+  // 本番形式（模擬試験・65問・時間制限あり）を、事前用意した静的問題バンクから
+  // 決定的に組み立てて出題する。AIプロバイダー/APIキーは一切使わないため、キー未設定でも
+  // 本番レベルの学習ができる。#124 のメンテナー確認（APIキー不要にすべき対象は
+  // デイリーチャレンジ5問ではなく65問の本番形式）に対応するための入口。
+  //
+  // 注意: この経路は getApiKey/getOpenAiApiKey/callAi/callAiStream/onRequireApiKey を
+  // 一切呼ばない。AI生成の模擬試験（quizModeStartBtn の mock 経路）は従来どおりキーが必要。
+  els.offlineExamBtn?.addEventListener('click', () => {
+    // 実在の試験IDにフォールバック（'__beginner__' などの擬似モード対策）。
+    const offlineExamId = isRealExamId(state.examId) ? state.examId : 'clf-c02';
+    const poolSize = getOfflineExamPoolSize(offlineExamId);
+    // mock セッションを作り、本番形式（時間制限・65問枠）の枠組みを適用する。
+    quizSession = createQuizSession({ examId: offlineExamId, mode: 'mock' });
+    quizSession.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    // 静的プールのサイズで出題数をクランプ（多くの試験で65、プールが小さい試験は最大数）。
+    const targetCount = Math.min(quizSession.questionCount || 65, poolSize);
+    const questions = getOfflineExamQuestions(offlineExamId, targetCount, { locale: getLocale() });
+    if (!questions.length) return;
+
+    quizSession.questionCount = questions.length;
+    quizSession.questions = questions.map(q => ({
+      question: q.question,
+      choices: q.choices,
+      correctIndex: q.correctIndex,
+      explanation: q.explanation,
+      domainId: null,
+    }));
+    quizSession.preGenerate = true;
+    quizSession.startedAt = Date.now();
+    quizSession._isOfflineExam = true;
+
+    const exam = getExamById(offlineExamId);
+    const offlineTitle = getLocale() === 'ja'
+      ? `本番形式（APIキー不要）: ${exam?.code || offlineExamId}（${questions.length}問）`
+      : `Practice Exam (no API key): ${exam?.code || offlineExamId} (${questions.length} questions)`;
+
+    lastAiRequest = {
+      type: 'quiz',
+      examId: offlineExamId,
+      taskId: '',
+      taskTitle: getLocale() === 'ja' ? '本番形式（APIキー不要）' : 'Practice Exam (no API key)',
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+
+    showAiModal(els, offlineTitle, true);
+    if (els.modalContent) els.modalContent.innerHTML = '';
+    if (els.modalLoading) els.modalLoading.classList.add('hidden');
+    resetQuizUi(els);
+    if (els.quizArea) els.quizArea.classList.remove('hidden');
+
+    // 本番形式なので、mock セッションの時間制限があればタイマーを開始する。
+    if (quizSession.timeLimitSec > 0) {
+      startQuizTimer(quizSession.timeLimitSec);
+    }
 
     renderInteractiveQuiz({ els, quiz: quizSession.questions[0] });
     updateQuizProgress();
@@ -1430,7 +1495,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Tag results to a real exam id. For the Daily Challenge the session already
     // resolved a real exam id (falling back to clf-c02 for pseudo-modes like
     // '__beginner__'), so prefer it over the possibly-pseudo appState.examId.
-    const resultExamId = quizSession?._isDailyChallenge && quizSession.examId
+    const resultExamId = (quizSession?._isDailyChallenge || quizSession?._isOfflineExam) && quizSession.examId
       ? quizSession.examId
       : appState.examId;
     addQuizResult({
@@ -2067,6 +2132,7 @@ function getElements() {
     dashboardQuizBtn: document.getElementById('dashboardQuizBtn'),
     dashboardReviewBtn: document.getElementById('dashboardReviewBtn'),
     dailyChallengeBtn: document.getElementById('dailyChallengeBtn'),
+    offlineExamBtn: document.getElementById('offlineExamBtn'),
 
     // Quiz history review modal
     quizHistoryModal: document.getElementById('quizHistoryModal'),
