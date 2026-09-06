@@ -2780,15 +2780,26 @@ function initDashboardCarousel(els) {
   prevBtn?.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; update(); resetAutoSlide(); } });
   nextBtn?.addEventListener('click', () => { if (currentIndex < getMaxIndex()) { currentIndex++; update(); resetAutoSlide(); } });
 
-  // Auto-slide every 5 seconds
-  let autoSlideTimer = setInterval(advance, 5000);
+  // Auto-slide every 5 seconds, but hold the first slide (the quiz launcher)
+  // noticeably longer right after the page opens so it can actually be read (#168).
+  const AUTO_SLIDE_MS = 5000;
+  const FIRST_SLIDE_MS = 12000;
+
+  let autoSlideTimer = setTimeout(() => {
+    advance();
+    autoSlideTimer = setInterval(advance, AUTO_SLIDE_MS);
+  }, FIRST_SLIDE_MS);
+
   function advance() {
     currentIndex = currentIndex < getMaxIndex() ? currentIndex + 1 : 0;
     update();
   }
   function resetAutoSlide() {
+    // Timeout and interval ids share one namespace, so clearing both is safe and
+    // covers the initial "hold the first slide" timer as well as the loop.
+    clearTimeout(autoSlideTimer);
     clearInterval(autoSlideTimer);
-    autoSlideTimer = setInterval(advance, 5000);
+    autoSlideTimer = setInterval(advance, AUTO_SLIDE_MS);
   }
 
   // Re-calculate on resize
