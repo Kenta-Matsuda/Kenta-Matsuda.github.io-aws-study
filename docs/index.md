@@ -17,6 +17,7 @@
 - [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
 - [API 設定画面の Google AI Studio リンクが消えていた問題 (#161)](issues/settings-help-links-161.md)
 - [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
+- [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
 
 ## LLM Wiki（docs/wiki/）
 
