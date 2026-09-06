@@ -35,6 +35,7 @@ import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 import {
   parseQuizResponse,
+  looksLikeQuizJson,
   indexToLetter,
   getComboMultiplier,
   getComboLabel,
@@ -1996,6 +1997,7 @@ function getElements() {
     modalTitle: document.getElementById('modalTitle'),
     modalContent: document.getElementById('modalContent'),
     modalLoading: document.getElementById('modalLoading'),
+    modalLoadingText: document.getElementById('modalLoadingText'),
     aiCopyBtn: document.getElementById('aiCopyBtn'),
     aiVoteGoodBtn: document.getElementById('aiVoteGoodBtn'),
     aiVoteBadBtn: document.getElementById('aiVoteBadBtn'),
@@ -2779,15 +2781,26 @@ function initDashboardCarousel(els) {
   prevBtn?.addEventListener('click', () => { if (currentIndex > 0) { currentIndex--; update(); resetAutoSlide(); } });
   nextBtn?.addEventListener('click', () => { if (currentIndex < getMaxIndex()) { currentIndex++; update(); resetAutoSlide(); } });
 
-  // Auto-slide every 5 seconds
-  let autoSlideTimer = setInterval(advance, 5000);
+  // Auto-slide every 5 seconds, but hold the first slide (the quiz launcher)
+  // noticeably longer right after the page opens so it can actually be read (#168).
+  const AUTO_SLIDE_MS = 5000;
+  const FIRST_SLIDE_MS = 12000;
+
+  let autoSlideTimer = setTimeout(() => {
+    advance();
+    autoSlideTimer = setInterval(advance, AUTO_SLIDE_MS);
+  }, FIRST_SLIDE_MS);
+
   function advance() {
     currentIndex = currentIndex < getMaxIndex() ? currentIndex + 1 : 0;
     update();
   }
   function resetAutoSlide() {
+    // Timeout and interval ids share one namespace, so clearing both is safe and
+    // covers the initial "hold the first slide" timer as well as the loop.
+    clearTimeout(autoSlideTimer);
     clearInterval(autoSlideTimer);
-    autoSlideTimer = setInterval(advance, 5000);
+    autoSlideTimer = setInterval(advance, AUTO_SLIDE_MS);
   }
 
   // Re-calculate on resize
@@ -4708,6 +4721,31 @@ function updateAiModalContentStreaming(els, partialText) {
   setAiCopyButtonEnabled(els, Boolean(t.trim()));
 }
 
+/**
+ * Progress feedback while an interactive quiz is being generated (issue #166).
+ *
+ * Quiz responses are a JSON contract, not prose, so the partial stream must
+ * never be shown to the user. The loading indicator stays visible and only a
+ * localized "generating" message plus the received character count is updated.
+ */
+function updateQuizGenerationProgress(els, partialText) {
+  const received = String(partialText ?? '').length;
+  els.modalLoading?.classList.remove('hidden');
+  if (els.modalContent) {
+    els.modalContent.textContent = '';
+  }
+  if (els.modalContent?.dataset) {
+    delete els.modalContent.dataset.aiCopyText;
+  }
+  setAiCopyButtonEnabled(els, false);
+
+  if (els.modalLoadingText) {
+    els.modalLoadingText.textContent = received > 0
+      ? t('quiz.generatingProgress', { chars: String(received) })
+      : t('quiz.generating');
+  }
+}
+
 async function explainTerm({ els, exam, term, taskContext }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
@@ -4779,7 +4817,6 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
     : buildQuizUserPrompt(taskTitle, taskContext);
 
   let response = '';
-  let fullText = '';
 
   try {
     response = await callAiStream({
@@ -4787,8 +4824,8 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
       systemPrompt,
       onRequireApiKey: () => openSettingsModal(els),
       onTextDelta: (_delta, text) => {
-        fullText = text;
-        updateAiModalContentStreaming(els, text);
+        // The quiz contract is JSON, so never surface the partial stream (#166).
+        updateQuizGenerationProgress(els, text);
       },
     });
 
@@ -4804,19 +4841,36 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
     return false;
   }
 
-  if (!isSuccessfulAiResponse(response)) {
-    if (response) updateAiModalContent(els, response);
+  // Try to parse as interactive quiz first: isSuccessfulAiResponse() rejects
+  // short payloads, but a valid quiz JSON can legitimately be short, and dumping
+  // it verbatim is exactly the raw-JSON leak reported in #166.
+  const parsed = parseQuizResponse(response);
+
+  if (!parsed && !isSuccessfulAiResponse(response)) {
+    if (looksLikeQuizJson(response)) {
+      console.warn('[quiz] Unusable quiz payload:', response);
+      updateAiModalContent(els, t('quiz.generateFailed'));
+    } else if (response) {
+      updateAiModalContent(els, response);
+    }
     return false;
   }
-
-  // Try to parse as interactive quiz
-  const parsed = parseQuizResponse(response);
 
   if (parsed) {
     parsed.domainId = domainId ?? null;
     // Render interactive quiz UI
     renderInteractiveQuiz({ els, quiz: parsed });
     return true;
+  }
+
+  // The model returned something that looks like the quiz JSON contract but we
+  // could not build a quiz from it. Showing that payload verbatim dumps raw JSON
+  // on the user (#166), so report a generation failure instead and keep the raw
+  // text in the console for debugging.
+  if (looksLikeQuizJson(response)) {
+    console.warn('[quiz] Unparsable quiz payload:', response);
+    updateAiModalContent(els, t('quiz.generateFailed'));
+    return false;
   }
 
   // Fallback: show as plain markdown (old format)
@@ -5004,7 +5058,13 @@ function isSuccessfulAiResponse(response) {
   if (!response) return false;
   const text = String(response).trim();
   if (!text) return false;
+  // Locale-aware failure detection: providers wrap failures in `errors.generic`,
+  // so compare against the current locale's prefix as well as the historical
+  // Japanese literals (kept so older cached strings still count as failures).
+  const genericPrefix = String(t('errors.generic', { msg: '' })).trim();
+  if (genericPrefix && genericPrefix !== 'errors.generic' && text.startsWith(genericPrefix)) return false;
   if (text.startsWith('エラーが発生しました')) return false;
+  if (text === t('errors.noResponse')) return false;
   if (text === '回答を生成できませんでした。') return false;
   if (text.length < 80) return false;
   return true;

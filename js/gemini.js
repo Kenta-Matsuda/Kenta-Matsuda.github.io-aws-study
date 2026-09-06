@@ -1,6 +1,20 @@
 import { getApiKey } from './storage.js';
 import { GEMINI_MODEL_CANDIDATES } from './config.js';
 import { t } from './i18n.js';
+import { classifyAiFailure, aiFailureMessageKey, isOnline } from './aiErrors.js';
+
+/**
+ * Turn the last thrown error into a user-facing message.
+ * Network drops (e.g. switching from mobile data to Wi-Fi mid-stream) surface as
+ * a bare "Failed to fetch", so they get an actionable sentence instead (#169).
+ * The message stays wrapped in `errors.generic` so existing failure detection
+ * (which looks for that prefix) keeps working.
+ */
+function describeFailure(lastError) {
+  const key = aiFailureMessageKey(classifyAiFailure(lastError, { online: isOnline() }));
+  const msg = key ? t(key) : (lastError?.message ? String(lastError.message) : 'Unknown error');
+  return t('errors.generic', { msg });
+}
 
 const DEFAULT_MODEL_CANDIDATES = [
   'gemini-2.0-flash',
@@ -220,8 +234,7 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
-  return t('errors.generic', { msg });
+  return describeFailure(lastError);
 }
 
 export async function callGeminiStream({
@@ -311,6 +324,5 @@ export async function callGeminiStream({
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
-  return t('errors.generic', { msg });
+  return describeFailure(lastError);
 }
