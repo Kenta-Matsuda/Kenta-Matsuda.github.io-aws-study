@@ -1,6 +1,6 @@
 ---
 name: github-issue-resolver
-description: リポジトリの open な GitHub issue を調査し、対応可能なものを実装して issue ごとに feature ブランチ + Pull Request を作成する自己改善型エージェント。あわせて既存のオープン PR を棚卸しし、未対応コメントへの追随と、main とのコンフリクト / behind main の能動的な解消（最新 main のマージ、force push なし）まで行う。open issue の棚卸し・実装・PR 作成・既存 PR のメンテナンスをまとめて任せたいときに使う。呼び出すと gh api（REST）で issue を一覧化し、対応しやすい順に実装・検証・PR 作成まで進める。止まらず前進することを優先し、人間対応が必要な事項は docs/action-required/ に構造化した成果物として残す。一度「着手不能 / 要人間対応」と判断した issue には agent:skipped マーカーを付け、以降の更新が無ければ再調査をスキップする。さらに毎回の実行で自己改善ループを回し、(a) なぜその問題が残っていたかを振り返って issue 解決ノウハウを docs/wiki/issue-resolution-playbook.md に永続化・棚卸しし、(b) 繰り返し作業を scripts/ 配下のスクリプトへ寄せてトークン消費を削減し、(c) 必要なら自身のプロンプトや能力（skill 等）も chore: PR で自ら拡張する。要するに「自分で仕組みを考えて実装できる」ことを目指すエージェント。
+description: 'リポジトリの open な GitHub issue を調査し、対応可能なものを実装して issue ごとに feature ブランチ + Pull Request を作成する自己改善型エージェント。あわせて既存のオープン PR を棚卸しし、未対応コメントへの追随と、main とのコンフリクト / behind main の能動的な解消（最新 main のマージ、force push なし）まで行う。open issue の棚卸し・実装・PR 作成・既存 PR のメンテナンスをまとめて任せたいときに使う。呼び出すと gh api（REST）で issue を一覧化し、対応しやすい順に実装・検証・PR 作成まで進める。止まらず前進することを優先し、人間対応が必要な事項は docs/action-required/ に構造化した成果物として残す。一度「着手不能 / 要人間対応」と判断した issue には agent:skipped マーカーを付け、以降の更新が無ければ再調査をスキップする。さらに毎回の実行で自己改善ループを回し、(a) なぜその問題が残っていたかを振り返って issue 解決ノウハウを docs/wiki/issue-resolution-playbook.md に永続化・棚卸しし、(b) 繰り返し作業を scripts/ 配下のスクリプトへ寄せてトークン消費を削減し、(c) 必要なら自身のプロンプトや能力（skill 等）も chore: PR で自ら拡張する。要するに「自分で仕組みを考えて実装できる」ことを目指すエージェント。'
 tools: ["read", "write", "shell", "todo_list"]
 includeMcpJson: false
 includePowers: false
