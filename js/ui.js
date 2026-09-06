@@ -3639,7 +3639,8 @@ function renderTabs({ els, exam, state, onDomainSelect }) {
       allBtn.style.borderColor = '#f97316';
       allBtn.style.color = '#f97316';
     }
-    // The tab shows exam-wide steps, so label it "全般 / General" rather than
+    // The tab shows the exam-wide learning flow, so label it
+    // "ラーニングパス / Learning Path" (via roadmap.examWide) rather than
     // "★すべて", which read like "all resources" and confused users (#163).
     allBtn.textContent = t('roadmap.examWide');
     allBtn.setAttribute('data-domain-tab', 'all');
