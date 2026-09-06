@@ -16,6 +16,10 @@
 - [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
 - [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
 - [API 設定画面の Google AI Studio リンクが消えていた問題 (#161)](issues/settings-help-links-161.md)
+- [AI 解説の `**「…」**` が太字にならない問題 (#164)](issues/markdown-emphasis-brackets-164.md)
+- [「模擬問題を作成」で JSON がそのまま表示される問題 (#166)](issues/quiz-json-leak-166.md)
+- [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
+- [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
 
 ## LLM Wiki（docs/wiki/）
 
@@ -33,6 +37,7 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 
 - [要人間対応事項の運用ルール（README）](action-required/README.md)
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](action-required/global-leaderboard.md) — 🔴 未対応（要対応） / 関連: #32
+- [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](action-required/mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 関連: #109
 - [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](action-required/streak-push-notifications.md) — 🔴 未対応（要対応） / 関連: #107
 - [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](action-required/issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 関連: #119
 - [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](action-required/issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 関連: #117（関連 #109 #119 #32 #107）
@@ -40,3 +45,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](action-required/issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 関連: #162
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](action-required/issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 関連: #167
 - [AIチャットが実在する試験を否定し別試験にすり替える問題（一次情報グラウンディング）](action-required/issue-138-ai-chat-exam-grounding.md) — 🔴 未対応（要対応） / 関連: #138（関連 #109 PR #113 PR #135 PR #139）※ AWS 公式ドキュメント確認済み。クライアント側は `url_context` グラウンディングで対応完了
+- [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69

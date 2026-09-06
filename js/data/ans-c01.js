@@ -111,11 +111,11 @@ export const ANS_C01 = {
           iconColorClass: 'text-green-600',
           items: [
             {
-              title: 'Exam Prep Standard Course: AWS Certified Advanced Networking - Specialty',
-              titleEn: 'Exam Prep Standard Course: AWS Certified Advanced Networking - Specialty',
-              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-advanced-networking-specialty-ans-c01',
-              note: 'AWS Skill Builder: 試験対策コース（無料）',
-              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
+              title: 'Exam Prep: AWS Certified Advanced Networking - Specialty (ANS-C01)',
+              titleEn: 'Exam Prep: AWS Certified Advanced Networking - Specialty (ANS-C01)',
+              url: 'https://skillbuilder.aws/exam-prep/advanced-networking-specialty',
+              note: 'AWS Skill Builder: 公式の試験対策ページへの直リンク（試験対策コース・公式練習問題セットの入口。検索不要・無料）',
+              noteEn: 'AWS Skill Builder: direct link to the official exam prep page (entry point for the exam prep course and official practice question set; no search needed, free)',
               recommend: true,
             },
             {

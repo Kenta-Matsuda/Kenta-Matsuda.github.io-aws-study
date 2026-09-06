@@ -67,7 +67,8 @@
 
 ## 現在の一覧
 
-- [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](global-leaderboard.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） / 関連: #32 ※ DynamoDB 月額コスト試算（机上見積もり）を追記済み
+- [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](global-leaderboard.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） / 関連: #32
+- [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンドプロキシ / LLM パイプライン。grounding は AWS 公式リモート MCP 利用で自前ホスト不要） / 関連: #109
 - [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](streak-push-notifications.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / Web Push サービス） / 関連: #107
 - [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / Web Push サービス） / 関連: #119
 - [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） / 関連: #117（関連 #109 #119 #32 #107）
@@ -75,3 +76,4 @@
 - [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / GitHub App の資格情報管理） / 関連: #162（関連 #101 #100 #166 #117）
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / データ保持方針） / 関連: #167（関連 #162 #117）
 - [AIチャットが実在する試験を否定し別試験にすり替える問題（一次情報グラウンディング）](issue-138-ai-chat-exam-grounding.md) — 🔴 未対応（要対応） / 種別: 要人間対応（AWS リモート MCP をブラウザから使うためのプロキシ設置の意思決定 / トークンコストの方針） / 関連: #138（関連 #109 PR #113 PR #135 PR #139）※ AWS 公式ドキュメント確認済み・CORS 制約を実地検証済み。クライアント側は `url_context` グラウンディングで対応完了
+- [AWS Skill Builder のコース URL が全試験で失効している](skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 種別: 手動確認（ブラウザ操作 / Skill Builder サインイン） / 関連: #69
