@@ -104,11 +104,11 @@ export const SOA_C03 = {
           iconColorClass: 'text-green-600',
           items: [
             {
-              title: 'Exam Prep Standard Course: AWS Certified SysOps Administrator - Associate',
-              titleEn: 'Exam Prep Standard Course: AWS Certified SysOps Administrator - Associate',
-              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-sysops-administrator-associate-soa-c02',
-              note: 'AWS Skill Builder: 試験対策コース（無料）',
-              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
+              title: 'Exam Prep: AWS Certified SysOps Administrator - Associate',
+              titleEn: 'Exam Prep: AWS Certified SysOps Administrator - Associate',
+              url: 'https://skillbuilder.aws/exam-prep/sysops-administrator-associate',
+              note: 'AWS Skill Builder: 公式の試験対策ページへの直リンク（試験対策コース・公式練習問題セットの入口。検索不要・無料）。SOA-C03 版が未公開の場合は SOA-C02 版が表示される',
+              noteEn: 'AWS Skill Builder: direct link to the official exam prep page (entry point for the exam prep course and official practice question set; no search needed, free). Shows the SOA-C02 edition until an SOA-C03 edition is published',
               recommend: true,
             },
           ],

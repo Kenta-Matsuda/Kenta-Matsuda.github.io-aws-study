@@ -104,11 +104,11 @@ export const DOP_C02 = {
           iconColorClass: 'text-green-600',
           items: [
             {
-              title: 'Exam Prep Standard Course: AWS Certified DevOps Engineer - Professional',
-              titleEn: 'Exam Prep Standard Course: AWS Certified DevOps Engineer - Professional',
-              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-devops-engineer-professional-dop-c02',
-              note: 'AWS Skill Builder: 試験対策コース（無料）',
-              noteEn: 'AWS Skill Builder: Exam preparation course (free)',
+              title: 'Exam Prep: AWS Certified DevOps Engineer - Professional (DOP-C02)',
+              titleEn: 'Exam Prep: AWS Certified DevOps Engineer - Professional (DOP-C02)',
+              url: 'https://skillbuilder.aws/exam-prep/devops-engineer-professional',
+              note: 'AWS Skill Builder: 公式の試験対策ページへの直リンク（試験対策コース・公式練習問題セットの入口。検索不要・無料）',
+              noteEn: 'AWS Skill Builder: direct link to the official exam prep page (entry point for the exam prep course and official practice question set; no search needed, free)',
               recommend: true,
             },
           ],
