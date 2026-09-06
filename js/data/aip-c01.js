@@ -73,10 +73,10 @@ export const AIP_C01 = {
           iconColorClass: 'text-orange-500',
           items: [
             {
-              title: 'AWS Certified Generative AI Developer - Professional 試験ガイド (PDF)',
-              titleEn: 'AWS Certified Generative AI Developer - Professional Exam Guide (PDF)',
-              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-ai-professional/AWS-Certified-Generative-AI-Developer-Professional_Exam-Guide.pdf',
-              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-ai-professional/AWS-Certified-Generative-AI-Developer-Professional_Exam-Guide.pdf',
+              title: 'AWS Certified Generative AI Developer - Professional (AIP-C01) 試験ガイド',
+              titleEn: 'AWS Certified Generative AI Developer - Professional (AIP-C01) Exam Guide',
+              url: 'https://docs.aws.amazon.com/ja_jp/aws-certification/latest/ai-professional-01/ai-professional-01.html',
+              urlEn: 'https://docs.aws.amazon.com/aws-certification/latest/ai-professional-01/ai-professional-01.html',
               note: '試験範囲・出題比率・サンプル問題を確認',
               noteEn: 'Review exam scope, question ratios, and sample questions',
               recommend: true,

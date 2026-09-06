@@ -7,7 +7,20 @@ import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
 import { getLocale, t } from './i18n.js';
-import { getExamCategoryLabel } from './exams.js';
+import { getExamCategoryLabel, getExamOfficialRefs } from './exams.js';
+
+/**
+ * Gemini built-in grounding tools used by the chat.
+ *
+ * `url_context` runs on Google's side, so the browser never fetches the AWS
+ * pages itself. That matters because AWS's own remote MCP endpoints cannot be
+ * called from a static site: `https://knowledge-mcp.global.api.aws/mcp` sends no
+ * `Access-Control-Allow-Origin`, and `https://aws-mcp.us-east-1.api.aws/mcp`
+ * requires an `Mcp-Session-Id` that CORS neither exposes on the response nor
+ * allows on the request (its preflight answers 405).
+ * See docs/action-required/issue-138-ai-chat-exam-grounding.md.
+ */
+const CHAT_GROUNDING_TOOLS = [{ url_context: {} }];
 
 /** Conversation history (role/content pairs) */
 let history = [];
@@ -123,6 +136,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
       userPrompt: text,
       systemPrompt,
       history: history.slice(0, -1), // exclude current message (already in userPrompt)
+      tools: CHAT_GROUNDING_TOOLS,
       onRequireApiKey: () => openSettingsModal(),
       onTextDelta: (_delta, fullText) => {
         updateBubbleContent(aiBubble, fullText);
@@ -135,6 +149,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
         userPrompt: text,
         systemPrompt,
         history: history.slice(0, -1),
+        tools: CHAT_GROUNDING_TOOLS,
         onRequireApiKey: () => openSettingsModal(),
       });
     }
@@ -161,6 +176,9 @@ function buildChatSystemPrompt(exam) {
   // Authoritative identity sourced from the repository's own exam definitions (js/data/*.js).
   const category = getExamCategoryLabel(exam?.id);
   const categoryLabel = category ? (isJa ? category.labelJa : category.labelEn) : null;
+  // AWS's own pages (official exam guide / official exam page) for this exam.
+  // Handed to the model so the `url_context` tool can verify exam facts.
+  const officialRefs = getExamOfficialRefs(exam?.id, { locale: isJa ? 'ja' : 'en' });
 
   if (getLocale() === 'en') {
     let prompt =
@@ -177,6 +195,14 @@ function buildChatSystemPrompt(exam) {
         `- Do NOT claim that this exam code or name does not exist, and do NOT deny or rename it, even if it conflicts with your internal knowledge.\n` +
         `- Do NOT substitute or redirect the answer to a different exam (for example, do not swap ${exam.code} for another exam code). If the user asks about this exam, answer about THIS exam only.\n` +
         `- Treat this repository-provided exam definition as more reliable than your own prior knowledge.\n`;
+    }
+    if (officialRefs.length) {
+      prompt +=
+        `\n[Primary sources — verify against AWS documentation]\n` +
+        officialRefs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
+        `- Before stating any fact about the exam itself (whether it exists, its official name, exam code, question domains and weightings, number of questions, duration, passing score, or fee), read the AWS pages above and base your answer on them.\n` +
+        `- If your internal knowledge contradicts those pages, the pages win. Never override AWS documentation with your own recollection.\n` +
+        `- Cite the AWS URL you actually relied on. If a page could not be read, say so instead of guessing.\n`;
     }
     prompt +=
       `\nAnswer questions clearly and concisely, using concrete examples.\n` +
@@ -203,6 +229,14 @@ function buildChatSystemPrompt(exam) {
       `- あなたの内部知識と食い違う場合でも、この試験コードや名称が「存在しない」と決めつけたり、否定・改名したりしないでください。\n` +
       `- 別の試験にすり替えたり誘導したりしないでください（例: ${exam.code} を別の試験コードに置き換えて回答しない）。ユーザーがこの試験について尋ねた場合は、この試験についてのみ回答してください。\n` +
       `- 試験の実在・正式名称・試験コード・区分については、あなたの内部知識よりも、このリポジトリが提供する上記の定義を優先してください。\n\n`;
+  }
+  if (officialRefs.length) {
+    prompt +=
+      `【一次情報（AWS公式ドキュメント）で必ず裏取りする】\n` +
+      officialRefs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
+      `- 試験そのものに関する事実（実在するか、正式名称、試験コード、出題ドメインと配点比率、問題数、試験時間、合格スコア、受験料など）を述べる前に、上記のAWS公式ページを読み、その内容に基づいて回答してください。\n` +
+      `- あなたの内部知識と上記ページの記載が食い違う場合は、必ず上記ページの記載を優先してください。記憶でAWS公式ドキュメントを上書きしないでください。\n` +
+      `- 実際に根拠として使ったAWSのURLを明記してください。ページを読めなかった場合は、推測せずに「読めなかった」と述べてください。\n\n`;
   }
   prompt +=
     `【信頼性に関する厳格なルール】\n` +

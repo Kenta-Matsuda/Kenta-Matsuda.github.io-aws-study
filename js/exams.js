@@ -124,6 +124,89 @@ export function getExamCategoryLabel(examId) {
 }
 
 /**
+ * Resource group keys inside `js/data/*.js` that point at AWS's own primary
+ * sources for an exam's identity (official exam page / official exam guide).
+ * Order matters: the exam guide is the most authoritative document for
+ * existence, official name, exam code, domains and weightings.
+ */
+const AUTHORITATIVE_RESOURCE_KEYS = ['guide', 'official-page'];
+
+/** Hosts accepted as AWS primary sources (keeps arbitrary URLs out of tool calls). */
+const AWS_PRIMARY_SOURCE_HOSTS = [
+  'docs.aws.amazon.com',
+  'aws.amazon.com',
+  'd1.awsstatic.com',
+];
+
+function isAwsPrimarySourceUrl(url) {
+  try {
+    const { protocol, hostname } = new URL(String(url));
+    if (protocol !== 'https:') return false;
+    return AWS_PRIMARY_SOURCE_HOSTS.some((h) => hostname === h || hostname.endsWith(`.${h}`));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Collect the AWS official (primary source) URLs declared for an exam in
+ * `js/data/*.js` – the official exam guide and the official exam page.
+ *
+ * These are the URLs handed to the model so it can verify facts about the exam
+ * itself (existence, official name, exam code, scope) against AWS documentation
+ * instead of relying on its internal knowledge.
+ *
+ * Null-safe: returns an empty array for a falsy or unknown exam ID.
+ *
+ * @param {string} examId
+ * @param {{ locale?: string }} [opts]
+ * @returns {Array<{ key: string, title: string, url: string }>}
+ */
+export function getExamOfficialRefs(examId, { locale = 'ja' } = {}) {
+  if (!examId) return [];
+
+  let exam;
+  try {
+    exam = getExamById(examId);
+  } catch {
+    return [];
+  }
+
+  const refs = [];
+  const seenUrls = new Set();
+
+  for (const key of AUTHORITATIVE_RESOURCE_KEYS) {
+    const items = [];
+    for (const step of Array.isArray(exam.steps) ? exam.steps : []) {
+      for (const group of Array.isArray(step?.resources) ? step.resources : []) {
+        if (group?.key !== key) continue;
+        for (const item of Array.isArray(group?.items) ? group.items : []) {
+          if (item) items.push(item);
+        }
+      }
+    }
+    if (!items.length) continue;
+
+    // Prefer the explicitly recommended entry, otherwise the first one.
+    const preferred = items.find((i) => i.recommend === true) || items[0];
+    const url =
+      locale === 'en'
+        ? preferred.urlEn || preferred.url
+        : preferred.url || preferred.urlEn;
+    if (!url || seenUrls.has(url) || !isAwsPrimarySourceUrl(url)) continue;
+
+    seenUrls.add(url);
+    refs.push({
+      key,
+      title: (locale === 'en' ? preferred.titleEn || preferred.title : preferred.title) || url,
+      url,
+    });
+  }
+
+  return refs;
+}
+
+/**
  * Resolve a URL hash (without #) to an exam ID.
  * Supports both short codes (clf) and full IDs (clf-c02).
  */

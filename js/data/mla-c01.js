@@ -73,10 +73,10 @@ export const MLA_C01 = {
           iconColorClass: 'text-orange-500',
           items: [
             {
-              title: 'AWS Certified Machine Learning Engineer - Associate 試験ガイド (PDF)',
-              titleEn: 'AWS Certified Machine Learning Engineer - Associate Exam Guide (PDF)',
-              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-ml-engineer-associate/AWS-Certified-Machine-Learning-Engineer-Associate_Exam-Guide.pdf',
-              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-ml-engineer-associate/AWS-Certified-Machine-Learning-Engineer-Associate_Exam-Guide.pdf',
+              title: 'AWS Certified Machine Learning Engineer - Associate (MLA-C01) 試験ガイド',
+              titleEn: 'AWS Certified Machine Learning Engineer - Associate (MLA-C01) Exam Guide',
+              url: 'https://docs.aws.amazon.com/ja_jp/aws-certification/latest/machine-learning-engineer-associate-01/machine-learning-engineer-associate-01.html',
+              urlEn: 'https://docs.aws.amazon.com/aws-certification/latest/machine-learning-engineer-associate-01/machine-learning-engineer-associate-01.html',
               note: '試験範囲・出題比率・サンプル問題を確認',
               noteEn: 'Review exam scope, question distribution, and sample questions',
               recommend: true,

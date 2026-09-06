@@ -66,27 +66,31 @@ export function isAiBatchEligible() {
 /**
  * Non-streaming AI call (provider-agnostic).
  * @param {Array<{role: string, content: string}>} [history] - conversation history for multi-turn chat
+ * @param {Array<Object>} [tools] - Gemini built-in grounding tools (e.g. `[{ url_context: {} }]`).
+ *   Ignored by the OpenAI provider, which has no equivalent wired up yet.
  */
-export async function callAi({ userPrompt, systemPrompt, onRequireApiKey, history }) {
+export async function callAi({ userPrompt, systemPrompt, onRequireApiKey, history, tools }) {
   const provider = resolveProvider();
 
   if (provider === 'openai') {
     return callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, history });
   }
-  return callGemini({ userPrompt, systemPrompt, onRequireApiKey, history });
+  return callGemini({ userPrompt, systemPrompt, onRequireApiKey, history, tools });
 }
 
 /**
  * Streaming AI call (provider-agnostic).
  * @param {Array<{role: string, content: string}>} [history] - conversation history for multi-turn chat
+ * @param {Array<Object>} [tools] - Gemini built-in grounding tools (e.g. `[{ url_context: {} }]`).
+ *   Ignored by the OpenAI provider, which has no equivalent wired up yet.
  */
-export async function callAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history }) {
+export async function callAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history, tools }) {
   const provider = resolveProvider();
 
   if (provider === 'openai') {
     return callOpenAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history });
   }
-  return callGeminiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history });
+  return callGeminiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta, history, tools });
 }
 
 /**

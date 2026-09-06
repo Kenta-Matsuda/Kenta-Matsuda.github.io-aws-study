@@ -122,8 +122,62 @@ issue #137 では「AWS re:Post のリソースがほとんどないが、AWS �
 
 - **新しい re:Post URL の実地収集・死活検証・執筆者や鮮度の確認は、外部 web アクセスを要するため本サンドボックス（INTEGRATIONS_ONLY）では実行不能**です。これらは**ネットワーク可能な環境（利用者の Kiro automations / `.kiro/agents/exam-content-maintainer.md` の `exam-content-maintainer` エージェント）**で実行してください。本ページには、その環境で走らせる**判断基準と手順**のみを蓄積します（issue #137）。
 
+## 試験ガイドは PDF ではなく AWS ドキュメント（HTML）を優先する
+
+issue #138 / PR #139 の調査で、**AWS 認定試験ガイドは全試験が `docs.aws.amazon.com` の HTML ドキュメントとして公開されている**ことを確認しました（索引: <https://docs.aws.amazon.com/aws-certification/latest/examguides/aws-certification-exam-guides.html>）。`d1.awsstatic.com` の PDF より HTML 版を優先すべき理由は次の通りです。
+
+- **リンク切れが起きにくい**: `d1.awsstatic.com` の PDF は予告なく 403 になります。実測で MLA-C01 と AIP-C01 の PDF（日英計 4 URL）が 403 でした。HTML 版へ差し替え済みです。
+- **日本語版がある**: `docs.aws.amazon.com/ja_jp/...` で日本語版が提供されるため、`url`（日本語）/ `urlEn`（英語）を対で保守しやすい。
+- **AI のグラウンディングに向く**: HTML はテキスト抽出が安定し、Gemini の `url_context` などで読ませたときのトークン効率も PDF より良い。
+
+### URL の型
+
+```
+https://docs.aws.amazon.com/aws-certification/latest/<slug>/<slug>.html          # 英語
+https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html    # 日本語
+```
+
+### slug 一覧（2026-09-06 時点で日英ともに HTTP 200 を確認）
+
+| 試験コード | slug |
+| --- | --- |
+| AIB-C01 | `ai-business-strategist-01` |
+| AIF-C01 | `ai-practitioner-01` |
+| CLF-C02 | `cloud-practitioner-02` |
+| DEA-C01 | `data-engineer-associate-01` |
+| DVA-C02 | `developer-associate-02` |
+| MLA-C01 | `machine-learning-engineer-associate-01` |
+| MLA-C02 | `machine-learning-engineer-associate-02` |
+| SAA-C03 | `solutions-architect-associate-03` |
+| SOA-C03 | `sysops-administrator-associate-03` |
+| AIP-C01 | `ai-professional-01` |
+| DOP-C02 | `devops-engineer-professional-02` |
+| SAP-C02 | `solutions-architect-professional-02` |
+| ANS-C01 | `advanced-networking-specialty-01` |
+| SCS-C03 | `security-specialty-03` |
+
+注意点:
+
+- SOA-C03 の slug は `sysops-administrator-associate-03` のままですが、**AWS 側の試験名は「AWS Certified CloudOps Engineer - Associate」に変わっています**。`cloudops-engineer-associate-03` は 404 なので slug を推測で書き換えないこと。表示名（`js/data/soa-c03.js` の `title`）が旧称のままかどうかは別途棚卸しが必要です。
+- MLA-C01 は MLA-C02 への更新期間中です（英語版 MLA-C01 は 2026-09-28 まで。日本語・韓国語・簡体字は MLA-C02 の GA まで継続）。試験コードを差し替える前に索引ページで現況を確認すること。
+
+### リンク死活チェックの実行方法（ネットワーク可能な環境）
+
+`js/exams.js` の `getExamOfficialRefs(examId, { locale })` が各試験の公式一次情報 URL（`official-page` / `guide`）を返すので、これを回して `fetch` すれば全試験のリンク死活を一括で確認できます。使い捨てスクリプトを `tmp-*.mjs` として置いて実行し、確認後に削除する運用が手軽です（`node --check` と違い実アクセスを伴うため、ネットワーク可能な環境でのみ実行）。
+
+## AWS 公式のリモート MCP はブラウザから直接呼べない（CORS）
+
+「AI に AWS Knowledge Tools を読ませて一次情報を確認させる」案は、**ブラウザ実行の静的サイトからは CORS の制約で実現できません**（2026-09-06 実測）。AWS 公式ドキュメントの記載と実測結果、再現コマンドは [docs/action-required/issue-138-ai-chat-exam-grounding.md](../action-required/issue-138-ai-chat-exam-grounding.md) にまとめています。要点のみ:
+
+- `https://knowledge-mcp.global.api.aws/mcp` … 認証不要で応答するが `Access-Control-Allow-Origin` を返さない。
+- `https://aws-mcp.us-east-1.api.aws/mcp` … `Access-Control-Allow-Origin: *` を返し `initialize` / `tools/list` は通るが、`tools/call` が要求する `Mcp-Session-Id` を CORS が読ませない（`Access-Control-Expose-Headers` に無く、リクエストヘッダーとして送るとプリフライトが 405）。
+- `https://docs.aws.amazon.com/...` も CORS ヘッダーを返さないため、ブラウザから直接 `fetch` できない。
+
+代替として、**Gemini の `url_context` ツールに AWS 公式 URL を渡す**方法を採っています（取得は Google 側で行われるため CORS の影響を受けない）。同種の「AI に一次情報を読ませたい」要望が来たときは、まずこの経路を検討してください。
+
 ## 更新履歴
 
 - 2026-09-03: 初版作成（issue #69）。信頼ドメイン一覧・検索クエリの型・評価基準・死活/鮮度チェックの観点を整理。
 - 2026-09-05: issue #137: 技術レベル(level)データフィールドの追加に伴う判定基準（Level 100/200/300/400 の規約・手掛かり・付与ルール）と、AWS re:Post (repost.aws) リソースの探索・検証手順を追記。
 - 2026-09-05: issue #137 レビュー反映: レベル付与作業を「(a) オフラインで完結する backfill（`note`/`title` に既存の明示的手掛かりがある場合は転記のみ・ネットワーク不要）」と「(b) ネットワークが必要な実地検証」に切り分けて明記。ANS の `note` に `(Level NNN)` を持つ全アイテムの `level` backfill を完了（オフラインで実施）。
+- 2026-09-06: issue #138 / PR #139: 試験ガイドは `d1.awsstatic.com` の PDF ではなく `docs.aws.amazon.com` の HTML 版を優先する方針と全試験の slug 一覧（日英とも HTTP 200 を実測確認）を追記。403 だった MLA-C01 / AIP-C01 の PDF を HTML 版へ差し替え。AWS 公式リモート MCP がブラウザから CORS で呼べないことの実測結果と、代替（Gemini `url_context`）を追記。`getExamOfficialRefs` を使ったリンク死活一括チェック手順も追記。
