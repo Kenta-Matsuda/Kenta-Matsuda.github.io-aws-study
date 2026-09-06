@@ -16,6 +16,9 @@
 - [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
 - [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
 - [API 設定画面の Google AI Studio リンクが消えていた問題 (#161)](issues/settings-help-links-161.md)
+- [「模擬問題を作成」で JSON がそのまま表示される問題 (#166)](issues/quiz-json-leak-166.md)
+- [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
+- [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
 
 ## LLM Wiki（docs/wiki/）
 
@@ -39,3 +42,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [Web/AI 検索での発見性向上（SEO / AI 検索対策）](action-required/issue-125-seo-discoverability.md) — 🔴 未対応（要対応） / 関連: #125
 - [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](action-required/issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 関連: #162
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](action-required/issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 関連: #167
+- [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69
