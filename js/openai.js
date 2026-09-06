@@ -1,8 +1,21 @@
 import { getOpenAiApiKey } from './storage.js';
 import { OPENAI_MODEL_CANDIDATES } from './config.js';
 import { t } from './i18n.js';
+import { classifyAiFailure, aiFailureMessageKey, isOnline } from './aiErrors.js';
 
 const DEFAULT_MODEL_CANDIDATES = ['gpt-5-mini', 'gpt-5'];
+
+/**
+ * Turn the last thrown error into a user-facing message.
+ * Network drops surface as a bare "Failed to fetch", so they get an actionable
+ * sentence instead (#169). Kept wrapped in `errors.generic` so existing failure
+ * detection (which looks for that prefix) keeps working.
+ */
+function describeFailure(lastError) {
+  const key = aiFailureMessageKey(classifyAiFailure(lastError, { online: isOnline() }));
+  const msg = key ? t(key) : (lastError?.message ? String(lastError.message) : 'Unknown error');
+  return t('errors.generic', { msg });
+}
 
 function getModelCandidates() {
   const fromConfig = Array.isArray(OPENAI_MODEL_CANDIDATES) ? OPENAI_MODEL_CANDIDATES : null;
@@ -100,8 +113,7 @@ export async function callOpenAi({ userPrompt, systemPrompt, onRequireApiKey, hi
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
-  return t('errors.generic', { msg });
+  return describeFailure(lastError);
 }
 
 /**
@@ -188,8 +200,7 @@ export async function callOpenAiStream({ userPrompt, systemPrompt, onRequireApiK
     }
   }
 
-  const msg = lastError?.message ? String(lastError.message) : 'Unknown error';
-  return t('errors.generic', { msg });
+  return describeFailure(lastError);
 }
 
 async function consumeOpenAiSse({ response, onTextDelta }) {
