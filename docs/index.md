@@ -18,11 +18,12 @@
 
 ## LLM Wiki（docs/wiki/）
 
-`exam-content-maintainer` エージェントが獲得した知見を**構造化して永続化**する Wiki です。各ページは**最終更新日と更新履歴**を持ち、棚卸しによる**最新化**と**過去ドキュメントとの整合性確保**が可能であることを前提に運用します。運用ルールは README を参照してください。
+自己改善型エージェント（`exam-content-maintainer` / `github-issue-resolver`）が獲得した知見を**構造化して永続化**する Wiki です。各ページは**最終更新日と更新履歴**を持ち、棚卸しによる**最新化**と**過去ドキュメントとの整合性確保**が可能であることを前提に運用します。運用ルールは README を参照してください。
 
 - [LLM Wiki 運用ルール（README）](wiki/README.md)
 - [AWS 公式リソース探索ノウハウ](wiki/aws-resource-discovery.md)
 - [試験リソース棚卸し台帳](wiki/exam-resource-inventory.md)
+- [issue 解決プレイブック](wiki/issue-resolution-playbook.md)
 - [効率化・自己拡張ログ](wiki/efficiency-log.md)
 
 ## 要人間対応事項（docs/action-required/）
