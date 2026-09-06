@@ -5084,7 +5084,13 @@ function isSuccessfulAiResponse(response) {
   if (!response) return false;
   const text = String(response).trim();
   if (!text) return false;
+  // Locale-aware failure detection: providers wrap failures in `errors.generic`,
+  // so compare against the current locale's prefix as well as the historical
+  // Japanese literals (kept so older cached strings still count as failures).
+  const genericPrefix = String(t('errors.generic', { msg: '' })).trim();
+  if (genericPrefix && genericPrefix !== 'errors.generic' && text.startsWith(genericPrefix)) return false;
   if (text.startsWith('エラーが発生しました')) return false;
+  if (text === t('errors.noResponse')) return false;
   if (text === '回答を生成できませんでした。') return false;
   if (text.length < 80) return false;
   return true;
