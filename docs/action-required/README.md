@@ -76,3 +76,4 @@
 - [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / GitHub App の資格情報管理） / 関連: #162（関連 #101 #100 #166 #117）
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / データ保持方針） / 関連: #167（関連 #162 #117）
 - [AWS Skill Builder のコース URL が全試験で失効している](skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 種別: 手動確認（ブラウザ操作 / Skill Builder サインイン） / 関連: #69
+- [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / 検索基盤 / API 提供。問題集 CSV はクライアント側で実装済み） / 関連: #165 / PR #180

@@ -32,6 +32,7 @@ import {
   addReviewSchedule,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
+import { quizHistoryToCsv } from './quizCsv.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 import {
   parseQuizResponse,
@@ -758,6 +759,21 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const a = document.createElement('a');
     a.href = url;
     a.download = `quiz-history${examId ? '-' + examId : ''}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  // CSV export button — question data for review / import into other tools (#165)
+  els.quizHistoryExportCsvBtn?.addEventListener('click', () => {
+    const examId = reviewState.selectedExamId || undefined;
+    const csv = quizHistoryToCsv(getQuizHistory(examId));
+    if (!csv) return;
+    // Prepend a UTF-8 BOM so Excel opens the CSV without mojibake for Japanese text.
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `quiz-history${examId ? '-' + examId : ''}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   });
@@ -2145,6 +2161,7 @@ function getElements() {
     quizHistoryList: document.getElementById('quizHistoryList'),
     quizHistoryEmpty: document.getElementById('quizHistoryEmpty'),
     quizHistoryExportBtn: document.getElementById('quizHistoryExportBtn'),
+    quizHistoryExportCsvBtn: document.getElementById('quizHistoryExportCsvBtn'),
 
     // Streak
     streakCount: document.getElementById('streakCount'),

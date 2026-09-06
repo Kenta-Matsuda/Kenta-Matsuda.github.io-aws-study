@@ -46,3 +46,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](action-required/issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 関連: #162
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](action-required/issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 関連: #167
 - [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69
+- [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](action-required/issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 関連: #165 / PR #180

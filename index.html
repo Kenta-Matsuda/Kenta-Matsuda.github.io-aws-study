@@ -2135,9 +2135,14 @@
                 <div id="quizHistoryList" class="space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
             <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
-                <button id="quizHistoryExportBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fas fa-download"></i> <span data-i18n="common.export">Export</span>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="quizHistoryExportBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-download"></i> <span data-i18n="common.exportMarkdown">Export as Markdown</span>
+                    </button>
+                    <button id="quizHistoryExportCsvBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-file-csv"></i> <span data-i18n="common.exportCsv">Export as CSV</span>
+                    </button>
+                </div>
                 <button type="button" data-close-modal="quizHistoryModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors" data-i18n="common.close">
                     Close
                 </button>

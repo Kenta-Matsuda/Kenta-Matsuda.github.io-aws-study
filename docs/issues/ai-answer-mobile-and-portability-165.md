@@ -63,6 +63,43 @@ Next Question / Close が並びます。幅 390px 相当のスマホではこれ
 2. **解説のローカル保存 + 一覧**（「後から見返せる」の中核。容量管理の設計が要る）
 3. 端末間同期 / API 連携は 1・2 の利用実態を見てから判断（バックエンド前提）
 
+## 3. 追加フィードバック（2026-09-06 コメント）への対応
+
+PR #180 に後から次の追加要望をいただきました。
+
+> 保存 / 他 SaaS 連携について、以下の方針で実装してほしいです
+> - 問題データの CSV ダウンロード（過去の問題復習とかするために、localStorage に保存していたはず）
+> - NotebookLM 向けの"学習パック"を提供する（一次ソース一覧 / ホワイトペーパーのリンク集 / 問題集 CSV /
+>   学習ルート Markdown / 用語集 CSV を ZIP にまとめる）
+> - 一次リソース検索 API
+> - 学習者の得意・不得意分析 API
+
+これらを **クライアントサイドで実現できるもの**と **バックエンドが必要なもの**に切り分けて扱います。
+
+### 3-1. 問題データの CSV ダウンロード（本 PR で対応済み）
+
+localStorage の学習履歴（`asn_quiz_history_v1`。`addQuizResult` が問題文・選択肢・正解・自分の回答・
+解説・所要時間を保存している）を **CSV としてダウンロード**できるようにしました。
+
+- 変換ロジックは `js/quizCsv.js`（`quizHistoryToCsv` / `escapeCsvField` / `QUIZ_CSV_HEADERS`）へ
+  ピュア関数として切り出し、localStorage やブラウザ無しでも単体テストできるようにした
+  （`js/markdown.js` / `js/aiErrors.js` と同じ方針）。
+- 学習履歴モーダル（`quizHistoryModal`）に既存の「Markdown で書き出し」ボタンの隣へ
+  **「CSV で書き出し」ボタン**（`#quizHistoryExportCsvBtn`）を追加。選択中の試験で絞り込める。
+- 列: `answeredAt / examId / domainId / mode / question / choiceA〜E / correctAnswer / yourAnswer /
+  isCorrect / elapsedSec / explanation`。カンマ・引用符・改行は RFC 4180 でエスケープし、
+  Excel の文字化けを避けるため UTF-8 BOM を付与してダウンロードする。
+- 既存の Markdown 書き出しボタンは「Markdown で書き出し」に名称変更し、CSV と用途を明確化した。
+
+これで「問題集 CSV」（学習パックの構成要素の 1 つ）はクライアント側で単体提供できます。
+
+### 3-2. NotebookLM 向け学習パック / 各種 API（要人間対応）
+
+NotebookLM 学習パック（複数資料の ZIP 一括提供）と、一次リソース検索 API・得意/不得意分析 API は、
+その本質（横断集計・サーバ側の検索基盤・API 提供）からバックエンドが必要です。切り分けと想定設計は
+[NotebookLM 学習パックと学習分析 API](../action-required/issue-165-notebooklm-pack-and-apis.md) に
+構造化しました（学習パックの一部要素は 3-1 の CSV のようにクライアント側で個別提供できる余地も併記）。
+
 ## 検証
 
 - `tests/ai-modal-footer.spec.mjs`（3 テスト）
@@ -70,4 +107,11 @@ Next Question / Close が並びます。幅 390px 相当のスマホではこれ
   - 幅 390px で Good / Bad のテキストが非表示になり、アイコンと `aria-label` が残ること
   - 幅 1280px ではテキストラベルが再表示されること
 - 修正前は 3 テストとも失敗、修正後は成功することを確認
-- `npx playwright test`（全 26 テスト）成功
+- `tests/quiz-csv.spec.mjs`（5 テスト）: `quizHistoryToCsv` / `escapeCsvField` のピュアロジック検証
+  （空履歴でヘッダーのみ / 問題文の無いエントリを除外 / インデックス→文字と正誤ラベル / RFC 4180 エスケープ /
+  カンマ入り問題文が 1 フィールドに収まる）。`js/quizCsv.js` を `node` で直接実行し、期待どおりの CSV が
+  出力されることを確認済み。
+- 追加のフッター修正時点では `npx playwright test`（全 26 テスト）成功。ただし本追加コミット（CSV）の実行環境は
+  外部ネットワーク遮断（INTEGRATIONS_ONLY）で npm レジストリ / Playwright ブラウザを取得できないため
+  `npx playwright test` は実行不可（`npm error 403 Forbidden`）。CSV ロジックは `node --check` と
+  `node` での直接実行で代替検証した。

@@ -18,6 +18,8 @@
     "all": "All",
     "error": "Error",
     "export": "Export",
+    "exportMarkdown": "Export as Markdown",
+    "exportCsv": "Export as CSV",
     "send": "Send",
     "loading": "Loading..."
   },
