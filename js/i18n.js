@@ -138,6 +138,32 @@ export function translateStaticElements() {
     }
   }
 
+  // Handle templates that must keep an existing child element (typically an
+  // external link) instead of having it wiped by the textContent assignment
+  // above. The locale string carries a `{{link}}` placeholder and the element
+  // holds the node to preserve, marked with `data-i18n-slot`.
+  // This keeps the href/rel attributes in the HTML (single source of truth)
+  // and avoids injecting markup from the locale files via innerHTML.
+  const tmplEls = document.querySelectorAll('[data-i18n-tmpl]');
+  for (const el of tmplEls) {
+    const key = el.getAttribute('data-i18n-tmpl');
+    if (!key) continue;
+    const translated = t(key);
+    if (translated === key) continue;
+    const slot = el.querySelector('[data-i18n-slot]');
+    if (!slot) continue;
+    const marker = '{{link}}';
+    const at = translated.indexOf(marker);
+    // No placeholder in the translation: keep the link rather than dropping it.
+    const before = at === -1 ? `${translated} ` : translated.slice(0, at);
+    const after = at === -1 ? '' : translated.slice(at + marker.length);
+    el.replaceChildren(
+      document.createTextNode(before),
+      slot,
+      document.createTextNode(after),
+    );
+  }
+
   // Handle placeholder translations
   const placeholderEls = document.querySelectorAll('[data-i18n-placeholder]');
   for (const el of placeholderEls) {
