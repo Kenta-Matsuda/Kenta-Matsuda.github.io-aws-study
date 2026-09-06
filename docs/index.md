@@ -14,14 +14,16 @@
 - [Duolingo 風の学習継続エンゲージメント (#107)](issues/streak-engagement.md)
 - [解説の出典URL可視化とプロンプトgroundingの厳格化（クライアント側） (#109)](issues/citation-grounding-clientside.md)
 - [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
+- [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
 
 ## LLM Wiki（docs/wiki/）
 
-`exam-content-maintainer` エージェントが獲得した知見を**構造化して永続化**する Wiki です。各ページは**最終更新日と更新履歴**を持ち、棚卸しによる**最新化**と**過去ドキュメントとの整合性確保**が可能であることを前提に運用します。運用ルールは README を参照してください。
+自己改善型エージェント（`exam-content-maintainer` / `github-issue-resolver`）が獲得した知見を**構造化して永続化**する Wiki です。各ページは**最終更新日と更新履歴**を持ち、棚卸しによる**最新化**と**過去ドキュメントとの整合性確保**が可能であることを前提に運用します。運用ルールは README を参照してください。
 
 - [LLM Wiki 運用ルール（README）](wiki/README.md)
 - [AWS 公式リソース探索ノウハウ](wiki/aws-resource-discovery.md)
 - [試験リソース棚卸し台帳](wiki/exam-resource-inventory.md)
+- [issue 解決プレイブック](wiki/issue-resolution-playbook.md)
 - [効率化・自己拡張ログ](wiki/efficiency-log.md)
 
 ## 要人間対応事項（docs/action-required/）
@@ -33,4 +35,5 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](action-required/streak-push-notifications.md) — 🔴 未対応（要対応） / 関連: #107
 - [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](action-required/issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 関連: #119
 - [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](action-required/issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 関連: #117（関連 #109 #119 #32 #107）
+- [Web/AI 検索での発見性向上（SEO / AI 検索対策）](action-required/issue-125-seo-discoverability.md) — 🔴 未対応（要対応） / 関連: #125
 - [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69

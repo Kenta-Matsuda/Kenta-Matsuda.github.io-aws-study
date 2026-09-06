@@ -73,12 +73,12 @@ export const MLA_C01 = {
           iconColorClass: 'text-orange-500',
           items: [
             {
-              title: 'AWS Certified Machine Learning Engineer - Associate 試験ガイド (PDF)',
-              titleEn: 'AWS Certified Machine Learning Engineer - Associate Exam Guide (PDF)',
-              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-ml-engineer-associate/AWS-Certified-Machine-Learning-Engineer-Associate_Exam-Guide.pdf',
-              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-ml-engineer-associate/AWS-Certified-Machine-Learning-Engineer-Associate_Exam-Guide.pdf',
-              note: '試験範囲・出題比率・サンプル問題を確認',
-              noteEn: 'Review exam scope, question distribution, and sample questions',
+              title: 'AWS Certified Machine Learning Engineer - Associate (MLA-C01) 試験ガイド',
+              titleEn: 'AWS Certified Machine Learning Engineer - Associate (MLA-C01) Exam Guide',
+              url: 'https://docs.aws.amazon.com/ja_jp/aws-certification/latest/machine-learning-engineer-associate-01/machine-learning-engineer-associate-01.html',
+              urlEn: 'https://docs.aws.amazon.com/aws-certification/latest/machine-learning-engineer-associate-01/machine-learning-engineer-associate-01.html',
+              note: '試験範囲・出題比率・スコープ内サービスを確認（AWS ドキュメント版。PDF より参照しやすく、ドメイン別ページにも分かれている）',
+              noteEn: 'Review exam scope, domain weightings, and in-scope services (AWS Documentation version, easier to reference than the PDF and split into per-domain pages)',
               recommend: true,
             },
           ],
@@ -106,7 +106,7 @@ export const MLA_C01 = {
             {
               title: 'Exam Prep Standard Course: AWS Certified Machine Learning Engineer - Associate',
               titleEn: 'Exam Prep Standard Course: AWS Certified Machine Learning Engineer - Associate',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/20473/exam-prep-standard-course-aws-certified-machine-learning-engineer-associate-mla-c01',
+              url: 'https://skillbuilder.aws/search?searchText=exam-prep-standard-course-aws-certified-machine-learning-engineer-associate-mla-c01',
               note: 'AWS Skill Builder: 試験対策コース（無料）',
               noteEn: 'AWS Skill Builder: Exam preparation course (free)',
               recommend: true,
@@ -189,7 +189,7 @@ export const MLA_C01 = {
             {
               title: 'AWS Certification 公式練習問題集（日本語）',
               titleEn: 'AWS Certification Official Practice Question Set (MLA-C01)',
-              url: 'https://explore.skillbuilder.aws/learn/course/internal/view/elearning/20524/aws-certified-machine-learning-engineer-associate-official-practice-question-set-mla-c01-japanese',
+              url: 'https://skillbuilder.aws/search?searchText=aws-certified-machine-learning-engineer-associate-official-practice-question-set-mla-c01-japanese',
               note: 'AWS Skill Builder: 無料',
               noteEn: 'AWS Skill Builder: Free',
               recommend: true,
@@ -1252,7 +1252,7 @@ export const MLA_C01 = {
                 {
                   title: 'AWS CodePipeline & AWS CodeBuild 編',
                   titleEn: 'AWS CodePipeline & AWS CodeBuild',
-                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CodePipeline%20%26%20AWS%20CodeBuild',
+                  url: 'https://aws.amazon.com/jp/blogs/news/aws-blackbelt-overview/#:~:text=AWS%20CodePipeline%20%E5%9F%BA%E7%A4%8E%E7%B7%A8',
                   note: 'PDF | Youtube',
                   noteEn: 'PDF | Youtube',
                 },
@@ -1399,8 +1399,8 @@ export const MLA_C01 = {
                 {
                   title: 'AWS Well-Architected Machine Learning Lens - モニタリング',
                   titleEn: 'AWS Well-Architected Machine Learning Lens - Monitoring',
-                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/machine-learning-lens/mlops.html',
-                  urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/mlops.html',
+                  url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/machine-learning-lens/machine-learning-lens.html',
+                  urlEn: 'https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/machine-learning-lens.html',
                   note: 'ML ワークロードのモニタリング設計原則',
                   noteEn: 'Monitoring design principles for ML workloads',
                 },
