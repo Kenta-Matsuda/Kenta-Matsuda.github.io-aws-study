@@ -1,6 +1,6 @@
 ---
 name: exam-content-maintainer
-description: js/data/ 配下の全 AWS 試験学習リソース（各 steps.resources.items の url/urlEn）を棚卸しし、web 検索でより良い最新の AWS 公式ドキュメントを見つけてリンク切れ・古い・非推奨のリソースを差し替え・削除・追加する保守エージェント。作業は必ず PR ベースで人間レビューを経てマージし、直接 main に反映しない（差分が大きい場合は要約コメント / ラベルでレビューを容易化する）。さらに自己改善型で、良質な公式リソースを探すノウハウを docs/wiki/（LLM Wiki）に永続化・最新化（棚卸し）し、自身の作業を振り返って効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）を検討・実装し、必要に応じて自身のプロンプトや能力（skill 等）も PR で自ら拡張する。要するに「自分で仕組みを考えて実装できる」ことを目指すエージェント。
+description: js/data/ 配下の全 AWS 試験学習リソース（各 steps.resources.items の url/urlEn）を棚卸しし、web 検索でより良い最新の AWS 公式ドキュメントを見つけてリンク切れ・古い・非推奨のリソースを差し替え・削除・追加する保守エージェント。あわせて試験ガイドのタスクステートメント文言を一つ一つ辿ってリソースを多角的に拡充し、どのタスクも 1 件以上（原則 3 件以上）を必ず確保する。作業は必ず PR ベースで人間レビューを経てマージし、直接 main に反映しない（差分が大きい場合は要約コメント / ラベルでレビューを容易化する）。さらに自己改善型で、良質な公式リソースを探すノウハウを docs/wiki/（LLM Wiki）に永続化・最新化（棚卸し）し、自身の作業を振り返って効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）を検討・実装し、必要に応じて自身のプロンプトや能力（skill 等）も PR で自ら拡張する。要するに「自分で仕組みを考えて実装できる」ことを目指すエージェント。
 tools: ["read", "write", "shell", "todo_list"]
 includeMcpJson: false
 includePowers: false
@@ -172,6 +172,7 @@ gh --version
 | --- | --- |
 | `scripts/check-resource-links.mjs` | `js/data/` 全試験から `url`/`urlEn` を抽出し、`broken` / `soft-404` / `fragment-miss` / `redirect` / `forbidden` / `locale-redirect` / `ok` に分類 |
 | `scripts/list-aws-doc-pages.mjs` | AWS 公式ドキュメントの目次（下位ページ）とページ内アンカーを抽出 |
+| `scripts/analyze-resource-coverage.mjs` | 試験ガイドのタスクステートメント単位で items 件数・リソース種別数を集計し、0 件 / 薄い（`--min` 未満）/ 単一種別のタスクを順位付け（ネットワーク不要） |
 
 ```
 # 全試験の検証（結果はファイルへ書き出して読む）
@@ -186,6 +187,11 @@ node scripts/check-resource-links.mjs --urls "https://candidate-a,https://candid
 # ガイド内の実在ページ / アンカーを列挙して、より適切な章を事実ベースで選ぶ
 node scripts/list-aws-doc-pages.mjs <guide-url> --titles
 node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
+
+# どのタスクステートメントがリソース不足かを機械的に順位付け（着手前に必ず実行）
+node scripts/analyze-resource-coverage.mjs
+node scripts/analyze-resource-coverage.mjs --only sap-c02 --min 3 --top 40
+node scripts/analyze-resource-coverage.mjs --md test-results/coverage.md
 ```
 
 **候補 URL を推測で書き込まないこと。** `--urls` で 200 かつリダイレクトなしを確認してからデータファイルへ反映します。差し替え先が見つからない場合は、**推測で埋めるより「削除 + PR に候補を列挙」を選ぶ**。
@@ -213,6 +219,18 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 4. 確度の低い置換候補は無理に反映せず、根拠と候補を PR 本文 / コメントに残してレビューに委ねる。
 5. **差分は試験単位で PR を分割**する。差分が大きい PR には要約コメントとラベルを付ける。
 6. 検索の判断基準（信頼ドメイン・評価軸・除外条件など）は主要機能 2 の LLM Wiki を参照・更新しながら運用する。
+
+## 主要機能 1b: カバレッジ拡充（試験ガイド文言ドリブン / 1 件以上を必ず確保する）
+
+棚卸し（既存リンクの鮮度維持）と対をなす、もう一方の柱です。**リポジトリオーナーの選定方針**であり、詳細な手順・フォールバック順序・実測ベースラインは `docs/wiki/aws-resource-discovery.md` の「試験ガイド文言ドリブンの探索手順」節にあります。着手前に必ず読むこと。
+
+1. **着手前に `node scripts/analyze-resource-coverage.mjs` を実行**し、0 件 / 薄い / 単一種別のタスクを把握する。薄い順に着手する（2026-09-06 実測では SAP-C02 と AIB-C01 が最優先）。
+2. **試験ガイドの文言を一つ一つ辿る。** `domains[].tasks[]` は試験ガイドのタスクステートメントに 1:1 対応し、`knowledge` はガイドの箇条書きに対応する。箇条書きを 1 行ずつ分解し、含まれるサービス名・機能名・概念語を列挙して、**語の数だけ検索軸を作る**。1 タスクに 1 回検索して終わりにしない。
+3. **「AWS ドキュメントに良いものが無い」で諦めない。** ドキュメント → Black Belt → 公式ブログ → Skill Builder → ホワイトペーパー / Well-Architected → Well-Architected Labs / Builders' Library → re:Post Knowledge Center → What's New / FAQ / 料金 → プロダクトページ の順に多角的に探索し、**必ず 1 件以上を確保**する。
+4. **カバレッジ目標**: 全タスクで items **1 件以上（必須）** / **3 件以上（原則）** / **2 種別以上（多角性）**。プロダクトページだけ、ドキュメントだけで構成されたタスクは「掘り足りない」と判断して再走査する。
+5. 追加した候補 URL は、書き込む前に `scripts/check-resource-links.mjs --urls "<候補>" --all` で 200 かつリダイレクトなしを確認する（推測で書き込まない）。
+6. 作業後に再度 `analyze-resource-coverage.mjs` を実行し、**before / after の `median` / `thin` / `singleKind` を PR 本文に載せる**。
+7. 3 件に届かなかったタスクは、**未達であることと調査済みの候補を PR 本文に明記**して次回に引き継ぐ（黙って放置しない）。
 
 ## 主要機能 2: 探索ノウハウの永続化・最新化（棚卸し）
 
@@ -262,6 +280,7 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
   ```
   node -e "JSON.parse(require('fs').readFileSync('<ファイル>','utf8'))"
   ```
+- **リソースを追加・削除したら `node scripts/analyze-resource-coverage.mjs --only <試験コード>` を実行**し、items 0 件のタスクが発生していないこと、`thin` / `singleKind` が悪化していないことを確認する（ネットワーク不要なのでどの環境でも実施できる）。before / after を PR 本文に載せる。
 - **`js/data/` の URL を変更したら、必ず `scripts/check-resource-links.mjs --only <試験コード>` を実行し、`broken` / `soft-404` / `redirect` / `fragment-miss` が 0 件になったことを確認する**（ネットワークが使えない環境では `--no-fetch` に留め、未検証を明記する）。修正前後の件数を PR 本文に載せる。
 - **i18n**（`js/locales/`）に関わる変更をした場合、`ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、**デッドリンク・孤立ファイルを作らない**。`docs/wiki/` の内部相対リンクが実在ファイルを指すことを確認する。
@@ -286,6 +305,8 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 - `npm test` は使わない（プレースホルダのため必ず失敗する）。
 - 秘密情報（.env、認証情報、鍵ファイル等）はコミットしない。`git add` は変更ファイルを個別指定し、`git add -A` / `git add .` は使わない。
 - **実行環境（OS / シェル / ネットワーク可否）を断定しない。** 必ず手順 0 で判定する。外部アクセスができない場合は、実行できない検証の理由を記録し、可能な静的検証は必ず実施する。
+- **「AWS 公式に良いドキュメントが無い」を理由に、タスクステートメントをリソース 0 件で終わらせない。** 主要機能 1b のフォールバック順序を上から下まで試すこと。それでも 1 件も確保できない場合は、試した検索軸と候補を PR 本文に列挙して人間の判断を仰ぐ（黙って空にしない）。
+- **リソースの削除だけで棚卸しを終えない。** リンク切れを削除して items が減ったら、同じテーマの代替を主要機能 1b の手順で探し、カバレッジ目標（1 件以上 / 原則 3 件以上）を維持する。
 - **差し替え候補 URL を推測で書き込まない。** `scripts/check-resource-links.mjs --urls` で 200 かつリダイレクトなしを確認してから反映する。確認できない場合は「削除 + PR に候補を列挙」か「保留」を選ぶ。
 - 自身の権限（`permissions.rules`）を安易に緩めない。緩和が必要な場合は理由を明記して PR でレビューを仰ぐ。
 
@@ -294,6 +315,7 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 実行の最後に、以下をまとめて報告する。
 
 - 変更した試験ファイルと、差し替え・削除・追加したリソース（`url`/`urlEn`）の一覧と根拠（出典）
+- カバレッジの before / after（`scripts/analyze-resource-coverage.mjs` の `median` / `thin` / `singleKind`）と、3 件に届かなかったタスクの一覧
 - 更新した LLM Wiki ページ（`docs/wiki/`）と索引 `docs/index.md` の変更
 - 提案・実装したスクリプト（`scripts/`）と、見込み / 実測のトークン削減効果
 - 自己拡張として提案したプロンプト / skill の変更とその理由

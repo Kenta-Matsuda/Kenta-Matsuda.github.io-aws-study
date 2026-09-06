@@ -1,12 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 // Coverage for issue #163:
-// - the exam-wide tab must be labelled 全般 / General (not "★すべて")
+// - the exam-wide tab must be labelled ラーニングパス / Learning Path (not "★すべて")
 // - the "Deep dive into each domain" step must link to the domain tabs
 // - the "Practice with sample questions" step must also offer this site's own
 //   AI question generator
 
-test.describe('exam-wide ("全般") tab navigation (#163)', () => {
+test.describe('exam-wide ("ラーニングパス") tab navigation (#163)', () => {
   test.beforeEach(async ({ page }) => {
     await page.addInitScript(() => {
       localStorage.setItem('asn_locale', 'ja');
@@ -25,10 +25,10 @@ test.describe('exam-wide ("全般") tab navigation (#163)', () => {
     await page.waitForTimeout(1200);
   });
 
-  test('the exam-wide tab is labelled 全般 and has no star', async ({ page }) => {
+  test('the exam-wide tab is labelled ラーニングパス and has no star', async ({ page }) => {
     const allTab = page.locator('#domainTabs button[data-domain-tab="all"]');
     await expect(allTab).toHaveCount(1);
-    await expect(allTab).toHaveText('全般');
+    await expect(allTab).toHaveText('ラーニングパス');
     await expect(allTab.locator('i.fa-star, svg.fa-star')).toHaveCount(0);
 
     // English label too.
@@ -37,7 +37,7 @@ test.describe('exam-wide ("全般") tab navigation (#163)', () => {
     await page.click('#langSwitch button[data-lang="en"]');
     await page.waitForTimeout(600);
     await page.click('[data-close-modal="settingsModal"]');
-    await expect(page.locator('#domainTabs button[data-domain-tab="all"]')).toHaveText('General');
+    await expect(page.locator('#domainTabs button[data-domain-tab="all"]')).toHaveText('Learning Path');
   });
 
   test('domain shortcuts switch to the matching domain tab', async ({ page }) => {

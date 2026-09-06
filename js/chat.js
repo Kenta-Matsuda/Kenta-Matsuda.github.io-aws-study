@@ -7,6 +7,7 @@ import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
 import { getLocale, t } from './i18n.js';
+import { renderMarkdownToSafeHtml } from './markdown.js';
 
 /** Conversation history (role/content pairs) */
 let history = [];
@@ -198,13 +199,12 @@ function appendBubble(container, text, role) {
 function updateBubbleContent(bubble, text, isFinal = false) {
   if (!bubble) return;
   if (isFinal) {
-    // Render markdown for final content
-    const marked = typeof window !== 'undefined' ? window.marked : undefined;
-    const DOMPurify = typeof window !== 'undefined' ? window.DOMPurify : undefined;
+    // Render markdown for final content. Uses the shared renderer so the chat
+    // gets the same Japanese normalization as the AI explanation modal (#164).
+    const { html, usedMarkdown } = renderMarkdownToSafeHtml(text);
 
-    if (marked && typeof marked.parse === 'function' && DOMPurify && typeof DOMPurify.sanitize === 'function') {
-      const rawHtml = marked.parse(String(text));
-      bubble.innerHTML = `<div class="ai-response-area">${DOMPurify.sanitize(rawHtml, { USE_PROFILES: { html: true } })}</div>`;
+    if (usedMarkdown) {
+      bubble.innerHTML = `<div class="ai-response-area">${html}</div>`;
       // Open links in new tab
       bubble.querySelectorAll('a').forEach((a) => {
         a.setAttribute('target', '_blank');
