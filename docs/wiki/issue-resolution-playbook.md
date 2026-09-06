@@ -52,6 +52,13 @@
 - **実測**: `issues?state=open` と `pulls?state=all` の生 JSON 2 本だけで約 221 万文字。`scripts/issue-triage.mjs` の要約は同じ判定材料を約 7.9 KB（open issue 12 件・関連 PR の未対応コメント検出込み）に圧縮した。
 - **恒久対策**: 決定論的に判定できるものはスクリプトへ寄せ、LLM は要約だけを読む。
 
+### A-7: コンフリクトしたオープン PR を、依頼が来るまで放置した
+
+- **何が起きたか**: コンフリクト解消が「PR コメントで『コンフリクトを解消して』と依頼されたときだけ行う派生対応」としてしか運用マニュアルに書かれておらず、依頼コメントが無いコンフリクト PR は検知されないままマージ不能で滞留した。`main` からの遅れ（behind main）については `git rev-list --left-right --count` による検出手順があったが、**実際に衝突している状態（`mergeable_state: dirty`）を能動的に見に行く手順が無かった**。
+- **なぜ見落とすか**: 一覧 API（`pulls?state=open`）のレスポンスには `mergeable` / `mergeable_state` が含まれない。PR 一覧を眺めるだけではコンフリクトの有無が分からず、「コメントが無い＝対応不要」と誤認しやすい。
+- **恒久対策**: マージ可能状態の確認を**コメントファースト事前ゲートの (iii)** に組み込み、`gh api repos/{owner}/{repo}/pulls/{n}` を**PR 単体で**叩いて `mergeable_state` を判定する手順を明文化した（`unknown` は計算中なので再取得 → それでも不明なら `git rev-list` にフォールバック）。解消は `git merge` に固定し、`git rebase` を permissions でも deny した。
+- **教訓（一般化）**: 「依頼されたら対応する」形の受動的ルールは、依頼が来ない限り実行されない。**状態を自分から観測する手順**（どの API のどのフィールドを見るか）まで書いて初めて能動的な運用になる。あわせて、一覧 API と単体 API で返るフィールドが違う点に注意する。
+
 ## 判定基準
 
 ### 棚卸しの分岐（`scripts/issue-triage.mjs` の判定値と対応）
@@ -101,7 +108,19 @@ gh api repos/{owner}/{repo}/pulls -f title="..." -f body="..." -f head="{branch}
 # スキップマーカー（ラベル + 判断コメント）
 gh api repos/{owner}/{repo}/issues/{n}/labels -f "labels[]=agent:skipped"
 gh api repos/{owner}/{repo}/issues/{n}/comments -f body="🤖 agent:skipped — 判断種別: ..."
+
+# マージ可能状態（コンフリクト検出）。一覧 API には mergeable が無いので PR 単体で叩く
+gh api repos/{owner}/{repo}/pulls/{n} --jq '{mergeable, mergeable_state, rebaseable}'
 ```
+
+`mergeable_state`: `dirty`（コンフリクト＝解消対象）/ `behind`（遅れ＝`main` 取り込み対象）/ `blocked` `unstable`（チェック・レビュー要件。マージ競合ではない）/ `clean`（対応不要）/ `unknown`（GitHub が計算中。`mergeable` は `null`。数秒待って再取得し、それでも不明なら下記の `git` 判定にフォールバック）。
+
+```
+# behind main の量をローカルで判定（左側が origin/main 側の先行コミット数）
+git fetch origin && git rev-list --left-right --count origin/main...origin/<head ブランチ>
+```
+
+解消は `git merge origin/main` のみ。`git rebase` / force push は禁止（A-7）。
 
 ### 静的検証（ビルドステップは無い）
 
@@ -122,4 +141,5 @@ env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<file.json>'
 
 ## 更新履歴
 
+- 2026-09-06: 落とし穴 **A-7（コンフリクトしたオープン PR を依頼が来るまで放置した）** を追記。一覧 API には `mergeable` / `mergeable_state` が含まれないため PR 単体 API で観測する必要がある点、`mergeable_state` の各値の扱い、`unknown` 時の再取得と `git rev-list` フォールバック、解消は `git merge` 固定（`git rebase` は permissions でも deny）を「再利用可能なコマンド」節に追加。出典: `.kiro/agents/github-issue-resolver.md` の「既存オープン PR のコンフリクト解消」節。
 - 2026-09-06: 初版作成。`github-issue-resolver` を自己改善型へ再構成した際に、これまで `docs/wiki/efficiency-log.md` とエージェントプロンプト内に散在していた落とし穴・判定基準・再利用コマンドを本ページへ集約（出典: `.kiro/agents/github-issue-resolver.md` / efficiency-log の 2026-09-05・2026-09-06 エントリ / issue #32 #109 #138 / PR #113 #114 #139）。あわせて `scripts/issue-triage.mjs` の判定値表と実測トークン削減値（生 JSON 約 221 万文字 → 要約 約 7.9 KB）を記録。
