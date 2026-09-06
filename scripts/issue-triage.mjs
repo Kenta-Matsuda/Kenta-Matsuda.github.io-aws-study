@@ -24,8 +24,18 @@
  *   --issue <n>           対象 issue を限定（複数指定可 / カンマ区切り可）
  *   --body-chars <n>      コメント抜粋の最大文字数（既定: 200 / 0 で本文抜粋なし）
  *   --no-prs              関連 PR の走査を省略（高速・低トークン。コメントファースト判定は不完全になる）
+ *   --no-pr-audit         オープン PR 監査（マージ可能状態・未対応コメント）を省略
  *   --json                機械可読な JSON を出力（既定は Markdown 要約）
  *   --help                使い方を表示
+ *
+ * オープン PR 監査について（2026-09-06 追加）:
+ *  - 従来は「open issue に紐づく PR」しか見ていなかったため、issue に紐づかない
+ *    ブランチ（`chore/...` / `docs/...` など）の PR が完全に不可視だった。
+ *    実際にその状態で PR #157 / #160 の未対応コメントとコンフリクトを見落とした。
+ *  - そこで**すべてのオープン PR**について、マージ可能状態（`mergeable_state`）と
+ *    未対応コメントを列挙する監査セクションを追加した。
+ *  - `mergeable` は一覧 API には含まれないため PR 単体 API を叩く。`unknown` は
+ *    GitHub が計算中なので数秒待って再取得する。
  *
  * 副作用なし: `gh api` の GET のみを実行し、書き込み系エンドポイントは呼ばない。
  * git 操作・ファイル書き込みも行わない。
@@ -51,6 +61,7 @@ function parseArgs(argv) {
     issues: [],
     bodyChars: 200,
     withPrs: true,
+    withPrAudit: true,
     json: false,
     help: false,
   };
@@ -59,6 +70,7 @@ function parseArgs(argv) {
     if (arg === '--help' || arg === '-h') opts.help = true;
     else if (arg === '--json') opts.json = true;
     else if (arg === '--no-prs') opts.withPrs = false;
+    else if (arg === '--no-pr-audit') opts.withPrAudit = false;
     else if (arg === '--repo') opts.repo = argv[++i];
     else if (arg === '--body-chars') opts.bodyChars = Number(argv[++i]) || 0;
     else if (arg === '--issue') {
@@ -81,6 +93,7 @@ const USAGE = `使い方: env -u NODE_OPTIONS node scripts/issue-triage.mjs [オ
   --issue <n>           対象 issue を限定（複数指定可 / カンマ区切り可）
   --body-chars <n>      コメント抜粋の最大文字数（既定: 200 / 0 で抜粋なし）
   --no-prs              関連 PR の走査を省略（コメントファースト判定は不完全になる）
+  --no-pr-audit         オープン PR 監査（マージ可能状態・未対応コメント）を省略
   --json                機械可読な JSON を出力
   --help                このヘルプ
 
@@ -150,12 +163,22 @@ function normalizeComment(c, kind, max) {
   };
 }
 
-/** issue 番号に紐づく PR かどうかを、head ブランチ名と本文の Closes 記載から判定する。 */
+/**
+ * issue 番号に紐づく PR かどうかを、head ブランチ名と本文の参照記載から判定する。
+ *
+ * ブランチ接頭辞は `feature/` だけではない（`fix/` `chore/` `docs/` なども使う）。
+ * 以前は `^feature/issue-N` のみを見ていたため、`fix/issue-165-...` のような PR が
+ * 「関連 PR なし」と誤判定されていた。本文側も `Closes` だけでなく、部分対応で使う
+ * `Refs` / `Related to` も拾う。
+ */
 function prMatchesIssue(pr, issueNumber) {
   const head = pr.head?.ref ?? '';
-  if (new RegExp(`^feature/issue-${issueNumber}(?:\\b|-)`).test(head)) return true;
+  if (new RegExp(`^[a-z]+/issue-${issueNumber}(?:\\b|-)`, 'i').test(head)) return true;
   const body = pr.body ?? '';
-  return new RegExp(`(closes|fixes|resolves)\\s+#${issueNumber}\\b`, 'i').test(body);
+  return new RegExp(
+    `(closes|fixes|resolves|refs|references|related to)\\s+#${issueNumber}\\b`,
+    'i',
+  ).test(body);
 }
 
 /**
@@ -261,6 +284,128 @@ async function triageIssue(repo, issue, allPrs, opts) {
   };
 }
 
+// ---- オープン PR 監査 ---------------------------------------------------
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+/**
+ * PR 単体 API からマージ可能状態を取得する。
+ * 一覧 API には `mergeable` / `mergeable_state` が含まれないため単体で叩く必要がある。
+ * `mergeable === null`（`mergeable_state: unknown`）は GitHub が計算中なので待って再取得する。
+ */
+async function fetchMergeState(repo, number, { attempts = 3, waitMs = 3000 } = {}) {
+  for (let i = 0; i < attempts; i += 1) {
+    const pr = await ghGet(`repos/${repo}/pulls/${number}`);
+    if (!pr) return { mergeable: null, mergeableState: 'unknown', rebaseable: null };
+    if (pr.mergeable !== null || i === attempts - 1) {
+      return {
+        mergeable: pr.mergeable,
+        mergeableState: pr.mergeable_state ?? 'unknown',
+        rebaseable: pr.rebaseable ?? null,
+      };
+    }
+    await sleep(waitMs);
+  }
+  return { mergeable: null, mergeableState: 'unknown', rebaseable: null };
+}
+
+const PR_VERDICT_LABEL = {
+  PR_CONFLICT: 'コンフリクト（mergeable_state: dirty）— 最優先で main をマージして解消する',
+  PR_BEHIND: 'main に遅れている（behind）— 最新 main を取り込む',
+  PR_FOLLOWUP: '未対応コメントあり — 同じ head ブランチへ対応し直す',
+  PR_UNKNOWN: 'マージ可能状態を判定できなかった — git rev-list でローカル判定にフォールバック',
+  PR_OK: 'コンフリクトも未対応コメントも無い（blocked / unstable はレビュー・チェック要件）',
+};
+
+const PR_VERDICT_ORDER = ['PR_CONFLICT', 'PR_FOLLOWUP', 'PR_BEHIND', 'PR_UNKNOWN', 'PR_OK'];
+
+/**
+ * すべてのオープン PR を監査する。
+ * issue に紐づかない PR（chore/... や docs/... ブランチ）も対象に含めるのが要点。
+ */
+async function auditOpenPrs(repo, allPrs, openIssueNumbers, opts) {
+  const openPrs = allPrs.filter((pr) => pr.state === 'open');
+  const results = [];
+
+  for (const pr of openPrs) {
+    const comments = await collectPrComments(repo, pr.number, opts.bodyChars);
+    const { baselineAt, doneAt, unaddressed } = detectUnaddressed(pr, comments);
+    const merge = await fetchMergeState(repo, pr.number);
+
+    // この PR がどの open issue に紐づいているか（紐づかないものは従来の棚卸しで不可視だった）
+    const linkedIssues = [...openIssueNumbers].filter((n) => prMatchesIssue(pr, n));
+
+    let verdict;
+    if (merge.mergeableState === 'dirty') verdict = 'PR_CONFLICT';
+    else if (unaddressed.length > 0) verdict = 'PR_FOLLOWUP';
+    else if (merge.mergeableState === 'behind') verdict = 'PR_BEHIND';
+    else if (merge.mergeableState === 'unknown') verdict = 'PR_UNKNOWN';
+    else verdict = 'PR_OK';
+
+    results.push({
+      number: pr.number,
+      title: pr.title,
+      head: pr.head?.ref ?? null,
+      base: pr.base?.ref ?? null,
+      createdAt: pr.created_at,
+      url: pr.html_url,
+      draft: Boolean(pr.draft),
+      mergeable: merge.mergeable,
+      mergeableState: merge.mergeableState,
+      baselineAt,
+      lastAgentReplyAt: doneAt,
+      commentCount: comments.length,
+      unaddressed,
+      linkedOpenIssues: linkedIssues,
+      verdict,
+    });
+  }
+
+  results.sort(
+    (a, b) => PR_VERDICT_ORDER.indexOf(a.verdict) - PR_VERDICT_ORDER.indexOf(b.verdict) || a.number - b.number,
+  );
+  return results;
+}
+
+function renderPrAudit(prAudit) {
+  const lines = [];
+  lines.push('## オープン PR 監査（issue に紐づかない PR も含む）');
+  lines.push('');
+  lines.push(`- 対象オープン PR: ${prAudit.length} 件`);
+  const counts = PR_VERDICT_ORDER.map((v) => `${v}=${prAudit.filter((p) => p.verdict === v).length}`);
+  lines.push(`- 判定内訳: ${counts.join(' / ')}`);
+  lines.push('');
+  for (const v of PR_VERDICT_ORDER) {
+    if (!prAudit.some((p) => p.verdict === v)) continue;
+    lines.push(`- \`${v}\`: ${PR_VERDICT_LABEL[v]}`);
+  }
+  lines.push('');
+  for (const p of prAudit) {
+    lines.push(
+      `### ${p.verdict} — PR #${p.number} ${p.title}`,
+    );
+    lines.push(
+      `- head: ${p.head} → base: ${p.base}${p.draft ? ' / draft' : ''} / 作成: ${p.createdAt}`,
+    );
+    lines.push(
+      `- mergeable: ${p.mergeable} / mergeable_state: ${p.mergeableState}` +
+        ` / 紐づく open issue: ${p.linkedOpenIssues.length ? p.linkedOpenIssues.map((n) => `#${n}`).join(' ') : 'なし（棚卸しでは不可視になるので注意）'}`,
+    );
+    lines.push(
+      `- コメント: ${p.commentCount} 件 / 未対応: ${p.unaddressed.length} 件（基準時刻 ${p.baselineAt}）`,
+    );
+    for (const c of p.unaddressed) {
+      lines.push(
+        `  - [${c.kind}${c.state ? `/${c.state}` : ''}] ${c.author} ${c.createdAt}` +
+          (c.path ? ` (${c.path})` : '') +
+          (c.excerpt ? `: ${c.excerpt}` : ''),
+      );
+    }
+    lines.push('');
+  }
+  return lines.join('\n');
+}
+
 // ---- 出力 ---------------------------------------------------------------
 
 const VERDICT_LABEL = {
@@ -273,7 +418,7 @@ const VERDICT_LABEL = {
 
 const VERDICT_ORDER = ['PR_FOLLOWUP', 'RECHECK', 'TRIAGE', 'OPEN_PR', 'SKIP'];
 
-function renderMarkdown(repo, results) {
+function renderMarkdown(repo, results, prAudit) {
   const lines = [];
   lines.push(`# issue トリアージ要約: ${repo}`);
   lines.push('');
@@ -285,6 +430,12 @@ function renderMarkdown(repo, results) {
   lines.push('判定の意味:');
   for (const v of VERDICT_ORDER) lines.push(`- \`${v}\`: ${VERDICT_LABEL[v]}`);
   lines.push('');
+
+  // オープン PR 監査を先に出す: コンフリクト解消と未対応コメントへの追随は
+  // 新規 issue の実装より優先されるため。
+  if (prAudit && prAudit.length) {
+    lines.push(renderPrAudit(prAudit));
+  }
 
   for (const v of VERDICT_ORDER) {
     const group = results.filter((r) => r.verdict === v);
@@ -365,10 +516,22 @@ async function main() {
   }
   results.sort((a, b) => a.number - b.number);
 
+  // オープン PR 監査は「対象 issue を限定した」場合でも全件行う。
+  // issue に紐づかない PR の見落としを防ぐことが目的なので、絞り込みの影響を受けさせない。
+  let prAudit = [];
+  if (opts.withPrs && opts.withPrAudit) {
+    const openIssues = opts.issues.length
+      ? (await ghGetAll(`repos/${repo}/issues?state=open`)).filter((i) => !i.pull_request)
+      : issues;
+    prAudit = await auditOpenPrs(repo, allPrs, new Set(openIssues.map((i) => i.number)), opts);
+  }
+
   if (opts.json) {
-    process.stdout.write(`${JSON.stringify({ repo, generatedAt: new Date().toISOString(), results }, null, 2)}\n`);
+    process.stdout.write(
+      `${JSON.stringify({ repo, generatedAt: new Date().toISOString(), results, openPrAudit: prAudit }, null, 2)}\n`,
+    );
   } else {
-    process.stdout.write(`${renderMarkdown(repo, results)}\n`);
+    process.stdout.write(`${renderMarkdown(repo, results, prAudit)}\n`);
   }
 }
 
