@@ -33,6 +33,8 @@
 | SCS-C03 | `js/data/scs-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 109 (99) | #155 | 13 試験で**最も不具合が少なかった**（修正 5 箇所）。Security Reference Architecture / インシデント対応ガイドのソフト 404 を是正。保留: Skill Builder が**SCS-C02 版**を指している点・Skill Builder 2 件 Audit Manager は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。インシデント対応ガイドは後継の AWS Security Incident Response ユーザーガイドへ差し替え。 |
 | SOA-C03 | `js/data/soa-c03.js` | 2026-09-06 | 棚卸し済み / 保留あり | 97 (95) | #156 | 削除済みの SSM 運用イベント自動化ブログを現行記事 + 公式ドキュメントへ。ElastiCache / VPC エンドポイントのリネームに追随。保留: Skill Builder が**SOA-C02 版**を指している点・差し替えブログの選定・Skill Builder 2 件 |
 
+> 各行の「保留: Skill Builder N 件」について: 2026-09-06 の第 2 次対応で、AWS 自身の sitemap（`https://skillbuilder.aws/sitemap.xml`）に載っている**試験対策ページの直リンク**を特定し、ANS-C01 / DEA-C01 / DOP-C02 / DVA-C02 / SAA-C03 / SAP-C02 / SCS-C03 / SOA-C03 の 8 試験で検索 URL から差し替えました。残る保留は「公式練習問題集の個別コース URL」と「sitemap に試験対策ページが無い AIF-C01 / AIP-C01 / MLA-C01」です。詳細と要人間対応の範囲は [Skill Builder のコース URL 失効](../action-required/skillbuilder-course-urls.md) を参照してください。
+
 ## リソース規模（統計）
 
 - 集計日: 2026-09-06
@@ -115,3 +117,4 @@
 - 2026-09-03: 初版作成（issue #69）。`js/data/` 配下の全 13 試験を「未棚卸し」で初期化。
 - 2026-09-04: 試験略称コードを AIBS-C01 から AIB-C01 に訂正（正しい略称コードは AIB-C01。データファイルも js/data/aibs-c01.js -> js/data/aib-c01.js にリネーム）。
 - 2026-09-06: 「リソース規模（統計）」節を追加。`scripts/collect-resource-urls.mjs` による実測（ユニーク URL 1,092 / ユニーク文書 656 / ユニークページ 523 / items 1,084）と試験別・ドメイン別内訳を記録。
+- 2026-09-06: Skill Builder の保留分について第 2 次対応の注記を追加。AWS の sitemap から試験対策ページの直リンクを特定し 8 試験で検索 URL を置換（出典: `https://skillbuilder.aws/sitemap.xml` / PR #157 のメンテナ指摘）。
