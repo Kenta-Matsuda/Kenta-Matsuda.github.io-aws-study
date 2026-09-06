@@ -1854,15 +1854,17 @@
                     </div>
                 </div>
             </div>
-            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-end gap-2">
+            <!-- flex-wrap so nothing is cut off on narrow screens (#165) -->
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex flex-wrap justify-end items-center gap-2">
                 <button id="aiCopyBtn" type="button" disabled class="px-4 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 opacity-60 cursor-not-allowed">
                     <i class="fas fa-copy"></i> <span data-ai-copy-label data-i18n="common.copy">Copy</span>
                 </button>
-                <button id="aiVoteGoodBtn" type="button" class="px-3 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" title="役に立った">
-                    <i class="fa-regular fa-thumbs-up"></i> Good
+                <!-- Good/Bad are icon-only on phones so the Copy button stays visible (#165) -->
+                <button id="aiVoteGoodBtn" type="button" class="px-3 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" title="役に立った" data-i18n-title="common.helpful" aria-label="役に立った" data-i18n-aria="common.helpful">
+                    <i class="fa-regular fa-thumbs-up"></i> <span class="hidden sm:inline" data-i18n="common.good">Good</span>
                 </button>
-                <button id="aiVoteBadBtn" type="button" class="px-3 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" title="微妙 / 改善してほしい">
-                    <i class="fa-regular fa-thumbs-down"></i> Bad
+                <button id="aiVoteBadBtn" type="button" class="px-3 py-2 bg-white hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2" title="微妙 / 改善してほしい" data-i18n-title="common.notHelpful" aria-label="微妙 / 改善してほしい" data-i18n-aria="common.notHelpful">
+                    <i class="fa-regular fa-thumbs-down"></i> <span class="hidden sm:inline" data-i18n="common.bad">Bad</span>
                 </button>
                 <button id="aiRetryBtn" type="button" class="hidden px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <i class="fas fa-rotate-right"></i> <span data-i18n="common.retry">Retry</span>
