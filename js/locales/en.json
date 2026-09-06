@@ -118,6 +118,8 @@
       "label": "Single Question"
     },
     "generating": "Generating questions...",
+    "generatingProgress": "Generating questions... ({{chars}} characters received)",
+    "generateFailed": "Could not build the question: the AI response was not in the expected format. Please try again.",
     "generatingSubtext": "The quiz will start once all questions are generated",
     "thinking": "Gemini is thinking...",
     "combo": "Combo",

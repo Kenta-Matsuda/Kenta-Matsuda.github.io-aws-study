@@ -118,6 +118,8 @@
       "label": "1問チャレンジ"
     },
     "generating": "問題を生成中...",
+    "generatingProgress": "問題を生成中...（{{chars}} 文字受信）",
+    "generateFailed": "問題を組み立てられませんでした。AIの応答が想定した形式ではありませんでした。もう一度お試しください。",
     "generatingSubtext": "全問題の生成が完了するとクイズが始まります",
     "thinking": "Gemini is thinking...",
     "combo": "コンボ",
