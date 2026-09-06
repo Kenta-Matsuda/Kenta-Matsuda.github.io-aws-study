@@ -95,14 +95,41 @@ permissions:
 - 開発サーバは `dev-server.mjs`。長時間実行プロセスなのでフォアグラウンドでは起動しない。
 - ドキュメント: `docs/` 配下。索引は `docs/index.md`、要人間対応事項は `docs/action-required/`、issue 単位の解説は `docs/issues/`、獲得ノウハウの **LLM Wiki は `docs/wiki/`**。
 
-## サンドボックス実行環境の事実（重要 / 事前に装備すべき回避策）
+## 実行環境の事実（重要 / 着手時に判定する）
 
-以下はこのサンドボックスの**実測に基づく事実**です。取り違えると無用に停止するため、必ず前提として扱ってください。
+**実行環境を断定しないこと。** このエージェントは Linux / bash のサンドボックスでも、Windows / PowerShell 7 のローカル環境でも起動されます。過去に「OS は Linux、シェルは bash」と断定していたため、記載どおりのコマンドが動かず無用な試行錯誤が発生しました（詳細は playbook の落とし穴 A-11）。
 
-### 1. OS / シェル
+### 手順 0: 着手時の環境判定（必須）
 
-- OS は **Linux**、シェルは **bash**。
-- コマンド連結は **`&&` が使えます**（`;` に置き換える必要はありません）。
+次の 4 点を最初に確認し、**結果を最終報告に明記**する。
+
+1. **OS / シェル**: プロンプトやコマンドの挙動から判定する。PowerShell か bash かでコマンドの書き方が変わる。
+2. **`NODE_OPTIONS`**: 空なら素の `node` で良い。存在しない preload を指している場合のみ後述の回避策を使う。
+3. **Playwright の実行可否**: `npx playwright test` が動くかを確認する。**動く環境では検証を省略しない。**
+4. **ネットワーク可否**: 外部 URL を 1 本取得して確認する。可能なら「外部の事実」は推論せず実測する。
+
+### シェル別の注意
+
+**bash の場合**
+
+- コマンド連結は `&&` が使える。
+- `NODE_OPTIONS` の回避は `env -u NODE_OPTIONS node ...` または `unset NODE_OPTIONS`。
+- ヒアドキュメントが使えるので、長い本文もインラインで渡せる。
+
+**PowerShell の場合（実測で踏んだ落とし穴）**
+
+- `env -u NODE_OPTIONS` は**使えない**（`env` が無い）。必要なら `$env:NODE_OPTIONS=''` を使う。`NODE_OPTIONS` が空なら素の `node` でよい。
+- **`cmd /c gh api ...` は失敗する。** `gh api` は PowerShell から直接呼ぶ。
+- コンソール出力の日本語が CP932 で文字化けする。**git / GitHub 側のデータは正しい UTF-8** なので、表示だけを見て「壊れた」と誤認しない。確認したいときは `cmd /c "git cat-file commit HEAD > <file>"` でバイト列を読む。
+- ヒアドキュメントが無いため、**コミットメッセージ・PR 本文・issue / PR コメント本文はファイル経由で渡す**（`git commit -F <file>` / `gh api ... -F body=@<file>`）。
+- 長い出力は `| Out-File -Encoding utf8 <file>` でファイルに落として読む。
+
+### スクラッチファイルの置き場所（重要）
+
+コミットメッセージ・PR 本文・調査用の一時スクリプトなどの下書きは、**リポジトリ外の一時ディレクトリ**に置く（例: PowerShell なら `C:/Users/Public/asn-scratch/`、bash なら `/tmp/`）。
+
+- **`test-results/` は使わない。** gitignored だが `npx playwright test` が実行のたびに中身を空にするため、下書きが消える（実際に消した）。
+- リポジトリ内に一時ファイルを作った場合は、コミット前に必ず削除する。
 
 ### 2. GitHub アクセスは `gh api`（REST）で行う
 
@@ -132,14 +159,16 @@ permissions:
     ```
 - `gh auth status` がログイン失敗のように報告することがありますが、これは**表示上のものだけで認証自体は機能しています**。`gh auth login` は**絶対に実行しないでください**。
 
-### 3. `NODE_OPTIONS` の落とし穴
+### 3. `NODE_OPTIONS` の落とし穴（環境によって発生する）
 
-- サンドボックスは `NODE_OPTIONS=--require /opt/amazon/kiro-agent/proxy-bootstrap.js` を設定していますが、**この preload ファイルは存在しません**。
-- そのまま `node` / `npm` / `npx` を呼ぶと `MODULE_NOT_FOUND`（preload エラー）で失敗します。
-- 回避策: node 系コマンドを呼ぶ前に **`unset NODE_OPTIONS`** するか、各コマンドを **`env -u NODE_OPTIONS`** で前置きしてください。
+- 一部のサンドボックスは `NODE_OPTIONS=--require /opt/amazon/kiro-agent/proxy-bootstrap.js` を設定しているが、**この preload ファイルは存在しない**。
+- その状態で `node` / `npm` / `npx` を呼ぶと `MODULE_NOT_FOUND`（preload エラー）で失敗する。
+- 回避策（bash）: `unset NODE_OPTIONS` するか、各コマンドを `env -u NODE_OPTIONS` で前置きする。
   ```
   env -u NODE_OPTIONS node --check js/app.js
   ```
+- 回避策（PowerShell）: `$env:NODE_OPTIONS=''` を実行する。
+- **`NODE_OPTIONS` が空の環境では何もしなくてよい**（手順 0 で確認する）。
 
 # 主要機能 1: issue 解決（棚卸し → 実装 → PR）
 
@@ -147,10 +176,11 @@ permissions:
 
 0. **【自己改善の起点】着手前に `docs/wiki/issue-resolution-playbook.md` を読む。** 過去の失敗パターン・判定基準・再利用可能な `gh api` レシピが蓄積されている。存在しない場合は主要機能 2 の規約に従って作成する。あわせて、バッチ着手時の振り返り（主要機能 2 の「バッチ処理開始時に必ず行う振り返り」）を実施する。
 1. **【コメントファースト・事前条件（無条件・最優先）】どの issue についても、着手・見送り（スキップ）を判断する前に、必ず先にコメントを全部読む。** これは例外なく適用される事前ゲートであり、後続のどの手順よりも先に行う。
-   - **推奨: この判定は `scripts/issue-triage.mjs` で一括実行する**（主要機能 3 を参照）。同スクリプトは下記 (i)(ii) の取得と判定を決定論的に行い、要約だけを出力するため、生 JSON を読むより桁違いに低コストで、かつ見落としが起きない。
+   - **推奨: この判定は `scripts/issue-triage.mjs` で一括実行する**（主要機能 3 を参照）。同スクリプトは下記 (i)(ii)(iii) の取得と判定を決定論的に行い、要約だけを出力するため、生 JSON を読むより桁違いに低コストで、かつ見落としが起きない。
      ```
-     env -u NODE_OPTIONS node scripts/issue-triage.mjs
+     node scripts/issue-triage.mjs
      ```
+     `NODE_OPTIONS` が存在しない preload を指している環境では前置きが必要（「実行環境の事実」節を参照）。オープン PR 監査を含むため**完了に 1〜3 分かかる**。タイムアウトの短い同期実行ではなく、バックグラウンド実行 + ファイル出力にすること。
    - 手動で行う場合、読むべきものは次の 2 系統すべて:
      - **(i) その issue 自身のコメント**:
        ```
@@ -162,6 +192,10 @@ permissions:
        - レビュー（approve / request changes 等）: `gh api "repos/{owner}/{repo}/pulls/{pr_number}/reviews?per_page=100"`
    - **「オープン PR がある」ことは、それ自体では issue をスキップしてよい理由には決してならない。** オープン PR がある場合でも、上記 3 種のコメントを読み、**未対応・エスカレーションされたフィードバックが無いことを確認してからでなければスキップしない**。未対応コメントがあれば「既存オープン PR の新規コメント対応」節の手順に従って対応し直す（詳細な特定・判定・対応の手順はその節を参照）。
    - **(iii) 同時に、その PR のマージ可能状態（`mergeable` / `mergeable_state`）も確認する。** コンフリクトや behind main は**コメントで依頼されなくても能動的に解消する**のが原則である。判定と解消の手順は「既存オープン PR のコンフリクト解消」節を参照する。**「コンフリクトしている」ことは issue や PR をスキップしてよい理由には決してならない**（むしろ最優先で解消すべき状態である）。
+   - **(iv) issue に紐づかない PR も必ず見る（無条件）。** issue を起点に PR を辿るだけでは、`chore/...` / `docs/...` のように**どの issue にも紐づかないブランチの PR が構造的に不可視**になる。実際にそれで PR #157 / #160 のメンテナ依頼とコンフリクトを見落とした（playbook の落とし穴 A-8）。`scripts/issue-triage.mjs` の**「オープン PR 監査」セクション**（全オープン PR を `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN` / `PR_OK` で判定）を必ず読み、`紐づく open issue: なし` と表示された PR を取りこぼさない。手動で行う場合は次で全件を列挙し、1 件ずつ (ii)(iii) を実施する:
+     ```
+     gh api "repos/{owner}/{repo}/pulls?state=open&per_page=100" --jq '.[] | "\(.number) | \(.head.ref)"'
+     ```
    - **実際に着手する issue については、要約だけで判断を終えない。** スクリプト出力は入口であり、着手対象は issue 本文・関連コメント全文・関連コードを必ず読む。
    - **根拠（なぜこのゲートが必要か）**: 従来このコメントファーストの指針は「既存オープン PR の新規コメント対応」節という埋もれた箇所にしか無く、参照されずに遵守されなかった。その結果、オープン PR に付いていたユーザーのエスカレーション済みコメントが未対応のまま放置された。同じ失敗を防ぐため、本ゲートを手順の先頭に無条件の事前条件として置き、さらにスクリプトで機械的に検出できるようにした。コンフリクト解消も同様に「コメントで依頼されたときだけ行う派生対応」として埋もれており、依頼が無いコンフリクト PR が放置され得た。そのため本ゲートに (iii) を加え、能動的な解消を無条件の事前条件に含める。
 2. `gh api "repos/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | {number, title}'` で open な issue を一覧化し、各 issue の内容を `gh api repos/{owner}/{repo}/issues/{n}` で確認する（`scripts/issue-triage.mjs` を使う場合はこの一覧化も同スクリプトが行う）。
@@ -172,14 +206,15 @@ permissions:
    ```
    git switch main && git pull && git switch -c feature/issue-<番号>-<短い英語スラッグ>
    ```
-   ブランチ名は `feature/issue-<番号>-...` の形式を守る（`scripts/issue-triage.mjs` が issue と PR の紐づけに使う）。
+   ブランチ名は `<接頭辞>/issue-<番号>-...` の形式を守る（`scripts/issue-triage.mjs` が issue と PR の紐づけに使う）。接頭辞は変更の性質に合わせて `feature/` / `fix/` / `docs/` などを使ってよい（スクリプトは `^[a-z]+/issue-<番号>` で紐づける）。**`issue-<番号>` を必ず含めること。**
 7. 変更をコミットし、`gh api ... /pulls ...`（REST）で該当 issue に紐づく PR を作成する。PR 本文は `.github/pull_request_template.md` の構成を参考にしつつ、以下を必ず含める。**PR 本文には GitHub タスクリスト記法（`- [ ]` / `- [x]`）を使わない**（GitHub のタスク進捗集計に誤カウントされるため）。種別・検証・確認事項は通常の箇条書きや本文で書く。
-   - `Closes #<番号>`
+   - `Closes #<番号>`。**ただし issue の要望の一部しか満たしていない場合は `Closes` を使わない。** `Refs #<番号>` にして、「なぜクローズしないのか」「何が残っているのか」を本文に明記する（未対応部分を暗黙に閉じてしまうのを防ぐ）。
    - 変更内容
    - 実装方針
    - 考慮したトレードオフ
    - テスト / 検証結果（**実行したコマンドと結果**、実行できなかったものはその理由）
    - docs 更新の有無と内容
+   - PowerShell 環境ではヒアドキュメントが使えないため、**PR 本文はリポジトリ外の一時ファイルに書いて `-F body=@<file>` で渡す**（「実行環境の事実」節を参照）。
 8. 1 つの PR は 1 つ（または密接に関連する少数）の issue に対応させ、レビューしやすい単位に保つ。
 9. 1 回の実行で全件終わらなくてよい。処理できるところまで進める。**着手不能なほど情報不足** / **要人間対応**と判断した issue はスキップし、その際は「対応保留マーカーの運用」節に従って**マーカー（`agent:skipped` ラベル＋判断コメント）を付与**する。これにより次回以降の実行で「更新が無ければ再調査しない」フィルタが機能する。
    - **対象 issue に既にオープンな PR がある場合、重複を避けて新規 PR 作成はスキップする。ただし手順 1 のコメントファースト事前条件のとおり、スキップ判断の前に必ずそのオープン PR のコメント（ディスカッション / インライン / レビュー）と issue コメントを読むこと。未対応の新規コメント（レビュー指摘・追加要望・コンフリクト解消依頼など）がある場合はスキップせず、「既存オープン PR の新規コメント対応」節に従って既存 PR ブランチへ対応し直す。** さらに、**コメントの有無に関わらずその PR のマージ可能状態を確認し、コンフリクト（`mergeable_state: dirty`）や behind main であれば「既存オープン PR のコンフリクト解消」節に従って解消する**（新規 PR 作成をスキップしても、コンフリクト解消はスキップしない）。
@@ -478,15 +513,18 @@ issue / コメントのバッチ処理に着手する前に、短いレトロス
 
 ## まず既存の資産を使う
 
-- **`scripts/issue-triage.mjs`（読み取り専用トリアージ / issue 対応の入口）**: open issue の一覧化、issue コメント、関連 PR（open / closed / merged）の 3 種コメント取得、`agent:skipped` マーカーの再評価、既存オープン PR の未対応コメント検出を **1 コマンド**で行い、要約だけを出力する。
+- **`scripts/issue-triage.mjs`（読み取り専用トリアージ / issue 対応の入口）**: open issue の一覧化、issue コメント、関連 PR（open / closed / merged）の 3 種コメント取得、`agent:skipped` マーカーの再評価、既存オープン PR の未対応コメント検出、そして**全オープン PR の監査**（`mergeable_state` と未対応コメント / issue に紐づかない PR も含む）を **1 コマンド**で行い、要約だけを出力する。
   ```
-  env -u NODE_OPTIONS node scripts/issue-triage.mjs                    # 全 open issue の Markdown 要約
-  env -u NODE_OPTIONS node scripts/issue-triage.mjs --issue 138,32     # 対象を限定
-  env -u NODE_OPTIONS node scripts/issue-triage.mjs --json             # 機械可読 JSON
-  env -u NODE_OPTIONS node scripts/issue-triage.mjs --help             # 全オプション
+  node scripts/issue-triage.mjs                    # 全 open issue の要約 + 全オープン PR 監査
+  node scripts/issue-triage.mjs --issue 138,32     # issue を限定（PR 監査は全件のまま）
+  node scripts/issue-triage.mjs --no-pr-audit      # PR 監査を省略（高速だが見落としリスクあり）
+  node scripts/issue-triage.mjs --json             # 機械可読 JSON（openPrAudit を含む）
+  node scripts/issue-triage.mjs --help             # 全オプション
   ```
-  出力の判定値: `PR_FOLLOWUP`（既存オープン PR に未対応コメントあり）/ `RECHECK`（マーカー後に更新あり）/ `TRIAGE`（通常の調査対象）/ `OPEN_PR`（オープン PR あり・未対応コメントなし）/ `SKIP`（マーカー後に更新なし）。
+  issue の判定値: `PR_FOLLOWUP`（既存オープン PR に未対応コメントあり）/ `RECHECK`（マーカー後に更新あり）/ `TRIAGE`（通常の調査対象）/ `OPEN_PR`（オープン PR あり・未対応コメントなし）/ `SKIP`（マーカー後に更新なし）。
+  PR 監査の判定値: `PR_CONFLICT`（`dirty`。最優先で解消）/ `PR_FOLLOWUP`（未対応コメント）/ `PR_BEHIND`（`behind`）/ `PR_UNKNOWN`（`mergeable` が `null`。`git rev-list` にフォールバック）/ `PR_OK`。
   マーカー検出は本文接頭辞 `🤖 agent:skipped` / `🤖 対応済み` に依存するため、**コメント時は必ず規定の接頭辞を使う**こと。
+  **監査は 1 PR あたり 4 リクエストを投げるため完了に 1〜3 分かかる。** タイムアウトの短い同期実行ではなく、バックグラウンド実行 + ファイル出力にする。`NODE_OPTIONS` の前置きが必要かは手順 0 の判定に従う。
 - 参考にできる既存スクリプト（`exam-content-maintainer` が同じ方針で育てた資産）:
   - `scripts/check-resource-links.mjs` — `js/data/` の全リソース URL を抽出して HTTP 死活・リダイレクトを一覧化。
   - `scripts/collect-resource-urls.mjs` — リソース URL の件数・ドメイン内訳を集計。
@@ -520,18 +558,25 @@ issue / コメントのバッチ処理に着手する前に、短いレトロス
 
 検証は「実行できないから省略」ではなく、**実行できる範囲を必ず実施し、実行できなかったものは理由を記録**します。
 
+以下の `node` 実行は、`NODE_OPTIONS` が存在しない preload を指す環境でのみ前置きが必要です（手順 0 の判定に従う。bash なら `env -u NODE_OPTIONS`、PowerShell なら `$env:NODE_OPTIONS=''`）。
+
 - 変更した **JS**（`js/` 配下、`scripts/` 配下を含む）は構文チェックする:
   ```
-  env -u NODE_OPTIONS node --check <ファイル>
+  node --check <ファイル>
   ```
 - 変更した **JSON** はパース可能か確認する:
   ```
-  env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<ファイル>','utf8'))"
+  node -e "JSON.parse(require('fs').readFileSync('<ファイル>','utf8'))"
   ```
 - **`scripts/` のスクリプトを追加・変更した場合**は、構文チェックに加えて**実際に 1 回実行**し、期待した要約が出ることを確認する（読み取り専用であることも確認する）。
 - **i18n** に関わる変更をした場合、`js/locales/ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。片方だけにキーがある状態を作らない。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、相対リンクが実在ファイルを指すことを確認する（デッドリンク・孤立ファイル禁止）。
-- **Playwright**（`npx playwright test`）は INTEGRATIONS_ONLY 環境ではブラウザ / npm を取得できず**失敗する可能性が高い**。既に実行可能な状態であれば実行し、そうでなければ**「実行できなかった旨と理由」を記録**する。これは修正や上記の静的検証を省略する理由にはならない。
+- **Playwright**（`npx playwright test`）は**動く環境では必ず実行する**。手順 0 で実行可否を確認し、動くなら省略しない。ブラウザや npm を取得できない環境（INTEGRATIONS_ONLY 等）では失敗するので、その場合のみ**「実行できなかった旨と理由」を記録**する。これは修正や上記の静的検証を省略する理由にはならない。
+  - **挙動を変える修正には回帰テストを追加する。** ロジックが巨大な `js/ui.js` の中にあるときは、テストできる小さなモジュールへ切り出してから書く（`js/markdown.js` / `js/aiErrors.js` はこの方針で生まれた）。
+  - **追加した回帰テストが「本当に落ちるか」を確認する。** 実装ファイルだけを `git stash push <file...>` で退避してテストを実行し、**失敗することを確認**してから `git stash pop` で戻す。確認結果（何件が失敗したか）を PR 本文に書く。テストが新しい export を import している場合は、その export を含むファイルを stash 対象から外す。
+  - **外部 API に依存する経路もスタブで検証できる。** `page.route('**<host>/**', ...)` で SSE（`content-type: text/event-stream` + `data: {...}\n\n`）を返せば AI 生成経路を API キー無しで検証でき、`route.abort('connectionfailed')` で通信断も再現できる。「API キーが無いから未検証」で済ませない。
+  - `test-results/` は実行のたびに空にされる。スクラッチファイルを置かない。
+  - 前回の実行が中断してポートが塞がると `ERR_CONNECTION_REFUSED` になる。**もう一度実行すれば復旧**する。
 - `npm test` は使わない（プレースホルダで必ず失敗する）。
 - 静的検証やテストが失敗して原因を修正できない場合でも、前進できた分の扱い（PR を出すか、要人間対応として残すか）を判断し、状況を PR 本文に明記する。
 
