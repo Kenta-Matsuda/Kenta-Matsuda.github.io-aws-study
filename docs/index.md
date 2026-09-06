@@ -20,6 +20,7 @@
 - [「模擬問題を作成」で JSON がそのまま表示される問題 (#166)](issues/quiz-json-leak-166.md)
 - [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
 - [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
+- [要人間対応事項をチェックリスト一覧として可視化 (#184)](issues/action-required-checklist-184.md)
 
 ## LLM Wiki（docs/wiki/）
 
@@ -33,8 +34,9 @@
 
 ## 要人間対応事項（docs/action-required/）
 
-AWS 操作など、人間しか実施できない**未対応（要対応）**の事項を構造化して残す場所です。規約とテンプレートは README を参照してください。
+AWS 操作など、人間しか実施できない**未対応（要対応）**の事項を構造化して残す場所です。規約とテンプレートは README を参照してください。俯瞰用のチェックリストは CHECKLIST を参照してください（#184）。
 
+- [要人間対応チェックリスト（俯瞰用）](action-required/CHECKLIST.md) — `scripts/list-action-required.mjs` が生成 / 関連: #184
 - [要人間対応事項の運用ルール（README）](action-required/README.md)
 - [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](action-required/global-leaderboard.md) — 🔴 未対応（要対応） / 関連: #32
 - [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](action-required/mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 関連: #109
