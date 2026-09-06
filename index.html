@@ -112,6 +112,42 @@
             "@type": "Answer",
             "text": "主な機能: (1) 試験ガイド準拠のドメイン別学習ロードマップ (2) AI搭載クイズ（5問/スピード/模擬試験/スマート復習の4モード） (3) XP・称号システムによるゲーミフィケーション (4) スキルレーダーチャート (5) 学習ストリーク (6) AIチューターチャット (7) 日英バイリンガル対応"
           }
+        },
+        {
+          "@type": "Question",
+          "name": "APIキーなしで使えますか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "はい。静的な問題バンクを使う学習コンテンツはAPIキー不要で利用できます。具体的には、本番形式の模擬試験（65問）をAPIキーなしで解けるほか、学習ロードマップ・XP/称号・スキルレーダー・学習ストリークなどの機能もAPIキーなしで使えます。AIが問題文をその場で生成するクイズモードやAIチューターチャットなど、生成AIを使う機能のみ、Google Gemini APIキー（無料枠あり）またはOpenAI APIキーが別途必要です。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "フィードバックの送信にGitHubアカウントは必要ですか？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "GitHub Issueとして投稿する場合はGitHubアカウント（サインイン）が必要です。アカウントをお持ちでない場合でも、フィードバック内容をコピーしてメールやSNSなど任意の手段で送れるほか、公開Issue一覧の閲覧はサインインなしで可能です。"
+          }
+        }
+      ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "ホーム",
+          "item": "https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "AWS認定 学習ナビゲーター",
+          "item": "https://kenta-matsuda.github.io/Kenta-Matsuda.github.io-aws-study/"
         }
       ]
     }
@@ -1484,8 +1520,14 @@
                                     </button>
                                     <button id="dailyChallengeBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
                                         <i class="fas fa-calendar-day"></i> <span data-i18n="dashboard.quizCarousel.dailyChallengeBtn">Daily Challenge</span>
+                                        <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold" data-i18n="dashboard.quizCarousel.dailyChallengeBadge">No API key</span>
                                     </button>
                                     <p class="text-xs text-gray-500 mt-1" data-i18n="dashboard.quizCarousel.dailyChallengeHint">No API key needed</p>
+                                    <button id="offlineExamBtn" type="button" class="px-5 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2 justify-center">
+                                        <i class="fas fa-file-alt"></i> <span data-i18n="dashboard.quizCarousel.offlineExamBtn">Practice Exam</span>
+                                        <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded-full text-[10px] font-bold" data-i18n="dashboard.quizCarousel.offlineExamBadge">No API key</span>
+                                    </button>
+                                    <p class="text-xs text-gray-500 mt-1" data-i18n="dashboard.quizCarousel.offlineExamHint">Full-length, production-format exam from a built-in question bank. No API key needed.</p>
                                 </div>
                             </div>
                         </div>
@@ -2013,8 +2055,13 @@
                     Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.
                 </p>
                 <div class="mb-4 p-2.5 bg-teal-50 text-teal-800 text-xs rounded border border-teal-200 leading-snug">
-                    <i class="fas fa-circle-info mr-1"></i>
-                    <span data-i18n="feedbackModal.noAccountNote">No GitHub account? No problem. Use "Copy text" below and send it however you like (e.g. paste it to the developer). A GitHub account is only needed if you want to post the issue yourself.</span>
+                    <span class="inline-flex items-center gap-1 font-bold mr-1">
+                        <i class="fas fa-circle-info"></i><span data-i18n="feedbackModal.noAccountLead">Posting to GitHub requires sign-in</span>
+                    </span>
+                    <span data-i18n="feedbackModal.noAccountNote">Pressing "Submit" opens GitHub's prefilled issue page, and you must sign in to a GitHub account to post it there. If you don't have or don't want a GitHub account, press "Copy text" below and send it any way you like (e.g. to the developer). You can also browse existing feedback without signing in.</span>
+                    <a href="https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues" target="_blank" rel="noopener" class="inline-flex items-center gap-1 underline font-medium hover:text-teal-900">
+                        <i class="fas fa-arrow-up-right-from-square"></i><span data-i18n="feedbackModal.browseIssues">Browse existing issues (no sign-in needed to view)</span>
+                    </a>
                 </div>
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">Category</label>
