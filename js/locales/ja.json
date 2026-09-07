@@ -351,6 +351,12 @@
   "roadmap": {
     "title": "学習ロードマップ",
     "description": "{{code}} 試験の学習を上から順に進めていきましょう。",
+    "examWide": "ラーニングパス",
+    "domainShortcutsTitle": "ドメイン別の学習へ移動",
+    "domainShortcutsHint": "各ドメインの詳しいリソースはドメインタブにまとまっています。学びたいドメインを選んでください。",
+    "aiQuizShortcutTitle": "このサイトのAI模擬問題で確認する",
+    "aiQuizShortcutHint": "公式の練習問題に加えて、全ドメイン横断のAI生成問題でも実力を確認できます。",
+    "aiQuizShortcutBtn": "AI模擬問題を始める",
     "commonTitle": "共通学習リソース",
     "commonDescription": "すべてのAWS認定試験に共通する学習ステップ・リソースです。",
     "taskStatement": "Task Statement {{id}}",

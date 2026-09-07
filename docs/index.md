@@ -16,6 +16,7 @@
 - [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
 - [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
 - [API 設定画面の Google AI Studio リンクが消えていた問題 (#161)](issues/settings-help-links-161.md)
+- [「★すべて」タブの項目名と導線の整理 (#163)](issues/general-tab-navigation-163.md)
 - [スマホで AI 解説のコピーボタンが見切れる / 学習ライフ全体での使いやすさ (#165)](issues/ai-answer-mobile-and-portability-165.md)
 - [AI 解説の `**「…」**` が太字にならない問題 (#164)](issues/markdown-emphasis-brackets-164.md)
 - [「模擬問題を作成」で JSON がそのまま表示される問題 (#166)](issues/quiz-json-leak-166.md)
