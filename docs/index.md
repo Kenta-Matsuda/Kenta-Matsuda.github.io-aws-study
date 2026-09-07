@@ -16,6 +16,7 @@
 - [ブログの技術レベル表示と re:Post リソースの拡充 (#137)](issues/resource-level-and-repost-137.md)
 - [APIキー不要の本番形式模擬試験（オフライン問題バンク） (#124)](issues/offline-production-exam.md)
 - [API 設定画面の Google AI Studio リンクが消えていた問題 (#161)](issues/settings-help-links-161.md)
+- [スマホで AI 解説のコピーボタンが見切れる / 学習ライフ全体での使いやすさ (#165)](issues/ai-answer-mobile-and-portability-165.md)
 - [AI 解説の `**「…」**` が太字にならない問題 (#164)](issues/markdown-emphasis-brackets-164.md)
 - [「模擬問題を作成」で JSON がそのまま表示される問題 (#166)](issues/quiz-json-leak-166.md)
 - [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
@@ -46,3 +47,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](action-required/issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 関連: #167
 - [AIチャットが実在する試験を否定し別試験にすり替える問題（一次情報グラウンディング）](action-required/issue-138-ai-chat-exam-grounding.md) — 🔴 未対応（要対応） / 関連: #138（関連 #109 PR #113 PR #135 PR #139）※ AWS 公式ドキュメント確認済み。クライアント側は `url_context` グラウンディングで対応完了
 - [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69
+- [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](action-required/issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 関連: #165 / PR #180
