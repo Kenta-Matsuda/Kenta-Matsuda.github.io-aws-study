@@ -33,6 +33,12 @@ import {
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { quizHistoryToCsv } from './quizCsv.js';
+import {
+  buildResourceLinksMarkdown,
+  buildResourceLinksCsv,
+  buildStudyRouteMarkdown,
+  buildGlossaryCsv,
+} from './studyPack.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 import {
   parseQuizResponse,
@@ -776,6 +782,56 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     a.download = `quiz-history${examId ? '-' + examId : ''}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  // --- Study pack downloads (#165: NotebookLM-ready assets from static exam data) ---
+  // These reuse the pure generators in js/studyPack.js and the same Blob-download idiom
+  // as the quiz-history export buttons above. The exam is chosen via reviewState.selectedExamId
+  // (the same source the export buttons use) and resolved with getExamById; the current locale
+  // is passed via getLocale(). Markdown -> text/markdown; CSV -> text/csv with a UTF-8 BOM.
+  function downloadStudyPackText(text, filename, mime, { bom = false } = {}) {
+    if (!text) return;
+    const blob = new Blob([bom ? '\uFEFF' + text : text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function selectedStudyExam() {
+    const examId = reviewState.selectedExamId;
+    if (!examId) return null;
+    try { return getExamById(examId); } catch { return null; }
+  }
+
+  els.studyPackLinksMdBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    if (!exam) return;
+    const md = buildResourceLinksMarkdown(exam, { locale: getLocale() });
+    downloadStudyPackText(md, `resource-links-${exam.id}.md`, 'text/markdown;charset=utf-8');
+  });
+
+  els.studyPackLinksCsvBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    if (!exam) return;
+    const csv = buildResourceLinksCsv(exam, { locale: getLocale() });
+    downloadStudyPackText(csv, `resource-links-${exam.id}.csv`, 'text/csv;charset=utf-8', { bom: true });
+  });
+
+  els.studyPackRouteMdBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    if (!exam) return;
+    const md = buildStudyRouteMarkdown(exam, { locale: getLocale() });
+    downloadStudyPackText(md, `study-route-${exam.id}.md`, 'text/markdown;charset=utf-8');
+  });
+
+  // Glossary: per-exam when an exam is selected, otherwise across all exams.
+  els.studyPackGlossaryCsvBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    const csv = buildGlossaryCsv(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(csv, `glossary${exam ? '-' + exam.id : '-all'}.csv`, 'text/csv;charset=utf-8', { bom: true });
   });
 
   // --- Schedule Review Button ---
@@ -2179,6 +2235,10 @@ function getElements() {
     quizHistoryEmpty: document.getElementById('quizHistoryEmpty'),
     quizHistoryExportBtn: document.getElementById('quizHistoryExportBtn'),
     quizHistoryExportCsvBtn: document.getElementById('quizHistoryExportCsvBtn'),
+    studyPackLinksMdBtn: document.getElementById('studyPackLinksMdBtn'),
+    studyPackLinksCsvBtn: document.getElementById('studyPackLinksCsvBtn'),
+    studyPackRouteMdBtn: document.getElementById('studyPackRouteMdBtn'),
+    studyPackGlossaryCsvBtn: document.getElementById('studyPackGlossaryCsvBtn'),
 
     // Streak
     streakCount: document.getElementById('streakCount'),
