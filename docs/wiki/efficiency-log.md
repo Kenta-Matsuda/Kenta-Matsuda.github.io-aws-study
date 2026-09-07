@@ -2,7 +2,7 @@
 
 - 最終更新日: 2026-09-06
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
-- 出典/参照: issue #69 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs`
+- 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs`
 
 > エージェントが実行のたびに自分の作業を振り返り、**トークン消費と手間を減らす**アイデアと、**自分自身の能力を拡張する**提案を記録するログです。スキーマ（メタデータ + 更新履歴）は [README](README.md) を参照してください。
 
@@ -16,6 +16,7 @@
 | `scripts/check-resource-links.mjs` | `js/data/` 全試験から `url` / `urlEn` を抽出し、HTTP 死活・リダイレクト・ソフト 404・テキストフラグメントの陳腐化を分類して一覧化 | `node scripts/check-resource-links.mjs --concurrency 10 --fragments --json test-results/links-all.json` |
 | `scripts/list-aws-doc-pages.mjs` | AWS 公式ドキュメント 1 ページから同一ガイド内の下位ページ / ページ内アンカーを抽出 | `node scripts/list-aws-doc-pages.mjs <url> --titles` / `... --anchors` |
 | `scripts/analyze-resource-coverage.mjs` | 試験ガイドのタスクステートメント単位で items 件数・リソース種別を集計し、0 件 / 薄い / 単一種別のタスクを順位付け（ネットワーク不要） | `node scripts/analyze-resource-coverage.mjs --md test-results/coverage.md` |
+| `scripts/list-action-required.mjs` | `docs/action-required/` の各ファイルのステータス行から要人間対応チェックリストを生成（読み取り専用。`--write` で `CHECKLIST.md` 再生成、`--check` で最新性検証） | `node scripts/list-action-required.mjs --write` / `node scripts/list-action-required.mjs --check` |
 
 `check-resource-links.mjs` は差し替え候補の当たり付けにも使えます（`--urls "https://a,https://b" --all`）。候補を推測で書き込む前に、必ずこのモードで実在とリダイレクト先を確認してください。
 
@@ -254,8 +255,44 @@
 - **想定リスク**: 権限緩和・既存制約の削除は無し。検証を弱める変更は含まず、**実行できる検証を省略しない**方向の強化のみ。
 - **状態**: 実装済み（本 PR）。
 
+### 2026-09-06: 要人間対応チェックリストの生成 `scripts/list-action-required.mjs`（実装済み・機能 3）
+
+- **日付**: 2026-09-06
+- **対象作業**: 「`docs/action-required/` に未対応の要人間対応が何件残っているか」を俯瞰する作業。従来は README の箇条書きを目視で数えるか、各ファイルを開いてステータス行を確認していた。
+- **課題**: 一覧が README の手書き箇条書きに依存しており、ファイル追加時に更新漏れ・実態とのずれが起きうる。俯瞰用のチェックリスト表示も無かった（issue #184）。
+- **実装**: `scripts/list-action-required.mjs`（読み取り専用）。`docs/action-required/` の各 Markdown の**冒頭ステータス行の行頭絵文字**・タイトル・種別・関連 issue を抽出し、チェックボックス付き一覧を生成する。`--write` で `CHECKLIST.md` を再生成、`--check` で最新性を検証（差分あれば非ゼロ終了、CI 等に使える）。外部依存なし（Node 標準のみ）。
+- **設計上の判断**: ステータス判定はタイトル行を除外する（「完了時のプッシュ通知」のようにタイトルへ本文語として『完了』が入りうるため）。書き込みは `--write` 時のみ。判断を伴う GitHub 書き込みは一切しない（スクリプトの読み取り専用原則を維持）。
+- **効果（見込み）**: 一覧の集計・最新性確認を LLM の目視から決定論的なスクリプトへ置換。ファイル追加のたびに `--write` で再生成すれば README とのずれが構造的に消える。件数規模が小さいためトークン削減効果は限定的だが、**正確性と再現性**の担保が主目的。
+- **状態**: 実装済み（PR #185 / issue #184）。`node --check` OK、`--write` → `--check` が up to date（冪等）を確認。
+
+### 2026-09-06: 今回のレトロスペクティブ（open PR 3 件のコンフリクト + 追随、新規 issue #184）
+
+- **日付**: 2026-09-06
+- **なぜこれらが残っていたのか**:
+  - **PR #139 / #180 / #182 が `dirty`**: `main` に PR #175 / #181 / #183 等が次々マージされ、いずれも `docs/index.md` / `docs/action-required/README.md` の**一覧末尾**を複数 PR が同時に追記していたため、末尾で構造的に衝突し続けていた。behind main を放置すると再発する典型（A-7 の運用が効いて今回は能動的に検知・解消できた）。
+  - **PR #182 のエスカレーション**: タブ改名要望に対し「全般 / General」という**ユーザーが却下した語**を当ててしまい、「ちゃんとコメント読んだ？」と再指摘されていた。コメントは読んでいたが、指摘の**具体的な方向（学習の流れを示す言葉）**を制約として扱えていなかった（新規落とし穴 A-13）。
+  - **issue #184（要対応チェックリスト）**: これまで要人間対応は README の箇条書きだけで、俯瞰用のチェックリスト表示という発想の仕組みが無かった。
+- **仕組みへの反映**:
+  1. A-13（却下語の言い換え再提出禁止）と A-14（環境は毎回変わりうる／`/tmp` ビュー差）を playbook に追記。
+  2. `scripts/list-action-required.mjs` を実装し、要対応の俯瞰を機械化（機能 3）。
+  3. `docs/index.md` / `docs/action-required/README.md` の**一覧末尾の同時追記が繰り返しコンフリクト源になっている**点は、A-7 のコンフリクト解消運用で吸収できているため、今回はプロンプト変更ではなく playbook の既存知見（双方保持）で対応した。
+- **今回詰まった点**: `fs_write` で書いた `/tmp/pr-184-body.md` が `bash` ツールから見えず PR 作成が一度失敗した。同一 bash コマンド内でヒアドキュメントから `/var/tmp/asn-scratch/` へ書いて `-F body=@<path>` で渡して解決（A-14 に記録）。
+
+## 自己拡張提案ログ（実績・続き）
+
+### 2026-09-06: 今回のプロンプト自己拡張の要否判断（機能 4）
+
+- **日付**: 2026-09-06
+- **対象**: `.kiro/agents/github-issue-resolver.md`（プロンプト本体）。
+- **判断**: 今回得た知見（A-13 却下語の言い換え禁止 / A-14 環境は毎回変わりうる）は、いずれも**既存プロンプトのゲートで対応済みか、playbook 側で管理すべき粒度**と判断し、プロンプト本体の変更は行わない。
+  - A-13 は「コメントファースト事前ゲート」（手順 1）の**運用の質**の問題であり、手順そのものの追加・移設で防げる性質ではない（コメントは実際に読んでいた）。同じ失敗が二度起きうるが、防止は「読んだコメント内の却下語・例示語を制約化する」という**判断の作法**なので、プロンプトに新ゲートを増やすより playbook の落とし穴として蓄積する方が適切（プロンプト肥大を避ける方針に沿う）。
+  - A-14 は既に手順 0（実行環境の判定）が存在し、今回それが正しく機能した（Linux/bash と判定して `env -u NODE_OPTIONS` を前置き）。プロンプト変更は不要で、実測事実を playbook に足すだけでよい。
+- **想定リスク**: なし（変更なし・制約緩和なし）。
+- **状態**: プロンプト本体は無変更。知見は playbook（A-13 / A-14）と本ログに記録。
+
 ## 更新履歴
 
+- 2026-09-06: `scripts/list-action-required.mjs`（要人間対応チェックリスト生成・issue #184 / PR #185）の実績エントリ、今回のレトロスペクティブ（open PR 3 件のコンフリクト解消 + 追随、#182 のタブ名エスカレーション、#184）、およびプロンプト自己拡張の要否判断（今回は本体無変更・知見は playbook A-13 / A-14 へ）を追記。
 - 2026-09-06: カバレッジ分析 `scripts/analyze-resource-coverage.mjs` を実装し、効率化ログに実績エントリを追加（データ全文投入からサマリ読み込みへ置換し 99% 以上のトークン削減、13 試験 206 タスクの実測）。あわせて「試験ガイド文言ドリブンの探索方針（1 件以上を必ず確保）」をプロンプトへ制度化する自己拡張提案（実装済み）を追記。従来のプロンプトが「リンク切れの差し替え・削除」に偏り、削除でカバレッジが下がるバイアスを持っていたことが根本原因。
 - 2026-09-06: トリアージに**オープン PR 監査**（全オープン PR の `mergeable_state` と未対応コメント）を追加し、issue に紐づかない PR（`chore/...` / `docs/...`）が構造的に見落とされる問題を解消。紐づけ判定を `^[a-z]+/issue-<N>` と `Refs` 対応へ拡張。あわせて実行環境の断定をやめ（実測は Windows + PowerShell 7 / Playwright 完全動作）、スクラッチ置き場・回帰テストの非空虚性確認・`page.route` による AI 経路のスタブ検証を手順として明文化。
 - 2026-09-06: エージェントプロンプトの実行環境前提を「Linux/bash・外部アクセス不可」の断定から**環境判定必須**へ改める自己拡張（実装済み）を追記。あわせて「なぜ今回まで全試験の棚卸しが手つかずだったのか」の振り返りと、仕組みへの反映を記録。
