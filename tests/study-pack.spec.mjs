@@ -119,6 +119,25 @@ test.describe('buildResourceLinksMarkdown (#165)', () => {
     expect(md).toContain('## Compute');
     expect(md).toContain('(https://example.com/guide-en)');
   });
+
+  test('accepts an exam array and produces an all-exams Markdown with per-exam H2 sections', () => {
+    const examA = makeFixtureExam();
+    const examB = {
+      id: 'fix-c02', code: 'FIX-C02', title: 'Second Exam',
+      steps: [{
+        id: 's1', title: 'Storage', jpTitle: 'ストレージ',
+        resources: [{ key: 'docs', label: 'ドキュメント', items: [
+          { title: 'S3 Docs', url: 'https://example.com/s3', note: 's3 note' },
+        ]}],
+      }],
+    };
+    const md = buildResourceLinksMarkdown([examA, examB], { locale: 'ja' });
+    expect(md).toContain('# 全試験 - 参考リンク集');
+    expect(md).toContain('## FIX-C01 - Fixture Exam');
+    expect(md).toContain('## FIX-C02 - Second Exam');
+    expect(md).toContain('### 概要');
+    expect(md).toContain('- [S3 Docs](https://example.com/s3)');
+  });
 });
 
 test.describe('buildResourceLinksCsv (#165)', () => {
@@ -140,6 +159,25 @@ test.describe('buildResourceLinksCsv (#165)', () => {
     expect(lines[1]).toContain('"Guide ""PDF"""');
     expect(lines[1]).toContain('"note ""quoted"""');
   });
+
+  test('accepts an exam array and concatenates rows from all exams', () => {
+    const examA = makeFixtureExam();
+    const examB = {
+      id: 'fix-c02', code: 'FIX-C02', title: 'Second Exam',
+      steps: [{
+        id: 's1', title: 'Storage', jpTitle: 'ストレージ',
+        resources: [{ key: 'docs', label: 'ドキュメント', items: [
+          { title: 'S3 Docs', url: 'https://example.com/s3', note: 's3 note' },
+        ]}],
+      }],
+    };
+    const csv = buildResourceLinksCsv([examA, examB], { locale: 'ja' });
+    const lines = csv.replace(/\r\n$/, '').split('\r\n');
+    // header + 2 from examA + 1 from examB = 4 lines
+    expect(lines).toHaveLength(4);
+    expect(lines[3]).toContain('FIX-C02');
+    expect(lines[3]).toContain('S3 Docs');
+  });
 });
 
 test.describe('buildStudyRouteMarkdown (#165)', () => {
@@ -160,6 +198,25 @@ test.describe('buildStudyRouteMarkdown (#165)', () => {
     expect(md).toContain('- Cloud basics');
     expect(md).toContain('- Shared responsibility model');
     expect(md).toContain('- Learn EC2');
+  });
+
+  test('accepts an exam array and produces an all-exams study route', () => {
+    const examA = makeFixtureExam();
+    const examB = {
+      id: 'fix-c02', code: 'FIX-C02', title: 'Second Exam',
+      steps: [{
+        id: 's1', title: 'Storage', jpTitle: 'ストレージ',
+        description: ['S3 を学ぶ'],
+        resources: [],
+      }],
+    };
+    const md = buildStudyRouteMarkdown([examA, examB], { locale: 'ja' });
+    expect(md).toContain('# 全試験 - 学習ルート');
+    expect(md).toContain('## FIX-C01 - Fixture Exam');
+    expect(md).toContain('## FIX-C02 - Second Exam');
+    expect(md).toContain('### ステップ 1: 概要');
+    expect(md).toContain('### ステップ 1: ストレージ');
+    expect(md).toContain('- S3 を学ぶ');
   });
 });
 

@@ -806,32 +806,34 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     try { return getExamById(examId); } catch { return null; }
   }
 
+  // All four buttons share one empty-selection contract: when a specific exam tab
+  // is active they emit a per-exam file, otherwise (default "All" tab) they fall back
+  // to an all-exams file. The generators accept a single exam OR the full exams array,
+  // so every click always produces a download (no silent dead-ends).
+  const studyExamSuffix = (exam) => (exam ? exam.id : 'all');
+
   els.studyPackLinksMdBtn?.addEventListener('click', () => {
     const exam = selectedStudyExam();
-    if (!exam) return;
-    const md = buildResourceLinksMarkdown(exam, { locale: getLocale() });
-    downloadStudyPackText(md, `resource-links-${exam.id}.md`, 'text/markdown;charset=utf-8');
+    const md = buildResourceLinksMarkdown(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(md, `resource-links-${studyExamSuffix(exam)}.md`, 'text/markdown;charset=utf-8');
   });
 
   els.studyPackLinksCsvBtn?.addEventListener('click', () => {
     const exam = selectedStudyExam();
-    if (!exam) return;
-    const csv = buildResourceLinksCsv(exam, { locale: getLocale() });
-    downloadStudyPackText(csv, `resource-links-${exam.id}.csv`, 'text/csv;charset=utf-8', { bom: true });
+    const csv = buildResourceLinksCsv(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(csv, `resource-links-${studyExamSuffix(exam)}.csv`, 'text/csv;charset=utf-8', { bom: true });
   });
 
   els.studyPackRouteMdBtn?.addEventListener('click', () => {
     const exam = selectedStudyExam();
-    if (!exam) return;
-    const md = buildStudyRouteMarkdown(exam, { locale: getLocale() });
-    downloadStudyPackText(md, `study-route-${exam.id}.md`, 'text/markdown;charset=utf-8');
+    const md = buildStudyRouteMarkdown(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(md, `study-route-${studyExamSuffix(exam)}.md`, 'text/markdown;charset=utf-8');
   });
 
-  // Glossary: per-exam when an exam is selected, otherwise across all exams.
   els.studyPackGlossaryCsvBtn?.addEventListener('click', () => {
     const exam = selectedStudyExam();
     const csv = buildGlossaryCsv(exam || exams, { locale: getLocale() });
-    downloadStudyPackText(csv, `glossary${exam ? '-' + exam.id : '-all'}.csv`, 'text/csv;charset=utf-8', { bom: true });
+    downloadStudyPackText(csv, `resource-glossary-${studyExamSuffix(exam)}.csv`, 'text/csv;charset=utf-8', { bom: true });
   });
 
   // --- Schedule Review Button ---

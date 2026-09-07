@@ -14,8 +14,17 @@
  *  - locale オプション（'ja' | 'en'）を受け取り、'en' のときは *En フィールド
  *    （titleEn / noteEn / urlEn / descriptionEn / knowledgeEn / labelEn）を優先し、
  *    無ければ日本語フィールドへフォールバックする。既定は 'ja'。
+ *  - 各ビルダー（buildResourceLinksMarkdown / buildResourceLinksCsv /
+ *    buildStudyRouteMarkdown / buildGlossaryCsv）は「単一の試験オブジェクト」でも
+ *    「試験オブジェクトの配列（ALL_EXAMS）」でも受け付ける。配列を渡すと全試験を
+ *    連結した“全試験まとめ”アセットを生成する。これにより UI 側は、特定試験が
+ *    選択されていない（既定の「すべて」タブ）状態でも 4 ボタンすべてで全試験版を
+ *    ダウンロードでき、空選択時の挙動が 4 ボタンで一貫する。
  *
- * グロッサリー（用語集）の定義:
+ * グロッサリー（リソース用語集）の定義:
+ *  これは「AWS 用語の概念定義集」ではなく、リソースのタイトル→ノートを引いた
+ *  “リソース索引（resource glossary）”である。UI ラベルも「リソース用語集」とし、
+ *  概念定義を含むかのような誤解を避ける。
  *  試験データには専用の用語集フィールドが無いため、グロッサリーは resources[].items[]
  *  から決定論的に導出する。各リソース項目を 1 用語とみなし、
  *    term       = 項目タイトル（en なら titleEn、無ければ title）
@@ -35,6 +44,11 @@
  */
 
 import { escapeCsvField } from './quizCsv.js';
+
+/** 単一試験 or 試験配列を、null/undefined を除いた試験配列へ正規化する。 */
+function normalizeExams(exams) {
+  return (Array.isArray(exams) ? exams : [exams]).filter(Boolean);
+}
 
 /** locale に応じて主フィールド / *En フィールドのどちらかを返す（無ければフォールバック）。 */
 function pick(locale, primary, en) {
@@ -125,25 +139,11 @@ export function collectResourceItems(exam, { locale = 'ja' } = {}) {
   return out;
 }
 
-/**
- * 試験のリソースリンクを、ステップ（ドメイン）ごとにグルーピングした Markdown で返す。
- * NotebookLM の「ソース」として貼り付けやすいよう、各項目を Markdown リンクにする。
- *
- * @param {object} exam
- * @param {{ locale?: string }} [opts]
- * @returns {string} Markdown 文書（末尾改行あり）。
- */
-export function buildResourceLinksMarkdown(exam, { locale = 'ja' } = {}) {
+/** 1 試験分のリソースリンク Markdown 本文（見出しレベルは baseLevel 起点）。 */
+function resourceLinksMarkdownBody(exam, locale, baseLevel) {
   const en = locale === 'en';
   const items = collectResourceItems(exam, { locale });
-  const examCode = exam?.code || exam?.id || '';
-  const examTitle = pick(locale, exam?.title, exam?.title);
   const lines = [];
-
-  lines.push(`# ${[examCode, examTitle].filter(Boolean).join(' - ')} ${en ? 'Resource Links' : '参考リンク集'}`.trim());
-  lines.push('');
-  lines.push(en ? `Generated: ${new Date().toISOString().slice(0, 10)}` : `生成日: ${new Date().toISOString().slice(0, 10)}`);
-  lines.push('');
 
   // ステップ（ドメイン）ごとにグルーピング。collectResourceItems はステップ順を保つ。
   const byStep = new Map();
@@ -155,13 +155,16 @@ export function buildResourceLinksMarkdown(exam, { locale = 'ja' } = {}) {
 
   if (byStep.size === 0) {
     lines.push(en ? '_No resources found._' : '_リソースが見つかりませんでした。_');
-    return lines.join('\n') + '\n';
+    lines.push('');
+    return lines;
   }
 
+  const h2 = '#'.repeat(baseLevel + 1);
+  const h3 = '#'.repeat(baseLevel + 2);
   for (const { title, items: stepItems } of byStep.values()) {
-    lines.push(`## ${title || (en ? 'Resources' : 'リソース')}`);
+    lines.push(`${h2} ${title || (en ? 'Resources' : 'リソース')}`);
     lines.push('');
-    // グループ（リソース種別）ごとに H3 を付ける。
+    // グループ（リソース種別）ごとに次の見出しレベルを付ける。
     const byGroup = new Map();
     for (const it of stepItems) {
       const gk = it.group || '';
@@ -170,7 +173,7 @@ export function buildResourceLinksMarkdown(exam, { locale = 'ja' } = {}) {
     }
     for (const [group, groupItems] of byGroup) {
       if (group) {
-        lines.push(`### ${group}`);
+        lines.push(`${h3} ${group}`);
         lines.push('');
       }
       for (const it of groupItems) {
@@ -182,6 +185,50 @@ export function buildResourceLinksMarkdown(exam, { locale = 'ja' } = {}) {
       }
       lines.push('');
     }
+  }
+  return lines;
+}
+
+/**
+ * 試験のリソースリンクを、ステップ（ドメイン）ごとにグルーピングした Markdown で返す。
+ * NotebookLM の「ソース」として貼り付けやすいよう、各項目を Markdown リンクにする。
+ * 単一の試験でも、試験配列（ALL_EXAMS）でも受け付ける。配列のときは試験ごとに
+ * H2 セクションへまとめ、その下にステップ／グループを H3/H4 で展開する。
+ *
+ * @param {object|Array<object>} exams - 単一試験または試験配列。
+ * @param {{ locale?: string }} [opts]
+ * @returns {string} Markdown 文書（末尾改行あり）。
+ */
+export function buildResourceLinksMarkdown(exams, { locale = 'ja' } = {}) {
+  const en = locale === 'en';
+  const list = normalizeExams(exams);
+  const multi = Array.isArray(exams) && list.length > 1;
+  const lines = [];
+
+  const title = multi
+    ? (en ? 'All Exams - Resource Links' : '全試験 - 参考リンク集')
+    : `${[list[0]?.code || list[0]?.id || '', pick(locale, list[0]?.title, list[0]?.title)].filter(Boolean).join(' - ')} ${en ? 'Resource Links' : '参考リンク集'}`.trim();
+  lines.push(`# ${title}`.trim());
+  lines.push('');
+  lines.push(en ? `Generated: ${new Date().toISOString().slice(0, 10)}` : `生成日: ${new Date().toISOString().slice(0, 10)}`);
+  lines.push('');
+
+  if (list.length === 0) {
+    lines.push(en ? '_No resources found._' : '_リソースが見つかりませんでした。_');
+    return lines.join('\n') + '\n';
+  }
+
+  if (multi) {
+    // 全試験版: 各試験を H2 セクションにし、本文の見出しは H3 起点にする。
+    for (const exam of list) {
+      const examCode = exam?.code || exam?.id || '';
+      const examTitle = pick(locale, exam?.title, exam?.title);
+      lines.push(`## ${[examCode, examTitle].filter(Boolean).join(' - ')}`.trim());
+      lines.push('');
+      lines.push(...resourceLinksMarkdownBody(exam, locale, 2));
+    }
+  } else {
+    lines.push(...resourceLinksMarkdownBody(list[0], locale, 1));
   }
 
   return lines.join('\n').replace(/\n+$/, '\n');
@@ -202,66 +249,51 @@ export const RESOURCE_CSV_HEADERS = [
 
 /**
  * 試験のリソースリンクを CSV 文字列で返す（RFC 4180・CRLF・末尾改行あり）。
- * @param {object} exam
+ * 単一の試験でも、試験配列（ALL_EXAMS）でも受け付ける。配列のときは試験ごとの
+ * 行を順に連結する（examId/examCode 列で試験を区別できる）。
+ * @param {object|Array<object>} exams - 単一試験または試験配列。
  * @param {{ locale?: string }} [opts]
  * @returns {string}
  */
-export function buildResourceLinksCsv(exam, { locale = 'ja' } = {}) {
+export function buildResourceLinksCsv(exams, { locale = 'ja' } = {}) {
   const rows = [RESOURCE_CSV_HEADERS.map(escapeCsvField).join(',')];
-  for (const it of collectResourceItems(exam, { locale })) {
-    const cells = [
-      it.examId,
-      it.examCode,
-      it.stepId,
-      it.stepTitle,
-      it.group,
-      it.title,
-      it.url,
-      it.note,
-      it.recommend ? 'true' : 'false',
-    ];
-    rows.push(cells.map(escapeCsvField).join(','));
+  for (const exam of normalizeExams(exams)) {
+    for (const it of collectResourceItems(exam, { locale })) {
+      const cells = [
+        it.examId,
+        it.examCode,
+        it.stepId,
+        it.stepTitle,
+        it.group,
+        it.title,
+        it.url,
+        it.note,
+        it.recommend ? 'true' : 'false',
+      ];
+      rows.push(cells.map(escapeCsvField).join(','));
+    }
   }
   return rows.join('\r\n') + '\r\n';
 }
 
-/**
- * 試験のステップから学習ルート（study route）Markdown を生成する。
- * storage.js の exportQuizHistory のマークダウンと同じトーン・構造を踏襲する
- * （先頭 H1 に試験名＋生成日、各ステップを H2、要点を箇条書き）。
- *
- * @param {object} exam
- * @param {{ locale?: string }} [opts]
- * @returns {string} Markdown 文書（末尾改行あり）。
- */
-export function buildStudyRouteMarkdown(exam, { locale = 'ja' } = {}) {
+/** 1 試験分の学習ルート本文（ステップ見出しは stepLevel、既定 H2）。 */
+function studyRouteMarkdownBody(exam, locale, stepLevel) {
   const en = locale === 'en';
-  const examCode = exam?.code || exam?.id || '';
-  const examTitle = pick(locale, exam?.title, exam?.title);
-  const subtitle = pick(locale, exam?.subtitle, exam?.subtitleEn);
   const lines = [];
-
-  lines.push(`# ${[examCode, examTitle].filter(Boolean).join(' - ')} ${en ? 'Study Route' : '学習ルート'}`.trim());
-  lines.push('');
-  if (subtitle) {
-    lines.push(subtitle);
-    lines.push('');
-  }
-  lines.push(en ? `Generated: ${new Date().toISOString().slice(0, 10)}` : `生成日: ${new Date().toISOString().slice(0, 10)}`);
-  lines.push('');
-
   const steps = Array.isArray(exam?.steps) ? exam.steps : [];
   if (steps.length === 0) {
     lines.push(en ? '_No steps found._' : '_ステップが見つかりませんでした。_');
-    return lines.join('\n') + '\n';
+    lines.push('');
+    return lines;
   }
 
+  const stepHeading = '#'.repeat(stepLevel);
   let n = 0;
   for (const step of steps) {
     n++;
     lines.push('---');
     lines.push('');
-    lines.push(`## ${en ? 'Step' : 'ステップ'} ${n}: ${stepTitleOf(step, locale)}`);
+    lines.push(`${stepHeading} ${en ? 'Step' : 'ステップ'} ${n}: ${stepTitleOf(step, locale)}`);
     lines.push('');
 
     const knowledge = stepKnowledgeOf(step, locale);
@@ -281,7 +313,64 @@ export function buildStudyRouteMarkdown(exam, { locale = 'ja' } = {}) {
       lines.push('');
     }
   }
+  return lines;
+}
 
+/**
+ * 試験のステップから学習ルート（study route）Markdown を生成する。
+ * storage.js の exportQuizHistory のマークダウンと同じトーン・構造を踏襲する
+ * （先頭 H1 に試験名＋生成日、各ステップを H2、要点を箇条書き）。
+ * 単一の試験でも、試験配列（ALL_EXAMS）でも受け付ける。配列のときは試験ごとに
+ * H2 セクションへまとめ、ステップ見出しを H3 に下げる。
+ *
+ * @param {object|Array<object>} exams - 単一試験または試験配列。
+ * @param {{ locale?: string }} [opts]
+ * @returns {string} Markdown 文書（末尾改行あり）。
+ */
+export function buildStudyRouteMarkdown(exams, { locale = 'ja' } = {}) {
+  const en = locale === 'en';
+  const list = normalizeExams(exams);
+  const multi = Array.isArray(exams) && list.length > 1;
+  const lines = [];
+
+  if (multi) {
+    lines.push(`# ${en ? 'All Exams - Study Route' : '全試験 - 学習ルート'}`.trim());
+    lines.push('');
+    lines.push(en ? `Generated: ${new Date().toISOString().slice(0, 10)}` : `生成日: ${new Date().toISOString().slice(0, 10)}`);
+    lines.push('');
+    if (list.length === 0) {
+      lines.push(en ? '_No steps found._' : '_ステップが見つかりませんでした。_');
+      return lines.join('\n') + '\n';
+    }
+    for (const exam of list) {
+      const examCode = exam?.code || exam?.id || '';
+      const examTitle = pick(locale, exam?.title, exam?.title);
+      lines.push(`## ${[examCode, examTitle].filter(Boolean).join(' - ')}`.trim());
+      lines.push('');
+      lines.push(...studyRouteMarkdownBody(exam, locale, 3));
+    }
+    return lines.join('\n').replace(/\n+$/, '\n');
+  }
+
+  const exam = list[0];
+  const examCode = exam?.code || exam?.id || '';
+  const examTitle = pick(locale, exam?.title, exam?.title);
+  const subtitle = pick(locale, exam?.subtitle, exam?.subtitleEn);
+  lines.push(`# ${[examCode, examTitle].filter(Boolean).join(' - ')} ${en ? 'Study Route' : '学習ルート'}`.trim());
+  lines.push('');
+  if (subtitle) {
+    lines.push(subtitle);
+    lines.push('');
+  }
+  lines.push(en ? `Generated: ${new Date().toISOString().slice(0, 10)}` : `生成日: ${new Date().toISOString().slice(0, 10)}`);
+  lines.push('');
+
+  if (!exam) {
+    lines.push(en ? '_No steps found._' : '_ステップが見つかりませんでした。_');
+    return lines.join('\n') + '\n';
+  }
+
+  lines.push(...studyRouteMarkdownBody(exam, locale, 2));
   return lines.join('\n').replace(/\n+$/, '\n');
 }
 
@@ -299,12 +388,10 @@ export const GLOSSARY_CSV_HEADERS = ['term', 'definition', 'source', 'examCode']
  * @returns {string}
  */
 export function buildGlossaryCsv(exams, { locale = 'ja' } = {}) {
-  const list = Array.isArray(exams) ? exams : [exams];
   const rows = [GLOSSARY_CSV_HEADERS.map(escapeCsvField).join(',')];
   const seenTerms = new Set();
 
-  for (const exam of list) {
-    if (!exam) continue;
+  for (const exam of normalizeExams(exams)) {
     for (const it of collectResourceItems(exam, { locale })) {
       const term = it.title;
       if (!term) continue;

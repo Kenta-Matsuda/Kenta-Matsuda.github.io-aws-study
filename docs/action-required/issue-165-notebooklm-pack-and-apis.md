@@ -24,11 +24,14 @@ issue #165 のフィードバック（PR #180 の 2026-09-06 追加コメント�
 
 - 一次ソースのドメイン別リンク集（Markdown / CSV）
 - 学習ルート Markdown
-- 用語集 CSV
+- リソース用語集 CSV（AWS 用語の概念定義集ではなく、リソースのタイトル→ノートを引いた索引）
 
 これらは `js/studyPack.js`（DOM・localStorage 非依存のピュア関数群）で生成し、学習履歴モーダルの
 フッターに追加した 4 ボタン（`studyPackLinksMdBtn` / `studyPackLinksCsvBtn` / `studyPackRouteMdBtn` /
 `studyPackGlossaryCsvBtn`）から `Blob` ダウンロードできる（CSV は Excel 対策の UTF-8 BOM 付き）。
+特定の試験タブを選んでいればその試験単体版を、既定の「すべて」タブでは全試験まとめ版を出力する。
+4 ボタンはこの空選択時の挙動を統一しており（generator が単一試験・試験配列のどちらも受け付ける）、
+どのボタンをクリックしても必ずファイルがダウンロードされる（無反応のクリックは無い）。
 1 の問題集 CSV と同じ経路・同じ設計方針（ピュア関数へ切り出し `tests/study-pack.spec.mjs` で単体テスト）。
 
 本ドキュメントは残る要人間対応（下記）を整理する。**これらは AWS 操作 / バックエンドが本質的に必要なため未対応のまま**:
@@ -57,7 +60,7 @@ issue #165 のフィードバック（PR #180 の 2026-09-06 追加コメント�
 
 1. **クライアントで個別提供できる範囲を先に出す**（バックエンド不要）: ✅ 実装済み
    - 問題集 CSV: PR #180 で対応済み。
-   - 学習ルート Markdown / 用語集 CSV: `js/studyPack.js` の `buildStudyRouteMarkdown` / `buildGlossaryCsv` で
+   - 学習ルート Markdown / リソース用語集 CSV: `js/studyPack.js` の `buildStudyRouteMarkdown` / `buildGlossaryCsv` で
      `js/data/*.js`（学習ステップ）から生成し、`Blob` ダウンロードできる（実装済み）。
    - 一次ソースのリンク集: `js/studyPack.js` の `buildResourceLinksMarkdown` / `buildResourceLinksCsv` で
      `js/data/*.js` のリソース URL をドメイン別に列挙して Markdown / CSV 出力する（実装済み。URL 収集は
@@ -88,8 +91,9 @@ issue #165 のフィードバック（PR #180 の 2026-09-06 追加コメント�
 
 ## 次のアクション
 
-- ✅ 学習ルート Markdown / 用語集 CSV / 一次ソースリンク集の**個別ダウンロード**を、問題集 CSV と同じ経路で
-  追加済み（`js/studyPack.js` + 学習履歴モーダルの 4 ボタン、バックエンド不要）。
+- ✅ 学習ルート Markdown / リソース用語集 CSV / 一次ソースリンク集の**個別ダウンロード**を、問題集 CSV と同じ経路で
+  追加済み（`js/studyPack.js` + 学習履歴モーダルの 4 ボタン、バックエンド不要）。特定試験タブ選択時はその試験単体版、
+  既定の「すべて」タブでは全試験まとめ版を出力し、4 ボタンの空選択時の挙動を統一（無反応クリック無し）。
 - ⏭️ NotebookLM パック（クライアント生成 ZIP・単一ファイル）は、依存無し ZIP ライターの採否を別 issue で判断してから
   束ねる形にすると段階的で安全（各 generator の文字列出力を集めるだけで済む構造にしてある）。
 - ⚠️ 検索 API / 分析 API の公開エンドポイントと、一次ソースの継続収集・インデックス更新パイプラインは

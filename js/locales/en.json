@@ -27,7 +27,7 @@
     "resourceLinksMd": "Resource Links (Markdown)",
     "resourceLinksCsv": "Resource Links (CSV)",
     "studyRouteMd": "Study Route (Markdown)",
-    "glossaryCsv": "Glossary (CSV)"
+    "glossaryCsv": "Resource Glossary (CSV)"
   },
   "header": {
     "subtitle": "Study Resource Navigator based on the Exam Guide",
