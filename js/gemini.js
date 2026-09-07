@@ -155,7 +155,22 @@ async function consumeSseText({ response, onTextDelta }) {
   return accumulated;
 }
 
-export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, history }) {
+/**
+ * Normalize the built-in tool list for the REST API.
+ * Accepts e.g. [{ url_context: {} }] and drops anything falsy.
+ */
+function normalizeTools(tools) {
+  if (!Array.isArray(tools)) return [];
+  return tools.filter((tool) => tool && typeof tool === 'object');
+}
+
+/**
+ * @param {Object} opts
+ * @param {Array<Object>} [opts.tools] Built-in tools for grounding,
+ *   e.g. `[{ url_context: {} }]`. Automatically dropped (and the request
+ *   retried) when the selected model rejects them.
+ */
+export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, history, tools }) {
   const apiKey = getApiKey();
   if (!apiKey) {
     onRequireApiKey?.();
@@ -172,10 +187,12 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
   }
   contents.push({ role: 'user', parts: [{ text: userPrompt }] });
 
-  const payload = {
+  const requestedTools = normalizeTools(tools);
+  const buildPayload = (withTools) => ({
     contents,
     systemInstruction: { parts: [{ text: systemPrompt }] },
-  };
+    ...(withTools && requestedTools.length ? { tools: requestedTools } : {}),
+  });
 
   const delays = [1000, 2000, 4000];
 
@@ -184,13 +201,14 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
 
   for (const model of models) {
     const url = buildUrl({ model, apiKey });
+    let useTools = requestedTools.length > 0;
 
     for (let i = 0; i < 3; i += 1) {
       try {
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(buildPayload(useTools)),
         });
 
         if (!response.ok) {
@@ -199,6 +217,15 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
             const detail = await readErrorMessage(response);
             lastError = new Error(detail || `Server Error: 404 (model: ${model})`);
             break; // try next model
+          }
+
+          // A model or API revision that does not support the requested built-in
+          // tools answers 400. Grounding is best-effort, so drop the tools and
+          // retry instead of failing the whole request.
+          if (response.status === 400 && useTools) {
+            useTools = false;
+            i -= 1; // the downgrade must not consume a retry attempt
+            continue;
           }
 
           if (response.status === 400 || response.status === 401 || response.status === 403) {
@@ -237,12 +264,19 @@ export async function callGemini({ userPrompt, systemPrompt, onRequireApiKey, hi
   return describeFailure(lastError);
 }
 
+/**
+ * @param {Object} opts
+ * @param {Array<Object>} [opts.tools] Built-in tools for grounding,
+ *   e.g. `[{ url_context: {} }]`. Automatically dropped (and the request
+ *   retried) when the selected model rejects them.
+ */
 export async function callGeminiStream({
   userPrompt,
   systemPrompt,
   onRequireApiKey,
   onTextDelta,
   history,
+  tools,
 }) {
   const apiKey = getApiKey();
   if (!apiKey) {
@@ -260,10 +294,12 @@ export async function callGeminiStream({
   }
   contents.push({ role: 'user', parts: [{ text: userPrompt }] });
 
-  const payload = {
+  const requestedTools = normalizeTools(tools);
+  const buildPayload = (withTools) => ({
     contents,
     systemInstruction: { parts: [{ text: systemPrompt }] },
-  };
+    ...(withTools && requestedTools.length ? { tools: requestedTools } : {}),
+  });
 
   const delays = [1000, 2000, 4000];
   const models = getModelCandidates();
@@ -271,6 +307,7 @@ export async function callGeminiStream({
 
   for (const model of models) {
     const url = buildStreamUrl({ model, apiKey });
+    let useTools = requestedTools.length > 0;
 
     for (let i = 0; i < 3; i += 1) {
       try {
@@ -278,7 +315,7 @@ export async function callGeminiStream({
         const response = await fetch(url, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(buildPayload(useTools)),
         });
 
         if (!response.ok) {
@@ -286,6 +323,13 @@ export async function callGeminiStream({
             const detail = await readErrorMessage(response);
             lastError = new Error(detail || `Server Error: 404 (model: ${model})`);
             break;
+          }
+
+          // Tool-less retry: see callGemini for the rationale.
+          if (response.status === 400 && useTools) {
+            useTools = false;
+            i -= 1;
+            continue;
           }
 
           if (response.status === 400 || response.status === 401 || response.status === 403) {

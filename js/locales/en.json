@@ -9,6 +9,8 @@
     "copyFailed": "Copy failed",
     "good": "Good",
     "bad": "Bad",
+    "helpful": "Helpful",
+    "notHelpful": "Not helpful / needs improvement",
     "retry": "Retry",
     "next": "Next",
     "prev": "Previous",
@@ -16,6 +18,8 @@
     "all": "All",
     "error": "Error",
     "export": "Export",
+    "exportMarkdown": "Export as Markdown",
+    "exportCsv": "Export as CSV",
     "send": "Send",
     "loading": "Loading..."
   },
