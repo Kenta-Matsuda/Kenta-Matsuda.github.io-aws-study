@@ -1547,6 +1547,23 @@
                                 </div>
                             </div>
                         </div>
+                        <!-- Slide 3b: Planned Exam Date Countdown (issue #200) -->
+                        <div class="dashboard-carousel-slide">
+                            <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
+                                <div id="examDatePanelTitle" class="text-xs font-bold text-gray-500 uppercase tracking-wide" data-i18n="examDate.titleShort">Exam Date</div>
+                                <div class="mt-2 flex items-center gap-3">
+                                    <span class="text-3xl">🗓️</span>
+                                    <span id="examDateCountdown" class="text-3xl font-extrabold text-gray-900 font-mono">—</span>
+                                </div>
+                                <p id="examDateMessage" class="text-sm text-gray-500 mt-3" data-i18n="examDate.empty">Register your planned exam date to see a countdown.</p>
+                                <div class="mt-4 flex flex-wrap items-center gap-2">
+                                    <input id="examDateInput" type="date" class="text-sm border border-gray-300 rounded-md px-2 py-1 bg-white text-gray-800" aria-label="受験予定日" data-i18n-aria="examDate.inputLabel">
+                                    <button id="examDateSaveBtn" type="button" class="text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white rounded-md px-3 py-1.5" data-i18n="examDate.save">Save</button>
+                                    <button id="examDateClearBtn" type="button" class="hidden text-xs font-medium text-gray-500 hover:text-gray-700 px-2 py-1.5" data-i18n="examDate.clear">Clear</button>
+                                </div>
+                                <button id="examDatePassedBtn" type="button" class="hidden mt-3 text-xs font-bold bg-green-600 hover:bg-green-700 text-white rounded-md px-3 py-1.5" data-i18n="examDate.markPassed">I passed! 🎉</button>
+                            </div>
+                        </div>
                         <!-- Slide 4: Title -->
                         <div class="dashboard-carousel-slide">
                             <div class="rounded-xl border border-gray-200 bg-gray-50 p-5 md:p-6 h-full">
@@ -2275,6 +2292,24 @@
                     <div id="streakMilestoneToastText" class="text-sm text-gray-700 mt-1">-</div>
                 </div>
                 <button id="streakMilestoneToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Pass Celebration Toast (issue #200; fixed, dedicated timer) -->
+    <div id="examPassToast" class="hidden fixed top-24 right-4 z-[1100] max-w-sm">
+        <div class="bg-white border border-green-200 shadow-lg rounded-xl p-4">
+            <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-green-100 text-green-700 flex items-center justify-center flex-shrink-0">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <div class="flex-1">
+                    <div class="text-sm font-bold text-gray-900" data-i18n="examDate.passToastTitle">Congratulations!</div>
+                    <div id="examPassToastText" class="text-sm text-gray-700 mt-1">-</div>
+                </div>
+                <button id="examPassToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
                     <i class="fas fa-times"></i>
                 </button>
             </div>

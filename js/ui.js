@@ -30,6 +30,11 @@ import {
   getEffectiveTheme,
   getSmartReviewCombined,
   addReviewSchedule,
+  getExamDateEntry,
+  setExamDate,
+  clearExamDate,
+  markExamPassed,
+  markExamCelebrated,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { quizHistoryToCsv } from './quizCsv.js';
@@ -67,6 +72,11 @@ import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
 import { buildResourceIndex, searchResources, selectAiCandidates } from './resourceSearch.js';
+import {
+  describeExamSchedule,
+  messageKeyForStage,
+  shouldCelebratePass,
+} from './examSchedule.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -1714,6 +1724,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // ── Settings Modal: opt-in local study reminder ──
   wireStudyReminder(els);
 
+  // ── Dashboard: planned exam date countdown (issue #200) ──
+  wireExamDateControls(els);
+
   // 初期表示
   setExam(defaultExamId);
 
@@ -2267,6 +2280,18 @@ function getElements() {
     // Study reminder (opt-in local notification)
     studyReminderToggle: document.getElementById('studyReminderToggle'),
     studyReminderStatus: document.getElementById('studyReminderStatus'),
+
+    // Planned exam date countdown (issue #200)
+    examDatePanelTitle: document.getElementById('examDatePanelTitle'),
+    examDateInput: document.getElementById('examDateInput'),
+    examDateSaveBtn: document.getElementById('examDateSaveBtn'),
+    examDateClearBtn: document.getElementById('examDateClearBtn'),
+    examDatePassedBtn: document.getElementById('examDatePassedBtn'),
+    examDateCountdown: document.getElementById('examDateCountdown'),
+    examDateMessage: document.getElementById('examDateMessage'),
+    examPassToast: document.getElementById('examPassToast'),
+    examPassToastText: document.getElementById('examPassToastText'),
+    examPassToastCloseBtn: document.getElementById('examPassToastCloseBtn'),
 
     // Daily Highlight (narrative)
     dailyHighlight: document.getElementById('dailyHighlight'),
@@ -2829,6 +2854,9 @@ function renderXpDashboard({ els, exam, state }) {
   // Streak display
   renderStreakDisplay(els);
 
+  // Planned exam date countdown (issue #200)
+  renderExamDateWidget({ els, exam });
+
   // Opt-in local study reminder: only act when the user has enabled it.
   // No permission is requested here unless the user opted in (see wireStudyReminder).
   maybeFireStudyReminder(els);
@@ -3020,6 +3048,110 @@ function showStreakMilestoneToast({ els, days }) {
 
 function hideStreakMilestoneToast({ els }) {
   els.streakMilestoneToast?.classList?.add('hidden');
+}
+
+// ─── Planned Exam Date Countdown (issue #200) ───────────────
+//
+// 受験予定日を登録し、日が近づくにつれてダッシュボードのメッセージが変わる。合格を
+// マークするとお祝い（トースト + 紙吹雪）を一度だけ表示する。端末内（localStorage）で
+// 完結する単一ユーザー向け機能で、バックエンドや OS プッシュ通知は使わない。
+
+// カウントダウン中の試験を覚えておき、renderExamDateWidget を引数なしで再実行できるようにする。
+let currentExamForDate = null;
+
+function renderExamDateWidget({ els, exam }) {
+  if (!els.examDateInput) return;
+  currentExamForDate = exam || null;
+
+  const examId = exam?.id || '';
+  const entry = examId ? getExamDateEntry(examId) : null;
+
+  if (els.examDatePanelTitle && exam?.code) {
+    els.examDatePanelTitle.textContent = t('examDate.title', { exam: exam.code });
+  }
+
+  // Reflect stored date in the input.
+  els.examDateInput.value = entry?.date || '';
+
+  const hasDate = Boolean(entry?.date);
+  if (els.examDateClearBtn) els.examDateClearBtn.classList.toggle('hidden', !hasDate);
+
+  // Countdown + stage message.
+  if (entry?.passed) {
+    if (els.examDateCountdown) els.examDateCountdown.textContent = '🎉';
+    if (els.examDateMessage) els.examDateMessage.textContent = t('examDate.passedStatus');
+  } else if (hasDate) {
+    const { daysUntil, stage } = describeExamSchedule(entry.date, new Date());
+    if (els.examDateCountdown) {
+      if (stage === 'today') {
+        els.examDateCountdown.textContent = t('examDate.todayShort');
+      } else if (stage === 'past') {
+        els.examDateCountdown.textContent = t('examDate.pastShort');
+      } else {
+        els.examDateCountdown.textContent = t('examDate.daysShort', { days: daysUntil });
+      }
+    }
+    const key = messageKeyForStage(stage);
+    if (els.examDateMessage) {
+      els.examDateMessage.textContent = key ? t(key, { days: daysUntil }) : '';
+    }
+  } else {
+    if (els.examDateCountdown) els.examDateCountdown.textContent = '—';
+    if (els.examDateMessage) els.examDateMessage.textContent = t('examDate.empty');
+  }
+
+  // "Mark as passed" button only makes sense once a date exists and not already passed.
+  if (els.examDatePassedBtn) {
+    els.examDatePassedBtn.classList.toggle('hidden', !hasDate || entry?.passed === true);
+  }
+
+  // Fire the celebration once when passed && not yet celebrated.
+  if (entry && shouldCelebratePass({ passed: entry.passed, alreadyCelebrated: entry.celebrated })) {
+    markExamCelebrated(examId);
+    showExamPassToast({ els, exam });
+  }
+}
+
+function showExamPassToast({ els, exam }) {
+  if (!els.examPassToast || !els.examPassToastText) return;
+  els.examPassToastText.textContent = t('examDate.passToast', { exam: exam?.code || '' });
+  els.examPassToast.classList.remove('hidden');
+  launchConfetti(els.confettiCanvas);
+  window.clearTimeout?.(els.__examPassToastTimer);
+  els.__examPassToastTimer = window.setTimeout(() => {
+    hideExamPassToast({ els });
+  }, 5000);
+}
+
+function hideExamPassToast({ els }) {
+  els.examPassToast?.classList?.add('hidden');
+}
+
+// Wire the register / clear / mark-passed controls for the exam-date widget.
+function wireExamDateControls(els) {
+  els.examDateSaveBtn?.addEventListener('click', () => {
+    const examId = currentExamForDate?.id || '';
+    const value = String(els.examDateInput?.value || '').trim();
+    if (!examId || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+    setExamDate(examId, value);
+    renderExamDateWidget({ els, exam: currentExamForDate });
+  });
+
+  els.examDateClearBtn?.addEventListener('click', () => {
+    const examId = currentExamForDate?.id || '';
+    if (!examId) return;
+    clearExamDate(examId);
+    renderExamDateWidget({ els, exam: currentExamForDate });
+  });
+
+  els.examDatePassedBtn?.addEventListener('click', () => {
+    const examId = currentExamForDate?.id || '';
+    if (!examId) return;
+    markExamPassed(examId);
+    renderExamDateWidget({ els, exam: currentExamForDate });
+  });
+
+  els.examPassToastCloseBtn?.addEventListener('click', () => hideExamPassToast({ els }));
 }
 
 // ─── Study Reminder (opt-in local notification) ─────────────
