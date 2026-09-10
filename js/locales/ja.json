@@ -360,6 +360,7 @@
     "commonTitle": "共通学習リソース",
     "commonDescription": "すべてのAWS認定試験に共通する学習ステップ・リソースです。",
     "taskStatement": "Task Statement {{id}}",
+    "taskStatementToggle": "タスクステートメント",
     "knowledge": "必要な知識・スキル",
     "keyPoints": "ポイント",
     "recommend": "おススメ",

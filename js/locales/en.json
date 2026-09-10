@@ -360,6 +360,7 @@
     "commonTitle": "Common Learning Resources",
     "commonDescription": "Learning steps and resources common to all AWS certification exams.",
     "taskStatement": "Task Statement {{id}}",
+    "taskStatementToggle": "Task statement",
     "knowledge": "Required Knowledge & Skills",
     "keyPoints": "Key Points",
     "recommend": "Recommended",
