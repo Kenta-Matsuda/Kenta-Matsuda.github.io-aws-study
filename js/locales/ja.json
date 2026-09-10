@@ -372,6 +372,25 @@
     "nextAction": "次の1手"
   },
   "aiDisclaimer": "※注意: AIの生成結果は必ずしも正しくありません（誤りを含む可能性があります）。重要な判断は、AWS公式ドキュメント等の一次情報で確認してください。",
+  "search": {
+    "title": "リソースを検索",
+    "heading": "リソース横断検索",
+    "description": "全試験に掲載されている学習リソースを横断して検索できます。特定の試験に絞ることも、試験を絞らずにキーワードだけで全試験を検索することもできます。",
+    "examFilterLabel": "試験",
+    "allExams": "すべての試験",
+    "placeholder": "例: QuickSight、S3、セキュリティ",
+    "keywordButton": "検索",
+    "aiButton": "AI検索",
+    "resultsCount": "{{count}} 件の結果",
+    "noResults": "一致するリソースが見つかりませんでした。別のキーワードをお試しください。",
+    "emptyQuery": "検索したいキーワードを入力してください。",
+    "searching": "検索中...",
+    "aiSearching": "AIに問い合わせ中...",
+    "aiAnswerHeading": "AIのおすすめ",
+    "aiNeedsKey": "AI検索にはAPIキーが必要です。設定から登録してください。下にキーワード検索の結果を表示しています。",
+    "aiError": "AI検索に失敗しました。下にキーワード検索の結果を表示しています。",
+    "openResource": "リソースを開く"
+  },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
   }

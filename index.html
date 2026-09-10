@@ -1347,9 +1347,14 @@
                     </div>
                 </div>
 
-                <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2.5 transition" title="Settings" data-i18n-title="settings.title">
-                    <i class="fas fa-cog text-lg text-gray-300 hover:text-white"></i>
-                </button>
+                <div class="flex items-center gap-2">
+                    <button id="resourceSearchBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2.5 transition" title="Search Resources" data-i18n-title="search.title" data-i18n-aria="search.title" aria-label="Search Resources">
+                        <i class="fas fa-search text-lg text-gray-300 hover:text-white"></i>
+                    </button>
+                    <button id="settingsBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2.5 transition" title="Settings" data-i18n-title="settings.title">
+                        <i class="fas fa-cog text-lg text-gray-300 hover:text-white"></i>
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -2007,6 +2012,60 @@
                 <button id="apiKeySaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors" data-i18n="common.save">
                     Save
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Resource Search Modal (issue #189) -->
+    <div id="resourceSearchModal" class="modal" data-backdrop-close="true">
+        <div class="modal-content" style="max-width: 720px;">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                    <i class="fas fa-search text-gray-600 dark:text-gray-300"></i> <span data-i18n="search.heading">Cross-Resource Search</span>
+                </h3>
+                <button type="button" data-close-modal="resourceSearchModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none" aria-label="Close" data-i18n-aria="common.close">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 sm:p-6 space-y-4">
+                <p class="text-xs text-gray-500 dark:text-gray-400" data-i18n="search.description">
+                    Search across the learning resources listed for all exams.
+                </p>
+
+                <!-- Controls: stack on mobile, row on larger screens -->
+                <div class="flex flex-col sm:flex-row gap-3 sm:items-end">
+                    <div class="sm:w-56">
+                        <label class="block text-gray-700 dark:text-gray-300 text-xs font-bold mb-1" for="resourceSearchExam" data-i18n="search.examFilterLabel">Exam</label>
+                        <select id="resourceSearchExam" class="w-full appearance-none border rounded py-2 px-3 text-sm text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                            <option value="" data-i18n="search.allExams">All exams</option>
+                        </select>
+                    </div>
+                    <div class="flex-1">
+                        <input id="resourceSearchInput" type="text" class="w-full shadow-sm appearance-none border rounded py-2 px-3 text-sm text-gray-700 dark:text-gray-100 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-600 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400" data-i18n-placeholder="search.placeholder" placeholder="e.g. QuickSight, S3, security">
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <button id="resourceSearchGoBtn" type="button" class="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-search"></i> <span data-i18n="search.keywordButton">Search</span>
+                    </button>
+                    <button id="resourceSearchAiBtn" type="button" class="flex-1 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
+                        <i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="search.aiButton">AI Search</span>
+                    </button>
+                </div>
+
+                <div id="resourceSearchStatus" class="text-sm text-gray-500 dark:text-gray-400 min-h-[1.25rem]"></div>
+
+                <!-- AI answer area (hidden until AI search produces text) -->
+                <div id="resourceSearchAiAnswer" class="hidden rounded-lg border border-purple-200 dark:border-purple-800 bg-purple-50 dark:bg-purple-900/20 p-3">
+                    <h4 class="text-sm font-bold text-purple-800 dark:text-purple-200 flex items-center gap-2 mb-2">
+                        <i class="fas fa-wand-magic-sparkles"></i> <span data-i18n="search.aiAnswerHeading">AI Recommendations</span>
+                    </h4>
+                    <div id="resourceSearchAiAnswerBody" class="prose prose-sm max-w-none dark:prose-invert text-sm text-gray-800 dark:text-gray-100"></div>
+                </div>
+
+                <!-- Results: scrollable so long lists never blow out the modal -->
+                <div id="resourceSearchResults" class="space-y-3 max-h-[45vh] overflow-y-auto"></div>
             </div>
         </div>
     </div>
