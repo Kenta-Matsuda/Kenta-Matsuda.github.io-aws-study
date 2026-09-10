@@ -33,7 +33,7 @@ import {
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { quizHistoryToCsv } from './quizCsv.js';
-import { taskStatementCopyText } from './roadmapTaskStatement.js';
+import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 import {
   parseQuizResponse,
@@ -3766,9 +3766,10 @@ function renderContent({ els, exam, state }) {
       card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
       const taskContext = buildTaskAiContext(task);
-      // Task statement lines (issue #191/#192). Kept in sync with the pure
-      // roadmapTaskStatement module so the shown lines and copied text match.
-      const taskDescriptionLines = normalizeDescriptionLines(localizedDescription(task));
+      // Task statement lines (issue #191/#192). Render from the same pure
+      // roadmapTaskStatement source used for the copy text so the shown lines
+      // and copied text share one implementation and cannot silently desync.
+      const taskDescriptionLines = taskStatementLines(task, getLocale());
       const taskDescriptionHtml = taskDescriptionLines
         .map((line) => `<div>${highlightHtml(escapeHtml(line), term)}</div>`)
         .join('');
