@@ -38,6 +38,7 @@ const APP_SHELL = [
   './js/milestones.js',
   './js/openai.js',
   './js/quiz.js',
+  './js/resourceSearch.js',
   './js/storage.js',
   './js/ui.js',
   './js/utils.js',

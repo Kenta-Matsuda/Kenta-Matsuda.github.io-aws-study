@@ -23,6 +23,12 @@
     "send": "Send",
     "loading": "Loading..."
   },
+  "studyPack": {
+    "resourceLinksMd": "Resource Links (Markdown)",
+    "resourceLinksCsv": "Resource Links (CSV)",
+    "studyRouteMd": "Study Route (Markdown)",
+    "glossaryCsv": "Resource Glossary (CSV)"
+  },
   "header": {
     "subtitle": "Study Resource Navigator based on the Exam Guide",
     "switchExam": "Switch Exam",
@@ -373,6 +379,23 @@
     "nextAction": "Next Step"
   },
   "aiDisclaimer": "Note: AI-generated results may not always be accurate (may contain errors). For important decisions, verify with primary sources such as AWS official documentation.",
+  "search": {
+    "title": "Search Resources",
+    "heading": "Cross-Resource Search",
+    "description": "Search across the learning resources listed for all exams. You can narrow the search to a single exam, or search by keyword across every exam.",
+    "examFilterLabel": "Exam",
+    "allExams": "All exams",
+    "placeholder": "e.g. QuickSight, S3, security",
+    "keywordButton": "Search",
+    "aiButton": "AI Search",
+    "resultsCount": "{{count}} result(s)",
+    "noResults": "No matching resources found. Try different keywords.",
+    "emptyQuery": "Enter a keyword to search.",
+    "aiSearching": "Asking AI...",
+    "aiAnswerHeading": "AI Recommendations",
+    "aiNeedsKey": "AI search needs an API key. Open Settings to add one. Keyword results are shown below.",
+    "aiError": "AI search failed. Keyword results are shown below."
+  },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
   }
