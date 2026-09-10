@@ -23,6 +23,12 @@
     "send": "Send",
     "loading": "Loading..."
   },
+  "studyPack": {
+    "resourceLinksMd": "Resource Links (Markdown)",
+    "resourceLinksCsv": "Resource Links (CSV)",
+    "studyRouteMd": "Study Route (Markdown)",
+    "glossaryCsv": "Resource Glossary (CSV)"
+  },
   "header": {
     "subtitle": "Study Resource Navigator based on the Exam Guide",
     "switchExam": "Switch Exam",

@@ -2193,13 +2193,25 @@
                 </div>
                 <div id="quizHistoryList" class="space-y-2 max-h-[60vh] overflow-y-auto"></div>
             </div>
-            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex justify-between">
-                <div class="flex items-center gap-2">
+            <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-xl flex flex-wrap justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <button id="quizHistoryExportBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                         <i class="fas fa-download"></i> <span data-i18n="common.exportMarkdown">Export as Markdown</span>
                     </button>
                     <button id="quizHistoryExportCsvBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                         <i class="fas fa-file-csv"></i> <span data-i18n="common.exportCsv">Export as CSV</span>
+                    </button>
+                    <button id="studyPackLinksMdBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-link"></i> <span data-i18n="studyPack.resourceLinksMd">Resource Links (Markdown)</span>
+                    </button>
+                    <button id="studyPackLinksCsvBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-link"></i> <span data-i18n="studyPack.resourceLinksCsv">Resource Links (CSV)</span>
+                    </button>
+                    <button id="studyPackRouteMdBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-route"></i> <span data-i18n="studyPack.studyRouteMd">Study Route (Markdown)</span>
+                    </button>
+                    <button id="studyPackGlossaryCsvBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-200 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                        <i class="fas fa-book"></i> <span data-i18n="studyPack.glossaryCsv">Resource Glossary (CSV)</span>
                     </button>
                 </div>
                 <button type="button" data-close-modal="quizHistoryModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors" data-i18n="common.close">
