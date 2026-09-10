@@ -106,6 +106,12 @@
       "title": "Skills by Domain",
       "placeholder": "Answer quizzes to see your skill chart"
     },
+    "missions": {
+      "title": "Missions",
+      "badge": "No API key",
+      "subtitle": "Complete missions to earn XP",
+      "toastTitle": "Mission Complete!"
+    },
     "bootError": "Failed to load page data. Please reload the page. If opening locally, you need to open via a local server."
   },
   "quiz": {
@@ -280,8 +286,32 @@
     "link": "Link Visit",
     "explain": "AI Explain",
     "quiz": "AI Quiz",
+    "mission": "Mission Complete",
     "xp": "XP",
     "noHistory": "No XP history yet"
+  },
+  "missions": {
+    "period": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly"
+    },
+    "metric": {
+      "quiz": "Quiz answers",
+      "correct": "Correct answers",
+      "link": "Resource visits",
+      "xp": "XP earned"
+    },
+    "reward": "+{{xp}} XP",
+    "toast": "Completed \"{{mission}}\" (+{{xp}} XP)",
+    "items": {
+      "daily_quiz_3": "Answer 3 quiz questions",
+      "daily_correct_1": "Get 1 quiz question correct",
+      "daily_link_1": "Open 1 study resource",
+      "weekly_quiz_20": "Answer 20 quiz questions this week",
+      "weekly_correct_10": "Get 10 quiz questions correct this week",
+      "monthly_xp_500": "Earn 500 XP this month"
+    }
   },
   "greeting": {
     "morning": "Good morning.",

@@ -1,4 +1,9 @@
 import { getMilestoneStatus, getNewlyUnlockedMilestones, getMilestoneTitle } from './milestones.js';
+import {
+  computeMissionState,
+  recordMissionMetric,
+  claimMissions,
+} from './missions.js';
 
 const API_KEY_STORAGE_KEY = 'gemini_api_key';
 const OPENAI_KEY_STORAGE_KEY = 'openai_api_key';
@@ -8,6 +13,7 @@ const STUDY_REMINDER_STORAGE_KEY = 'asn_study_reminder'; // 'on' | 'off'
 const STREAK_CELEBRATION_STORAGE_KEY = 'asn_streak_celebrated_v1'; // last celebrated milestone (number)
 
 const STUDY_STATE_STORAGE_KEY = 'asn_study_state_v1';
+const MISSIONS_STORAGE_KEY = 'asn_missions_v1'; // local daily/weekly/monthly mission progress (issue #193)
 
 export function resetAppStorage() {
   // Avoid localStorage.clear() to not wipe unrelated data.
@@ -18,6 +24,7 @@ export function resetAppStorage() {
   localStorage.removeItem(STUDY_REMINDER_STORAGE_KEY);
   localStorage.removeItem(STREAK_CELEBRATION_STORAGE_KEY);
   localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
+  localStorage.removeItem(MISSIONS_STORAGE_KEY);
   try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
 }
 
@@ -422,6 +429,86 @@ export function getXpSummary(examId) {
     progress01: ms.progress01,
     recentActions: Array.isArray(ex.recentActions) ? ex.recentActions.slice(0, 3) : [],
   };
+}
+
+// ─── Local Missions (daily/weekly/monthly) ──────────────────
+// issue #193: 端末内で完結するデイリー/ウィークリー/マンスリーのミッション。
+// クリアすると既存の XP 機構（addXp）経由で XP を付与する。ユーザー横断の
+// ランキングは backend が必要なため対象外（クライアント完結のみ）。
+
+/**
+ * ミッション進捗を localStorage から読み込む（safe-parse。壊れていれば null）。
+ * 正規化・期間ロールオーバーは missions.js 側が行うため、ここでは生の値を返す。
+ * @returns {object|null}
+ */
+function loadMissionsProgress() {
+  try {
+    const raw = localStorage.getItem(MISSIONS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveMissionsProgress(progress) {
+  const safe = progress && typeof progress === 'object' ? progress : {};
+  localStorage.setItem(MISSIONS_STORAGE_KEY, JSON.stringify(safe));
+}
+
+/**
+ * 現在のミッション一覧と状態を返す（期間ロールオーバー込み）。
+ * 読み込み時に正規化した進捗を書き戻すので、日付が変わった直後も表示が最新になる。
+ * @returns {{ missions: Array, newlyCompleted: Array }}
+ */
+export function getMissionsSummary() {
+  const stored = loadMissionsProgress();
+  const { missions, newlyCompleted, normalized } = computeMissionState(stored, new Date());
+  // 正規化（期間リセット）を永続化しておく。
+  saveMissionsProgress(normalized);
+  return { missions, newlyCompleted };
+}
+
+/**
+ * ミッション用のメトリクスイベントを記録し、その結果クリアされたミッションに対して
+ * 既存の XP 機構（addXp, reason='mission'）で報酬 XP を付与する。
+ *
+ * XP を二重管理しないよう、報酬 XP の付与は addXp 経由で行い、付与済みのミッションは
+ * claimed フラグで再付与を防ぐ。
+ *
+ * @param {'quiz'|'correct'|'link'|'xp'} metric
+ * @param {number} [amount=1]
+ * @returns {{ completed: Array, unlocked: Array, xpAwarded: number }}
+ *   completed: 今回クリアして報酬付与したミッション（xpReward 含む）
+ *   unlocked : 報酬 XP により新たに解放されたマイルストーン
+ *   xpAwarded: 付与した報酬 XP 合計
+ */
+export function recordMissionEvent(metric, amount = 1) {
+  const stored = loadMissionsProgress();
+  const updated = recordMissionMetric(stored, metric, amount, new Date());
+
+  const { newlyCompleted } = computeMissionState(updated, new Date());
+  if (!newlyCompleted.length) {
+    saveMissionsProgress(updated);
+    return { completed: [], unlocked: [], xpAwarded: 0 };
+  }
+
+  // 先に報酬 XP を既存機構で付与してから claimed をマークする。
+  const unlocked = [];
+  let xpAwarded = 0;
+  for (const m of newlyCompleted) {
+    const res = addXp({ amount: m.xpReward, reason: 'mission' });
+    if (res?.applied) {
+      xpAwarded += Number(res.amountApplied || 0);
+      if (Array.isArray(res.unlocked)) unlocked.push(...res.unlocked);
+    }
+  }
+
+  const claimed = claimMissions(updated, newlyCompleted.map((m) => m.id), new Date());
+  saveMissionsProgress(claimed);
+
+  return { completed: newlyCompleted, unlocked, xpAwarded };
 }
 
 // ─── Quiz History ───────────────────────────────────────────
