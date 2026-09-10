@@ -172,16 +172,33 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
 
 function buildChatSystemPrompt(exam) {
   const isJa = getLocale() === 'ja';
-  const code = exam?.code || 'AWS';
-  const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
   // Authoritative identity sourced from the repository's own exam definitions (js/data/*.js).
   const category = getExamCategoryLabel(exam?.id);
   const categoryLabel = category ? (isJa ? category.labelJa : category.labelEn) : null;
   // AWS's own pages (official exam guide / official exam page) for this exam.
   // Handed to the model so the `url_context` tool can verify exam facts.
   const officialRefs = getExamOfficialRefs(exam?.id, { locale: isJa ? 'ja' : 'en' });
+  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs });
+}
 
-  if (getLocale() === 'en') {
+/**
+ * Build the chat system prompt from explicit inputs (pure, DOM/i18n-free).
+ *
+ * Extracted from buildChatSystemPrompt (mirroring the js/markdown.js /
+ * js/aiErrors.js pure-module pattern) so the grounding contract can be unit
+ * tested without a browser or i18n runtime: the caller resolves locale,
+ * category label and official refs, this function only assembles the text.
+ *
+ * @param {{ code?: string, shortLabel?: string, title?: string } | null} exam
+ * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }> }} opts
+ * @returns {string}
+ */
+export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [] } = {}) {
+  const code = exam?.code || 'AWS';
+  const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
+  const refs = Array.isArray(officialRefs) ? officialRefs : [];
+
+  if (!isJa) {
     let prompt =
       `You are a friendly AWS study assistant. ` +
       `The user is currently studying for ${code} (${label}).\n`;
@@ -197,12 +214,13 @@ function buildChatSystemPrompt(exam) {
         `- Do NOT substitute or redirect the answer to a different exam (for example, do not swap ${exam.code} for another exam code). If the user asks about this exam, answer about THIS exam only.\n` +
         `- Treat this repository-provided exam definition as more reliable than your own prior knowledge.\n`;
     }
-    if (officialRefs.length) {
+    if (refs.length) {
       prompt +=
         `\n[Primary sources — verify against AWS documentation]\n` +
-        officialRefs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
+        refs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
         `- Before stating any fact about the exam itself (whether it exists, its official name, exam code, question domains and weightings, number of questions, duration, passing score, or fee), read the AWS pages above and base your answer on them.\n` +
         `- If your internal knowledge contradicts those pages, the pages win. Never override AWS documentation with your own recollection.\n` +
+        `- AWS service names and branding change over time (services are renamed, rebranded or merged into other products). Always use the CURRENT service name exactly as it appears on the official AWS documentation and pages provided above, not an older name you may have memorized. For example, prefer the current name (such as "Amazon Q in QuickSight") over a former name. When in doubt, verify the current naming against the AWS pages before answering.\n` +
         `- Cite the AWS URL you actually relied on. If a page could not be read, say so instead of guessing.\n`;
     }
     prompt +=
@@ -231,12 +249,13 @@ function buildChatSystemPrompt(exam) {
       `- 別の試験にすり替えたり誘導したりしないでください（例: ${exam.code} を別の試験コードに置き換えて回答しない）。ユーザーがこの試験について尋ねた場合は、この試験についてのみ回答してください。\n` +
       `- 試験の実在・正式名称・試験コード・区分については、あなたの内部知識よりも、このリポジトリが提供する上記の定義を優先してください。\n\n`;
   }
-  if (officialRefs.length) {
+  if (refs.length) {
     prompt +=
       `【一次情報（AWS公式ドキュメント）で必ず裏取りする】\n` +
-      officialRefs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
+      refs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
       `- 試験そのものに関する事実（実在するか、正式名称、試験コード、出題ドメインと配点比率、問題数、試験時間、合格スコア、受験料など）を述べる前に、上記のAWS公式ページを読み、その内容に基づいて回答してください。\n` +
       `- あなたの内部知識と上記ページの記載が食い違う場合は、必ず上記ページの記載を優先してください。記憶でAWS公式ドキュメントを上書きしないでください。\n` +
+      `- AWSのサービス名やブランド名は時間とともに変わります（サービスは改名・再ブランド化されたり、別の製品に統合されたりします）。記憶している古い名称ではなく、上記のAWS公式ドキュメント・公式ページに記載されている「現在の正式なサービス名」をそのまま使ってください（例: 古い名称よりも「Amazon Q in QuickSight」のような現在の名称を優先する）。名称に確信が持てない場合は、回答前に上記のAWS公式ページで現在の名称を確認してください。\n` +
       `- 実際に根拠として使ったAWSのURLを明記してください。ページを読めなかった場合は、推測せずに「読めなかった」と述べてください。\n\n`;
   }
   prompt +=

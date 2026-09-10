@@ -23,6 +23,7 @@
 - [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
 - [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
 - [要人間対応事項をチェックリスト一覧として可視化 (#184)](issues/action-required-checklist-184.md)
+- [AIチューターが古いサービス名で回答する問題（現在のサービス名グラウンディング強化） (#202)](issues/ai-chat-service-naming-202.md)
 
 ## LLM Wiki（docs/wiki/）
 
