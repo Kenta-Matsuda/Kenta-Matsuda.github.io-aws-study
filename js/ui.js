@@ -60,6 +60,8 @@ import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
+import { buildResourceIndex, searchResources, selectAiCandidates } from './resourceSearch.js';
+import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
  * Return locale-aware title: jpTitle for 'ja', title (English) for 'en'.
@@ -1615,7 +1617,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     currentDomainId: null,
   };
 
-  wireGlobalUiHandlers({ els, state });
+  wireGlobalUiHandlers({ els, state, exams });
 
   // Apply theme on boot
   applyTheme();
@@ -2058,6 +2060,18 @@ function getElements() {
     batchProgressStartBtn: document.getElementById('batchProgressStartBtn'),
     batchProgressCloseBtn: document.getElementById('batchProgressCloseBtn'),
 
+    // Cross-resource search (issue #189)
+    resourceSearchBtn: document.getElementById('resourceSearchBtn'),
+    resourceSearchModal: document.getElementById('resourceSearchModal'),
+    resourceSearchExam: document.getElementById('resourceSearchExam'),
+    resourceSearchInput: document.getElementById('resourceSearchInput'),
+    resourceSearchGoBtn: document.getElementById('resourceSearchGoBtn'),
+    resourceSearchAiBtn: document.getElementById('resourceSearchAiBtn'),
+    resourceSearchResults: document.getElementById('resourceSearchResults'),
+    resourceSearchStatus: document.getElementById('resourceSearchStatus'),
+    resourceSearchAiAnswer: document.getElementById('resourceSearchAiAnswer'),
+    resourceSearchAiAnswerBody: document.getElementById('resourceSearchAiAnswerBody'),
+
     settingsModal: document.getElementById('settingsModal'),
     settingsBtn: document.getElementById('settingsBtn'),
     apiKeyInput: document.getElementById('apiKeyInput'),
@@ -2300,7 +2314,7 @@ async function copyTextToClipboard(text) {
   }
 }
 
-function wireGlobalUiHandlers({ els }) {
+function wireGlobalUiHandlers({ els, exams }) {
   let pointerDownOnBackdrop = false;
 
   // Exam dropdown
@@ -2315,6 +2329,9 @@ function wireGlobalUiHandlers({ els }) {
 
   // Settings
   els.settingsBtn.addEventListener('click', () => openSettingsModal(els));
+
+  // Cross-resource search (issue #189)
+  wireResourceSearchHandlers({ els, exams });
 
   // Feedback
   wireFeedbackHandlers({ els });
@@ -4627,6 +4644,260 @@ function openSettingsModal(els) {
   els.settingsMessage.classList.add('hidden');
   reflectProviderUi(els);
   openModal(els.settingsModal);
+}
+
+// --- Cross-resource search (issue #189) ---
+
+/**
+ * Lazily-built, memoized resource index. Built once on first search so we
+ * never pay the flattening cost unless the user actually opens the search UI.
+ * @type {import('./resourceSearch.js').ResourceRecord[] | null}
+ */
+let resourceSearchIndex = null;
+
+/** Build (or reuse) the memoized resource index. */
+function getResourceSearchIndex() {
+  if (!resourceSearchIndex) {
+    resourceSearchIndex = buildResourceIndex();
+  }
+  return resourceSearchIndex;
+}
+
+/**
+ * Pick the locale-aware value from a plain/JP title pair, falling back to
+ * whichever is non-empty so a breadcrumb never renders blank.
+ * @param {string} plain - English/plain field.
+ * @param {string} jp - Japanese field.
+ * @returns {string}
+ */
+function localizedRecordText(plain, jp) {
+  if (getLocale() === 'ja') return jp || plain || '';
+  return plain || jp || '';
+}
+
+/** Build the "examCode › section [› task]" breadcrumb for a search record. */
+function buildResourceBreadcrumb(record) {
+  const parts = [];
+  if (record.examCode) parts.push(record.examCode);
+  const section = localizedRecordText(record.stepTitle, record.stepJpTitle);
+  if (section) parts.push(section);
+  if (record.taskId) {
+    const task = localizedRecordText(record.taskTitle, record.taskJpTitle);
+    if (task) parts.push(task);
+  }
+  return parts.join(' › ');
+}
+
+/** Render a single search-hit card in the existing resource-card style. */
+function renderResourceSearchCard(record) {
+  const title = getLocale() === 'en' && record.titleEn ? record.titleEn : record.title;
+  const note = getLocale() === 'en' && record.noteEn ? record.noteEn : record.note;
+  const url = getLocale() === 'en' && record.urlEn ? record.urlEn : record.url;
+
+  const titleSafe = escapeHtml(title);
+  const urlSafe = escapeHtml(url);
+  const breadcrumbSafe = escapeHtml(buildResourceBreadcrumb(record));
+  const iconSafe = record.iconClass
+    ? `<i class="${escapeHtml(record.iconClass)} ${escapeHtml(record.iconColorClass || '')}"></i>`
+    : '';
+  const recommendBadge = record.recommend
+    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"><i class="fas fa-star mr-1"></i>${escapeHtml(getLocale() === 'ja' ? 'おすすめ' : 'Recommended')}</span>`
+    : '';
+  const noteHtml = note
+    ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1"><i class="fas fa-info-circle text-gray-400"></i><span>${escapeHtml(note)}</span></div>`
+    : '';
+
+  return `
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+      <div class="flex items-start justify-between gap-3">
+        <a data-xp-link="resource" href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 dark:text-blue-300 hover:underline flex items-start gap-2 group">
+          ${iconSafe}
+          <span>${titleSafe}</span>
+          <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
+        </a>
+        ${recommendBadge}
+      </div>
+      <div class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">${breadcrumbSafe}</div>
+      ${noteHtml}
+    </div>
+  `;
+}
+
+/** Populate the exam <select> once from the public exam list. */
+function populateResourceSearchExams(els, exams) {
+  const select = els.resourceSearchExam;
+  if (!select || select.dataset.populated === 'true') return;
+  const list = Array.isArray(exams) ? exams : [];
+  const options = list
+    .filter((exam) => exam && exam.id)
+    .map((exam) => {
+      const code = escapeHtml(String(exam.code || ''));
+      const title = escapeHtml(String(exam.title || ''));
+      const label = code ? `${code} — ${title}` : title;
+      return `<option value="${escapeHtml(String(exam.id))}">${label}</option>`;
+    })
+    .join('');
+  // Keep the existing "All exams" option (index 0), append the rest.
+  select.insertAdjacentHTML('beforeend', options);
+  select.dataset.populated = 'true';
+}
+
+function wireResourceSearchHandlers({ els, exams }) {
+  if (!els.resourceSearchBtn || !els.resourceSearchModal) return;
+
+  const setStatus = (text) => {
+    if (els.resourceSearchStatus) els.resourceSearchStatus.textContent = text || '';
+  };
+
+  const hideAiAnswer = () => {
+    if (els.resourceSearchAiAnswer) els.resourceSearchAiAnswer.classList.add('hidden');
+    if (els.resourceSearchAiAnswerBody) els.resourceSearchAiAnswerBody.innerHTML = '';
+  };
+
+  /**
+   * Run the keyword search and render results. Returns the matched records so
+   * the AI path can reuse them as grounding candidates.
+   * @returns {import('./resourceSearch.js').ResourceRecord[]}
+   */
+  const runKeywordSearch = () => {
+    const query = String(els.resourceSearchInput?.value || '').trim();
+    const examId = String(els.resourceSearchExam?.value || '').trim() || undefined;
+    if (!els.resourceSearchResults) return [];
+
+    if (!query) {
+      els.resourceSearchResults.innerHTML = '';
+      setStatus(t('search.emptyQuery'));
+      return [];
+    }
+
+    const index = getResourceSearchIndex();
+    const results = searchResources(index, query, { examId });
+
+    if (results.length === 0) {
+      els.resourceSearchResults.innerHTML = '';
+      setStatus(t('search.noResults'));
+      return [];
+    }
+
+    els.resourceSearchResults.innerHTML = results.map(renderResourceSearchCard).join('');
+    setStatus(t('search.resultsCount', { count: results.length }));
+    return results;
+  };
+
+  // Open modal from the header button; populate the exam select once.
+  els.resourceSearchBtn.addEventListener('click', () => {
+    populateResourceSearchExams(els, exams);
+    openModal(els.resourceSearchModal);
+    els.resourceSearchInput?.focus();
+  });
+
+  // Keyword search: button click.
+  els.resourceSearchGoBtn?.addEventListener('click', () => {
+    hideAiAnswer();
+    runKeywordSearch();
+  });
+
+  // Keyword search: Enter key in the input (ignore IME composition).
+  els.resourceSearchInput?.addEventListener('keydown', (e) => {
+    if (e.isComposing) return;
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    hideAiAnswer();
+    runKeywordSearch();
+  });
+
+  // AI search: always run keyword search first (so the user never gets
+  // nothing), then ask the model to rank/recommend strictly from that list.
+  els.resourceSearchAiBtn?.addEventListener('click', async () => {
+    hideAiAnswer();
+    const query = String(els.resourceSearchInput?.value || '').trim();
+    if (!query) {
+      setStatus(t('search.emptyQuery'));
+      return;
+    }
+
+    const candidates = runKeywordSearch();
+    if (candidates.length === 0) return; // noResults status already shown
+
+    // No API key → keyword-only fallback with a localized notice. We check
+    // keys directly so we can keep keyword results visible and avoid opening
+    // the settings modal on top of the search modal.
+    if (!getApiKey() && !getOpenAiApiKey()) {
+      setStatus(t('search.aiNeedsKey'));
+      return;
+    }
+
+    setStatus(t('search.aiSearching'));
+
+    // Bound the prompt size: only the top candidates are sent as grounding.
+    // Select by match relevance (not the recommend-first display order) so a
+    // strong keyword hit is never dropped from the model's view just because
+    // it sits past the cap in the display ordering (#189 review item 2).
+    const AI_CANDIDATE_CAP = 40;
+    const grounding = selectAiCandidates(candidates, query, AI_CANDIDATE_CAP).map((r, i) => {
+      const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
+      const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
+      return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;
+    }).join('\n');
+
+    const localeName = getLocale() === 'ja' ? 'Japanese' : 'English';
+    const trusted = (AI_RELIABILITY_CONFIG?.trustedSourceDomains || []).join(', ');
+    const systemPrompt = [
+      'You help learners find the most relevant AWS certification study resources.',
+      'You are given a fixed CANDIDATE LIST of resources (title | location | URL).',
+      'Rules you MUST follow:',
+      '- Recommend and rank ONLY resources from the CANDIDATE LIST. Never invent or guess URLs or titles.',
+      '- Only cite URLs exactly as they appear in the list. Prefer official sources such as: ' + trusted + '.',
+      '- If nothing in the list fits, say so plainly instead of inventing anything.',
+      `- Answer in ${localeName}, concisely, as a short ranked list with one-line reasons.`,
+    ].join('\n');
+    const userPrompt = `Query: ${query}\n\nCANDIDATE LIST:\n${grounding}`;
+
+    let answer = '';
+    try {
+      answer = await callAiStream({
+        userPrompt,
+        systemPrompt,
+        onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
+        onTextDelta: () => {},
+      });
+      if (String(answer || '').includes('ストリーミングに対応していない環境')) {
+        answer = await callAi({
+          userPrompt,
+          systemPrompt,
+          onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
+        });
+      }
+    } catch {
+      try {
+        answer = await callAi({
+          userPrompt,
+          systemPrompt,
+          onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
+        });
+      } catch {
+        answer = null;
+      }
+    }
+
+    if (!answer) {
+      // onRequireApiKey already set the needs-key status when no key; otherwise
+      // show a generic error. Keyword results stay visible in both cases.
+      if (getApiKey() || getOpenAiApiKey()) setStatus(t('search.aiError'));
+      return;
+    }
+
+    if (els.resourceSearchAiAnswer && els.resourceSearchAiAnswerBody) {
+      const rendered = renderMarkdownToSafeHtml(String(answer));
+      // Fall back to escaped plain text if the markdown/DOMPurify path is
+      // unavailable, so we never inject unsanitized HTML.
+      els.resourceSearchAiAnswerBody.innerHTML = rendered && rendered.usedMarkdown && rendered.html
+        ? rendered.html
+        : escapeHtml(String(answer)).replace(/\n/g, '<br>');
+      els.resourceSearchAiAnswer.classList.remove('hidden');
+    }
+    setStatus(t('search.resultsCount', { count: candidates.length }));
+  });
 }
 
 function openModal(modalEl) {
