@@ -60,7 +60,7 @@ import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
-import { buildResourceIndex, searchResources } from './resourceSearch.js';
+import { buildResourceIndex, searchResources, selectAiCandidates } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -1617,7 +1617,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     currentDomainId: null,
   };
 
-  wireGlobalUiHandlers({ els, state });
+  wireGlobalUiHandlers({ els, state, exams });
 
   // Apply theme on boot
   applyTheme();
@@ -2314,7 +2314,7 @@ async function copyTextToClipboard(text) {
   }
 }
 
-function wireGlobalUiHandlers({ els }) {
+function wireGlobalUiHandlers({ els, exams }) {
   let pointerDownOnBackdrop = false;
 
   // Exam dropdown
@@ -4830,8 +4830,11 @@ function wireResourceSearchHandlers({ els, exams }) {
     setStatus(t('search.aiSearching'));
 
     // Bound the prompt size: only the top candidates are sent as grounding.
+    // Select by match relevance (not the recommend-first display order) so a
+    // strong keyword hit is never dropped from the model's view just because
+    // it sits past the cap in the display ordering (#189 review item 2).
     const AI_CANDIDATE_CAP = 40;
-    const grounding = candidates.slice(0, AI_CANDIDATE_CAP).map((r, i) => {
+    const grounding = selectAiCandidates(candidates, query, AI_CANDIDATE_CAP).map((r, i) => {
       const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
       const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
       return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;

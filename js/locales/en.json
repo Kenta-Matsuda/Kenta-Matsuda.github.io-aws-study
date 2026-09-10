@@ -384,12 +384,10 @@
     "resultsCount": "{{count}} result(s)",
     "noResults": "No matching resources found. Try different keywords.",
     "emptyQuery": "Enter a keyword to search.",
-    "searching": "Searching...",
     "aiSearching": "Asking AI...",
     "aiAnswerHeading": "AI Recommendations",
     "aiNeedsKey": "AI search needs an API key. Open Settings to add one. Keyword results are shown below.",
-    "aiError": "AI search failed. Keyword results are shown below.",
-    "openResource": "Open resource"
+    "aiError": "AI search failed. Keyword results are shown below."
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."

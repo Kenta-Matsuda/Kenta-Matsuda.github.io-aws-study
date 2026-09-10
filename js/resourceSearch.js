@@ -226,3 +226,65 @@ export function searchResources(index, query, { examId, limit = 200 } = {}) {
   const cap = Number.isFinite(limit) && limit > 0 ? limit : matches.length;
   return matches.slice(0, cap);
 }
+
+/**
+ * 1 レコードとクエリ語の一致度を粗く採点する。AI モードで「モデルに渡す候補（grounding）」を
+ * 選ぶときに使う。`searchResources` の recommend 優先ソートは表示順としては妥当だが、
+ * その順で上位 N 件を切り取ると、recommend でない強い一致がキャップ外に押し出され、
+ * キーワードモードには出るのに AI モードには渡らない、という取りこぼしが起きうる（issue #189 レビュー指摘 2）。
+ * そこで AI 候補の選抜だけは、この関数で計算した「一致度」で並べ替えてから上位を採る。
+ *
+ * 採点は軽量なヒューリスティック（DOM/ネットワーク非依存のピュア関数）:
+ *  - タイトル（日英）に語が含まれる: 語ごとに +3
+ *  - URL（日英）に語が含まれる: 語ごとに +2
+ *  - 補足・グループ名などその他フィールドに含まれる: 語ごとに +1
+ *  - recommend フラグ: +1（同点時の穏やかなタイブレーク）
+ * すべての語について最も強い出現箇所を採点する。
+ *
+ * @param {ResourceRecord} record
+ * @param {string} query
+ * @returns {number} 一致度スコア（大きいほど関連が強い）。
+ */
+export function scoreResourceRelevance(record, query) {
+  if (!record) return 0;
+  const trimmed = typeof query === 'string' ? query.trim().toLowerCase() : '';
+  const terms = trimmed ? trimmed.split(/\s+/).filter(Boolean) : [];
+  if (terms.length === 0) return 0;
+
+  const titleHay = [record.title, record.titleEn].join('\n').toLowerCase();
+  const urlHay = [record.url, record.urlEn].join('\n').toLowerCase();
+  const otherHay = [record.note, record.noteEn, record.groupLabel, record.groupLabelEn]
+    .join('\n')
+    .toLowerCase();
+
+  let score = 0;
+  for (const term of terms) {
+    if (titleHay.includes(term)) score += 3;
+    else if (urlHay.includes(term)) score += 2;
+    else if (otherHay.includes(term)) score += 1;
+  }
+  if (record.recommend === true) score += 1;
+  return score;
+}
+
+/**
+ * AI モードの grounding としてモデルに渡す候補を、関連度の高い順に最大 `limit` 件選ぶ。
+ * `searchResources` の結果（recommend 優先の表示順）をそのまま上位 N 件で切ると
+ * 強い一致を落としうるため、ここでは `scoreResourceRelevance` の降順で並べ替えてから
+ * 上位を採る。安定ソートのため同点は元の（表示）順を保つ。
+ *
+ * @param {ResourceRecord[]} results - `searchResources` が返した一致レコード。
+ * @param {string} query - 検索キーワード。
+ * @param {number} [limit=40] - 返す候補の上限（プロンプトサイズを抑えるため）。
+ * @returns {ResourceRecord[]} 関連度順に並べ替え、上位 `limit` 件に絞った候補。
+ */
+export function selectAiCandidates(results, query, limit = 40) {
+  const list = Array.isArray(results) ? results.filter(Boolean) : [];
+  const cap = Number.isFinite(limit) && limit > 0 ? limit : list.length;
+  // 元の順序を保持したうえで安定ソートするため index を添える。
+  return list
+    .map((record, index) => ({ record, index, score: scoreResourceRelevance(record, query) }))
+    .sort((a, b) => (b.score - a.score) || (a.index - b.index))
+    .slice(0, cap)
+    .map((entry) => entry.record);
+}

@@ -384,12 +384,10 @@
     "resultsCount": "{{count}} 件の結果",
     "noResults": "一致するリソースが見つかりませんでした。別のキーワードをお試しください。",
     "emptyQuery": "検索したいキーワードを入力してください。",
-    "searching": "検索中...",
     "aiSearching": "AIに問い合わせ中...",
     "aiAnswerHeading": "AIのおすすめ",
     "aiNeedsKey": "AI検索にはAPIキーが必要です。設定から登録してください。下にキーワード検索の結果を表示しています。",
-    "aiError": "AI検索に失敗しました。下にキーワード検索の結果を表示しています。",
-    "openResource": "リソースを開く"
+    "aiError": "AI検索に失敗しました。下にキーワード検索の結果を表示しています。"
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
