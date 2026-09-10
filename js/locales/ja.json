@@ -106,6 +106,12 @@
       "title": "ドメイン別スキル",
       "placeholder": "クイズに回答するとスキルチャートが表示されます"
     },
+    "missions": {
+      "title": "ミッション",
+      "badge": "APIキー不要",
+      "subtitle": "ミッションをクリアしてXPを獲得しよう",
+      "toastTitle": "ミッション達成！"
+    },
     "bootError": "画面データの読み込みに失敗しました。ページを再読み込みしてください。ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。"
   },
   "quiz": {
@@ -280,8 +286,32 @@
     "link": "URL遷移",
     "explain": "AI解説",
     "quiz": "AI作問",
+    "mission": "ミッション達成",
     "xp": "XP",
     "noHistory": "まだ獲得履歴がありません"
+  },
+  "missions": {
+    "period": {
+      "daily": "デイリー",
+      "weekly": "ウィークリー",
+      "monthly": "マンスリー"
+    },
+    "metric": {
+      "quiz": "クイズ回答",
+      "correct": "クイズ正解",
+      "link": "リソース閲覧",
+      "xp": "XP獲得"
+    },
+    "reward": "+{{xp}} XP",
+    "toast": "「{{mission}}」を達成（+{{xp}} XP）",
+    "items": {
+      "daily_quiz_3": "クイズに3問回答する",
+      "daily_correct_1": "クイズに1問正解する",
+      "daily_link_1": "学習リソースを1つ開く",
+      "weekly_quiz_20": "今週クイズに20問回答する",
+      "weekly_correct_10": "今週クイズに10問正解する",
+      "monthly_xp_500": "今月500 XPを獲得する"
+    }
   },
   "greeting": {
     "morning": "おはようございます。",

@@ -30,6 +30,8 @@ import {
   getEffectiveTheme,
   getSmartReviewCombined,
   addReviewSchedule,
+  getMissionsSummary,
+  recordMissionEvent,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { quizHistoryToCsv } from './quizCsv.js';
@@ -1564,6 +1566,19 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
     }
 
+    // Local missions (issue #193): every answered question counts toward the
+    // "quiz" metric; a correct answer additionally counts toward "correct".
+    // Mission play is not gated by the daily-XP cap above (the mission counters
+    // track engagement); the reward XP itself is granted through addXp.
+    {
+      const missionRes = recordMissionEvent('quiz');
+      handleMissionCompletions({ els, missionRes });
+      if (isCorrect) {
+        const correctRes = recordMissionEvent('correct');
+        handleMissionCompletions({ els, missionRes: correctRes });
+      }
+    }
+
     // Store quiz result
     const elapsedMs = window.__questionShownAt ? Date.now() - window.__questionShownAt : null;
     window.__questionShownAt = 0;
@@ -2029,6 +2044,11 @@ function wireXpLinkHandlers({ els, state, getExamById }) {
     if (result?.unlocked?.length) {
       showMilestoneToast({ els, unlocked: result.unlocked });
     }
+    // Local missions (issue #193): count the link visit and grant mission XP.
+    if (result?.applied) {
+      const missionRes = recordMissionEvent('link');
+      handleMissionCompletions({ els, missionRes });
+    }
     renderXpDashboard({ els, exam: getExamById(state.examId), state });
   };
 
@@ -2084,6 +2104,11 @@ function getElements() {
     xpMotivation: document.getElementById('xpMotivation'),
     editUserNameBtn: document.getElementById('editUserNameBtn'),
     tweetBtn: document.getElementById('tweetBtn'),
+
+    // Local missions (issue #193)
+    missionsList: document.getElementById('missionsList'),
+    missionToast: document.getElementById('missionToast'),
+    missionToastText: document.getElementById('missionToastText'),
 
     // modals
     aiModal: document.getElementById('aiModal'),
@@ -2792,6 +2817,110 @@ function renderLearningStatus({ els, exam, state }) {
   }
 }
 
+// ─── Local Missions UI (issue #193) ─────────────────────────
+
+const MISSION_PERIOD_ORDER = ['daily', 'weekly', 'monthly'];
+
+/**
+ * Build the localized label for a mission from i18n, with a metric/target based
+ * fallback so a missing key never renders an empty row.
+ */
+function missionLabel(mission) {
+  const key = `missions.items.${mission.id}`;
+  const localized = t(key);
+  if (localized && localized !== key) return localized;
+  // Fallback: "<metric> x<target>"
+  const metricLabel = t(`missions.metric.${mission.metric}`);
+  const metric = metricLabel && !metricLabel.startsWith('missions.') ? metricLabel : mission.metric;
+  return `${metric} × ${mission.target}`;
+}
+
+/**
+ * Render the daily/weekly/monthly missions panel on the (cert-independent)
+ * dashboard. Pure read: pulls the current mission state from storage and paints
+ * progress + reward. Completion/XP is handled elsewhere via recordMissionEvent.
+ */
+function renderMissionsPanel(els) {
+  const container = els.missionsList;
+  if (!container) return;
+
+  const { missions } = getMissionsSummary();
+  const byPeriod = new Map(MISSION_PERIOD_ORDER.map((p) => [p, []]));
+  for (const m of missions) {
+    if (byPeriod.has(m.period)) byPeriod.get(m.period).push(m);
+  }
+
+  const sections = [];
+  for (const period of MISSION_PERIOD_ORDER) {
+    const list = byPeriod.get(period) || [];
+    if (!list.length) continue;
+
+    const heading = t(`missions.period.${period}`);
+    const rows = list.map((m) => {
+      const pct = Math.round(Math.max(0, Math.min(1, m.progress01)) * 100);
+      const doneClass = m.completed ? ' text-emerald-600' : ' text-gray-500';
+      const check = m.completed ? '<i class="fas fa-check-circle text-emerald-500 mr-1"></i>' : '';
+      const rewardLabel = t('missions.reward', { xp: m.xpReward });
+      return `
+        <div class="mission-row">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <span class="font-medium text-gray-700 truncate">${check}${escapeHtml(missionLabel(m))}</span>
+            <span class="whitespace-nowrap font-bold${doneClass}">${escapeHtml(rewardLabel)}</span>
+          </div>
+          <div class="mt-1 flex items-center gap-2">
+            <div class="flex-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+              <div class="h-1.5 rounded-full bg-indigo-500" style="width: ${pct}%"></div>
+            </div>
+            <span class="text-[10px] font-mono text-gray-500 whitespace-nowrap">${Math.min(m.progress, m.target)}/${m.target}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    sections.push(`
+      <div class="mission-section">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">${escapeHtml(heading)}</div>
+        <div class="space-y-2">${rows}</div>
+      </div>`);
+  }
+
+  container.innerHTML = sections.join('');
+}
+
+/**
+ * React to newly-completed missions returned by recordMissionEvent: surface any
+ * milestone unlocked by the reward XP, and repaint the missions panel.
+ */
+function handleMissionCompletions({ els, missionRes }) {
+  if (!missionRes) return;
+  if (Array.isArray(missionRes.unlocked) && missionRes.unlocked.length) {
+    showMilestoneToast({ els, unlocked: missionRes.unlocked });
+  }
+  if (Array.isArray(missionRes.completed) && missionRes.completed.length) {
+    const first = missionRes.completed[0];
+    showMissionToast({ els, mission: first, xpAwarded: missionRes.xpAwarded });
+  }
+  renderMissionsPanel(els);
+}
+
+/**
+ * Lightweight toast announcing a completed mission and its XP reward. Reuses the
+ * milestone toast element if a dedicated mission toast is not present in the DOM.
+ */
+function showMissionToast({ els, mission, xpAwarded }) {
+  const toast = els.missionToast;
+  const text = els.missionToastText;
+  if (!toast || !text || !mission) return;
+  text.textContent = t('missions.toast', {
+    mission: missionLabel(mission),
+    xp: Number(xpAwarded || mission.xpReward || 0),
+  });
+  toast.classList.remove('hidden');
+  window.clearTimeout?.(els.__missionToastTimer);
+  els.__missionToastTimer = window.setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 4000);
+}
+
 function renderXpDashboard({ els, exam, state }) {
   if (!els.xpDashboard) return;
 
@@ -2828,6 +2957,9 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Streak display
   renderStreakDisplay(els);
+
+  // Local missions panel (issue #193)
+  renderMissionsPanel(els);
 
   // Opt-in local study reminder: only act when the user has enabled it.
   // No permission is requested here unless the user opted in (see wireStudyReminder).
@@ -3436,7 +3568,9 @@ function renderRecentXpActionsHtml(actions) {
             ? t('xpActions.explain')
             : reason === 'quiz'
               ? t('xpActions.quiz')
-              : reason || t('xpActions.xp');
+              : reason === 'mission'
+                ? t('xpActions.mission')
+                : reason || t('xpActions.xp');
 
       let timeText = '';
       try {
