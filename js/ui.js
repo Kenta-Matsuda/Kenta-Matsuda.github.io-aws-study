@@ -1936,6 +1936,25 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
   });
 
+  // Accordion behavior for the task-statement disclosures (#191 follow-up):
+  // opening one statement collapses any others that are currently open, so the
+  // roadmap never shows a stack of expanded toggles at once. The `toggle` event
+  // does not bubble, so the listener is registered in the capture phase.
+  els.contentArea.addEventListener(
+    'toggle',
+    (e) => {
+      const opened = e.target;
+      if (!(opened instanceof HTMLDetailsElement)) return;
+      if (!opened.classList.contains('task-statement-details') || !opened.open) return;
+      els.contentArea
+        .querySelectorAll('details.task-statement-details[open]')
+        .forEach((details) => {
+          if (details !== opened) details.open = false;
+        });
+    },
+    true
+  );
+
   wireXpLinkHandlers({ els, state, getExamById });
 
   // Return public API for external callers (e.g. hashchange routing)
@@ -3857,7 +3876,7 @@ function renderContent({ els, exam, state }) {
       // plain text produced by taskStatementCopyText (#192).
       const descriptionHtml = taskDescriptionLines.length
         ? `
-            <details class="mt-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-900">
+            <details class="task-statement-details mt-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-900">
               <summary class="cursor-pointer select-none px-3 py-2 text-xs font-bold text-amber-700 flex items-center gap-2">
                 <i class="fas fa-align-left"></i> ${escapeHtml(t('roadmap.taskStatementToggle'))}
               </summary>
