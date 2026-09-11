@@ -37,6 +37,18 @@
  *  - `mergeable` は一覧 API には含まれないため PR 単体 API を叩く。`unknown` は
  *    GitHub が計算中なので数秒待って再取得する。
  *
+ * 重複スキップコメント検知について（2026-09-11 追加）:
+ *  - issue #32（グローバルリーダーボード）は、バッチ実行を跨いで `🤖 agent:skipped`
+ *    系の見送りコメントが繰り返し積み上がった（同じ「バックエンドが必要なので見送る」
+ *    という趣旨のコメントが複数回）。#162 / #167 も同じ蓄積の予備軍だった。
+ *  - 従来は `updatedAfterMarker`（マーカー後に人間の更新があったか）しか出しておらず、
+ *    「既に何件のスキップコメントが付いているか」を可視化していなかったため、
+ *    SKIP 判定の issue に対してエージェントが毎回スキップコメントを重ねて投稿していた。
+ *  - そこで各 issue について `🤖 agent:skipped` 接頭辞のコメント件数
+ *    （agentSkipCommentCount）を数え、SKIP 判定の issue には「再コメント不要」の
+ *    助言（reSkipAdvice）を出すようにした。RECHECK（マーカー後に人間入力あり）の
+ *    ときだけ再調査・再コメントする、というルールを機械可読な信号として支援する。
+ *
  * 副作用なし: `gh api` の GET のみを実行し、書き込み系エンドポイントは呼ばない。
  * git 操作・ファイル書き込みも行わない。
  */
@@ -97,6 +109,12 @@ const USAGE = `使い方: env -u NODE_OPTIONS node scripts/issue-triage.mjs [オ
   --json                機械可読な JSON を出力
   --help                このヘルプ
 
+出力する信号（抜粋）:
+  - 各 issue の判定（PR_FOLLOWUP / RECHECK / TRIAGE / OPEN_PR / SKIP）
+  - 重複スキップコメント検知: 既存の \`🤖 agent:skipped\` コメント件数
+    （agentSkipCommentCount）と、SKIP 判定 issue への再コメント不要助言
+    （reSkipAdvice）。新規の人間入力が無い限り再度スキップコメントを付けない。
+
 読み取り専用（gh api の GET のみ）。`;
 
 // ---- gh api ラッパ ------------------------------------------------------
@@ -143,7 +161,33 @@ const isAgentMarker = (body) => {
   return b.startsWith(SKIP_MARKER) || b.startsWith(DONE_MARKER);
 };
 
+// スキップ接頭辞（`🤖 agent:skipped`）だけを対象にする。isAgentMarker は
+// 対応済み（`🤖 対応済み`）も真になるため、重複スキップコメントの件数計上には使わない。
+const isSkipMarker = (body) => (body || '').trimStart().startsWith(SKIP_MARKER);
+
 const ts = (value) => (value ? Date.parse(value) : 0);
+
+/**
+ * 既存の `🤖 agent:skipped` コメント件数と、SKIP 判定時の再コメント不要助言を
+ * 計算する純ロジック（副作用なし・テスト容易化のため分離）。
+ *
+ * @param {Array<{isSkipMarker?: boolean}>} comments 正規化済みコメント配列
+ * @param {string} verdict トリアージ判定（'SKIP' のときだけ助言を出す）
+ * @param {boolean} alreadySkipMarked ラベル付与かつ判断コメントありか
+ * @returns {{agentSkipCommentCount: number, reSkipAdvice: string|null}}
+ */
+function computeRedundantSkipSignal(comments, verdict, alreadySkipMarked) {
+  const agentSkipCommentCount = (comments || []).filter((c) => c && c.isSkipMarker).length;
+  let reSkipAdvice = null;
+  if (verdict === 'SKIP') {
+    reSkipAdvice =
+      `既に agent:skipped 済み（既存スキップコメント ${agentSkipCommentCount} 件` +
+      `${alreadySkipMarked ? ' / ラベル・マーカーあり' : ''}）。` +
+      '新規の人間入力が無い限り、再度スキップコメントを付けないこと（再コメント禁止）。' +
+      'ラベルと既存の 1 件のマーカーコメントで十分。';
+  }
+  return { agentSkipCommentCount, reSkipAdvice };
+}
 
 function excerpt(body, max) {
   if (!max) return undefined;
@@ -159,6 +203,7 @@ function normalizeComment(c, kind, max) {
     state: c.state, // review のみ
     path: c.path, // インラインコメントのみ
     isAgentMarker: isAgentMarker(c.body),
+    isSkipMarker: isSkipMarker(c.body),
     excerpt: excerpt(c.body, max),
   };
 }
@@ -267,6 +312,14 @@ async function triageIssue(repo, issue, allPrs, opts) {
   else if (openPrs.length > 0) verdict = 'OPEN_PR';
   else verdict = 'TRIAGE';
 
+  // 重複スキップコメント検知（読み取り専用の派生信号）。
+  const alreadySkipMarked = hasSkipLabel && skipMarkerAt > 0;
+  const { agentSkipCommentCount, reSkipAdvice } = computeRedundantSkipSignal(
+    comments,
+    verdict,
+    alreadySkipMarked,
+  );
+
   return {
     number: issue.number,
     title: issue.title,
@@ -277,6 +330,9 @@ async function triageIssue(repo, issue, allPrs, opts) {
     hasSkipLabel,
     skipMarkerAt: skipMarkerAt ? new Date(skipMarkerAt).toISOString() : null,
     updatedAfterMarker,
+    alreadySkipMarked,
+    agentSkipCommentCount,
+    reSkipAdvice,
     commentCount: comments.length,
     comments,
     relatedPrs,
@@ -453,6 +509,11 @@ function renderMarkdown(repo, results, prAudit) {
           `- skip マーカー: ${r.skipMarkerAt ?? '(判断コメントなし)'} / マーカー後の更新: ${r.updatedAfterMarker ? 'あり' : 'なし'}`,
         );
       }
+      if (r.verdict === 'SKIP') {
+        lines.push(
+          `- 既存の agent:skipped コメント: ${r.agentSkipCommentCount} 件 / 再コメント: 不要（新規の人間入力が無い限り再度スキップコメントを付けない）`,
+        );
+      }
       if (r.relatedPrs.length) {
         for (const pr of r.relatedPrs) {
           const un = pr.unaddressed?.length ?? 0;
@@ -535,7 +596,13 @@ async function main() {
   }
 }
 
-main().catch((err) => {
-  process.stderr.write(`[error] ${err?.stack || err}\n`);
-  process.exitCode = 1;
-});
+// 直接実行されたときだけ main() を走らせる。テスト等から import されたときは
+// 純ロジック（computeRedundantSkipSignal など）だけを使えるようにする。
+if (import.meta.url === `file://${process.argv[1]}`) {
+  main().catch((err) => {
+    process.stderr.write(`[error] ${err?.stack || err}\n`);
+    process.exitCode = 1;
+  });
+}
+
+export { computeRedundantSkipSignal, isSkipMarker, isAgentMarker, SKIP_MARKER, DONE_MARKER };
