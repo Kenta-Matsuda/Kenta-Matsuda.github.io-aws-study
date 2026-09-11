@@ -30,11 +30,13 @@ const human = (n) => Array.from({ length: n }, () => ({ isSkipMarker: false }));
 
 check('SKIP 判定では skip 接頭辞のコメント件数を数え、助言を出す', () => {
   const comments = [...skip(2), ...human(3)];
+  // 第3引数は hasSkipLabel（ラベル有無）。
   const { agentSkipCommentCount, reSkipAdvice } = computeRedundantSkipSignal(comments, 'SKIP', true);
   assert.equal(agentSkipCommentCount, 2, '既存スキップコメントは 2 件');
   assert.ok(reSkipAdvice, 'SKIP では reSkipAdvice が設定される');
   assert.match(reSkipAdvice, /再コメント禁止/, '再コメント禁止の助言を含む');
   assert.match(reSkipAdvice, /2 件/, '件数を助言に含める');
+  assert.match(reSkipAdvice, /スキップラベル: あり/, 'ラベル有無を件数とは別に述べる');
 });
 
 check('対応済み（done）マーカーは skip 件数に数えない', () => {
@@ -52,10 +54,31 @@ check('SKIP 以外の判定では reSkipAdvice を出さない', () => {
   }
 });
 
-check('コメントが無い場合は 0 件・助言なし相当', () => {
+check('コメントが無い場合は 0 件・ラベル無しを別々に述べ、齟齬を生まない', () => {
   const { agentSkipCommentCount, reSkipAdvice } = computeRedundantSkipSignal([], 'SKIP', false);
   assert.equal(agentSkipCommentCount, 0);
-  assert.match(reSkipAdvice, /0 件/);
+  assert.match(reSkipAdvice, /0 件/, '件数 0 を明示する');
+  assert.match(reSkipAdvice, /スキップラベル: なし/, 'ラベル無しを明示する');
+  // 齟齬防止: 件数 0 件のときに「マーカーあり」等と矛盾する表現を出さない。
+  assert.doesNotMatch(
+    reSkipAdvice,
+    /マーカーあり/,
+    '0 件なのに「マーカーあり」と述べる矛盾した文面を出さない',
+  );
+});
+
+check('件数 0 かつラベルありでも「0 件 + マーカーあり」の齟齬を生まない', () => {
+  // 旧実装では hasSkipLabel 由来の alreadySkipMarked が真だと
+  // 「既存スキップコメント 0 件 / ラベル・マーカーあり」と件数と矛盾しえた。
+  const { agentSkipCommentCount, reSkipAdvice } = computeRedundantSkipSignal([], 'SKIP', true);
+  assert.equal(agentSkipCommentCount, 0);
+  assert.match(reSkipAdvice, /0 件/, '件数 0 を明示する');
+  assert.match(reSkipAdvice, /スキップラベル: あり/, 'ラベルありを件数とは別に述べる');
+  assert.doesNotMatch(
+    reSkipAdvice,
+    /マーカーあり/,
+    '件数と矛盾する「マーカーあり」の表現を出さない',
+  );
 });
 
 check('isSkipMarker は skip 接頭辞のみ真、done 接頭辞は偽', () => {

@@ -173,18 +173,25 @@ const ts = (value) => (value ? Date.parse(value) : 0);
  *
  * @param {Array<{isSkipMarker?: boolean}>} comments 正規化済みコメント配列
  * @param {string} verdict トリアージ判定（'SKIP' のときだけ助言を出す）
- * @param {boolean} alreadySkipMarked ラベル付与かつ判断コメントありか
+ * @param {boolean} hasSkipLabel スキップ用ラベルが付与済みか
  * @returns {{agentSkipCommentCount: number, reSkipAdvice: string|null}}
+ *
+ * 注: 助言の文面はスキップ接頭辞のコメント件数（agentSkipCommentCount）と
+ * ラベル有無（hasSkipLabel）をそれぞれ独立に記述する。以前は skipMarkerAt 由来の
+ * alreadySkipMarked（対応済みマーカーでも真になりうる）で「ラベル・マーカーあり」と
+ * 表示していたため、「既存スキップコメント 0 件 / ラベル・マーカーあり」のように
+ * 件数と齟齬する文面になりうる問題があった。ここでは件数とラベルを別々に、
+ * 実態どおりに述べることで齟齬を無くす。
  */
-function computeRedundantSkipSignal(comments, verdict, alreadySkipMarked) {
+function computeRedundantSkipSignal(comments, verdict, hasSkipLabel) {
   const agentSkipCommentCount = (comments || []).filter((c) => c && c.isSkipMarker).length;
   let reSkipAdvice = null;
   if (verdict === 'SKIP') {
     reSkipAdvice =
-      `既に agent:skipped 済み（既存スキップコメント ${agentSkipCommentCount} 件` +
-      `${alreadySkipMarked ? ' / ラベル・マーカーあり' : ''}）。` +
+      `既に SKIP 判定済み（スキップラベル: ${hasSkipLabel ? 'あり' : 'なし'} / ` +
+      `既存スキップコメント ${agentSkipCommentCount} 件）。` +
       '新規の人間入力が無い限り、再度スキップコメントを付けないこと（再コメント禁止）。' +
-      'ラベルと既存の 1 件のマーカーコメントで十分。';
+      'ラベルと既存のマーカーコメントで十分。RECHECK（マーカー後に人間入力あり）の時だけ再コメントする。';
   }
   return { agentSkipCommentCount, reSkipAdvice };
 }
@@ -314,10 +321,12 @@ async function triageIssue(repo, issue, allPrs, opts) {
 
   // 重複スキップコメント検知（読み取り専用の派生信号）。
   const alreadySkipMarked = hasSkipLabel && skipMarkerAt > 0;
+  // 助言の文面はスキップ件数とラベル有無を別々に述べる（対応済みマーカー由来の
+  // alreadySkipMarked を文面に混ぜると件数 0 でも「マーカーあり」と齟齬しうるため）。
   const { agentSkipCommentCount, reSkipAdvice } = computeRedundantSkipSignal(
     comments,
     verdict,
-    alreadySkipMarked,
+    hasSkipLabel,
   );
 
   return {
