@@ -1,0 +1,30 @@
+{
+  "project_type": "Static client-side PWA (GitHub Pages) for AWS certification study. Vanilla JS ES modules under js/, single large index.html, no build step. Tailwind CDN + Chart.js + Font Awesome. i18n via js/i18n.js and js/locales/{ja,en}.json.",
+  "language": "JavaScript (ES modules), some JSON data",
+  "build_system": "None. No bundler / no build step. dev-server.mjs (node) serves the static site for local dev.",
+  "test_framework": "Playwright (@playwright/test) with playwright.config.mjs. Many specs under tests/ are PURE-LOGIC: they import JS modules directly and assert without a browser (e.g. tests/ai-search-hyde.spec.mjs, tests/resource-search.spec.mjs, tests/quiz-csv.spec.mjs). The pure specs use `import { test, expect } from '@playwright/test'` but only exercise pure functions.",
+  "build_command": "None (static site). Baseline verification for a no-build site is `env -u NODE_OPTIONS node --check <file>` on changed JS plus JSON.parse on changed JSON.",
+  "test_command": "npx playwright test (or a specific spec). NOTE: under INTEGRATIONS_ONLY this cannot run (no cached browsers, no npm registry). package.json `npm test` is a placeholder that always exits 1 — do NOT use it.",
+  "verification_instructions": "1) `env -u NODE_OPTIONS node --check` on every changed .js file (ui.js, resourceSearch.js, new module, new spec). 2) `env -u NODE_OPTIONS node -e \"JSON.parse(require('fs').readFileSync('<file>','utf8'))\"` on any changed JSON. 3) For i18n changes, confirm ja.json and en.json flattened key sets are mirrored. 4) Run the pure-logic spec assertions directly with `env -u NODE_OPTIONS node` by extracting/importing the pure functions (Playwright itself cannot run in-sandbox). Document exactly what was and was not runnable.",
+  "snapshot_or_generated_files": null,
+  "setup_instructions": "No install needed for static-site changes. `env -u NODE_OPTIONS node dev-server.mjs --port 8877 --no-cache` serves the site locally for manual/browser verification (browser-only steps are documented, not run in-sandbox).",
+  "environment_constraints": "Network mode is INTEGRATIONS_ONLY (repository access only). No external network: `npm install` from the public registry and Playwright browser downloads WILL fail, so `npx playwright test` cannot run in-sandbox. Verify pure logic with plain `env -u NODE_OPTIONS node` (NODE_OPTIONS points at a non-existent proxy-bootstrap preload, so it MUST be unset per command). Do NOT run any `aws ...` commands. Do NOT push or open PRs (the orchestrator does that).",
+  "contribution_requirements": "PR bodies MUST NOT use GitHub task-list checkbox syntax (`- [ ]` / `- [x]`) — GitHub mis-counts them as task progress. Use plain bullets. PR body should follow .github/pull_request_template.md structure and (per user instruction) include: Closes #<n>, 変更内容, 実装方針, 考慮したトレードオフ. Responses/agent comments in Japanese. One feature branch per issue, `<prefix>/issue-<n>-<slug>`. Self-improvement (chore) changes go in a SEPARATE chore branch/PR, never mixed with the feature. Never push to main; never force-push.",
+  "key_patterns": "Pure, DOM/network-free logic lives in dedicated modules (js/resourceSearch.js, js/quizCsv.js, js/roadmapTaskStatement.js) so it is unit-testable without a browser; the UI layer (js/ui.js) wires the browser/AI-only parts. HyDE for issue #201 (merged PR #204) already added: searchResourcesMulti(index, terms, opts) in resourceSearch.js (union+dedupe of multi-term search); expandQueryToAwsKeywords(query)/parseExpandedKeywords(raw) in ui.js (~lines 5007-5071) that call the model to turn a vague query into concrete AWS keywords; and the AI-search handler in wireResourceSearchHandlers (~lines 5073-5271). Exam data files js/data/*.js expose per-task/step `knowledge` (and some `knowledgeEn`) arrays of bare AWS service/keyword strings, plus `description`/`descriptionEn` lines that mention important services (e.g. clf-c02.js task 3.7 lists 'Amazon QuickSight' in both a description bullet and the `knowledge` array). ALL_EXAMS is exported from js/exams.js. buildResourceIndex(exams=ALL_EXAMS) already walks steps[].resources and domains[].tasks[].resources. Tests import from '@playwright/test' and use a makeRecord()-style synthetic-data helper for determinism.",
+  "relevant_files": [
+    "js/resourceSearch.js (pure search core: buildResourceIndex, searchResources, searchResourcesMulti, scoreResourceRelevance, selectAiCandidates)",
+    "js/ui.js (HyDE wiring ~5007-5271: expandQueryToAwsKeywords, parseExpandedKeywords, wireResourceSearchHandlers, getResourceSearchIndex ~4917)",
+    "js/exams.js (ALL_EXAMS export)",
+    "js/data/clf-c02.js (example: task 3.7 has QuickSight in description + knowledge arrays)",
+    "js/data/aif-c01.js (knowledge + knowledgeEn arrays)",
+    "tests/ai-search-hyde.spec.mjs (pure-logic style guide with makeRecord helper)",
+    "tests/resource-search.spec.mjs (pure-logic style guide)",
+    "docs/issues/ai-search-hyde-201.md (prior HyDE issue doc to mirror as a pattern)",
+    "docs/index.md (docs index to update when adding a docs/issues page)",
+    ".kiro/agents/github-issue-resolver.md (self-improvement conventions)",
+    "docs/wiki/issue-resolution-playbook.md (known pitfalls + decision table; self-improvement target)",
+    "docs/wiki/efficiency-log.md (dated retrospective log; self-improvement target)",
+    "docs/wiki/README.md (wiki page index; must stay in sync)"
+  ],
+  "directory_structure": "js/ = app logic (ui.js is 6050 lines and the main wiring; resourceSearch.js is the pure search core). js/data/ = per-exam-code data (13 exams) with steps/domains/tasks/knowledge/resources. js/locales/ = i18n (ja.json, en.json, urls.json). tests/ = Playwright specs (pure-logic + browser). docs/issues/ = per-issue explanation docs. docs/wiki/ = LLM knowledge base (playbook, efficiency-log). docs/action-required/ = human-needed items. scripts/ = ops scripts (issue-triage.mjs etc.). .kiro/agents/ = agent definitions."
+}
