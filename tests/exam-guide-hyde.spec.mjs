@@ -195,6 +195,21 @@ test.describe('augmentTermsWithCatalog — HyDE augmentation (#209)', () => {
     const out = augmentTermsWithCatalog(['BIツール'], CATALOG);
     expect(out).toContain('Amazon QuickSight');
   });
+
+  test('a query CONTAINING a concept phrase still fires the alias (v2 review — forward direction)', () => {
+    // The concept 'ダッシュボード' is contained in the natural-language query, so the
+    // alias fires and pulls 'Amazon QuickSight' even without lexical overlap.
+    const out = augmentTermsWithCatalog(['ダッシュボードを作りたい'], CATALOG);
+    expect(out).toContain('Amazon QuickSight');
+  });
+
+  test('a generic token that is only a SUBSTRING of a concept word does NOT inject the alias (v2 review — no reverse fire)', () => {
+    // 'business' / 'b' are substrings of concept keys ('business intelligence') but the
+    // query does not CONTAIN the concept phrase, so the reverse direction must not fire.
+    expect(augmentTermsWithCatalog(['business'], CATALOG)).not.toContain('Amazon QuickSight');
+    expect(augmentTermsWithCatalog(['b'], CATALOG)).not.toContain('Amazon QuickSight');
+    expect(augmentTermsWithCatalog(['ビジネス'], CATALOG)).not.toContain('Amazon QuickSight');
+  });
 });
 
 test.describe('buildAugmentedScoringQuery — grounding scores on augmented terms (#209 v1 review item 4)', () => {

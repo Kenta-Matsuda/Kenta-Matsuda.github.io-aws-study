@@ -338,14 +338,17 @@ export function augmentTermsWithCatalog(terms, catalog, { limit = 24 } = {}) {
     .map((t) => str(t).trim().toLowerCase())
     .filter(Boolean);
 
-  // 指摘 5: 概念エイリアス。クエリが概念語に（部分一致で）触れたら、対応サービス語を
+  // 指摘 5: 概念エイリアス。クエリが概念語を**含む**とき（前方一致のみ）、対応サービス語を
   // 「クエリ語」として扱い、下の catalog 照合で拾えるようにする（字面が重ならなくても可）。
+  // v2 レビュー指摘: 逆方向（`conceptLower.includes(q)`）は過剰発火する。短い/一般的な
+  // クエリ語（例 'b' / 'business' / 'ビジネス'）が概念語（'business intelligence' /
+  // 'ビジネスインテリジェンス'）の部分文字列というだけで QuickSight を注入してしまうため、
+  // 前方向（クエリが概念語を含む）のみで判定する。`q === conceptLower` は
+  // `q.includes(conceptLower)` が真になるので、完全一致の概念クエリは引き続き発火する。
   for (const { concept, services } of CONCEPT_SERVICE_ALIASES) {
     const conceptLower = str(concept).trim().toLowerCase();
     if (!conceptLower) continue;
-    const hit = queryTermsLower.some(
-      (q) => q.includes(conceptLower) || conceptLower.includes(q),
-    );
+    const hit = queryTermsLower.some((q) => q.includes(conceptLower));
     if (hit) {
       for (const svc of services) {
         const svcLower = str(svc).trim().toLowerCase();
