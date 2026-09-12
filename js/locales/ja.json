@@ -54,6 +54,7 @@
       "start": "今日の学習を始める",
       "resume": "今日の学習を再開する"
     },
+    "searchCta": "全試験の学習リソースを横断検索する",
     "bookPromo": {
       "onSale": "発売中",
       "title": "AWS認定",
