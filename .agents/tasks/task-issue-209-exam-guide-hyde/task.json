@@ -1,0 +1,7 @@
+{
+  "task_id": "task-issue-209-exam-guide-hyde",
+  "task_description": "Process the repository's open GitHub issues, in a reviewable, PR-per-issue way. The single clearly-actionable, un-addressed, client-side issue this run is #209: make the AI-search HyDE query expansion exam-guide-informed so newer/edge AWS services (litmus test: 'Quick' → Amazon QuickSight / Amazon Q) surface. Deliver committed changes on a feature branch (no push, no PR — the orchestrator pushes and opens PRs). Also, per the repo's resolver self-improvement convention, deliver a SEPARATE chore branch that adds a durable index of permanently-blocked (human/AWS) issues so future runs stop re-triaging #32/#162/#167 from scratch. Skipped this run: #190 (open PR #195), #193 (open PR #206), #202 (open PR #203) — already have open PRs; #200/#197/#201 — already merged; #167/#162/#32 — require AWS backend (documented, no aws commands run).",
+  "status": "in_progress",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}
