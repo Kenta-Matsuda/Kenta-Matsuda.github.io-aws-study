@@ -228,6 +228,65 @@ export function searchResources(index, query, { examId, limit = 200 } = {}) {
 }
 
 /**
+ * 複数の展開語（expanded terms）で `searchResources` を実行し、その結果を和集合で
+ * マージ（union）して重複排除（dedupe）する。AI 検索の HyDE（Hypothetical Document
+ * Embeddings）フローで使う（issue #201）。
+ *
+ * 背景: AI 検索はこれまで、ユーザーのクエリで **まずキーワード検索** を行い、その
+ * ヒットだけを AI に再ランクさせていた。そのため「分析用のAIサービス」のような
+ * ふわっとしたクエリはどのリソースの haystack にも部分一致せず、候補が 0 件になり
+ * AI が何もできなかった。HyDE では、まず AI にこの曖昧なクエリから具体的な AWS
+ * サービス名 / キーワード（例: "Amazon Q", "SageMaker", "Comprehend"）を生成させ、
+ * その **展開語のそれぞれ** で索引を検索して和集合を取ることで、元クエリでは 0 件でも
+ * 候補を得られるようにする。得られた候補は従来どおり AI に「候補リストの中からのみ
+ * 推薦・ランク付けさせる」grounding として渡す。
+ *
+ * `searchResources` は語を空白で分割して AND 条件で照合するため、1 つの展開語が
+ * 複数語（例 "Amazon QuickSight"）でも意図どおり動く。ここでは展開語ごとに
+ * `searchResources` を呼び、返ってきたレコードを (examId + url) をキーに重複排除して
+ * つなげる。順序は「最初にヒットした展開語の順」を保つ安定な和集合とし、そのうえで
+ * recommend:true を先頭へ寄せる（`searchResources` と同じ表示方針）。
+ *
+ * DOM / ネットワーク非依存のピュア関数なので、ブラウザ無しで単体テストできる。
+ * AI 呼び出し自体（曖昧なクエリ → 展開語）は UI 側（`js/ui.js`）が担い、ここには
+ * 展開語のマージ・重複排除という純粋なロジックだけを置く。
+ *
+ * @param {ResourceRecord[]} index - `buildResourceIndex()` が返す配列。
+ * @param {string[]} terms - 検索する展開語の配列。空・空白のみの語は無視する。
+ * @param {Object} [options]
+ * @param {string} [options.examId] - 指定するとその試験に絞る（`searchResources` と同じ）。
+ * @param {number} [options.perTermLimit=200] - 展開語ごとの `searchResources` の上限。
+ * @param {number} [options.limit=200] - マージ後に返す件数の上限。
+ * @returns {ResourceRecord[]} 展開語全体の和集合（重複排除済み）。recommend:true を先頭へ
+ *   寄せ、それ以外は「最初にヒットした展開語の順 → その語の結果順」を保つ。
+ */
+export function searchResourcesMulti(index, terms, { examId, perTermLimit = 200, limit = 200 } = {}) {
+  const termList = Array.isArray(terms) ? terms : [];
+  const seen = new Set();
+  const merged = [];
+
+  for (const term of termList) {
+    const trimmed = typeof term === 'string' ? term.trim() : '';
+    if (!trimmed) continue;
+    const results = searchResources(index, trimmed, { examId, limit: perTermLimit });
+    for (const record of results) {
+      if (!record) continue;
+      const dedupeKey = `${record.examId}\n${record.url}`;
+      if (seen.has(dedupeKey)) continue;
+      seen.add(dedupeKey);
+      merged.push(record);
+    }
+  }
+
+  // recommend:true を先頭へ。安定ソートなので同グループ内は和集合の順序（最初に
+  // ヒットした展開語の順）を保つ。
+  merged.sort((a, b) => (b.recommend === true ? 1 : 0) - (a.recommend === true ? 1 : 0));
+
+  const cap = Number.isFinite(limit) && limit > 0 ? limit : merged.length;
+  return merged.slice(0, cap);
+}
+
+/**
  * 1 レコードとクエリ語の一致度を粗く採点する。AI モードで「モデルに渡す候補（grounding）」を
  * 選ぶときに使う。`searchResources` の recommend 優先ソートは表示順としては妥当だが、
  * その順で上位 N 件を切り取ると、recommend でない強い一致がキャップ外に押し出され、

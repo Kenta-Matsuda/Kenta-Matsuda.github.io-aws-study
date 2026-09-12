@@ -66,7 +66,7 @@ import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
-import { buildResourceIndex, searchResources, selectAiCandidates } from './resourceSearch.js';
+import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -2120,6 +2120,7 @@ function getElements() {
 
     // Cross-resource search (issue #189)
     resourceSearchBtn: document.getElementById('resourceSearchBtn'),
+    dashboardSearchBtn: document.getElementById('dashboardSearchBtn'),
     resourceSearchModal: document.getElementById('resourceSearchModal'),
     resourceSearchExam: document.getElementById('resourceSearchExam'),
     resourceSearchInput: document.getElementById('resourceSearchInput'),
@@ -4804,6 +4805,73 @@ function populateResourceSearchExams(els, exams) {
   select.dataset.populated = 'true';
 }
 
+/**
+ * HyDE query expansion (#201): turn a vague natural-language query into a small
+ * set of concrete AWS service names / keywords so the local resource index can
+ * be searched even when the raw query matches nothing.
+ *
+ * The AI call lives here (in the UI layer, next to the other AI-search wiring);
+ * only the pure union/dedupe merge of the expanded terms lives in the testable
+ * `searchResourcesMulti` helper in `js/resourceSearch.js`. The prompt keeps the
+ * grounding discipline of the ranking step: it asks only for real AWS service
+ * names / keywords and never for URLs.
+ *
+ * @param {string} query - the user's (possibly vague) query.
+ * @returns {Promise<string[]>} up to ~8 concrete AWS service names / keywords.
+ *   Returns [] if no key, the call fails, or nothing usable is parsed — callers
+ *   fall back to a plain keyword search on the raw query in that case.
+ */
+async function expandQueryToAwsKeywords(query) {
+  const q = String(query || '').trim();
+  if (!q) return [];
+  if (!getApiKey() && !getOpenAiApiKey()) return [];
+
+  const systemPrompt = [
+    'You expand a learner\'s vague query about AWS into concrete search keywords.',
+    'Given the query, imagine which AWS certification study topics answer it, then output the concrete AWS service names and keywords that would appear in matching documentation (this is HyDE: hypothesise the answer, then extract its keywords).',
+    'Rules you MUST follow:',
+    '- Output ONLY a comma-separated list of concrete AWS service names / keywords (e.g. "Amazon SageMaker, Amazon Bedrock, Amazon Comprehend").',
+    '- Prefer official AWS service names. Do not invent services that do not exist.',
+    '- Output at most 8 keywords. No sentences, no URLs, no numbering, no extra text.',
+  ].join('\n');
+  const userPrompt = `Query: ${q}`;
+
+  let raw = '';
+  try {
+    raw = await callAi({ userPrompt, systemPrompt, onRequireApiKey: () => {} });
+  } catch {
+    return [];
+  }
+  return parseExpandedKeywords(raw);
+}
+
+/**
+ * Parse the model's keyword-expansion output into a clean, deduped term list.
+ * Tolerant of models that return a comma-separated line, a bulleted/numbered
+ * list, or a mix. Pure string logic (no DOM); kept next to its only caller.
+ * @param {string} raw - the raw model text.
+ * @returns {string[]} deduped, trimmed keywords (max 8).
+ */
+function parseExpandedKeywords(raw) {
+  const text = String(raw || '');
+  if (!text.trim()) return [];
+  // Split on commas and newlines; strip common list markers / surrounding punctuation.
+  const parts = text
+    .split(/[\n,;、]+/)
+    .map((p) => p.replace(/^[\s*\-–—•]+/, '').replace(/^\d+[.)]\s*/, '').replace(/["'`.]+$/, '').trim())
+    .filter(Boolean);
+  const seen = new Set();
+  const terms = [];
+  for (const part of parts) {
+    const key = part.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    terms.push(part);
+    if (terms.length >= 8) break;
+  }
+  return terms;
+}
+
 function wireResourceSearchHandlers({ els, exams }) {
   if (!els.resourceSearchBtn || !els.resourceSearchModal) return;
 
@@ -4846,12 +4914,15 @@ function wireResourceSearchHandlers({ els, exams }) {
     return results;
   };
 
-  // Open modal from the header button; populate the exam select once.
-  els.resourceSearchBtn.addEventListener('click', () => {
+  // Open modal from the header button or the prominent dashboard search entry
+  // (#201). Both reuse the same modal wiring; populate the exam select once.
+  const openResourceSearch = () => {
     populateResourceSearchExams(els, exams);
     openModal(els.resourceSearchModal);
     els.resourceSearchInput?.focus();
-  });
+  };
+  els.resourceSearchBtn.addEventListener('click', openResourceSearch);
+  els.dashboardSearchBtn?.addEventListener('click', openResourceSearch);
 
   // Keyword search: button click.
   els.resourceSearchGoBtn?.addEventListener('click', () => {
@@ -4868,8 +4939,14 @@ function wireResourceSearchHandlers({ els, exams }) {
     runKeywordSearch();
   });
 
-  // AI search: always run keyword search first (so the user never gets
-  // nothing), then ask the model to rank/recommend strictly from that list.
+  // AI search (HyDE — Hypothetical Document Embeddings, #201): a vague query
+  // like "分析用のAIサービス" matches no keyword, so a keyword-first flow used
+  // to return nothing and the AI never ran. Instead we first ask the model to
+  // expand the vague query into concrete AWS service names / keywords, then
+  // keyword-search the local index with each expanded term (union + dedupe),
+  // and finally ask the model to rank/recommend strictly from that candidate
+  // list. Direct keyword hits on the original query are unioned in too so we
+  // never regress on queries that already matched.
   els.resourceSearchAiBtn?.addEventListener('click', async () => {
     hideAiAnswer();
     const query = String(els.resourceSearchInput?.value || '').trim();
@@ -4878,18 +4955,51 @@ function wireResourceSearchHandlers({ els, exams }) {
       return;
     }
 
-    const candidates = runKeywordSearch();
-    if (candidates.length === 0) return; // noResults status already shown
+    const examId = String(els.resourceSearchExam?.value || '').trim() || undefined;
 
     // No API key → keyword-only fallback with a localized notice. We check
     // keys directly so we can keep keyword results visible and avoid opening
-    // the settings modal on top of the search modal.
+    // the settings modal on top of the search modal. Matches prior behavior:
+    // show whatever plain keyword search finds, then the needs-key notice.
     if (!getApiKey() && !getOpenAiApiKey()) {
+      runKeywordSearch();
       setStatus(t('search.aiNeedsKey'));
       return;
     }
 
     setStatus(t('search.aiSearching'));
+
+    const index = getResourceSearchIndex();
+
+    // Step 1 (HyDE): expand the (possibly vague) query into concrete AWS
+    // service names / keywords via the model, then union-search the local
+    // index across those terms. This makes vague queries yield candidates.
+    let candidates = [];
+    try {
+      const expandedTerms = await expandQueryToAwsKeywords(query);
+      // Always include the raw query as one term so exact keyword hits are kept.
+      const terms = [query, ...expandedTerms];
+      candidates = searchResourcesMulti(index, terms, { examId });
+    } catch {
+      candidates = [];
+    }
+
+    // Fallback: if expansion produced nothing (e.g. AI call failed or returned
+    // no usable terms), fall back to a plain keyword search on the raw query.
+    if (candidates.length === 0) {
+      candidates = searchResources(index, query, { examId });
+    }
+
+    // Render the merged candidate list (same card renderer as keyword search)
+    // so the user always sees concrete resources, not just the AI prose.
+    if (els.resourceSearchResults) {
+      if (candidates.length === 0) {
+        els.resourceSearchResults.innerHTML = '';
+        setStatus(t('search.noResults'));
+        return;
+      }
+      els.resourceSearchResults.innerHTML = candidates.map(renderResourceSearchCard).join('');
+    }
 
     // Bound the prompt size: only the top candidates are sent as grounding.
     // Select by match relevance (not the recommend-first display order) so a
