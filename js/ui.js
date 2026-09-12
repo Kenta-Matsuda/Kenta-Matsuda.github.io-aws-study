@@ -77,7 +77,7 @@ import {
   messageKeyForStage,
   shouldCelebratePass,
 } from './examSchedule.js';
-import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates } from './resourceSearch.js';
+import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates, buildExamKeywordCatalog, augmentTermsWithCatalog } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -4925,6 +4925,23 @@ function getResourceSearchIndex() {
 }
 
 /**
+ * Lazily-built, memoized exam-guide keyword catalog (issue #209). The catalog is
+ * the durable, model-independent list of "which AWS services/concepts matter" per
+ * exam guide (e.g. Amazon QuickSight / Amazon Q), used to augment HyDE expanded
+ * terms so newer services the LLM was not trained on still surface in AI search.
+ * @type {string[] | null}
+ */
+let examKeywordCatalog = null;
+
+/** Build (or reuse) the memoized exam-guide keyword catalog. */
+function getExamKeywordCatalog() {
+  if (!examKeywordCatalog) {
+    examKeywordCatalog = buildExamKeywordCatalog();
+  }
+  return examKeywordCatalog;
+}
+
+/**
  * Pick the locale-aware value from a plain/JP title pair, falling back to
  * whichever is non-empty so a breadcrumb never renders blank.
  * @param {string} plain - English/plain field.
@@ -5176,7 +5193,11 @@ function wireResourceSearchHandlers({ els, exams }) {
     try {
       const expandedTerms = await expandQueryToAwsKeywords(query);
       // Always include the raw query as one term so exact keyword hits are kept.
-      const terms = [query, ...expandedTerms];
+      const baseTerms = [query, ...expandedTerms];
+      // issue #209: fold in exam-guide catalog services relevant to the query so
+      // newer services the model may omit (the "Quick" → Amazon QuickSight / Amazon Q
+      // litmus test) still surface. augmentTermsWithCatalog is pure/unit-tested.
+      const terms = augmentTermsWithCatalog(baseTerms, getExamKeywordCatalog());
       candidates = searchResourcesMulti(index, terms, { examId });
     } catch {
       candidates = [];

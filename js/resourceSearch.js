@@ -161,6 +161,138 @@ function pushGroups(out, groups, examMeta, stepMeta, taskMeta) {
 }
 
 /**
+ * 試験ガイド由来の「重要な AWS サービス名 / 概念キーワード」辞書（catalog）を構築する
+ * ピュア関数（issue #209）。
+ *
+ * 背景 / なぜ必要か: AI 検索の HyDE（`js/ui.js` の expandQueryToAwsKeywords）は、曖昧な
+ * クエリを具体的な AWS サービス名へ「モデルに推測させる」ことに全面的に依存している。
+ * しかし新しめ・エッジなサービス（issue #209 のリトマス試験である "Quick" → Amazon
+ * QuickSight / Amazon Q など）は、LLM が学習していない場合に展開語へ現れず、検索から
+ * 抜け落ちる。一方で各試験データには、その試験で「どのサービス / 概念が重要か」が
+ * `knowledge` / `knowledgeEn` 配列（素の AWS サービス名文字列）として明示されており、
+ * これはモデルの知識に依存しない**恒久的な出典**になる。この関数はその出典を辞書化し、
+ * HyDE の展開語を補強する材料（`augmentTermsWithCatalog` が使う）を提供する。
+ *
+ * 走査対象は `buildResourceIndex` と整合を保つ: step レベル（`exam.steps[].knowledge` /
+ * `knowledgeEn`）と task レベル（`exam.domains[].tasks[].knowledge` / `knowledgeEn`）の
+ * 両方を歩く。値は文字列または配列を受け付け、trim し、空要素は捨てる。大文字小文字を
+ * 区別せず重複排除し、最初に現れた表記（casing）を保持する。DOM / ネットワーク非依存。
+ *
+ * @param {Array<object>} [exams=ALL_EXAMS] - 辞書化する試験オブジェクトの配列。
+ *   既定は全 13 試験（`ALL_EXAMS`）。テスト用に部分集合を渡すこともできる。
+ * @returns {string[]} 一意な重要キーワードの配列（出現順を保持）。
+ */
+export function buildExamKeywordCatalog(exams = ALL_EXAMS) {
+  const examList = Array.isArray(exams) ? exams : [];
+  const seen = new Set();
+  const catalog = [];
+
+  const collect = (value) => {
+    // 文字列単体でも配列でも受け付ける。
+    const values = Array.isArray(value) ? value : value == null ? [] : [value];
+    for (const raw of values) {
+      const keyword = str(raw).trim();
+      if (!keyword) continue;
+      const key = keyword.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      catalog.push(keyword);
+    }
+  };
+
+  for (const exam of examList) {
+    if (!exam || typeof exam !== 'object') continue;
+
+    // step レベルの knowledge / knowledgeEn。
+    const steps = Array.isArray(exam.steps) ? exam.steps : [];
+    for (const step of steps) {
+      if (!step || typeof step !== 'object') continue;
+      collect(step.knowledge);
+      collect(step.knowledgeEn);
+    }
+
+    // task レベルの knowledge / knowledgeEn（buildResourceIndex と同じ domain→task 走査）。
+    const domains = Array.isArray(exam.domains) ? exam.domains : [];
+    for (const domain of domains) {
+      if (!domain || typeof domain !== 'object') continue;
+      const tasks = Array.isArray(domain.tasks) ? domain.tasks : [];
+      for (const task of tasks) {
+        if (!task || typeof task !== 'object') continue;
+        collect(task.knowledge);
+        collect(task.knowledgeEn);
+      }
+    }
+  }
+
+  return catalog;
+}
+
+/**
+ * HyDE の展開語（terms）に、クエリと関連する試験ガイド辞書（catalog）のエントリを
+ * 足し込むピュア関数（issue #209）。
+ *
+ * これは issue #209 が求める「試験ガイドごとに重要なサービス / 概念を整理し、それを
+ * HyDE に反映する」を、モデルに依存しない決定的なロジックとして実装したもの。モデルが
+ * "Amazon QuickSight" を展開語に出さなくても、クエリに "Quick" / "QuickSight" が含まれて
+ * いれば辞書の "Amazon QuickSight" を引き込み、`searchResourcesMulti` が公開済みの
+ * QuickSight リソースを見つけられるようにする。
+ *
+ * 「関連する」の判定は緩めの部分一致（大文字小文字を無視）:
+ *   - いずれかのクエリ語が catalog エントリの部分文字列（例 'Quick' ⊂ 'Amazon QuickSight'）、
+ *     または
+ *   - catalog エントリがいずれかのクエリ語の部分文字列（例 catalog の 'Amazon QuickSight' が
+ *     クエリ語 'Amazon QuickSight のドキュメント' に含まれる）。
+ *
+ * 結果は terms と関連 catalog エントリの和集合。大文字小文字を無視して重複排除し、順序は
+ * 「元の terms が先、その後に catalog 順で追加分」を保つ。プロンプト / 候補サイズを抑える
+ * ため `opts.limit`（既定 24）で全体を打ち切る。入力（terms / catalog）は変更しない。
+ *
+ * @param {string[]} terms - HyDE の展開語（`[query, ...expandedTerms]` を想定）。
+ * @param {string[]} catalog - `buildExamKeywordCatalog()` が返す辞書。
+ * @param {Object} [opts]
+ * @param {number} [opts.limit=24] - 返す語数の上限。
+ * @returns {string[]} terms ∪（関連する catalog エントリ）。重複排除・順序保持済み。
+ */
+export function augmentTermsWithCatalog(terms, catalog, { limit = 24 } = {}) {
+  const termList = Array.isArray(terms) ? terms : [];
+  const catalogList = Array.isArray(catalog) ? catalog : [];
+
+  const seen = new Set();
+  const result = [];
+
+  const add = (raw) => {
+    const value = str(raw).trim();
+    if (!value) return;
+    const key = value.toLowerCase();
+    if (seen.has(key)) return;
+    seen.add(key);
+    result.push(value);
+  };
+
+  // 1) 元の terms を先に（空・空白は無視、重複排除）。
+  for (const term of termList) add(term);
+
+  // 関連判定に使う、trim 済み・非空のクエリ語（小文字）。
+  const queryTermsLower = termList
+    .map((t) => str(t).trim().toLowerCase())
+    .filter(Boolean);
+
+  // 2) クエリと関連する catalog エントリを catalog 順で追加。
+  for (const entry of catalogList) {
+    const entryStr = str(entry).trim();
+    if (!entryStr) continue;
+    const entryLower = entryStr.toLowerCase();
+    const relevant = queryTermsLower.some(
+      (q) => entryLower.includes(q) || q.includes(entryLower),
+    );
+    if (relevant) add(entryStr);
+  }
+
+  const cap = Number.isFinite(limit) && limit > 0 ? limit : result.length;
+  return result.slice(0, cap);
+}
+
+/**
  * 1 レコードから照合用の haystack 文字列（小文字化済み）を作る。
  * ロケールに関係なくヒットさせるため日本語・英語フィールドを両方含める。
  * @param {ResourceRecord} record
