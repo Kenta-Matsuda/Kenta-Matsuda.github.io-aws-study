@@ -107,6 +107,28 @@
       "title": "Skills by Domain",
       "placeholder": "Answer quizzes to see your skill chart"
     },
+    "examDate": {
+      "titleShort": "Exam Date",
+      "title": "{{exam}} exam date",
+      "empty": "Register your planned exam date to see a countdown and encouragement.",
+      "inputLabel": "Planned exam date",
+      "save": "Save",
+      "clear": "Clear",
+      "markPassed": "I passed! 🎉",
+      "daysShort": "{{days}} days left",
+      "todayShort": "Today",
+      "pastShort": "Ended",
+      "passedStatus": "Congratulations on passing! 🎉",
+      "passToastTitle": "Congratulations!",
+      "passToast": "🏆 Congratulations on passing {{exam}}! Your hard work paid off.",
+      "stage": {
+        "far": "{{days}} days until your exam. Take your time to build a solid foundation.",
+        "soon": "{{days}} days until your exam. Time to start your final review!",
+        "imminent": "Only {{days}} days to go! Do a last check of your weak areas 🔥",
+        "today": "It's exam day. Stay calm and give it your best! 💪",
+        "past": "Your exam date has passed. Record your result or set a new date."
+      }
+    },
     "bootError": "Failed to load page data. Please reload the page. If opening locally, you need to open via a local server."
   },
   "quiz": {

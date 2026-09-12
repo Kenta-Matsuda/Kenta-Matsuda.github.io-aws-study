@@ -32,6 +32,7 @@ const APP_SHELL = [
   './js/chat.js',
   './js/config.js',
   './js/exams.js',
+  './js/examSchedule.js',
   './js/gemini.js',
   './js/geminiBatch.js',
   './js/i18n.js',

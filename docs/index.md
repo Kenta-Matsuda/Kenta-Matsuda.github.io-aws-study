@@ -23,6 +23,7 @@
 - [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
 - [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
 - [要人間対応事項をチェックリスト一覧として可視化 (#184)](issues/action-required-checklist-184.md)
+- [受験予定日のカウントダウンと合格お祝い (#200)](issues/exam-date-countdown-200.md)
 - [AI検索をHyDEでクエリ拡張し、検索導線を強化 (#201)](issues/ai-search-hyde-201.md)
 
 ## LLM Wiki（docs/wiki/）
