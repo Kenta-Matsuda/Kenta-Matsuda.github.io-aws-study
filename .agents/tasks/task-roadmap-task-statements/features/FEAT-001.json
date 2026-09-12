@@ -1,0 +1,30 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Establish the local verification baseline for this no-build static site and extract a small pure helper module for task-statement text. Because the sandbox is INTEGRATIONS_ONLY (no npm/Playwright), the baseline is node syntax checks + locale parity, not a bundler build. This feature also creates js/roadmapTaskStatement.js: a pure ES module that turns a roadmap task object into (a) the display lines and (b) a single clipboard-ready plain-text string, so the copy logic (#192) is unit-testable without a browser (mirrors the js/quizCsv.js pattern).",
+  "status": "completed",
+  "steps": [
+    "Confirm baseline: run `node --check js/ui.js`, `node --check js/i18n.js`, and `node --check dev-server.mjs` and confirm they pass (this is the working-state baseline for a no-build site).",
+    "Confirm locale parity baseline: write a throwaway node one-liner (do NOT commit it) that JSON.parse's js/locales/ja.json and js/locales/en.json and compares their flattened key sets; confirm they are already mirrored before making changes.",
+    "Create js/roadmapTaskStatement.js as a pure ES module (no DOM, no imports from ui.js). Export at least: `taskStatementLines(task, locale)` returning the array of trimmed non-empty statement lines for the given locale ('en' uses task.descriptionEn when present, otherwise task.description; 'ja' uses task.description) reusing the same selection/normalization logic that localizedDescription + normalizeDescriptionLines apply in ui.js; and `taskStatementCopyText(task, locale)` returning a single plain-text string suitable for the clipboard (join the lines with '\\n'; return '' when there are no lines). Keep the normalization behavior byte-compatible with ui.js's normalizeDescriptionLines (trim each entry, drop empties, accept string or array).",
+    "Add a JSDoc header to js/roadmapTaskStatement.js explaining, in the same style as js/quizCsv.js, why the logic is split out (unit-testable clipboard text for issue #192 / #191) and that it must stay in sync with ui.js's localizedDescription/normalizeDescriptionLines.",
+    "Add tests/roadmap-task-statement.spec.mjs following the pure-logic style of tests/quiz-csv.spec.mjs: import the two functions from ../js/roadmapTaskStatement.js and cover: en falls back to description when descriptionEn is missing; en uses descriptionEn when present; ja always uses description; whitespace-only / empty entries are dropped; a task with no description yields [] and '' copy text; copy text joins multiple lines with newlines in order (e.g. a task like the aif-c01 '1.1' statement with a header line + several bullet lines).",
+    "Run `node --check js/roadmapTaskStatement.js` and `node --check tests/roadmap-task-statement.spec.mjs`.",
+    "Run a node import smoke test: `node --input-type=module -e \"import('./js/roadmapTaskStatement.js').then(m=>{const t={description:[' A ','', 'B'],descriptionEn:['X','Y']};console.log(JSON.stringify(m.taskStatementLines(t,'ja')));console.log(JSON.stringify(m.taskStatementCopyText(t,'en')));})\"` and confirm ja=['A','B'] and en copy text='X\\nY'."
+  ],
+  "acceptance_criteria": [
+    "js/roadmapTaskStatement.js exists, is a pure ES module (no DOM / no ui.js import) and exports taskStatementLines(task, locale) and taskStatementCopyText(task, locale).",
+    "taskStatementLines('en') uses descriptionEn when present and falls back to description otherwise; ('ja') uses description; empty/whitespace entries are dropped; a task with no description returns [].",
+    "taskStatementCopyText joins the lines with '\\n' in order and returns '' when there are no lines.",
+    "tests/roadmap-task-statement.spec.mjs imports the module directly and asserts the above cases.",
+    "`node --check` passes for js/ui.js, js/roadmapTaskStatement.js, and tests/roadmap-task-statement.spec.mjs.",
+    "ja.json and en.json key sets remain mirrored (no regressions introduced by this feature)."
+  ],
+  "verification": [
+    "node --check js/ui.js && node --check js/roadmapTaskStatement.js && node --check tests/roadmap-task-statement.spec.mjs",
+    "node --input-type=module -e import smoke test described in steps prints the expected ja lines and en copy text",
+    "node script confirming js/locales/ja.json and js/locales/en.json flattened key sets are equal"
+  ],
+  "blocked_reason": null,
+  "findings": "Created js/roadmapTaskStatement.js (pure ES module, no DOM / no ui.js import) exporting taskStatementLines(task, locale) and taskStatementCopyText(task, locale). Selection logic mirrors ui.js localizedDescription (en uses descriptionEn when present else description; ja uses description) and normalization mirrors ui.js normalizeDescriptionLines (accept string or array, trim each, drop empties). taskStatementCopyText joins lines with '\\n', '' when empty. Added tests/roadmap-task-statement.spec.mjs in the tests/quiz-csv.spec.mjs pure-logic style covering en fallback, en uses descriptionEn, ja uses description, whitespace/empty dropped, plain-string description, empty task -> [] and '', and multi-line copy ordering.\n\nVerification (NODE_OPTIONS proxy-bootstrap preload had to be unset for node to run in this sandbox): `node --check` PASSED for js/ui.js, js/i18n.js, dev-server.mjs, js/roadmapTaskStatement.js, tests/roadmap-task-statement.spec.mjs (ALL_CHECKS_PASS). Import smoke test printed ja lines [\"A\",\"B\"] and en copy text \"X\\nY\" as expected. Locale parity confirmed: ja.json and en.json both 293 flattened keys, no keys unique to either (LOCALE_PARITY_OK). Playwright specs not executed (INTEGRATIONS_ONLY: no browser/npm); they run in CI. Did not implement FEAT-002 (ui.js rendering/toggle/copy button + new locale keys)."
+}

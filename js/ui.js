@@ -38,6 +38,7 @@ import {
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { quizHistoryToCsv } from './quizCsv.js';
+import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
 import {
   buildResourceLinksMarkdown,
   buildResourceLinksCsv,
@@ -1918,7 +1919,54 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       await runAiRequest(lastAiRequest);
       return;
     }
+
+    // Copy a task's statement plain text to the clipboard (#192).
+    if (action === 'copy-task-statement') {
+      const taskId = String(btn.dataset.taskId || '').trim();
+      if (!taskId) return;
+      let task = null;
+      for (const domain of exam?.domains || []) {
+        task = (domain.tasks || []).find((tk) => String(tk.id) === taskId);
+        if (task) break;
+      }
+      if (!task) return;
+
+      const text = taskStatementCopyText(task, getLocale());
+      const ok = await copyTextToClipboard(text);
+
+      // Mirror the flash-feedback idiom: swap label to common.copied for ~1.4s
+      // then restore to common.copy.
+      const original = btn.innerHTML;
+      const label = ok ? t('common.copied') : t('common.copyFailed');
+      const iconClass = ok ? 'fa-check' : 'fa-triangle-exclamation';
+      btn.innerHTML = `<i class="fas ${iconClass}"></i> ${escapeHtml(label)}`;
+      if (btn.__copyStatementTimer) clearTimeout(btn.__copyStatementTimer);
+      btn.__copyStatementTimer = setTimeout(() => {
+        btn.innerHTML = original;
+        btn.__copyStatementTimer = null;
+      }, 1400);
+      return;
+    }
   });
+
+  // Accordion behavior for the task-statement disclosures (#191 follow-up):
+  // opening one statement collapses any others that are currently open, so the
+  // roadmap never shows a stack of expanded toggles at once. The `toggle` event
+  // does not bubble, so the listener is registered in the capture phase.
+  els.contentArea.addEventListener(
+    'toggle',
+    (e) => {
+      const opened = e.target;
+      if (!(opened instanceof HTMLDetailsElement)) return;
+      if (!opened.classList.contains('task-statement-details') || !opened.open) return;
+      els.contentArea
+        .querySelectorAll('details.task-statement-details[open]')
+        .forEach((details) => {
+          if (details !== opened) details.open = false;
+        });
+    },
+    true
+  );
 
   wireXpLinkHandlers({ els, state, getExamById });
 
@@ -3949,20 +3997,38 @@ function renderContent({ els, exam, state }) {
       card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
       const taskContext = buildTaskAiContext(task);
-      const shouldShowDescription = task?.showDescription === true;
-      const taskDescriptionLines = normalizeDescriptionLines(localizedDescription(task));
+      // Task statement lines (issue #191/#192). Render from the same pure
+      // roadmapTaskStatement source used for the copy text so the shown lines
+      // and copied text share one implementation and cannot silently desync.
+      const taskDescriptionLines = taskStatementLines(task, getLocale());
       const taskDescriptionHtml = taskDescriptionLines
         .map((line) => `<div>${highlightHtml(escapeHtml(line), term)}</div>`)
         .join('');
-      const descriptionHtml =
-        shouldShowDescription && taskDescriptionLines.length
-          ? `
-            <div class="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
-              <div class="text-xs font-bold text-amber-700 mb-1">${getLocale() === 'ja' ? '説明' : 'Description'}</div>
-              <div class="space-y-1">${taskDescriptionHtml}</div>
-            </div>
+      // Collapsed-by-default disclosure (no `open` attribute) so statements are
+      // hidden until the user opts in (#191). The copy button copies the same
+      // plain text produced by taskStatementCopyText (#192).
+      const descriptionHtml = taskDescriptionLines.length
+        ? `
+            <details class="task-statement-details mt-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-900">
+              <summary class="cursor-pointer select-none px-3 py-2 text-xs font-bold text-amber-700 flex items-center gap-2">
+                <i class="fas fa-align-left"></i> ${escapeHtml(t('roadmap.taskStatementToggle'))}
+              </summary>
+              <div class="px-3 pb-3">
+                <div class="space-y-1">${taskDescriptionHtml}</div>
+                <div class="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    data-action="copy-task-statement"
+                    data-task-id="${escapeHtml(task.id)}"
+                    class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 shadow-sm transition hover:bg-amber-100 whitespace-nowrap"
+                  >
+                    <i class="fas fa-copy"></i> ${escapeHtml(t('common.copy'))}
+                  </button>
+                </div>
+              </div>
+            </details>
           `
-          : '';
+        : '';
 
       const header = document.createElement('div');
       header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white';
