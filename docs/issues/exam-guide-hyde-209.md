@@ -69,16 +69,88 @@ candidates = searchResourcesMulti(index, terms, { examId });
 
 「query 関連の catalog 抜粋をモデルの system / user プロンプトに『既知の重要サービス』として
 渡す」案（steps の任意項目）は**採用しなかった**。展開後の決定的な補強（上記 2・3）だけで
-issue #209 のリトマス試験（`Quick` → QuickSight）は満たせるうえ、プロンプト投入は
+issue #209 の意図（試験ガイド由来のサービスを HyDE に反映）を満たせるうえ、プロンプト投入は
 `parseExpandedKeywords` の契約やレイテンシ・コストに追加の複雑さ / リスクを持ち込むため、
 低リスクな決定的補強に絞った。
+
+## v1 レビュー指摘への対応（follow-up）
+
+初回レビューは NEEDS_CHANGES で、字面ベースの補強が「効いている範囲」と「効いていない範囲」を
+明確に切り分けた。指摘は 5 点。以下のとおり対応した。
+
+### 指摘 1: リトマス `Quick` 単独では needle が動かない → 実効化した
+
+`searchResources` は大文字小文字を無視した**部分一致**なので、生クエリ `Quick` は既に
+`QuickSight` に部分一致し（6 件ヒット）、`Amazon QuickSight` を辞書から足しても**追加リソースは
+0 件**（補強は no-op）だった。一方、`Amazon Q Developer とは` のような**冗長な多語クエリ**は
+生では 1 つの AND フレーズ扱いで 0 件になり、辞書が清潔なサービス語を供給して初めて結果が出る
+（0 → 9 件）。この「多語クエリでの実効」を保ちつつ、下記の指摘 3・4・5 で
+
+- 検索リコールに実際に効くケース（多語クエリ・字面が重ならない概念クエリ）を増やし、
+- 辞書由来のヒットが AI グラウンディングに確実に届くようにした（指摘 4）。
+
+`Quick` **単独**については、字面部分一致で既にヒットするため辞書補強は追加リソースを生まない。
+これは「悪化ではなく現状維持（既に検索できている）」であり、本 issue の実質的なギャップは
+**冗長クエリ**と**字面の重ならない概念クエリ**にあることを、正直に本ドキュメントに明記する。
+
+### 指摘 2: 退行検知できない end-to-end テスト → 差分テストに書き換え
+
+旧テスト（`['Quick','Amazon Athena']` で QuickSight が出る）は、補強を**外しても通る**ため
+新挙動を何も守っていなかった。`tests/exam-guide-hyde.spec.mjs` を次の**退行検知可能**な差分
+テストに置き換えた。
+
+- **冗長クエリ差分**: `Amazon Q Developer とは` について、補強前（`[query, ...expandedTerms]`、
+  すなわち機能導入前に `ui.js` が行っていた挙動）の結果集合と補強後を同一索引で比較し、
+  「補強後にしか出ない結果（delta）が非空」を assert。補強を revert すると baseline=0 のままで
+  delta も 0 になり、テストは**落ちる**。
+- **字面非重複の概念クエリ**: `BIツール`（QuickSight と部分文字列を一切共有しない）が、補強
+  （概念エイリアス経由）でのみ QuickSight を出すことを assert。revert すると出ないため落ちる。
+
+退行検知が効くことは、`augmentTermsWithCatalog` を恒等関数（＝補強無し）に差し替えた throwaway
+実行で「両 assert が落ちる」ことを確認済み（PR 本文 / FEAT-002 findings にコマンドと出力を記録）。
+
+### 指摘 3: 素の `Amazon Q` が過剰一致 → 短い/曖昧トークンをガード
+
+素の `Amazon Q` は `amazon` AND `q` として検索され、1 文字の `q` が queue / quotas / parquet /
+data quality 等に偶然部分一致して**無関係な約 38 件**をグラウンディングに引き込んでいた。
+ピュア関数 `isSafeCatalogSearchTerm(entry)` を追加し、「句読点除去後のトークン列に 1 文字以下の
+トークンがあり、かつトークン総数が 2 個以下（アンカー語が無い）」エントリだけを検索語から除外
+する。これにより実データでは `Amazon Q` 系（`Amazon Q` とその概念リスト表記）だけが弾かれ、
+アンカー語を持つ `Amazon Q Developer` / `Amazon Q Business` は**温存**される。単体テスト済み。
+
+### 指摘 4: グラウンディングが生クエリで採点される → 拡張後 term で採点
+
+`selectAiCandidates(candidates, query, 40)` を**生クエリ**で採点すると、catalog 経由でのみ
+候補入りしたリソース（生クエリに `quick` が無い等）が 0 点になり 40 件キャップの外へ落ちて
+モデルに届かない恐れがあった。ピュア関数 `buildAugmentedScoringQuery(terms)` を追加し、`ui.js`
+では拡張後の term 集合から作った採点用クエリで `selectAiCandidates` を呼ぶよう変更した。
+`selectAiCandidates` / `scoreResourceRelevance` / `searchResourcesMulti` は**未変更**。
+
+### 指摘 5: 字面の重ならない曖昧クエリが未対応 → 小さな概念エイリアスで部分対応（限界を明記）
+
+`BIツール` のように**意図（概念）だけを述べサービス名を含まない**クエリは、字面部分一致では
+catalog を引けない。概念→サービスの一般的な意味対応を決定的ピュア関数で完全に解くのは範囲外
+のため、重い意味マッピングや外部依存は導入しない。代わりに、試験データに実在するサービスへの
+**小さな手動エイリアス表** `CONCEPT_SERVICE_ALIASES`（例: `BIツール` / `ダッシュボード` /
+`business intelligence` → `Amazon QuickSight`）を追加し、`augmentTermsWithCatalog` がクエリを
+概念語に部分一致させたとき対応サービスを「クエリ語」として catalog 照合に載せる（catalog に
+無いサービスは加えない）。純粋・テスト可能・低リスク。
+
+**限界（正直な明記）**: これは**網羅的な概念→サービス辞書ではない**。エイリアス表に載っていない
+概念クエリ（多くのドメイン語）は依然として字面部分一致に依存し、サービス名を含まなければ
+補強されない。汎用的な概念対応（例: 埋め込みベースの意味検索）は本 issue のスコープ外とし、
+必要になった時点で別 issue として検討する。
 
 ## 変更ファイル
 
 - `js/resourceSearch.js`: ピュア関数 `buildExamKeywordCatalog` / `augmentTermsWithCatalog` を追加。
+  v1 レビュー対応で `isSafeCatalogSearchTerm`（過剰一致ガード）、`CONCEPT_SERVICE_ALIASES`
+  （概念→サービスの小さな手動エイリアス）、`buildAugmentedScoringQuery`（拡張後 term での
+  グラウンディング採点）を追加。
 - `js/ui.js`: `getExamKeywordCatalog()` のメモ化キャッシュ追加、import 拡張、AI検索
-  ハンドラで展開語を辞書補強するよう変更。
-- `tests/exam-guide-hyde.spec.mjs`: 辞書構築・補強の回帰テスト（新規）。
+  ハンドラで展開語を辞書補強し、グラウンディング候補選抜を拡張後 term で採点するよう変更。
+- `tests/exam-guide-hyde.spec.mjs`: 辞書構築・補強・ガード・採点クエリの回帰テスト、および
+  退行検知可能な差分 end-to-end テスト。
 - `docs/issues/exam-guide-hyde-209.md`（本ファイル） / `docs/index.md`。
 
 ## 考慮したトレードオフ
@@ -110,9 +182,13 @@ issue #209 のリトマス試験（`Quick` → QuickSight）は満たせるう�
   - モデルが QuickSight を出さない想定（展開語 `['Amazon Athena']`）でも、
     `searchResourcesMulti(index, augmentTermsWithCatalog(['Quick','Amazon Athena'], catalog))`
     が QuickSight リソースを返す（→ `ALL_209_ASSERTIONS_PASS`）。
-- 上記に加え、`tests/exam-guide-hyde.spec.mjs` の全ピュア assertion を `node` で直接実行し
-  合格を確認（catalog の両レベル収集・trim・重複排除・文字列受付、augment の部分一致・
-  重複防止・順序・limit・非変更）。
+- 上記に加え、`tests/exam-guide-hyde.spec.mjs` の全ピュア assertion（26 件）を `node` で直接
+  実行し合格を確認（catalog の両レベル収集・trim・重複排除・文字列受付、augment の部分一致・
+  重複防止・順序・limit・非変更、`isSafeCatalogSearchTerm` のガード、`buildAugmentedScoringQuery`、
+  概念エイリアス、および退行検知可能な差分 e2e）。
+- **退行検知の証明**: `augmentTermsWithCatalog` を恒等関数（補強無し）に差し替えた throwaway
+  実行で、冗長クエリ差分テスト（`Amazon Q Developer とは`）と概念クエリテスト（`BIツール`）の
+  両 assert が**落ちる**ことを確認（補強を戻すと通る）。
 
 AI 呼び出し自体（曖昧なクエリ → 展開語）はブラウザ限定のため、下記の手動手順で確認する。
 

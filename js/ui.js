@@ -77,7 +77,7 @@ import {
   messageKeyForStage,
   shouldCelebratePass,
 } from './examSchedule.js';
-import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates, buildExamKeywordCatalog, augmentTermsWithCatalog } from './resourceSearch.js';
+import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates, buildExamKeywordCatalog, augmentTermsWithCatalog, buildAugmentedScoringQuery } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -5190,17 +5190,23 @@ function wireResourceSearchHandlers({ els, exams }) {
     // service names / keywords via the model, then union-search the local
     // index across those terms. This makes vague queries yield candidates.
     let candidates = [];
+    // Terms actually searched (raw query + HyDE expansion + exam-guide catalog).
+    // Kept in this scope so grounding candidate selection can score against the
+    // SAME augmented term set, not just the raw query (#209 v1 review item 4).
+    let augmentedTerms = [query];
     try {
       const expandedTerms = await expandQueryToAwsKeywords(query);
       // Always include the raw query as one term so exact keyword hits are kept.
       const baseTerms = [query, ...expandedTerms];
       // issue #209: fold in exam-guide catalog services relevant to the query so
       // newer services the model may omit (the "Quick" → Amazon QuickSight / Amazon Q
-      // litmus test) still surface. augmentTermsWithCatalog is pure/unit-tested.
-      const terms = augmentTermsWithCatalog(baseTerms, getExamKeywordCatalog());
-      candidates = searchResourcesMulti(index, terms, { examId });
+      // litmus test) still surface. augmentTermsWithCatalog is pure/unit-tested and
+      // guards over-matching short tokens (e.g. bare "Amazon Q") per the v1 review.
+      augmentedTerms = augmentTermsWithCatalog(baseTerms, getExamKeywordCatalog());
+      candidates = searchResourcesMulti(index, augmentedTerms, { examId });
     } catch {
       candidates = [];
+      augmentedTerms = [query];
     }
 
     // Fallback: if expansion produced nothing (e.g. AI call failed or returned
@@ -5225,7 +5231,12 @@ function wireResourceSearchHandlers({ els, exams }) {
     // strong keyword hit is never dropped from the model's view just because
     // it sits past the cap in the display ordering (#189 review item 2).
     const AI_CANDIDATE_CAP = 40;
-    const grounding = selectAiCandidates(candidates, query, AI_CANDIDATE_CAP).map((r, i) => {
+    // Score against the AUGMENTED term set (raw query + HyDE + catalog), not the raw
+    // query, so a resource pulled in ONLY via a catalog term (e.g. a QuickSight doc
+    // for a query lacking "quick") still scores > 0 and reaches the model instead of
+    // being evicted past the cap (#209 v1 review item 4).
+    const scoringQuery = buildAugmentedScoringQuery(augmentedTerms);
+    const grounding = selectAiCandidates(candidates, scoringQuery, AI_CANDIDATE_CAP).map((r, i) => {
       const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
       const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
       return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;

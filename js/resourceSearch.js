@@ -228,8 +228,63 @@ export function buildExamKeywordCatalog(exams = ALL_EXAMS) {
 }
 
 /**
+ * catalog エントリを「そのまま検索語（live search term）として使ってよいか」を判定する
+ * ピュア関数（issue #209 v1 レビュー指摘 3）。
+ *
+ * なぜ必要か: `searchResources` はクエリを空白で分割し、各トークンの**部分一致 AND**で
+ * 照合する。そのため 1 文字トークンを含む短い catalog エントリ（典型例: 素の "Amazon Q"
+ * → `amazon` AND `q`）は、`q` が queue / quotas / parquet / data quality などに偶然
+ * 部分一致し、無関係なリソースを大量に（実データで約 38 件）引き込んでグラウンディングを
+ * 薄めてしまう。一方 "Amazon Q Developer" や "Amazon Q Business" は `developer` /
+ * `business` という**アンカー語**があるため過剰一致しない。
+ *
+ * 判定規則: 句読点を除いたトークン列に 1 文字以下のトークンが含まれ、かつトークン総数が
+ * 2 個以下（＝過剰一致を抑えるアンカー語が無い）の場合のみ「危険（unsafe）」として
+ * 検索語に使わない。これにより素の "Amazon Q" だけを弾き、"Amazon Q Developer" 等の
+ * 有用な複数語サービスは温存する（検証済み: 実データで弾かれるのは "Amazon Q" 系のみ）。
+ *
+ * @param {string} entry - catalog エントリ。
+ * @returns {boolean} 検索語として安全なら true。
+ */
+export function isSafeCatalogSearchTerm(entry) {
+  const value = str(entry).trim();
+  if (!value) return false;
+  // 句読点（例 スラッシュ）を落としてから空白分割で「検索トークン」を作る。
+  const tokens = value
+    .split(/\s+/)
+    .map((t) => t.replace(/[^\p{L}\p{N}]/gu, ''))
+    .filter(Boolean);
+  if (tokens.length === 0) return false;
+  const hasShortToken = tokens.some((t) => t.length < 2);
+  // 1 文字トークンがあり、かつアンカー語（3 トークン目以降）が無いものだけ危険とみなす。
+  return !(hasShortToken && tokens.length <= 2);
+}
+
+/**
+ * 「概念（intent）→ サービス」の小さな手動エイリアス表（issue #209 v1 レビュー指摘 5）。
+ *
+ * なぜ必要か: `augmentTermsWithCatalog` の関連判定は**字面（部分一致）**ベースなので、
+ * サービス名と語が重ならない曖昧クエリ（例 "BIツール" ↔ Amazon QuickSight）は catalog を
+ * 引けない。概念→サービスの完全な意味的対応は決定的ピュア関数の範囲外だが、試験データに
+ * 実在するサービスへの**低リスクで小さな手動エイリアス**なら、字面が重ならないクエリでも
+ * 意図するサービスを引ける。ここは重い意味マッピングを導入せず、代表的な数語に絞る。
+ *
+ * 各エントリのキー（概念語, 小文字）にクエリが（部分一致で）触れたら、値のサービス語群を
+ * 「クエリ語」として扱い、通常の catalog 照合に載せる（catalog に無いサービスは加えない）。
+ * @type {ReadonlyArray<{concept: string, services: string[]}>}
+ */
+export const CONCEPT_SERVICE_ALIASES = [
+  { concept: 'biツール', services: ['Amazon QuickSight'] },
+  { concept: 'bi tool', services: ['Amazon QuickSight'] },
+  { concept: 'ビジネスインテリジェンス', services: ['Amazon QuickSight'] },
+  { concept: 'business intelligence', services: ['Amazon QuickSight'] },
+  { concept: 'ダッシュボード', services: ['Amazon QuickSight'] },
+  { concept: 'dashboard', services: ['Amazon QuickSight'] },
+];
+
+/**
  * HyDE の展開語（terms）に、クエリと関連する試験ガイド辞書（catalog）のエントリを
- * 足し込むピュア関数（issue #209）。
+ * 足し込むピュア関数（issue #209 / v1 レビュー指摘 1・3・5 対応）。
  *
  * これは issue #209 が求める「試験ガイドごとに重要なサービス / 概念を整理し、それを
  * HyDE に反映する」を、モデルに依存しない決定的なロジックとして実装したもの。モデルが
@@ -240,8 +295,14 @@ export function buildExamKeywordCatalog(exams = ALL_EXAMS) {
  * 「関連する」の判定は緩めの部分一致（大文字小文字を無視）:
  *   - いずれかのクエリ語が catalog エントリの部分文字列（例 'Quick' ⊂ 'Amazon QuickSight'）、
  *     または
- *   - catalog エントリがいずれかのクエリ語の部分文字列（例 catalog の 'Amazon QuickSight' が
- *     クエリ語 'Amazon QuickSight のドキュメント' に含まれる）。
+ *   - catalog エントリがいずれかのクエリ語の部分文字列（例 catalog の 'Amazon Q Developer'
+ *     が クエリ語 'Amazon Q Developer とは' に含まれる）。
+ *
+ * v1 レビュー対応:
+ *   - 指摘 3: `isSafeCatalogSearchTerm` を通らない過剰一致トークン（素の "Amazon Q" 等）は
+ *     検索語に加えない（グラウンディングのノイズ希釈を防ぐ）。
+ *   - 指摘 5: `CONCEPT_SERVICE_ALIASES` により、字面が重ならない概念クエリ（例 "BIツール"）
+ *     でも対応サービス（catalog に実在するもの）を引ける。
  *
  * 結果は terms と関連 catalog エントリの和集合。大文字小文字を無視して重複排除し、順序は
  * 「元の terms が先、その後に catalog 順で追加分」を保つ。プロンプト / 候補サイズを抑える
@@ -277,10 +338,28 @@ export function augmentTermsWithCatalog(terms, catalog, { limit = 24 } = {}) {
     .map((t) => str(t).trim().toLowerCase())
     .filter(Boolean);
 
+  // 指摘 5: 概念エイリアス。クエリが概念語に（部分一致で）触れたら、対応サービス語を
+  // 「クエリ語」として扱い、下の catalog 照合で拾えるようにする（字面が重ならなくても可）。
+  for (const { concept, services } of CONCEPT_SERVICE_ALIASES) {
+    const conceptLower = str(concept).trim().toLowerCase();
+    if (!conceptLower) continue;
+    const hit = queryTermsLower.some(
+      (q) => q.includes(conceptLower) || conceptLower.includes(q),
+    );
+    if (hit) {
+      for (const svc of services) {
+        const svcLower = str(svc).trim().toLowerCase();
+        if (svcLower) queryTermsLower.push(svcLower);
+      }
+    }
+  }
+
   // 2) クエリと関連する catalog エントリを catalog 順で追加。
+  //    指摘 3: 過剰一致する短い/曖昧なエントリは検索語に使わない。
   for (const entry of catalogList) {
     const entryStr = str(entry).trim();
     if (!entryStr) continue;
+    if (!isSafeCatalogSearchTerm(entryStr)) continue;
     const entryLower = entryStr.toLowerCase();
     const relevant = queryTermsLower.some(
       (q) => entryLower.includes(q) || q.includes(entryLower),
@@ -290,6 +369,37 @@ export function augmentTermsWithCatalog(terms, catalog, { limit = 24 } = {}) {
 
   const cap = Number.isFinite(limit) && limit > 0 ? limit : result.length;
   return result.slice(0, cap);
+}
+
+/**
+ * grounding 用の候補選抜（`selectAiCandidates`）に渡す「採点用クエリ」を、拡張後の
+ * term 集合から組み立てるピュア関数（issue #209 v1 レビュー指摘 4）。
+ *
+ * なぜ必要か: `selectAiCandidates(candidates, query, cap)` を**生クエリ**で採点すると、
+ * catalog 経由でのみ候補に入ったリソース（例 "Amazon QuickSight" で引かれた QuickSight
+ * ドキュメントだが、生クエリには "quick" が無い場合）は `scoreResourceRelevance` で 0 点に
+ * なり、40 件キャップの外へ押し出されてモデルに届かない恐れがある。採点対象を「拡張後の
+ * term 集合」にすることで、catalog 由来のヒットもスコアが付き、モデルに確実に届く。
+ *
+ * `selectAiCandidates` / `scoreResourceRelevance` は変更せず、呼び出し側が渡すクエリ文字列を
+ * この関数で作るだけにとどめる（純粋・テスト可能なまま）。
+ *
+ * @param {string[]} terms - `augmentTermsWithCatalog` が返した拡張後の term 集合。
+ * @returns {string} 採点用に空白連結したクエリ文字列（重複語は除去、順序保持）。
+ */
+export function buildAugmentedScoringQuery(terms) {
+  const termList = Array.isArray(terms) ? terms : [];
+  const seen = new Set();
+  const parts = [];
+  for (const term of termList) {
+    const value = str(term).trim();
+    if (!value) continue;
+    const key = value.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    parts.push(value);
+  }
+  return parts.join(' ');
 }
 
 /**
