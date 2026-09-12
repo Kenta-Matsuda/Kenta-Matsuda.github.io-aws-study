@@ -1,7 +1,15 @@
 {
   "task_id": "task-issue-209-exam-guide-hyde",
   "task_description": "Process the repository's open GitHub issues, in a reviewable, PR-per-issue way. The single clearly-actionable, un-addressed, client-side issue this run is #209: make the AI-search HyDE query expansion exam-guide-informed so newer/edge AWS services (litmus test: 'Quick' → Amazon QuickSight / Amazon Q) surface. Deliver committed changes on a feature branch (no push, no PR — the orchestrator pushes and opens PRs). Also, per the repo's resolver self-improvement convention, deliver a SEPARATE chore branch that adds a durable index of permanently-blocked (human/AWS) issues so future runs stop re-triaging #32/#162/#167 from scratch. Skipped this run: #190 (open PR #195), #193 (open PR #206), #202 (open PR #203) — already have open PRs; #200/#197/#201 — already merged; #167/#162/#32 — require AWS backend (documented, no aws commands run).",
-  "status": "in_progress",
+  "status": "completed",
   "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
-  "blocked_reason": null
+  "blocked_reason": null,
+  "review_iterations": 2,
+  "verification": {
+    "build": "pass",
+    "tests": "pass",
+    "test_quality": "pass",
+    "docker_build": "skipped",
+    "summary": "No build step (static site). node --check passes on js/resourceSearch.js, js/ui.js, js/exams.js, tests/exam-guide-hyde.spec.mjs. Pure-logic spec assertions run and pass with env -u NODE_OPTIONS node (Playwright/npx cannot run under INTEGRATIONS_ONLY — no cached browsers/registry; documented, not a failure). Test quality: the two differential end-to-end tests are proven reversion-sensitive (they FAIL when augmentTermsWithCatalog is reverted to identity and PASS with augmentation), so they meaningfully guard the new behavior. Docker: repo has no Dockerfile — skipped. Semantic review: v1 NEEDS_CHANGES (5 issues) -> all addressed in 636c7ae -> v2 APPROVED; a v2-flagged non-blocking precision wart (concept-alias reverse-direction over-fire) was also fixed in cd94e31 with a reversion-sensitive guard test."
+  }
 }
