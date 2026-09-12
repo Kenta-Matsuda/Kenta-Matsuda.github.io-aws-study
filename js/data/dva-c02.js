@@ -392,7 +392,7 @@ export const DVA_C02 = {
         {
           id: '1.2',
           title: 'Develop code for AWS Lambda.',
-          jpTitle: 'AWS Lambda 用コードの開発',
+          jpTitle: 'AWS Lambda 用のコードの開発',
           description: [
             'タスク 2: AWS Lambda 用のコードの開発',
             '対象知識:',
@@ -733,7 +733,7 @@ export const DVA_C02 = {
         {
           id: '2.1',
           title: 'Implement authentication and/or authorization for applications and AWS services.',
-          jpTitle: 'アプリケーションと AWS のサービスの認証および/または認可の実装',
+          jpTitle: 'アプリケーションと AWS のサービスの認証および / または認可の実装',
           description: [
             'タスク 1: アプリケーションと AWS のサービスの認証および / または認可の実装',
             '対象知識:',
@@ -904,7 +904,7 @@ export const DVA_C02 = {
         {
           id: '2.2',
           title: 'Implement encryption by using AWS services.',
-          jpTitle: 'AWS のサービスを使用した暗号化の実装',
+          jpTitle: 'AWS サービスを使用した暗号化の実装',
           description: [
             'タスク 2: AWS サービスを使用した暗号化の実装',
             '対象知識:',
@@ -1468,7 +1468,7 @@ export const DVA_C02 = {
         {
           id: '3.4',
           title: 'Deploy code by using AWS CI/CD services.',
-          jpTitle: 'AWS の CI/CD サービスを使用したコードのデプロイ',
+          jpTitle: 'AWS CI/CD サービスを使用したコードのデプロイ',
           description: [
             'タスク 4: AWS CI/CD サービスを使用したコードのデプロイ',
             '対象知識:',
@@ -1774,7 +1774,7 @@ export const DVA_C02 = {
         {
           id: '4.2',
           title: 'Instrument code for observability.',
-          jpTitle: 'オブザーバビリティのためのコードの考案',
+          jpTitle: 'オブザーバビリティのためのコードの計測',
           description: [
             'タスク 2: オブザーバビリティのためのコードの計測',
             '対象知識:',
