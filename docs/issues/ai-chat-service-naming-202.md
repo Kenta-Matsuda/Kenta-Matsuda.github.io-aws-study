@@ -69,4 +69,41 @@ AIチューターへ「分析系のAIサービスって何があるっけ」と�
 2. 試験を AIB-C01（AWS Certified AI Business Strategist）に切り替え、API キーを設定する。
 3. AI チャットを開き、「分析系のAIサービスって何があるっけ」と質問する。
 4. 分析系サービスに言及する際、旧称ではなく公式ドキュメント上の現在の名称
-   （例: 「Amazon Q in QuickSight」）で回答し、参照した AWS 公式 URL を明記することを確認する。
+   （例: 「Amazon Quick」）で回答し、参照した AWS 公式 URL を明記することを確認する。
+
+## 追加対応: メンテナのフォローアップ（2026-09-12）への対応
+
+上記の初期対応（改名・再ブランド化への対処）に対し、PR #202 で次のフォローアップが寄せられた。
+
+> 問題を誤認している。Amazon Quick（2026年6月に公開されたサービス）を答えてほしかった
+> 試験ガイドの対象サービス一覧を取り出してプロンプトに直接含めてあげるといいかも
+
+つまり本質は「旧称／新称の言い換え」ではなく、**モデルの学習データより後（2026 年 6 月）に登場した
+Amazon Quick を、モデルがそもそも知らないために取りこぼしていた**点にあった。対策として、試験ガイドの
+対象サービス一覧をプロンプトへ直接注入する、という提案に沿って次を実装した。
+
+- `js/exams.js`: 新関数 `getExamServiceKeywords(examId, { locale })` を追加。試験定義
+  （`js/data/*.js`）の step / domain / task の `knowledge` 箇条書きとリソースの note / title から、
+  「Amazon …」「AWS …」の命名規則に一致する **AWS サービス名を抽出・重複排除**し、上限件数で切り詰めて
+  返す。`AWS Certified …` などのプログラム／マーケティング名は除外する。AIB-C01 では対象サービスとして
+  **Amazon Quick** が抽出される。null-safe（不明・空 ID では空配列）。
+- `js/chat.js`: `buildExamGroundingPrompt` に `serviceKeywords` を渡し、システムプロンプトへ
+  **「この試験の対象 AWS サービス（試験ガイド由来）」**ブロックとして注入。あわせて既存の
+  「現在の正式なサービス名を使う」ルールを、**「対象サービスの中にはモデルの学習データより新しく、
+  まったく知らないものが含まれ得る（例: Amazon Quick は 2026 年にリリース）。存在しないと決めつけたり、
+  名前の似た古いサービスにすり替えたりしない」**という、新規サービスを想定した指示へ強化した
+  （日本語 / 英語の両分岐）。
+- 回帰スペック `tests/chat-grounding.spec.mjs` を更新。`getExamServiceKeywords('aib-c01')` が
+  `Amazon Quick` を含むこと、AIB-C01 のシステムプロンプトに対象サービス一覧・`Amazon Quick`・
+  「2026 年にリリース／released in 2026」等の新規サービス想定ルールが ja / en とも含まれることを表明する。
+
+### 追加検証（静的・ユニット）
+
+INTEGRATIONS_ONLY のため Playwright（E2E）は引き続き実行不可。以下を実施した。
+
+- `env -u NODE_OPTIONS node --check js/chat.js js/exams.js tests/chat-grounding.spec.mjs` … 構文 OK
+- `getExamServiceKeywords('aib-c01', { locale })` を Node から直接実行し、抽出結果に `Amazon Quick`
+  および `Amazon Bedrock` 等が ja / en とも含まれ、`AWS Certified …` が混入しないことを確認。
+- `buildExamGroundingPrompt` を Node から直接実行し、対象サービス一覧ブロック・`Amazon Quick`・
+  新規サービス想定ルール（`2026 年にリリース` / `released in 2026` / `NEWER than your training data`）が
+  ja / en とも注入され、既存の裏取り制約の文言が残っていることを確認。

@@ -7,7 +7,7 @@ import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
 import { getLocale, t } from './i18n.js';
-import { getExamCategoryLabel, getExamOfficialRefs } from './exams.js';
+import { getExamCategoryLabel, getExamOfficialRefs, getExamServiceKeywords } from './exams.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
 
 /**
@@ -178,7 +178,11 @@ function buildChatSystemPrompt(exam) {
   // AWS's own pages (official exam guide / official exam page) for this exam.
   // Handed to the model so the `url_context` tool can verify exam facts.
   const officialRefs = getExamOfficialRefs(exam?.id, { locale: isJa ? 'ja' : 'en' });
-  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs });
+  // In-scope AWS service names harvested from this exam's data (js/data/*.js),
+  // injected so the model grounds on the exam guide's target-service list rather
+  // than its training-cutoff memory (see issue #202 maintainer follow-up).
+  const serviceKeywords = getExamServiceKeywords(exam?.id, { locale: isJa ? 'ja' : 'en' });
+  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords });
 }
 
 /**
@@ -190,13 +194,14 @@ function buildChatSystemPrompt(exam) {
  * category label and official refs, this function only assembles the text.
  *
  * @param {{ code?: string, shortLabel?: string, title?: string } | null} exam
- * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }> }} opts
+ * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[] }} opts
  * @returns {string}
  */
-export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [] } = {}) {
+export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [] } = {}) {
   const code = exam?.code || 'AWS';
   const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
   const refs = Array.isArray(officialRefs) ? officialRefs : [];
+  const services = Array.isArray(serviceKeywords) ? serviceKeywords.filter(Boolean) : [];
 
   if (!isJa) {
     let prompt =
@@ -220,8 +225,14 @@ export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = nu
         refs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
         `- Before stating any fact about the exam itself (whether it exists, its official name, exam code, question domains and weightings, number of questions, duration, passing score, or fee), read the AWS pages above and base your answer on them.\n` +
         `- If your internal knowledge contradicts those pages, the pages win. Never override AWS documentation with your own recollection.\n` +
-        `- AWS service names and branding change over time (services are renamed, rebranded or merged into other products). Always use the CURRENT service name exactly as it appears on the official AWS documentation and pages provided above, not an older name you may have memorized. For example, prefer the current name (such as "Amazon Q in QuickSight") over a former name. When in doubt, verify the current naming against the AWS pages before answering.\n` +
+        `- AWS service names and branding change over time, and AWS ships brand-new services. Always use the CURRENT official service name exactly as it appears on the AWS documentation and pages provided above, not an older name you may have memorized. Some in-scope services are NEWER than your training data and you may have no knowledge of them at all — for example, Amazon Quick was released in 2026. Do NOT assume such a service does not exist, and do NOT silently substitute a similarly named older service (for example, do not answer with an older analytics/BI product when the current service for this exam is Amazon Quick). When a name is unfamiliar or you are unsure, treat the AWS pages and the in-scope service list below as authoritative and surface the current service rather than guessing.\n` +
         `- Cite the AWS URL you actually relied on. If a page could not be read, say so instead of guessing.\n`;
+    }
+    if (services.length) {
+      prompt +=
+        `\n[In-scope AWS services for this exam — from the exam guide, use these exact names]\n` +
+        `- ${services.join(', ')}\n` +
+        `- These are the AWS services this exam focuses on, taken from the exam's target-service list. Use these exact, current names. If one of them is newer than your knowledge (such as Amazon Quick), still treat it as a real, current AWS service and verify details against the AWS pages above.\n`;
     }
     prompt +=
       `\nAnswer questions clearly and concisely, using concrete examples.\n` +
@@ -255,8 +266,14 @@ export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = nu
       refs.map((ref) => `- ${ref.title}: ${ref.url}\n`).join('') +
       `- 試験そのものに関する事実（実在するか、正式名称、試験コード、出題ドメインと配点比率、問題数、試験時間、合格スコア、受験料など）を述べる前に、上記のAWS公式ページを読み、その内容に基づいて回答してください。\n` +
       `- あなたの内部知識と上記ページの記載が食い違う場合は、必ず上記ページの記載を優先してください。記憶でAWS公式ドキュメントを上書きしないでください。\n` +
-      `- AWSのサービス名やブランド名は時間とともに変わります（サービスは改名・再ブランド化されたり、別の製品に統合されたりします）。記憶している古い名称ではなく、上記のAWS公式ドキュメント・公式ページに記載されている「現在の正式なサービス名」をそのまま使ってください（例: 古い名称よりも「Amazon Q in QuickSight」のような現在の名称を優先する）。名称に確信が持てない場合は、回答前に上記のAWS公式ページで現在の名称を確認してください。\n` +
+      `- AWSのサービス名やブランド名は時間とともに変わり、まったく新しいサービスも次々に登場します。記憶している古い名称ではなく、上記のAWS公式ドキュメント・公式ページに記載されている「現在の正式なサービス名」をそのまま使ってください。対象サービスの中には、あなたの学習データよりも新しく、あなたがまったく知らないものが含まれることがあります（例: Amazon Quick は 2026 年にリリースされたサービスです）。そのようなサービスについて「存在しない」と決めつけたり、名前の似た古いサービスにこっそりすり替えたりしないでください（例: この試験の現行サービスが Amazon Quick である場面で、古い分析／BI 製品を答えにしない）。名称に確信が持てない、あるいは知らない名前が出てきた場合は、上記のAWS公式ページと下記の対象サービス一覧を正として、推測せずに現在のサービスを提示してください。\n` +
       `- 実際に根拠として使ったAWSのURLを明記してください。ページを読めなかった場合は、推測せずに「読めなかった」と述べてください。\n\n`;
+  }
+  if (services.length) {
+    prompt +=
+      `【この試験の対象 AWS サービス（試験ガイド由来 / この正式名称をそのまま使う）】\n` +
+      `- ${services.join('、')}\n` +
+      `- これらは、この試験が対象とする AWS サービス（試験ガイドの対象サービス一覧）です。回答ではこれらの現在の正式名称をそのまま使ってください。この中にあなたの知識より新しいサービス（例: Amazon Quick）が含まれる場合でも、実在する現行の AWS サービスとして扱い、詳細は上記のAWS公式ページで確認してください。\n\n`;
   }
   prompt +=
     `【信頼性に関する厳格なルール】\n` +

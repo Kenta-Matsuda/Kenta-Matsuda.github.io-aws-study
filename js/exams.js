@@ -207,6 +207,129 @@ export function getExamOfficialRefs(examId, { locale = 'ja' } = {}) {
 }
 
 /**
+ * Matches AWS service names that appear in the exam data text, e.g.
+ * "Amazon Bedrock", "Amazon SageMaker AI", "Amazon Quick", "AWS Glue".
+ * The trailing group greedily captures multi-word service names
+ * (proper-cased words or ALL-CAPS acronyms) that follow the "Amazon"/"AWS" prefix.
+ */
+const AWS_SERVICE_NAME_RE = /\b(?:Amazon|AWS)(?:\s+(?:[A-Z][A-Za-z0-9]*|[A-Z]{2,}))+/g;
+
+/** Name prefixes that are programs/frameworks/marketing, not AWS services, filtered out. */
+const NON_SERVICE_FRAGMENTS = [
+  'AWS Certified',
+  'AWS Certification',
+  'AWS Training',
+  'AWS Skill Builder',
+  'AWS Cloud Adoption Framework',
+  'AWS Well',
+  'AWS Blog',
+  'AWS Black Belt',
+  'AWS Decision Guide',
+  'AWS Executive Insights',
+  'AWS Security Best Practices',
+  'AWS Compliance Programs',
+  'AWS Global Infrastructure',
+  'AWS Cloud Practitioner',
+  'AWS Pricing Works',
+];
+
+/** Exact names that are too generic to be a specific service, filtered out. */
+const NON_SERVICE_EXACT = new Set([
+  'Amazon Web Services',
+  'AWS Cloud',
+  'AWS Services',
+  'AWS AI Services',
+  'AWS Compliance',
+  'AWS Responsible AI',
+  'AWS Responsible AI Resources',
+]);
+
+/** Upper bound on injected keywords so the system prompt stays compact. */
+const MAX_SERVICE_KEYWORDS = 25;
+
+/**
+ * Collect the in-scope AWS service names referenced by an exam's data
+ * (`js/data/*.js`) so they can be injected into the chat system prompt as
+ * grounding context. This surfaces the exam guide's target-service list to the
+ * model, which matters for services that are newer than the model's training
+ * cutoff (e.g. Amazon Quick, released 2026) and would otherwise be misidentified.
+ *
+ * Service names are harvested from the human-readable text of the exam
+ * definition (step/domain/task `knowledge` bullets and resource notes/titles),
+ * matched against the "Amazon …" / "AWS …" naming convention, de-duplicated,
+ * and capped so the prompt stays compact. Program/exam names such as
+ * "AWS Certified …" are excluded.
+ *
+ * Null-safe: returns an empty array for a falsy or unknown exam ID.
+ *
+ * @param {string} examId
+ * @param {{ locale?: string }} [opts]
+ * @returns {string[]} de-duplicated AWS service names, in first-seen order
+ */
+export function getExamServiceKeywords(examId, { locale = 'ja' } = {}) {
+  if (!examId) return [];
+
+  let exam;
+  try {
+    exam = getExamById(examId);
+  } catch {
+    return [];
+  }
+
+  const preferEn = locale === 'en';
+  const seen = new Set();
+  const keywords = [];
+
+  const harvest = (value) => {
+    if (typeof value !== 'string' || keywords.length >= MAX_SERVICE_KEYWORDS) return;
+    const matches = value.match(AWS_SERVICE_NAME_RE);
+    if (!matches) return;
+    for (const raw of matches) {
+      const name = raw.trim();
+      if (NON_SERVICE_EXACT.has(name)) continue;
+      if (NON_SERVICE_FRAGMENTS.some((frag) => name === frag || name.startsWith(`${frag} `))) continue;
+      if (seen.has(name)) continue;
+      seen.add(name);
+      keywords.push(name);
+      if (keywords.length >= MAX_SERVICE_KEYWORDS) return;
+    }
+  };
+
+  // Prefer the locale-specific field, falling back to the other locale.
+  const harvestPair = (obj, jaKey, enKey) => {
+    if (!obj) return;
+    const primary = preferEn ? obj[enKey] : obj[jaKey];
+    const fallback = preferEn ? obj[jaKey] : obj[enKey];
+    for (const field of [primary, fallback]) {
+      if (Array.isArray(field)) field.forEach(harvest);
+      else harvest(field);
+    }
+  };
+
+  const harvestResources = (resources) => {
+    for (const group of Array.isArray(resources) ? resources : []) {
+      for (const item of Array.isArray(group?.items) ? group.items : []) {
+        harvestPair(item, 'note', 'noteEn');
+        harvestPair(item, 'title', 'titleEn');
+      }
+    }
+  };
+
+  for (const step of Array.isArray(exam.steps) ? exam.steps : []) {
+    harvestPair(step, 'knowledge', 'knowledgeEn');
+    harvestResources(step?.resources);
+  }
+  for (const domain of Array.isArray(exam.domains) ? exam.domains : []) {
+    for (const task of Array.isArray(domain?.tasks) ? domain.tasks : []) {
+      harvestPair(task, 'knowledge', 'knowledgeEn');
+      harvestResources(task?.resources);
+    }
+  }
+
+  return keywords;
+}
+
+/**
  * Resolve a URL hash (without #) to an exam ID.
  * Supports both short codes (clf) and full IDs (clf-c02).
  */
