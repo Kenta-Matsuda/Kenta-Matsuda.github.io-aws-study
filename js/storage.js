@@ -496,7 +496,13 @@ export function recordMissionEvent(metric, amount = 1) {
     return { completed: [], unlocked: [], xpAwarded: 0 };
   }
 
-  // 先に報酬 XP を既存機構で付与してから claimed をマークする。
+  // 二重付与を防ぐため、先に claimed フラグを永続化してから報酬 XP を付与する。
+  // こうすると、XP 付与（addXp）と claimed 保存の間で 2 度目の書き込みが失敗しても、
+  // 既に claimed 済みなので次回 recordMissionEvent / getMissionsSummary で再検出・再付与
+  // されない（付与の冪等性を claimed 永続化で担保する）。
+  const claimed = claimMissions(updated, newlyCompleted.map((m) => m.id), new Date());
+  saveMissionsProgress(claimed);
+
   const unlocked = [];
   let xpAwarded = 0;
   for (const m of newlyCompleted) {
@@ -506,9 +512,6 @@ export function recordMissionEvent(metric, amount = 1) {
       if (Array.isArray(res.unlocked)) unlocked.push(...res.unlocked);
     }
   }
-
-  const claimed = claimMissions(updated, newlyCompleted.map((m) => m.id), new Date());
-  saveMissionsProgress(claimed);
 
   return { completed: newlyCompleted, unlocked, xpAwarded };
 }

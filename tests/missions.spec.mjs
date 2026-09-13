@@ -115,6 +115,29 @@ test.describe('claimMissions – reward receipt (#193)', () => {
     progress = claimMissions(progress, ['daily_quiz_3'], DAY_A);
     expect(computeMissionState(progress, DAY_A).missions.find((m) => m.id === 'daily_quiz_3').claimed).toBe(false);
   });
+
+  // Guards the XP double-award fix in storage.recordMissionEvent: the caller
+  // persists the claimed flag BEFORE awarding XP, relying on claim being
+  // idempotent. If the claimed progress is re-processed (e.g. a later XP-award
+  // write fails and the same event is retried), the mission must NOT reappear
+  // in newlyCompleted, so XP is granted at most once per completion.
+  test('a claimed completion is never re-detected as newlyCompleted (award idempotency)', () => {
+    let progress = null;
+    for (let i = 0; i < 3; i += 1) progress = recordMissionMetric(progress, 'quiz', 1, DAY_A);
+
+    // Mirror storage: claim (persist) first, then re-evaluate as if XP award
+    // failed and the same progress was re-processed on a subsequent call.
+    const claimed = claimMissions(progress, ['daily_quiz_3'], DAY_A);
+    const firstPass = computeMissionState(claimed, DAY_A).newlyCompleted.map((m) => m.id);
+    expect(firstPass).not.toContain('daily_quiz_3');
+
+    // Re-processing the already-claimed progress stays empty for that mission,
+    // and re-claiming is a stable no-op (idempotent).
+    const reclaimed = claimMissions(claimed, ['daily_quiz_3'], DAY_A);
+    const secondPass = computeMissionState(reclaimed, DAY_A).newlyCompleted.map((m) => m.id);
+    expect(secondPass).not.toContain('daily_quiz_3');
+    expect(reclaimed).toEqual(claimed);
+  });
 });
 
 test.describe('period reset across boundaries (#193)', () => {
