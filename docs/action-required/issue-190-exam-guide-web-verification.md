@@ -30,7 +30,20 @@ PR #195（issue #190）に対するメンテナ指摘（2026-09-12）で、次�
   - en `title` / `descriptionEn[0]`:
     - Before: `Deploy code by using AWS CI/CD services.`
     - After: `Deploying code using AWS continuous integration and continuous delivery (CI/CD) services`
-- これはメンテナが典拠（Web ガイド）を引用して**正しい文言を明示**した唯一のケースであり、フェッチ無しで確定できるため修正しました。他のステートメントは Web ガイドの実地確認が必要なため、憶測での変更は行っていません。
+- これはメンテナが典拠（Web ガイド）を引用して**正しい文言を明示**した唯一のケースであり、フェッチ無しで確定できるため修正しました。試験ガイドの実地確認が必要な**新規の文言追加や推測に基づく変更**は行っていません。
+
+### その他の軽微な表記修正（本 PR に含まれる）
+
+上記 DVA-C02 3.4 の典拠準拠修正に加えて、本ブランチには次の**低リスクな誤記 / 表記ゆれの修正**が含まれます。いずれも新しい文言を推測で追加するものではなく、既存本文（`description[0]` 等）とのゆれを解消する範囲の修正です。変更集合の全容を開示するためここに列挙します。
+
+- `js/data/ans-c01.js` タスク 3.3（en `title`）: 誤記 `costeffectiveness` → `cost-effectiveness`。
+- `js/data/mla-c01.js` タスク 3.3（ja `jpTitle`）: `CI/CD` → `継続的インテグレーションおよび継続的デリバリー (CI/CD)`。既存の `description[0]` は既に完全展開済みで、タイトルをそれに合わせた。
+- `js/data/dva-c02.js` タスク 1.2（ja `jpTitle`）: `AWS Lambda 用コードの開発` → `AWS Lambda 用のコードの開発`（`description[0]` の表記に一致）。
+- `js/data/dva-c02.js` タスク 2.1（ja `jpTitle`）: `認証および/または認可` → `認証および / または認可`（`description[0]` の表記に一致）。
+- `js/data/dva-c02.js` タスク 2.2（ja `jpTitle`）: `AWS のサービスを使用した暗号化の実装` → `AWS サービスを使用した暗号化の実装`（`description[0]` の表記に一致）。
+- `js/data/dva-c02.js` タスク 4.2（ja `jpTitle`）: `オブザーバビリティのためのコードの考案` → `オブザーバビリティのためのコードの計測`（`description[0]` の表記に一致。「考案」は誤記）。
+
+これらは典拠（Web ガイド）の実地確認を要する再検証対象とは別枠で、いずれも `title` / `jpTitle` を同タスクの `description[0]` 既存表記へ揃える整合性修正です。Web ガイドを正典とした全試験横断の再検証（下表）は引き続き要ネットワーク確認です。
 
 ## 切り分け手順（この環境で確認したこと）
 
