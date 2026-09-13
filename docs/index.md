@@ -51,3 +51,4 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [AIチャットが実在する試験を否定し別試験にすり替える問題（一次情報グラウンディング）](action-required/issue-138-ai-chat-exam-grounding.md) — 🔴 未対応（要対応） / 関連: #138（関連 #109 PR #113 PR #135 PR #139）※ AWS 公式ドキュメント確認済み。クライアント側は `url_context` グラウンディングで対応完了
 - [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69
 - [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](action-required/issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 関連: #165 / PR #180
+- [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](action-required/issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 関連: #190 / PR #195
