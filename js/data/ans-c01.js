@@ -2333,7 +2333,7 @@ export const ANS_C01 = {
         },
         {
           id: '3.3',
-          title: 'Optimize AWS networks for performance, reliability, and costeffectiveness.',
+          title: 'Optimize AWS networks for performance, reliability, and cost-effectiveness.',
           jpTitle: 'AWS ネットワークを最適化して、パフォーマンス、信頼性、費用対効果を高める。',
           description: [
             'タスクステートメント 3.3: AWS ネットワークを最適化して、パフォーマンス、信頼性、費用対効果を高める。',

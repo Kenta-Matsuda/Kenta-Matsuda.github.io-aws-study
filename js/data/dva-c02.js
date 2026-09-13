@@ -392,7 +392,7 @@ export const DVA_C02 = {
         {
           id: '1.2',
           title: 'Develop code for AWS Lambda.',
-          jpTitle: 'AWS Lambda 用コードの開発',
+          jpTitle: 'AWS Lambda 用のコードの開発',
           description: [
             'タスク 2: AWS Lambda 用のコードの開発',
             '対象知識:',
@@ -733,7 +733,7 @@ export const DVA_C02 = {
         {
           id: '2.1',
           title: 'Implement authentication and/or authorization for applications and AWS services.',
-          jpTitle: 'アプリケーションと AWS のサービスの認証および/または認可の実装',
+          jpTitle: 'アプリケーションと AWS のサービスの認証および / または認可の実装',
           description: [
             'タスク 1: アプリケーションと AWS のサービスの認証および / または認可の実装',
             '対象知識:',
@@ -904,7 +904,7 @@ export const DVA_C02 = {
         {
           id: '2.2',
           title: 'Implement encryption by using AWS services.',
-          jpTitle: 'AWS のサービスを使用した暗号化の実装',
+          jpTitle: 'AWS サービスを使用した暗号化の実装',
           description: [
             'タスク 2: AWS サービスを使用した暗号化の実装',
             '対象知識:',
@@ -1467,10 +1467,10 @@ export const DVA_C02 = {
 
         {
           id: '3.4',
-          title: 'Deploy code by using AWS CI/CD services.',
-          jpTitle: 'AWS の CI/CD サービスを使用したコードのデプロイ',
+          title: 'Deploying code using AWS continuous integration and continuous delivery (CI/CD) services',
+          jpTitle: 'AWS の継続的インテグレーションおよび継続的デリバリー (CI/CD) サービスを使用したコードのデプロイ',
           description: [
-            'タスク 4: AWS CI/CD サービスを使用したコードのデプロイ',
+            'タスク 4: AWS の継続的インテグレーションおよび継続的デリバリー (CI/CD) サービスを使用したコードのデプロイ',
             '対象知識:',
             '- Git ベースのバージョン管理ツール (Git など)',
             '- AWS CodePipeline での手動承認と自動承認',
@@ -1492,7 +1492,7 @@ export const DVA_C02 = {
           ],
 
           descriptionEn: [
-            'Task 4: Deploy code by using AWS CI/CD services.',
+            'Task 4: Deploying code using AWS continuous integration and continuous delivery (CI/CD) services',
             'Target knowledge:',
             '- Git-based version control tools (Git, etc.)',
             '- Manual and automatic approvals in AWS CodePipeline',
@@ -1774,7 +1774,7 @@ export const DVA_C02 = {
         {
           id: '4.2',
           title: 'Instrument code for observability.',
-          jpTitle: 'オブザーバビリティのためのコードの考案',
+          jpTitle: 'オブザーバビリティのためのコードの計測',
           description: [
             'タスク 2: オブザーバビリティのためのコードの計測',
             '対象知識:',
