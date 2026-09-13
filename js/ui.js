@@ -30,9 +30,21 @@ import {
   getEffectiveTheme,
   getSmartReviewCombined,
   addReviewSchedule,
+  getExamDateEntry,
+  setExamDate,
+  clearExamDate,
+  markExamPassed,
+  markExamCelebrated,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
 import { quizHistoryToCsv } from './quizCsv.js';
+import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
+import {
+  buildResourceLinksMarkdown,
+  buildResourceLinksCsv,
+  buildStudyRouteMarkdown,
+  buildGlossaryCsv,
+} from './studyPack.js';
 import { escapeHtml, escapeRegExp } from './utils.js';
 import {
   parseQuizResponse,
@@ -60,6 +72,13 @@ import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
+import {
+  describeExamSchedule,
+  messageKeyForStage,
+  shouldCelebratePass,
+} from './examSchedule.js';
+import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates } from './resourceSearch.js';
+import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
  * Return locale-aware title: jpTitle for 'ja', title (English) for 'en'.
@@ -776,6 +795,58 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     a.download = `quiz-history${examId ? '-' + examId : ''}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  // --- Study pack downloads (#165: NotebookLM-ready assets from static exam data) ---
+  // These reuse the pure generators in js/studyPack.js and the same Blob-download idiom
+  // as the quiz-history export buttons above. The exam is chosen via reviewState.selectedExamId
+  // (the same source the export buttons use) and resolved with getExamById; the current locale
+  // is passed via getLocale(). Markdown -> text/markdown; CSV -> text/csv with a UTF-8 BOM.
+  function downloadStudyPackText(text, filename, mime, { bom = false } = {}) {
+    if (!text) return;
+    const blob = new Blob([bom ? '\uFEFF' + text : text], { type: mime });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function selectedStudyExam() {
+    const examId = reviewState.selectedExamId;
+    if (!examId) return null;
+    try { return getExamById(examId); } catch { return null; }
+  }
+
+  // All four buttons share one empty-selection contract: when a specific exam tab
+  // is active they emit a per-exam file, otherwise (default "All" tab) they fall back
+  // to an all-exams file. The generators accept a single exam OR the full exams array,
+  // so every click always produces a download (no silent dead-ends).
+  const studyExamSuffix = (exam) => (exam ? exam.id : 'all');
+
+  els.studyPackLinksMdBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    const md = buildResourceLinksMarkdown(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(md, `resource-links-${studyExamSuffix(exam)}.md`, 'text/markdown;charset=utf-8');
+  });
+
+  els.studyPackLinksCsvBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    const csv = buildResourceLinksCsv(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(csv, `resource-links-${studyExamSuffix(exam)}.csv`, 'text/csv;charset=utf-8', { bom: true });
+  });
+
+  els.studyPackRouteMdBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    const md = buildStudyRouteMarkdown(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(md, `study-route-${studyExamSuffix(exam)}.md`, 'text/markdown;charset=utf-8');
+  });
+
+  els.studyPackGlossaryCsvBtn?.addEventListener('click', () => {
+    const exam = selectedStudyExam();
+    const csv = buildGlossaryCsv(exam || exams, { locale: getLocale() });
+    downloadStudyPackText(csv, `resource-glossary-${studyExamSuffix(exam)}.csv`, 'text/csv;charset=utf-8', { bom: true });
   });
 
   // --- Schedule Review Button ---
@@ -1615,7 +1686,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     currentDomainId: null,
   };
 
-  wireGlobalUiHandlers({ els, state });
+  wireGlobalUiHandlers({ els, state, exams });
 
   // Apply theme on boot
   applyTheme();
@@ -1653,6 +1724,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   // ── Settings Modal: opt-in local study reminder ──
   wireStudyReminder(els);
+
+  // ── Dashboard: planned exam date countdown (issue #200) ──
+  wireExamDateControls(els);
 
   // 初期表示
   setExam(defaultExamId);
@@ -1845,7 +1919,54 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       await runAiRequest(lastAiRequest);
       return;
     }
+
+    // Copy a task's statement plain text to the clipboard (#192).
+    if (action === 'copy-task-statement') {
+      const taskId = String(btn.dataset.taskId || '').trim();
+      if (!taskId) return;
+      let task = null;
+      for (const domain of exam?.domains || []) {
+        task = (domain.tasks || []).find((tk) => String(tk.id) === taskId);
+        if (task) break;
+      }
+      if (!task) return;
+
+      const text = taskStatementCopyText(task, getLocale());
+      const ok = await copyTextToClipboard(text);
+
+      // Mirror the flash-feedback idiom: swap label to common.copied for ~1.4s
+      // then restore to common.copy.
+      const original = btn.innerHTML;
+      const label = ok ? t('common.copied') : t('common.copyFailed');
+      const iconClass = ok ? 'fa-check' : 'fa-triangle-exclamation';
+      btn.innerHTML = `<i class="fas ${iconClass}"></i> ${escapeHtml(label)}`;
+      if (btn.__copyStatementTimer) clearTimeout(btn.__copyStatementTimer);
+      btn.__copyStatementTimer = setTimeout(() => {
+        btn.innerHTML = original;
+        btn.__copyStatementTimer = null;
+      }, 1400);
+      return;
+    }
   });
+
+  // Accordion behavior for the task-statement disclosures (#191 follow-up):
+  // opening one statement collapses any others that are currently open, so the
+  // roadmap never shows a stack of expanded toggles at once. The `toggle` event
+  // does not bubble, so the listener is registered in the capture phase.
+  els.contentArea.addEventListener(
+    'toggle',
+    (e) => {
+      const opened = e.target;
+      if (!(opened instanceof HTMLDetailsElement)) return;
+      if (!opened.classList.contains('task-statement-details') || !opened.open) return;
+      els.contentArea
+        .querySelectorAll('details.task-statement-details[open]')
+        .forEach((details) => {
+          if (details !== opened) details.open = false;
+        });
+    },
+    true
+  );
 
   wireXpLinkHandlers({ els, state, getExamById });
 
@@ -2058,6 +2179,19 @@ function getElements() {
     batchProgressStartBtn: document.getElementById('batchProgressStartBtn'),
     batchProgressCloseBtn: document.getElementById('batchProgressCloseBtn'),
 
+    // Cross-resource search (issue #189)
+    resourceSearchBtn: document.getElementById('resourceSearchBtn'),
+    dashboardSearchBtn: document.getElementById('dashboardSearchBtn'),
+    resourceSearchModal: document.getElementById('resourceSearchModal'),
+    resourceSearchExam: document.getElementById('resourceSearchExam'),
+    resourceSearchInput: document.getElementById('resourceSearchInput'),
+    resourceSearchGoBtn: document.getElementById('resourceSearchGoBtn'),
+    resourceSearchAiBtn: document.getElementById('resourceSearchAiBtn'),
+    resourceSearchResults: document.getElementById('resourceSearchResults'),
+    resourceSearchStatus: document.getElementById('resourceSearchStatus'),
+    resourceSearchAiAnswer: document.getElementById('resourceSearchAiAnswer'),
+    resourceSearchAiAnswerBody: document.getElementById('resourceSearchAiAnswerBody'),
+
     settingsModal: document.getElementById('settingsModal'),
     settingsBtn: document.getElementById('settingsBtn'),
     apiKeyInput: document.getElementById('apiKeyInput'),
@@ -2179,6 +2313,10 @@ function getElements() {
     quizHistoryEmpty: document.getElementById('quizHistoryEmpty'),
     quizHistoryExportBtn: document.getElementById('quizHistoryExportBtn'),
     quizHistoryExportCsvBtn: document.getElementById('quizHistoryExportCsvBtn'),
+    studyPackLinksMdBtn: document.getElementById('studyPackLinksMdBtn'),
+    studyPackLinksCsvBtn: document.getElementById('studyPackLinksCsvBtn'),
+    studyPackRouteMdBtn: document.getElementById('studyPackRouteMdBtn'),
+    studyPackGlossaryCsvBtn: document.getElementById('studyPackGlossaryCsvBtn'),
 
     // Streak
     streakCount: document.getElementById('streakCount'),
@@ -2191,6 +2329,18 @@ function getElements() {
     // Study reminder (opt-in local notification)
     studyReminderToggle: document.getElementById('studyReminderToggle'),
     studyReminderStatus: document.getElementById('studyReminderStatus'),
+
+    // Planned exam date countdown (issue #200)
+    examDatePanelTitle: document.getElementById('examDatePanelTitle'),
+    examDateInput: document.getElementById('examDateInput'),
+    examDateSaveBtn: document.getElementById('examDateSaveBtn'),
+    examDateClearBtn: document.getElementById('examDateClearBtn'),
+    examDatePassedBtn: document.getElementById('examDatePassedBtn'),
+    examDateCountdown: document.getElementById('examDateCountdown'),
+    examDateMessage: document.getElementById('examDateMessage'),
+    examPassToast: document.getElementById('examPassToast'),
+    examPassToastText: document.getElementById('examPassToastText'),
+    examPassToastCloseBtn: document.getElementById('examPassToastCloseBtn'),
 
     // Daily Highlight (narrative)
     dailyHighlight: document.getElementById('dailyHighlight'),
@@ -2300,7 +2450,7 @@ async function copyTextToClipboard(text) {
   }
 }
 
-function wireGlobalUiHandlers({ els }) {
+function wireGlobalUiHandlers({ els, exams }) {
   let pointerDownOnBackdrop = false;
 
   // Exam dropdown
@@ -2315,6 +2465,9 @@ function wireGlobalUiHandlers({ els }) {
 
   // Settings
   els.settingsBtn.addEventListener('click', () => openSettingsModal(els));
+
+  // Cross-resource search (issue #189)
+  wireResourceSearchHandlers({ els, exams });
 
   // Feedback
   wireFeedbackHandlers({ els });
@@ -2750,6 +2903,9 @@ function renderXpDashboard({ els, exam, state }) {
   // Streak display
   renderStreakDisplay(els);
 
+  // Planned exam date countdown (issue #200)
+  renderExamDateWidget({ els, exam });
+
   // Opt-in local study reminder: only act when the user has enabled it.
   // No permission is requested here unless the user opted in (see wireStudyReminder).
   maybeFireStudyReminder(els);
@@ -2941,6 +3097,110 @@ function showStreakMilestoneToast({ els, days }) {
 
 function hideStreakMilestoneToast({ els }) {
   els.streakMilestoneToast?.classList?.add('hidden');
+}
+
+// ─── Planned Exam Date Countdown (issue #200) ───────────────
+//
+// 受験予定日を登録し、日が近づくにつれてダッシュボードのメッセージが変わる。合格を
+// マークするとお祝い（トースト + 紙吹雪）を一度だけ表示する。端末内（localStorage）で
+// 完結する単一ユーザー向け機能で、バックエンドや OS プッシュ通知は使わない。
+
+// カウントダウン中の試験を覚えておき、renderExamDateWidget を引数なしで再実行できるようにする。
+let currentExamForDate = null;
+
+function renderExamDateWidget({ els, exam }) {
+  if (!els.examDateInput) return;
+  currentExamForDate = exam || null;
+
+  const examId = exam?.id || '';
+  const entry = examId ? getExamDateEntry(examId) : null;
+
+  if (els.examDatePanelTitle && exam?.code) {
+    els.examDatePanelTitle.textContent = t('examDate.title', { exam: exam.code });
+  }
+
+  // Reflect stored date in the input.
+  els.examDateInput.value = entry?.date || '';
+
+  const hasDate = Boolean(entry?.date);
+  if (els.examDateClearBtn) els.examDateClearBtn.classList.toggle('hidden', !hasDate);
+
+  // Countdown + stage message.
+  if (entry?.passed) {
+    if (els.examDateCountdown) els.examDateCountdown.textContent = '🎉';
+    if (els.examDateMessage) els.examDateMessage.textContent = t('examDate.passedStatus');
+  } else if (hasDate) {
+    const { daysUntil, stage } = describeExamSchedule(entry.date, new Date());
+    if (els.examDateCountdown) {
+      if (stage === 'today') {
+        els.examDateCountdown.textContent = t('examDate.todayShort');
+      } else if (stage === 'past') {
+        els.examDateCountdown.textContent = t('examDate.pastShort');
+      } else {
+        els.examDateCountdown.textContent = t('examDate.daysShort', { days: daysUntil });
+      }
+    }
+    const key = messageKeyForStage(stage);
+    if (els.examDateMessage) {
+      els.examDateMessage.textContent = key ? t(key, { days: daysUntil }) : '';
+    }
+  } else {
+    if (els.examDateCountdown) els.examDateCountdown.textContent = '—';
+    if (els.examDateMessage) els.examDateMessage.textContent = t('examDate.empty');
+  }
+
+  // "Mark as passed" button only makes sense once a date exists and not already passed.
+  if (els.examDatePassedBtn) {
+    els.examDatePassedBtn.classList.toggle('hidden', !hasDate || entry?.passed === true);
+  }
+
+  // Fire the celebration once when passed && not yet celebrated.
+  if (entry && shouldCelebratePass({ passed: entry.passed, alreadyCelebrated: entry.celebrated })) {
+    markExamCelebrated(examId);
+    showExamPassToast({ els, exam });
+  }
+}
+
+function showExamPassToast({ els, exam }) {
+  if (!els.examPassToast || !els.examPassToastText) return;
+  els.examPassToastText.textContent = t('examDate.passToast', { exam: exam?.code || '' });
+  els.examPassToast.classList.remove('hidden');
+  launchConfetti(els.confettiCanvas);
+  window.clearTimeout?.(els.__examPassToastTimer);
+  els.__examPassToastTimer = window.setTimeout(() => {
+    hideExamPassToast({ els });
+  }, 5000);
+}
+
+function hideExamPassToast({ els }) {
+  els.examPassToast?.classList?.add('hidden');
+}
+
+// Wire the register / clear / mark-passed controls for the exam-date widget.
+function wireExamDateControls(els) {
+  els.examDateSaveBtn?.addEventListener('click', () => {
+    const examId = currentExamForDate?.id || '';
+    const value = String(els.examDateInput?.value || '').trim();
+    if (!examId || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return;
+    setExamDate(examId, value);
+    renderExamDateWidget({ els, exam: currentExamForDate });
+  });
+
+  els.examDateClearBtn?.addEventListener('click', () => {
+    const examId = currentExamForDate?.id || '';
+    if (!examId) return;
+    clearExamDate(examId);
+    renderExamDateWidget({ els, exam: currentExamForDate });
+  });
+
+  els.examDatePassedBtn?.addEventListener('click', () => {
+    const examId = currentExamForDate?.id || '';
+    if (!examId) return;
+    markExamPassed(examId);
+    renderExamDateWidget({ els, exam: currentExamForDate });
+  });
+
+  els.examPassToastCloseBtn?.addEventListener('click', () => hideExamPassToast({ els }));
 }
 
 // ─── Study Reminder (opt-in local notification) ─────────────
@@ -3737,20 +3997,38 @@ function renderContent({ els, exam, state }) {
       card.className = 'bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden card-hover mb-6';
 
       const taskContext = buildTaskAiContext(task);
-      const shouldShowDescription = task?.showDescription === true;
-      const taskDescriptionLines = normalizeDescriptionLines(localizedDescription(task));
+      // Task statement lines (issue #191/#192). Render from the same pure
+      // roadmapTaskStatement source used for the copy text so the shown lines
+      // and copied text share one implementation and cannot silently desync.
+      const taskDescriptionLines = taskStatementLines(task, getLocale());
       const taskDescriptionHtml = taskDescriptionLines
         .map((line) => `<div>${highlightHtml(escapeHtml(line), term)}</div>`)
         .join('');
-      const descriptionHtml =
-        shouldShowDescription && taskDescriptionLines.length
-          ? `
-            <div class="mt-3 p-3 rounded-lg bg-amber-50 border border-amber-200 text-sm text-amber-900">
-              <div class="text-xs font-bold text-amber-700 mb-1">${getLocale() === 'ja' ? '説明' : 'Description'}</div>
-              <div class="space-y-1">${taskDescriptionHtml}</div>
-            </div>
+      // Collapsed-by-default disclosure (no `open` attribute) so statements are
+      // hidden until the user opts in (#191). The copy button copies the same
+      // plain text produced by taskStatementCopyText (#192).
+      const descriptionHtml = taskDescriptionLines.length
+        ? `
+            <details class="task-statement-details mt-3 rounded-lg border border-amber-200 bg-amber-50 text-sm text-amber-900">
+              <summary class="cursor-pointer select-none px-3 py-2 text-xs font-bold text-amber-700 flex items-center gap-2">
+                <i class="fas fa-align-left"></i> ${escapeHtml(t('roadmap.taskStatementToggle'))}
+              </summary>
+              <div class="px-3 pb-3">
+                <div class="space-y-1">${taskDescriptionHtml}</div>
+                <div class="mt-3 flex justify-end">
+                  <button
+                    type="button"
+                    data-action="copy-task-statement"
+                    data-task-id="${escapeHtml(task.id)}"
+                    class="inline-flex items-center gap-2 rounded-lg border border-amber-300 bg-white px-3 py-1.5 text-xs font-bold text-amber-800 shadow-sm transition hover:bg-amber-100 whitespace-nowrap"
+                  >
+                    <i class="fas fa-copy"></i> ${escapeHtml(t('common.copy'))}
+                  </button>
+                </div>
+              </div>
+            </details>
           `
-          : '';
+        : '';
 
       const header = document.createElement('div');
       header.className = 'p-5 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white';
@@ -4627,6 +4905,369 @@ function openSettingsModal(els) {
   els.settingsMessage.classList.add('hidden');
   reflectProviderUi(els);
   openModal(els.settingsModal);
+}
+
+// --- Cross-resource search (issue #189) ---
+
+/**
+ * Lazily-built, memoized resource index. Built once on first search so we
+ * never pay the flattening cost unless the user actually opens the search UI.
+ * @type {import('./resourceSearch.js').ResourceRecord[] | null}
+ */
+let resourceSearchIndex = null;
+
+/** Build (or reuse) the memoized resource index. */
+function getResourceSearchIndex() {
+  if (!resourceSearchIndex) {
+    resourceSearchIndex = buildResourceIndex();
+  }
+  return resourceSearchIndex;
+}
+
+/**
+ * Pick the locale-aware value from a plain/JP title pair, falling back to
+ * whichever is non-empty so a breadcrumb never renders blank.
+ * @param {string} plain - English/plain field.
+ * @param {string} jp - Japanese field.
+ * @returns {string}
+ */
+function localizedRecordText(plain, jp) {
+  if (getLocale() === 'ja') return jp || plain || '';
+  return plain || jp || '';
+}
+
+/** Build the "examCode › section [› task]" breadcrumb for a search record. */
+function buildResourceBreadcrumb(record) {
+  const parts = [];
+  if (record.examCode) parts.push(record.examCode);
+  const section = localizedRecordText(record.stepTitle, record.stepJpTitle);
+  if (section) parts.push(section);
+  if (record.taskId) {
+    const task = localizedRecordText(record.taskTitle, record.taskJpTitle);
+    if (task) parts.push(task);
+  }
+  return parts.join(' › ');
+}
+
+/** Render a single search-hit card in the existing resource-card style. */
+function renderResourceSearchCard(record) {
+  const title = getLocale() === 'en' && record.titleEn ? record.titleEn : record.title;
+  const note = getLocale() === 'en' && record.noteEn ? record.noteEn : record.note;
+  const url = getLocale() === 'en' && record.urlEn ? record.urlEn : record.url;
+
+  const titleSafe = escapeHtml(title);
+  const urlSafe = escapeHtml(url);
+  const breadcrumbSafe = escapeHtml(buildResourceBreadcrumb(record));
+  const iconSafe = record.iconClass
+    ? `<i class="${escapeHtml(record.iconClass)} ${escapeHtml(record.iconColorClass || '')}"></i>`
+    : '';
+  const recommendBadge = record.recommend
+    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"><i class="fas fa-star mr-1"></i>${escapeHtml(getLocale() === 'ja' ? 'おすすめ' : 'Recommended')}</span>`
+    : '';
+  const noteHtml = note
+    ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1"><i class="fas fa-info-circle text-gray-400"></i><span>${escapeHtml(note)}</span></div>`
+    : '';
+
+  return `
+    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 border border-gray-100 dark:border-gray-700">
+      <div class="flex items-start justify-between gap-3">
+        <a data-xp-link="resource" href="${urlSafe}" target="_blank" rel="noopener noreferrer" class="text-sm font-medium text-blue-700 dark:text-blue-300 hover:underline flex items-start gap-2 group">
+          ${iconSafe}
+          <span>${titleSafe}</span>
+          <i class="fas fa-external-link-alt text-xs text-gray-400 group-hover:text-blue-500 mt-1"></i>
+        </a>
+        ${recommendBadge}
+      </div>
+      <div class="text-[11px] text-gray-400 dark:text-gray-500 mt-1">${breadcrumbSafe}</div>
+      ${noteHtml}
+    </div>
+  `;
+}
+
+/** Populate the exam <select> once from the public exam list. */
+function populateResourceSearchExams(els, exams) {
+  const select = els.resourceSearchExam;
+  if (!select || select.dataset.populated === 'true') return;
+  const list = Array.isArray(exams) ? exams : [];
+  const options = list
+    .filter((exam) => exam && exam.id)
+    .map((exam) => {
+      const code = escapeHtml(String(exam.code || ''));
+      const title = escapeHtml(String(exam.title || ''));
+      const label = code ? `${code} — ${title}` : title;
+      return `<option value="${escapeHtml(String(exam.id))}">${label}</option>`;
+    })
+    .join('');
+  // Keep the existing "All exams" option (index 0), append the rest.
+  select.insertAdjacentHTML('beforeend', options);
+  select.dataset.populated = 'true';
+}
+
+/**
+ * HyDE query expansion (#201): turn a vague natural-language query into a small
+ * set of concrete AWS service names / keywords so the local resource index can
+ * be searched even when the raw query matches nothing.
+ *
+ * The AI call lives here (in the UI layer, next to the other AI-search wiring);
+ * only the pure union/dedupe merge of the expanded terms lives in the testable
+ * `searchResourcesMulti` helper in `js/resourceSearch.js`. The prompt keeps the
+ * grounding discipline of the ranking step: it asks only for real AWS service
+ * names / keywords and never for URLs.
+ *
+ * @param {string} query - the user's (possibly vague) query.
+ * @returns {Promise<string[]>} up to ~8 concrete AWS service names / keywords.
+ *   Returns [] if no key, the call fails, or nothing usable is parsed — callers
+ *   fall back to a plain keyword search on the raw query in that case.
+ */
+async function expandQueryToAwsKeywords(query) {
+  const q = String(query || '').trim();
+  if (!q) return [];
+  if (!getApiKey() && !getOpenAiApiKey()) return [];
+
+  const systemPrompt = [
+    'You expand a learner\'s vague query about AWS into concrete search keywords.',
+    'Given the query, imagine which AWS certification study topics answer it, then output the concrete AWS service names and keywords that would appear in matching documentation (this is HyDE: hypothesise the answer, then extract its keywords).',
+    'Rules you MUST follow:',
+    '- Output ONLY a comma-separated list of concrete AWS service names / keywords (e.g. "Amazon SageMaker, Amazon Bedrock, Amazon Comprehend").',
+    '- Prefer official AWS service names. Do not invent services that do not exist.',
+    '- Output at most 8 keywords. No sentences, no URLs, no numbering, no extra text.',
+  ].join('\n');
+  const userPrompt = `Query: ${q}`;
+
+  let raw = '';
+  try {
+    raw = await callAi({ userPrompt, systemPrompt, onRequireApiKey: () => {} });
+  } catch {
+    return [];
+  }
+  return parseExpandedKeywords(raw);
+}
+
+/**
+ * Parse the model's keyword-expansion output into a clean, deduped term list.
+ * Tolerant of models that return a comma-separated line, a bulleted/numbered
+ * list, or a mix. Pure string logic (no DOM); kept next to its only caller.
+ * @param {string} raw - the raw model text.
+ * @returns {string[]} deduped, trimmed keywords (max 8).
+ */
+function parseExpandedKeywords(raw) {
+  const text = String(raw || '');
+  if (!text.trim()) return [];
+  // Split on commas and newlines; strip common list markers / surrounding punctuation.
+  const parts = text
+    .split(/[\n,;、]+/)
+    .map((p) => p.replace(/^[\s*\-–—•]+/, '').replace(/^\d+[.)]\s*/, '').replace(/["'`.]+$/, '').trim())
+    .filter(Boolean);
+  const seen = new Set();
+  const terms = [];
+  for (const part of parts) {
+    const key = part.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    terms.push(part);
+    if (terms.length >= 8) break;
+  }
+  return terms;
+}
+
+function wireResourceSearchHandlers({ els, exams }) {
+  if (!els.resourceSearchBtn || !els.resourceSearchModal) return;
+
+  const setStatus = (text) => {
+    if (els.resourceSearchStatus) els.resourceSearchStatus.textContent = text || '';
+  };
+
+  const hideAiAnswer = () => {
+    if (els.resourceSearchAiAnswer) els.resourceSearchAiAnswer.classList.add('hidden');
+    if (els.resourceSearchAiAnswerBody) els.resourceSearchAiAnswerBody.innerHTML = '';
+  };
+
+  /**
+   * Run the keyword search and render results. Returns the matched records so
+   * the AI path can reuse them as grounding candidates.
+   * @returns {import('./resourceSearch.js').ResourceRecord[]}
+   */
+  const runKeywordSearch = () => {
+    const query = String(els.resourceSearchInput?.value || '').trim();
+    const examId = String(els.resourceSearchExam?.value || '').trim() || undefined;
+    if (!els.resourceSearchResults) return [];
+
+    if (!query) {
+      els.resourceSearchResults.innerHTML = '';
+      setStatus(t('search.emptyQuery'));
+      return [];
+    }
+
+    const index = getResourceSearchIndex();
+    const results = searchResources(index, query, { examId });
+
+    if (results.length === 0) {
+      els.resourceSearchResults.innerHTML = '';
+      setStatus(t('search.noResults'));
+      return [];
+    }
+
+    els.resourceSearchResults.innerHTML = results.map(renderResourceSearchCard).join('');
+    setStatus(t('search.resultsCount', { count: results.length }));
+    return results;
+  };
+
+  // Open modal from the header button or the prominent dashboard search entry
+  // (#201). Both reuse the same modal wiring; populate the exam select once.
+  const openResourceSearch = () => {
+    populateResourceSearchExams(els, exams);
+    openModal(els.resourceSearchModal);
+    els.resourceSearchInput?.focus();
+  };
+  els.resourceSearchBtn.addEventListener('click', openResourceSearch);
+  els.dashboardSearchBtn?.addEventListener('click', openResourceSearch);
+
+  // Keyword search: button click.
+  els.resourceSearchGoBtn?.addEventListener('click', () => {
+    hideAiAnswer();
+    runKeywordSearch();
+  });
+
+  // Keyword search: Enter key in the input (ignore IME composition).
+  els.resourceSearchInput?.addEventListener('keydown', (e) => {
+    if (e.isComposing) return;
+    if (e.key !== 'Enter') return;
+    e.preventDefault();
+    hideAiAnswer();
+    runKeywordSearch();
+  });
+
+  // AI search (HyDE — Hypothetical Document Embeddings, #201): a vague query
+  // like "分析用のAIサービス" matches no keyword, so a keyword-first flow used
+  // to return nothing and the AI never ran. Instead we first ask the model to
+  // expand the vague query into concrete AWS service names / keywords, then
+  // keyword-search the local index with each expanded term (union + dedupe),
+  // and finally ask the model to rank/recommend strictly from that candidate
+  // list. Direct keyword hits on the original query are unioned in too so we
+  // never regress on queries that already matched.
+  els.resourceSearchAiBtn?.addEventListener('click', async () => {
+    hideAiAnswer();
+    const query = String(els.resourceSearchInput?.value || '').trim();
+    if (!query) {
+      setStatus(t('search.emptyQuery'));
+      return;
+    }
+
+    const examId = String(els.resourceSearchExam?.value || '').trim() || undefined;
+
+    // No API key → keyword-only fallback with a localized notice. We check
+    // keys directly so we can keep keyword results visible and avoid opening
+    // the settings modal on top of the search modal. Matches prior behavior:
+    // show whatever plain keyword search finds, then the needs-key notice.
+    if (!getApiKey() && !getOpenAiApiKey()) {
+      runKeywordSearch();
+      setStatus(t('search.aiNeedsKey'));
+      return;
+    }
+
+    setStatus(t('search.aiSearching'));
+
+    const index = getResourceSearchIndex();
+
+    // Step 1 (HyDE): expand the (possibly vague) query into concrete AWS
+    // service names / keywords via the model, then union-search the local
+    // index across those terms. This makes vague queries yield candidates.
+    let candidates = [];
+    try {
+      const expandedTerms = await expandQueryToAwsKeywords(query);
+      // Always include the raw query as one term so exact keyword hits are kept.
+      const terms = [query, ...expandedTerms];
+      candidates = searchResourcesMulti(index, terms, { examId });
+    } catch {
+      candidates = [];
+    }
+
+    // Fallback: if expansion produced nothing (e.g. AI call failed or returned
+    // no usable terms), fall back to a plain keyword search on the raw query.
+    if (candidates.length === 0) {
+      candidates = searchResources(index, query, { examId });
+    }
+
+    // Render the merged candidate list (same card renderer as keyword search)
+    // so the user always sees concrete resources, not just the AI prose.
+    if (els.resourceSearchResults) {
+      if (candidates.length === 0) {
+        els.resourceSearchResults.innerHTML = '';
+        setStatus(t('search.noResults'));
+        return;
+      }
+      els.resourceSearchResults.innerHTML = candidates.map(renderResourceSearchCard).join('');
+    }
+
+    // Bound the prompt size: only the top candidates are sent as grounding.
+    // Select by match relevance (not the recommend-first display order) so a
+    // strong keyword hit is never dropped from the model's view just because
+    // it sits past the cap in the display ordering (#189 review item 2).
+    const AI_CANDIDATE_CAP = 40;
+    const grounding = selectAiCandidates(candidates, query, AI_CANDIDATE_CAP).map((r, i) => {
+      const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
+      const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
+      return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;
+    }).join('\n');
+
+    const localeName = getLocale() === 'ja' ? 'Japanese' : 'English';
+    const trusted = (AI_RELIABILITY_CONFIG?.trustedSourceDomains || []).join(', ');
+    const systemPrompt = [
+      'You help learners find the most relevant AWS certification study resources.',
+      'You are given a fixed CANDIDATE LIST of resources (title | location | URL).',
+      'Rules you MUST follow:',
+      '- Recommend and rank ONLY resources from the CANDIDATE LIST. Never invent or guess URLs or titles.',
+      '- Only cite URLs exactly as they appear in the list. Prefer official sources such as: ' + trusted + '.',
+      '- If nothing in the list fits, say so plainly instead of inventing anything.',
+      `- Answer in ${localeName}, concisely, as a short ranked list with one-line reasons.`,
+    ].join('\n');
+    const userPrompt = `Query: ${query}\n\nCANDIDATE LIST:\n${grounding}`;
+
+    let answer = '';
+    try {
+      answer = await callAiStream({
+        userPrompt,
+        systemPrompt,
+        onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
+        onTextDelta: () => {},
+      });
+      if (String(answer || '').includes('ストリーミングに対応していない環境')) {
+        answer = await callAi({
+          userPrompt,
+          systemPrompt,
+          onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
+        });
+      }
+    } catch {
+      try {
+        answer = await callAi({
+          userPrompt,
+          systemPrompt,
+          onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
+        });
+      } catch {
+        answer = null;
+      }
+    }
+
+    if (!answer) {
+      // onRequireApiKey already set the needs-key status when no key; otherwise
+      // show a generic error. Keyword results stay visible in both cases.
+      if (getApiKey() || getOpenAiApiKey()) setStatus(t('search.aiError'));
+      return;
+    }
+
+    if (els.resourceSearchAiAnswer && els.resourceSearchAiAnswerBody) {
+      const rendered = renderMarkdownToSafeHtml(String(answer));
+      // Fall back to escaped plain text if the markdown/DOMPurify path is
+      // unavailable, so we never inject unsanitized HTML.
+      els.resourceSearchAiAnswerBody.innerHTML = rendered && rendered.usedMarkdown && rendered.html
+        ? rendered.html
+        : escapeHtml(String(answer)).replace(/\n/g, '<br>');
+      els.resourceSearchAiAnswer.classList.remove('hidden');
+    }
+    setStatus(t('search.resultsCount', { count: candidates.length }));
+  });
 }
 
 function openModal(modalEl) {

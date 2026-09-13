@@ -5,7 +5,7 @@
 - 生成元: `scripts/list-action-required.mjs`（各ファイルの冒頭ステータス行・タイトル・種別・関連 issue を機械的に抽出）。`node scripts/list-action-required.mjs --write` で再生成できます。手で編集せず、元ファイルを直してから再生成してください。
 - 出典/参照: issue #184 / `docs/action-required/README.md`
 
-未対応: 12 件 / 完了: 0 件 / 合計: 12 件
+未対応: 13 件 / 完了: 0 件 / 合計: 13 件
 
 ## 未対応（要対応）
 
@@ -18,6 +18,7 @@
 - [ ] [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / 検索基盤 / API 提供）。一部要素はクライアント側で個別提供可能。 — 関連: #165 / PR #180（関連 #117 #167）
 - [ ] [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ / データ保持方針） — 関連: #167（本件） / #162（同じ API 基盤に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
 - [ ] [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 種別: 手動確認（ネットワーク越しの AWS 試験ガイド Web ページ参照が必要） — 関連: #190 / PR #195
+- [ ] [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / 翻訳ソース・品質基準の決定 / 翻訳コンテンツのオーナーシップ） — 関連: #197
 - [ ] [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンドプロキシ / LLM パイプライン） — 関連: #109
 - [ ] [AWS Skill Builder のコース URL が全試験で失効している（新 URL の特定にブラウザ操作が必要）](skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 種別: 手動確認（ブラウザ操作 / Skill Builder サインイン） — 関連: #69 / PR #142（リンクチェッカ）/ PR #157（sitemap 由来の直リンク化）および各試験の `content/*-resource-refresh` PR
 - [ ] [ストリーク維持のためのプッシュ通知（アプリを閉じている間に届く通知）](streak-push-notifications.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / Web Push サービス） — 関連: #107

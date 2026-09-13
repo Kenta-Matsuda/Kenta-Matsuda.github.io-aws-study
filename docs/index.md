@@ -23,6 +23,8 @@
 - [ダッシュボードのカルーセルの順番と初回表示時間 (#168)](issues/carousel-order-168.md)
 - [問題生成が失敗したときのエラー原因の切り分け (#169)](issues/ai-network-error-messages-169.md)
 - [要人間対応事項をチェックリスト一覧として可視化 (#184)](issues/action-required-checklist-184.md)
+- [受験予定日のカウントダウンと合格お祝い (#200)](issues/exam-date-countdown-200.md)
+- [AI検索をHyDEでクエリ拡張し、検索導線を強化 (#201)](issues/ai-search-hyde-201.md)
 
 ## LLM Wiki（docs/wiki/）
 
@@ -50,5 +52,6 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](action-required/issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 関連: #167
 - [AIチャットが実在する試験を否定し別試験にすり替える問題（一次情報グラウンディング）](action-required/issue-138-ai-chat-exam-grounding.md) — 🔴 未対応（要対応） / 関連: #138（関連 #109 PR #113 PR #135 PR #139）※ AWS 公式ドキュメント確認済み。クライアント側は `url_context` グラウンディングで対応完了
 - [AWS Skill Builder のコース URL が全試験で失効している](action-required/skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 関連: #69
-- [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](action-required/issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 関連: #165 / PR #180
+- [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](action-required/issue-165-notebooklm-pack-and-apis.md) — 🟡 一部対応 / 関連: #165 / PR #180 ※ クライアント側の学習パック生成（リソースリンク集 Markdown・CSV / 学習ルート Markdown / リソース用語集 CSV。`js/studyPack.js`）は実装済み。検索 API・分析 API・継続収集パイプラインは 🔴 未対応（要対応）
+- [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](action-required/issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 関連: #197 ※ AWS 操作は不要。対象言語の確定・翻訳ソース / 品質基準・コンテンツ翻訳の保守体制はプロダクト判断（要人間）
 - [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](action-required/issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 関連: #190 / PR #195
