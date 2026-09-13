@@ -6,6 +6,7 @@ const AI_PROVIDER_STORAGE_KEY = 'ai_provider'; // 'gemini' | 'openai'
 const THEME_STORAGE_KEY = 'asn_theme'; // 'light' | 'dark' | 'system'
 const STUDY_REMINDER_STORAGE_KEY = 'asn_study_reminder'; // 'on' | 'off'
 const STREAK_CELEBRATION_STORAGE_KEY = 'asn_streak_celebrated_v1'; // last celebrated milestone (number)
+const EXAM_DATE_STORAGE_KEY = 'asn_exam_date_v1'; // map examId -> { date: 'YYYY-MM-DD', passed: bool, celebrated: bool }
 
 const STUDY_STATE_STORAGE_KEY = 'asn_study_state_v1';
 
@@ -17,6 +18,7 @@ export function resetAppStorage() {
   localStorage.removeItem(THEME_STORAGE_KEY);
   localStorage.removeItem(STUDY_REMINDER_STORAGE_KEY);
   localStorage.removeItem(STREAK_CELEBRATION_STORAGE_KEY);
+  localStorage.removeItem(EXAM_DATE_STORAGE_KEY);
   localStorage.removeItem(STUDY_STATE_STORAGE_KEY);
   try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
 }
@@ -650,6 +652,120 @@ export function setCelebratedStreakMilestone(milestone) {
   const m = Math.max(0, Math.floor(Number(milestone || 0)));
   localStorage.setItem(STREAK_CELEBRATION_STORAGE_KEY, String(m));
   return m;
+}
+
+// ─── Planned Exam Date (受験予定日) ─────────────────────────
+//
+// 受験予定日をユーザーが登録し、日が近づくにつれてダッシュボードの表示メッセージが
+// 変わる（issue #200）。純粋に端末内（localStorage）で完結する単一ユーザー向け機能で、
+// バックエンドや OS プッシュ通知は使わない。試験ごと（examId ごと）に予定日と
+// 「合格済み」フラグ、「お祝い表示済み」フラグを保持する。
+
+/** 予定日マップ全体を安全に読み出す（壊れていれば {} を返す）。 */
+function loadExamDates() {
+  try {
+    const raw = localStorage.getItem(EXAM_DATE_STORAGE_KEY);
+    if (!raw) return {};
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  } catch {
+    return {};
+  }
+}
+
+function saveExamDates(map) {
+  const safe = map && typeof map === 'object' && !Array.isArray(map) ? map : {};
+  localStorage.setItem(EXAM_DATE_STORAGE_KEY, JSON.stringify(safe));
+}
+
+/**
+ * 指定試験の受験予定日エントリを取得する。
+ * @param {string} examId
+ * @returns {{ date: string, passed: boolean, celebrated: boolean } | null}
+ */
+export function getExamDateEntry(examId) {
+  const id = String(examId || '');
+  if (!id) return null;
+  const map = loadExamDates();
+  const entry = map[id];
+  if (!entry || typeof entry !== 'object') return null;
+  const date = typeof entry.date === 'string' ? entry.date : '';
+  if (!date) return null;
+  return {
+    date,
+    passed: entry.passed === true,
+    celebrated: entry.celebrated === true,
+  };
+}
+
+/**
+ * 受験予定日を登録／更新する。日付は 'YYYY-MM-DD' 文字列。
+ * 日付を変更すると passed / celebrated はリセットする（新しい受験のため）。
+ * @param {string} examId
+ * @param {string} date - 'YYYY-MM-DD'
+ * @returns {{ date: string, passed: boolean, celebrated: boolean } | null}
+ */
+export function setExamDate(examId, date) {
+  const id = String(examId || '');
+  const d = String(date || '').trim();
+  if (!id || !/^\d{4}-\d{2}-\d{2}$/.test(d)) return getExamDateEntry(id);
+  const map = loadExamDates();
+  map[id] = { date: d, passed: false, celebrated: false };
+  saveExamDates(map);
+  return getExamDateEntry(id);
+}
+
+/**
+ * 指定試験の受験予定日エントリを削除する。
+ * @param {string} examId
+ */
+export function clearExamDate(examId) {
+  const id = String(examId || '');
+  if (!id) return;
+  const map = loadExamDates();
+  if (Object.prototype.hasOwnProperty.call(map, id)) {
+    delete map[id];
+    saveExamDates(map);
+  }
+}
+
+/**
+ * 指定試験を「合格済み」としてマークする（お祝い表示前の状態）。
+ * @param {string} examId
+ * @returns {{ date: string, passed: boolean, celebrated: boolean } | null}
+ */
+export function markExamPassed(examId) {
+  const id = String(examId || '');
+  if (!id) return null;
+  const map = loadExamDates();
+  const entry = map[id] && typeof map[id] === 'object' ? map[id] : null;
+  // 予定日が未登録でも合格マークは可能にする（日付は空のまま）。
+  map[id] = {
+    date: entry && typeof entry.date === 'string' ? entry.date : '',
+    passed: true,
+    celebrated: entry ? entry.celebrated === true : false,
+  };
+  saveExamDates(map);
+  return {
+    date: map[id].date,
+    passed: true,
+    celebrated: map[id].celebrated === true,
+  };
+}
+
+/**
+ * 合格お祝いを表示済みとして記録する（同じお祝いを繰り返さないため）。
+ * @param {string} examId
+ */
+export function markExamCelebrated(examId) {
+  const id = String(examId || '');
+  if (!id) return;
+  const map = loadExamDates();
+  const entry = map[id] && typeof map[id] === 'object' ? map[id] : null;
+  if (!entry) return;
+  entry.celebrated = true;
+  map[id] = entry;
+  saveExamDates(map);
 }
 
 // ─── Theme (Dark Mode) ──────────────────────────────────────
