@@ -87,3 +87,4 @@ node scripts/list-action-required.mjs --check    # 最新かどうかを検証�
 - [AIチャットが実在する試験を否定し別試験にすり替える問題（一次情報グラウンディング）](issue-138-ai-chat-exam-grounding.md) — 🔴 未対応（要対応） / 種別: 要人間対応（AWS リモート MCP をブラウザから使うためのプロキシ設置の意思決定 / トークンコストの方針） / 関連: #138（関連 #109 PR #113 PR #135 PR #139）※ AWS 公式ドキュメント確認済み・CORS 制約を実地検証済み。クライアント側は `url_context` グラウンディングで対応完了
 - [AWS Skill Builder のコース URL が全試験で失効している](skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 種別: 手動確認（ブラウザ操作 / Skill Builder サインイン） / 関連: #69
 - [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / 検索基盤 / API 提供。問題集 CSV はクライアント側で実装済み） / 関連: #165 / PR #180
+- [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / 翻訳ソース・品質基準 / 翻訳コンテンツのオーナーシップ。AWS 操作は不要） / 関連: #197

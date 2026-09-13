@@ -54,6 +54,7 @@
       "start": "今日の学習を始める",
       "resume": "今日の学習を再開する"
     },
+    "searchCta": "全試験の学習リソースを横断検索する",
     "bookPromo": {
       "onSale": "発売中",
       "title": "AWS認定",
@@ -111,6 +112,28 @@
       "badge": "APIキー不要",
       "subtitle": "ミッションをクリアしてXPを獲得しよう",
       "toastTitle": "ミッション達成！"
+    },
+    "examDate": {
+      "titleShort": "受験予定日",
+      "title": "{{exam}} の受験予定日",
+      "empty": "受験予定日を登録すると、当日までのカウントダウンと応援メッセージが表示されます。",
+      "inputLabel": "受験予定日",
+      "save": "登録",
+      "clear": "削除",
+      "markPassed": "合格した！ 🎉",
+      "daysShort": "あと{{days}}日",
+      "todayShort": "本日",
+      "pastShort": "終了",
+      "passedStatus": "合格おめでとうございます！ 🎉",
+      "passToastTitle": "合格おめでとうございます！",
+      "passToast": "🏆 {{exam}} 合格、おめでとうございます！ここまでの努力は本物です。",
+      "stage": {
+        "far": "受験予定日まであと{{days}}日。今のうちに基礎をじっくり固めよう。",
+        "soon": "受験予定日まであと{{days}}日。仕上げの復習に入りましょう！",
+        "imminent": "受験まであと{{days}}日！苦手分野を最終チェックしよう 🔥",
+        "today": "いよいよ本番です。落ち着いて、実力を出し切ろう！ 💪",
+        "past": "受験予定日を過ぎました。結果を登録するか、新しい日程を設定しましょう。"
+      }
     },
     "bootError": "画面データの読み込みに失敗しました。ページを再読み込みしてください。ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。"
   },
@@ -396,6 +419,7 @@
     "commonTitle": "共通学習リソース",
     "commonDescription": "すべてのAWS認定試験に共通する学習ステップ・リソースです。",
     "taskStatement": "Task Statement {{id}}",
+    "taskStatementToggle": "タスクステートメント",
     "knowledge": "必要な知識・スキル",
     "keyPoints": "ポイント",
     "recommend": "おススメ",
