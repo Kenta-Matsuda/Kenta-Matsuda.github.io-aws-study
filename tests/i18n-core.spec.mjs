@@ -10,9 +10,10 @@ import { test, expect } from '@playwright/test';
  *   - the chosen locale persists across a reload.
  *
  * They mirror tests/routing-lang.spec.mjs and run in CI against a real browser.
- * The locale-derivation logic itself (SUPPORTED_LOCALES from the locale data,
- * English fallback, ja↔en URL localization) is additionally covered by the
- * node smoke test recorded in the PR for issue #197, since js/i18n.js touches
+ * The locale-derivation logic itself (supported set from Object.keys of the
+ * locale data, unsupported saved/browser locale fallback, English fallback in
+ * t(), and the non-base getLocalizedUrl branch) is covered by the committed
+ * pure-logic spec tests/i18n-core-unit.spec.mjs, since js/i18n.js touches
  * document/localStorage/navigator only inside its functions.
  */
 test.describe('i18n core (N-locale generalization, ja/en regression)', () => {
