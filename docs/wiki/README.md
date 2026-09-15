@@ -81,8 +81,10 @@
 - [試験リソース棚卸し台帳](exam-resource-inventory.md)
 - [issue 解決プレイブック](issue-resolution-playbook.md)
 - [効率化・自己拡張ログ](efficiency-log.md)
+- [レビュー待ちオープン PR キュー](open-prs-review-queue.md)
 
 ## 更新履歴
 
 - 2026-09-03: 初版作成（issue #69）。LLM Wiki の目的・置き場所・ページスキーマ・更新/整合性/索引運用ルールと現在のページ一覧を定義。
 - 2026-09-06: `github-issue-resolver` を自己改善型へ再構成したことに伴い、Wiki の対象エージェントを 2 つに拡張し、[issue 解決プレイブック](issue-resolution-playbook.md) をページ一覧に追加（出典: `.kiro/agents/github-issue-resolver.md`）。
+- 2026-09-15: レビュー待ちで滞留しているオープン PR を俯瞰する機械生成索引 [レビュー待ちオープン PR キュー](open-prs-review-queue.md)（`scripts/list-open-prs.mjs` が生成）をページ一覧に追加（出典: `.kiro/agents/github-issue-resolver.md`）。

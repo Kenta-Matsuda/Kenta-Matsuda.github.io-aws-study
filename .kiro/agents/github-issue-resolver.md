@@ -535,10 +535,17 @@ issue / コメントのバッチ処理に着手する前に、短いレトロス
   PR 監査の判定値: `PR_CONFLICT`（`dirty`。最優先で解消）/ `PR_FOLLOWUP`（未対応コメント）/ `PR_BEHIND`（`behind`）/ `PR_UNKNOWN`（`mergeable` が `null`。`git rev-list` にフォールバック）/ `PR_OK`。
   マーカー検出は本文接頭辞 `🤖 agent:skipped` / `🤖 対応済み` に依存するため、**コメント時は必ず規定の接頭辞を使う**こと。
   **監査は 1 PR あたり 4 リクエストを投げるため完了に 1〜3 分かかる。** タイムアウトの短い同期実行ではなく、バックグラウンド実行 + ファイル出力にする。`NODE_OPTIONS` の前置きが必要かは手順 0 の判定に従う。
+- **`scripts/list-open-prs.mjs`（読み取り専用 / レビュー待ち PR の索引生成）**: すべてのオープン PR を `mergeable_state`（`clean` / `blocked` / `behind` / `dirty` / `unknown` などを人間向けの区分に対応づけ）と紐づく issue（本文の `Closes` / `Refs` 等、無ければ head ブランチ名 `.../issue-<N>-...` から抽出）とともに一覧化し、**完成済みだがレビュー / マージ待ちで滞留している PR を俯瞰する**ための索引を生成する。`scripts/issue-triage.mjs` の PR 監査が実行時の要約なのに対し、こちらは**リポジトリに残る索引**（`docs/wiki/open-prs-review-queue.md`）を機械生成する点が異なる（`docs/action-required/CHECKLIST.md` と同じパターン）。
+  ```
+  node scripts/list-open-prs.mjs            # レビューキューの要約を標準出力へ（読み取り専用）
+  node scripts/list-open-prs.mjs --write     # docs/wiki/open-prs-review-queue.md を再生成
+  ```
+  **実行のたびに `--write` で再生成し、レビュー待ち PR の滞留をメンテナが俯瞰できる状態を保つ。** ゼロから着手できる新規 issue が枯れている（クライアント側は PR 化済みで滞留し、残りは要人間対応）ときに、追加の issue 実装 PR を重ねて PR 乱立・マージ滞留を悪化させる代わりに、滞留状況の可視化という成果物を出すために使う。読み取り専用（`gh api` の GET のみ）で、書き込み操作は行わない。`docs/wiki/blocked-issues-index.md`（AWS / 人間対応待ちの **issue** の索引）とは別物なので混同しない（こちらはレビュー待ちの **open PR** の索引）。
 - 参考にできる既存スクリプト（`exam-content-maintainer` が同じ方針で育てた資産）:
   - `scripts/check-resource-links.mjs` — `js/data/` の全リソース URL を抽出して HTTP 死活・リダイレクトを一覧化。
   - `scripts/collect-resource-urls.mjs` — リソース URL の件数・ドメイン内訳を集計。
   - `scripts/list-aws-doc-pages.mjs` — AWS 公式ガイド内の下位ページを機械的に列挙。
+  - `scripts/list-action-required.mjs` — `docs/action-required/` のステータス行から要人間対応チェックリストを機械生成（`docs/wiki/open-prs-review-queue.md` と同じ「スクリプト生成 Markdown 索引」パターン）。
   - `scripts/generate-icons.mjs` — 外部ツールに依存せず決定論的に PNG を生成する自己完結スクリプトの例。
 
 ## スクリプトを拡張・追加する
@@ -581,6 +588,7 @@ issue / コメントのバッチ処理に着手する前に、短いレトロス
 - **`scripts/` のスクリプトを追加・変更した場合**は、構文チェックに加えて**実際に 1 回実行**し、期待した要約が出ることを確認する（読み取り専用であることも確認する）。
 - **i18n** に関わる変更をした場合、`js/locales/ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。片方だけにキーがある状態を作らない。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、相対リンクが実在ファイルを指すことを確認する（デッドリンク・孤立ファイル禁止）。
+- **レビュー待ち PR の索引を再生成する。** 実行のたびに `node scripts/list-open-prs.mjs --write` を実行して `docs/wiki/open-prs-review-queue.md` を最新化し、完成済みだがレビュー / マージ待ちで滞留しているオープン PR をメンテナが俯瞰できる状態を保つ（`scripts/list-action-required.mjs` の再生成と同じ運用）。生成物を手で編集せず、スクリプトを実行して再生成する。
 - **作業証跡（キャプチャ等）を PR 本文に残す。** レビュワー（人間）が変更を確認できるよう、検証した事実を証跡として添付する。これは既存の「実行できる検証を省略しない」原則の強化であり、検証を弱めるものではない。
   - **UI に影響する変更**（画面・スタイル・文言・レイアウトの変更）の PR では、**変更前後（before / after）のキャプチャ**を添付する。ブラウザが使える環境では手順 0 で確認したうえで、Playwright（`npx playwright test` のスクリーンショット / `page.screenshot()`）や power の agent-browser 等でキャプチャを取得する。
   - **ヘッドレス / ブラウザ不在の実行環境でキャプチャを取得できない場合**（INTEGRATIONS_ONLY で npm・ブラウザを取得できない等）は、**その旨と理由を PR 本文に明記**し、人間が UI を確認できるよう**再現手順**を記載する。再現手順には少なくとも次を含める: 開発サーバの起動方法（`node dev-server.mjs`）、確認する URL / 画面、変更点（どこがどう変わるか）。これは修正や静的検証を省略する理由にはならない。

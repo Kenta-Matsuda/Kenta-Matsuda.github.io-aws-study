@@ -35,6 +35,7 @@
 - [試験リソース棚卸し台帳](wiki/exam-resource-inventory.md)
 - [issue 解決プレイブック](wiki/issue-resolution-playbook.md)
 - [効率化・自己拡張ログ](wiki/efficiency-log.md)
+- [レビュー待ちオープン PR キュー](wiki/open-prs-review-queue.md) — `scripts/list-open-prs.mjs` が生成
 
 ## 要人間対応事項（docs/action-required/）
 

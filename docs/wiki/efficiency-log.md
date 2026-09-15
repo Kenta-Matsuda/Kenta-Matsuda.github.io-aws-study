@@ -1,8 +1,8 @@
 # 効率化・自己拡張ログ
 
-- 最終更新日: 2026-09-10
+- 最終更新日: 2026-09-15
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
-- 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs`
+- 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs` / `scripts/list-open-prs.mjs`
 
 > エージェントが実行のたびに自分の作業を振り返り、**トークン消費と手間を減らす**アイデアと、**自分自身の能力を拡張する**提案を記録するログです。スキーマ（メタデータ + 更新履歴）は [README](README.md) を参照してください。
 
@@ -17,6 +17,7 @@
 | `scripts/list-aws-doc-pages.mjs` | AWS 公式ドキュメント 1 ページから同一ガイド内の下位ページ / ページ内アンカーを抽出 | `node scripts/list-aws-doc-pages.mjs <url> --titles` / `... --anchors` |
 | `scripts/analyze-resource-coverage.mjs` | 試験ガイドのタスクステートメント単位で items 件数・リソース種別を集計し、0 件 / 薄い / 単一種別のタスクを順位付け（ネットワーク不要） | `node scripts/analyze-resource-coverage.mjs --md test-results/coverage.md` |
 | `scripts/list-action-required.mjs` | `docs/action-required/` の各ファイルのステータス行から要人間対応チェックリストを生成（読み取り専用。`--write` で `CHECKLIST.md` 再生成、`--check` で最新性検証） | `node scripts/list-action-required.mjs --write` / `node scripts/list-action-required.mjs --check` |
+| `scripts/list-open-prs.mjs` | すべてのオープン PR を `mergeable_state` と紐づく issue とともに一覧化し、レビュー / マージ待ちで滞留している PR を俯瞰する索引を生成（読み取り専用。`--write` で `docs/wiki/open-prs-review-queue.md` 再生成） | `node scripts/list-open-prs.mjs` / `node scripts/list-open-prs.mjs --write` |
 
 `check-resource-links.mjs` は差し替え候補の当たり付けにも使えます（`--urls "https://a,https://b" --all`）。候補を推測で書き込む前に、必ずこのモードで実在とリダイレクト先を確認してください。
 
@@ -319,7 +320,24 @@
 - **想定リスク**: 権限緩和・既存制約の削除は無し。スクリプトは引き続き読み取り専用（書き込み系エンドポイント・ファイル書き込み・git 操作を一切追加しない）。AWS 操作は行わない。
 - **状態**: 実装済み（本 PR）。
 
+### 2026-09-15: 完成済みオープン PR のレビュー / マージ滞留を可視化する `scripts/list-open-prs.mjs` + レビューキュー索引を制度化
+
+- **日付**: 2026-09-15
+- **対象**: `scripts/list-open-prs.mjs`（新規・読み取り専用）/ `docs/wiki/open-prs-review-queue.md`（新規・機械生成）/ `docs/wiki/README.md` / `docs/index.md` / `.kiro/agents/github-issue-resolver.md` / 本ログ。
+- **今回の landscape（なぜ新規 issue の実装 PR を増やさなかったか）**: open な issue は 8 件（#209 / #202 / #197 / #193 / #190 / #167 / #162 / #32）。うち #190→PR #195、#193→PR #206、#197→PR #214、#202→PR #203、#209→PR #210 は**既に完成した open PR が存在**し、メンテナのフォローアップにも対応済み。#167 / #162 / #32 は `agent:skipped` 済みで AWS バックエンドが本質的に必要な要人間対応（`docs/action-required/` に設計整理済み・再スキップコメント禁止）。**ゼロから着手できる新規 client-side issue は残っていない**。この状況で追加の issue 実装 PR を作ると、PR 乱立・マージ滞留を悪化させるだけになる。
+- **根本原因（振り返り）**: 今回残っていた問題は「コードの不足」ではなく、**完成済みの open PR が `mergeable_state: blocked` のまま単独メンテナのレビュー / マージ待ちで滞留し、その滞留状況を一覧で俯瞰できる恒久的な成果物が無かった**こと。`scripts/issue-triage.mjs` のオープン PR 監査は実行時の要約に留まり、リポジトリに残る索引ではない。既存の `docs/wiki/blocked-issues-index.md`（PR #211）は「AWS / 人間対応待ちの **issue** の索引」であって「レビュー待ちの **open PR** の索引」ではなく、別物（重複しない）。
+- **実施した仕組み変更**:
+  1. **スクリプト**: `scripts/list-action-required.mjs` → `docs/action-required/CHECKLIST.md` と同じ「スクリプトで機械生成した Markdown 索引」パターンに合わせ、`scripts/list-open-prs.mjs` を新規実装。`gh api "repos/{owner}/{repo}/pulls?state=open"` で列挙し、各 PR を `gh api repos/{owner}/{repo}/pulls/{n}` で `mergeable_state` を取得（一覧 API には含まれないため単体 API・`unknown` は再取得）。PR ごとに番号・タイトル・head・base・`mergeable_state`（`clean` / `blocked` / `behind` / `dirty` / `unknown` などを人間向け区分に対応づけ）・紐づく issue（本文の `Closes` / `Refs` 等、無ければ head ブランチ名 `.../issue-<N>-...` から抽出）を出力。`--write` で `docs/wiki/open-prs-review-queue.md` を再生成、フラグ無しは標準出力に要約（`list-action-required.mjs` の挙動に合わせる）。読み取り専用（GET のみ）。
+  2. **索引**: `docs/wiki/open-prs-review-queue.md` を生成し、`docs/wiki/README.md` の「現在のページ一覧」と `docs/index.md` にリンクを追加（デッドリンク / 孤立ファイルなし）。生成 Markdown は README のページスキーマ（先頭メタデータ + 末尾 `## 更新履歴`）に従い、「手で編集せずスクリプトで再生成する」旨を明記。タスクリスト記法（`- [ ]`）は使わず通常の箇条書き / 表にした（A-5 を維持）。
+  3. **プロンプト**: 主要機能 3 のツールキットと検証節に、`scripts/list-open-prs.mjs` を実行のたびに再生成してレビュー待ち PR の滞留をメンテナが俯瞰できるようにするルールを追記（既存の禁止事項は一切弱めず、追加・明確化のみ）。
+- **実測効果**: `--write` を実データで実行し、オープン PR **9 件がすべて `blocked`（レビュー・チェック待ち）**であることを索引化（#195 / #203 / #206 / #210 / #211 / #212 / #213 / #214 / #215）。従来はこの一覧を得るのに LLM が全オープン PR を列挙 → PR 単体 API を 1 件ずつ叩く手作業が必要だったが、次回以降はスクリプト 1 本 + リポジトリに残る索引で俯瞰できる。滞留の可視化が「気づけるかどうか」に依存しなくなった点が本質的な改善。
+- **検証**: `env -u NODE_OPTIONS node --check scripts/list-open-prs.mjs`（成功）/ `--help`（成功）/ 純ロジックの import スモーク（`linkedIssues` / `mergeStateLabel` / `stateRank`）/ 実データで `--write` 実行し生成物を確認。
+- **想定リスク**: 権限緩和・既存制約の削除は無し。スクリプトは読み取り専用（`gh api` GET のみ / 書き込み系エンドポイント・git 操作を追加しない）、外部依存の追加も無し（Node 標準 + `gh`）。AWS 操作は行わない。
+- **状態**: 実装済み（本 PR / ブランチ `chore/issue-resolver-open-pr-review-queue`）。
+
 ## 更新履歴
+
+- 2026-09-15: 完成済みオープン PR のレビュー / マージ滞留を可視化する `scripts/list-open-prs.mjs`（読み取り専用）と機械生成索引 `docs/wiki/open-prs-review-queue.md` を制度化。根本原因は「完成済みだが `mergeable_state: blocked` で滞留する open PR を一覧で俯瞰できる恒久成果物が無かった」こと。ツールキット表・プロンプトの主要機能 3 / 検証節・README / `docs/index.md` の索引も同 PR で更新。既存の `blocked-issues-index.md`（issue の索引）とは別物で重複しない。権限緩和・既存制約の削除は無し（スクリプトの読み取り専用も維持）。
 
 - 2026-09-11: SKIP 済み issue への重複スキップコメントを防ぐ仕組みを制度化（#32 / #162 / #167）。`scripts/issue-triage.mjs` に既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を追加（読み取り専用は維持）。プロンプトに「SKIP には再コメントしない・再コメントは RECHECK のときだけ」を明文化し、playbook に落とし穴 A-15 と決定表 SKIP 行の追記を行った。あわせて現在の landscape（クライアント側 8 件は PR 化済みで滞留、AWS ブロックの 3 件は要人間対応でキューが枯れている）を振り返りとして記録。権限緩和は無し。
 - 2026-09-10: issue #194 対応として、PR への作業証跡（キャプチャ）添付を制度化した自己拡張エントリを追記。PR テンプレート（`## Testing`）・プロンプトの「検証」節・playbook の新設節に、UI 変更時の before / after キャプチャ添付と、ブラウザ不在環境での再現手順（`node dev-server.mjs`・URL / 画面・変更点）明記の切り分けを恒久ルール化。既存制約の緩和は無し（タスクリスト記法禁止も維持）。
