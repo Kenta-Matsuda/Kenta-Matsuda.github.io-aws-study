@@ -196,6 +196,59 @@ function computeRedundantSkipSignal(comments, verdict, hasSkipLabel) {
   return { agentSkipCommentCount, reSkipAdvice };
 }
 
+// 着手可否サマリで「今回、新規に着手すべきもの」と数える判定値。
+// issue 側: PR_FOLLOWUP（未対応コメント追随）/ RECHECK（マーカー後に人間入力）/ TRIAGE（新規調査）。
+//   OPEN_PR（クリーンなオープン PR あり）と SKIP（見送り済み）は着手対象ではない。
+// PR 監査側: PR_CONFLICT / PR_FOLLOWUP / PR_BEHIND / PR_UNKNOWN。PR_OK は対応不要。
+const ACTIONABLE_ISSUE_VERDICTS = ['PR_FOLLOWUP', 'RECHECK', 'TRIAGE'];
+const ACTIONABLE_PR_VERDICTS = ['PR_CONFLICT', 'PR_FOLLOWUP', 'PR_BEHIND', 'PR_UNKNOWN'];
+
+/**
+ * 「今回、新規に着手すべきものがあるか」を単一の判定にまとめる純ロジック
+ * （副作用なし・gh 呼び出しや I/O を一切行わないためユニットテスト可能）。
+ *
+ * 背景（なぜこれが必要か / A-15 の landscape）:
+ *  - トリアージは判定値ごとの件数を出すが、「結局この実行で着手対象はあるのか？」という
+ *    単一の答えを出していなかったため、毎回 LLM が件数を目視で足し合わせて判断していた。
+ *  - キューが枯れた状態（クリーンなオープン PR が並び、残りは AWS ブロックの SKIP）が
+ *    繰り返し発生するため、その状態を決定論的に「ACTIONABLE=0」と表現できると
+ *    「SKIP へ再コメントしない / 重複 PR を作らない / クリーンな PR を触らない」という
+ *    正しい振る舞い（機能 2〜4 へ進む）へ機械的に誘導できる。
+ *
+ * @param {Array<{verdict: string}>} results 棚卸し結果（issue 単位）
+ * @param {Array<{verdict: string}>} prAudit オープン PR 監査結果
+ * @returns {{actionableIssues: number, actionablePrs: number, total: number,
+ *   issueBreakdown: {PR_FOLLOWUP: number, RECHECK: number, TRIAGE: number},
+ *   prBreakdown: {PR_CONFLICT: number, PR_FOLLOWUP: number, PR_BEHIND: number, PR_UNKNOWN: number}}}
+ */
+function computeActionability(results, prAudit) {
+  const issues = Array.isArray(results) ? results : [];
+  const prs = Array.isArray(prAudit) ? prAudit : [];
+  const countBy = (arr, verdict) => arr.filter((x) => x && x.verdict === verdict).length;
+
+  const issueBreakdown = {
+    PR_FOLLOWUP: countBy(issues, 'PR_FOLLOWUP'),
+    RECHECK: countBy(issues, 'RECHECK'),
+    TRIAGE: countBy(issues, 'TRIAGE'),
+  };
+  const prBreakdown = {
+    PR_CONFLICT: countBy(prs, 'PR_CONFLICT'),
+    PR_FOLLOWUP: countBy(prs, 'PR_FOLLOWUP'),
+    PR_BEHIND: countBy(prs, 'PR_BEHIND'),
+    PR_UNKNOWN: countBy(prs, 'PR_UNKNOWN'),
+  };
+  const actionableIssues = ACTIONABLE_ISSUE_VERDICTS.reduce((n, v) => n + issueBreakdown[v], 0);
+  const actionablePrs = ACTIONABLE_PR_VERDICTS.reduce((n, v) => n + prBreakdown[v], 0);
+
+  return {
+    actionableIssues,
+    actionablePrs,
+    total: actionableIssues + actionablePrs,
+    issueBreakdown,
+    prBreakdown,
+  };
+}
+
 function excerpt(body, max) {
   if (!max) return undefined;
   const flat = (body || '').replace(/\r?\n+/g, ' ').trim();
@@ -483,6 +536,61 @@ const VERDICT_LABEL = {
 
 const VERDICT_ORDER = ['PR_FOLLOWUP', 'RECHECK', 'TRIAGE', 'OPEN_PR', 'SKIP'];
 
+/**
+ * computeActionability() の結果から「今回の着手可否サマリ」ブロックを組み立てる。
+ * ACTIONABLE=0 のときは機能 2〜4（自己改善）へ進むよう助言し、A-15 の反挙動
+ * （SKIP への再コメント・重複 PR・クリーンな PR への手出し）を明示的に禁止する。
+ * ACTIONABLE>0 のときは、着手優先順位（PR_CONFLICT を最優先）で内訳を提示する。
+ */
+function renderActionability(a) {
+  const lines = [];
+  lines.push('## 今回の着手可否サマリ');
+  lines.push('');
+  lines.push(
+    `- ACTIONABLE=${a.total}（着手対象 issue: ${a.actionableIssues} 件 / 対応が要るオープン PR: ${a.actionablePrs} 件）`,
+  );
+  if (a.total === 0) {
+    lines.push(
+      '- 今回、新規に**着手 / 追随 / コンフリクト解消**すべき対象はありません' +
+        '（着手対象 issue も、対応が要るオープン PR もゼロ）。',
+    );
+    lines.push(
+      '- したがって主要機能 1（issue 実装）で新規にやることは無いので、そのまま' +
+        '**主要機能 2〜4（振り返り・効率化・自己拡張）**へ進みます。',
+    );
+    lines.push(
+      '- このとき **SKIP 判定の issue へ再びスキップコメントを付けない / 重複 PR を作らない / ' +
+        'クリーンなオープン PR（OPEN_PR・PR_OK）に手を出さない**こと（playbook A-15）。',
+    );
+  } else {
+    lines.push('- 着手優先順位（上から順に確認する）:');
+    if (a.prBreakdown.PR_CONFLICT > 0) {
+      lines.push(`  - PR_CONFLICT: ${a.prBreakdown.PR_CONFLICT} 件（最優先。\`git merge origin/main\` で解消）`);
+    }
+    if (a.prBreakdown.PR_FOLLOWUP > 0 || a.issueBreakdown.PR_FOLLOWUP > 0) {
+      lines.push(
+        `  - PR_FOLLOWUP: PR 監査 ${a.prBreakdown.PR_FOLLOWUP} 件 / issue 側 ${a.issueBreakdown.PR_FOLLOWUP} 件` +
+          '（既存 head ブランチへ対応し直す）',
+      );
+    }
+    if (a.issueBreakdown.RECHECK > 0) {
+      lines.push(`  - RECHECK: ${a.issueBreakdown.RECHECK} 件（マーカー後に人間入力あり。除外解除して再調査）`);
+    }
+    if (a.issueBreakdown.TRIAGE > 0) {
+      lines.push(`  - TRIAGE: ${a.issueBreakdown.TRIAGE} 件（通常の新規調査対象）`);
+    }
+    if (a.prBreakdown.PR_BEHIND > 0) {
+      lines.push(`  - PR_BEHIND: ${a.prBreakdown.PR_BEHIND} 件（最新 main を取り込む）`);
+    }
+    if (a.prBreakdown.PR_UNKNOWN > 0) {
+      lines.push(`  - PR_UNKNOWN: ${a.prBreakdown.PR_UNKNOWN} 件（\`git rev-list\` でローカル判定にフォールバック）`);
+    }
+    lines.push('- 上記に着手したうえで、主要機能 2〜4（振り返り・効率化・自己拡張）も併せて回すこと。');
+  }
+  lines.push('');
+  return lines.join('\n');
+}
+
 function renderMarkdown(repo, results, prAudit) {
   const lines = [];
   lines.push(`# issue トリアージ要約: ${repo}`);
@@ -495,6 +603,9 @@ function renderMarkdown(repo, results, prAudit) {
   lines.push('判定の意味:');
   for (const v of VERDICT_ORDER) lines.push(`- \`${v}\`: ${VERDICT_LABEL[v]}`);
   lines.push('');
+
+  // 今回、新規に着手すべきものがあるかの単一判定（機械的に導出）。
+  lines.push(renderActionability(computeActionability(results, prAudit)));
 
   // オープン PR 監査を先に出す: コンフリクト解消と未対応コメントへの追随は
   // 新規 issue の実装より優先されるため。
@@ -598,7 +709,17 @@ async function main() {
 
   if (opts.json) {
     process.stdout.write(
-      `${JSON.stringify({ repo, generatedAt: new Date().toISOString(), results, openPrAudit: prAudit }, null, 2)}\n`,
+      `${JSON.stringify(
+        {
+          repo,
+          generatedAt: new Date().toISOString(),
+          results,
+          openPrAudit: prAudit,
+          actionability: computeActionability(results, prAudit),
+        },
+        null,
+        2,
+      )}\n`,
     );
   } else {
     process.stdout.write(`${renderMarkdown(repo, results, prAudit)}\n`);
@@ -614,4 +735,11 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export { computeRedundantSkipSignal, isSkipMarker, isAgentMarker, SKIP_MARKER, DONE_MARKER };
+export {
+  computeRedundantSkipSignal,
+  computeActionability,
+  isSkipMarker,
+  isAgentMarker,
+  SKIP_MARKER,
+  DONE_MARKER,
+};
