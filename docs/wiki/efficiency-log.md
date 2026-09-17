@@ -1,6 +1,6 @@
 # 効率化・自己拡張ログ
 
-- 最終更新日: 2026-09-10
+- 最終更新日: 2026-09-17
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
 - 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs`
 
@@ -319,8 +319,29 @@
 - **想定リスク**: 権限緩和・既存制約の削除は無し。スクリプトは引き続き読み取り専用（書き込み系エンドポイント・ファイル書き込み・git 操作を一切追加しない）。AWS 操作は行わない。
 - **状態**: 実装済み（本 PR）。
 
+### 2026-09-17: トリアージに「今回の着手可否サマリ（ACTIONABLE=N）」を追加し、着手可否の目視集計をやめた（機能 3）
+
+- **日付**: 2026-09-17
+- **対象**: `scripts/issue-triage.mjs`（拡張・読み取り専用は維持） / `tests/issue-triage-actionability.spec.mjs`（新規・純ロジック spec） / `docs/wiki/issue-resolution-playbook.md`（A-16 追記） / `.kiro/agents/github-issue-resolver.md`（追加的な一文） / 本ログ。
+- **今回の open issue / open PR の landscape（2026-09-17 実測）**: open issue 8 件（`PR_FOLLOWUP=0 / RECHECK=0 / TRIAGE=0 / OPEN_PR=5 / SKIP=3`）。オープン PR 監査 10 件はすべて `PR_OK`（`PR_CONFLICT=0 / PR_FOLLOWUP=0 / PR_BEHIND=0 / PR_UNKNOWN=0`）。`mergeable_state` は `blocked`（レビュー・チェック要件でありコンフリクトではない）。
+  - OPEN_PR: #190(PR#195) / #193(PR#206) / #197(PR#214,#215) / #202(PR#203) / #209(PR#210) はいずれもクリーンなオープン PR あり・未対応コメント 0・コンフリクト無しでレビュー待ち。
+  - SKIP: #32 / #162 / #167 は AWS バックエンドが本質的に必要で `agent:skipped` 済み・マーカー後の更新なし。
+  - つまり「ゼロから着手できる新規 issue」のキューは枯れ、クライアント側でできることは PR 化済み、残りは要人間対応（AWS）という 2026-09-11 と同じ landscape が再発している。
+- **根本原因（なぜ効率化が要ったか）**: トリアージは判定値ごとの件数（`PR_FOLLOWUP` / `RECHECK` / `TRIAGE` / `OPEN_PR` / `SKIP` と PR 監査の 5 値）を出していたが、「結局この実行で新規に着手すべきものはあるのか？」という**単一の答え**を出していなかった。そのため毎回 LLM が件数を目視で足し合わせ、`OPEN_PR` / `SKIP` / `PR_OK` を除外して着手可否を再導出していた。キューが枯れた landscape が繰り返し発生するため、この目視集計は毎回発生する定型作業だった。
+- **実施した仕組み変更**:
+  1. **純関数 `computeActionability(results, prAudit)` を追加**（副作用なし・`gh` 呼び出しや I/O をしないためユニットテスト可能）。着手対象を issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE`、PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN` と定義し（`OPEN_PR` / `SKIP` / `PR_OK` は除外）、`{ actionableIssues, actionablePrs, total, issueBreakdown, prBreakdown }` を返す。既存 export（`computeRedundantSkipSignal` など）に並べてエクスポート。
+  2. **`renderMarkdown()` に「## 今回の着手可否サマリ」ブロック**を判定内訳の直後・PR 監査の前に描画。`ACTIONABLE=<total>` を出し、`0` のときは「新規に着手 / 追随 / コンフリクト解消すべき対象は無い → 主要機能 2〜4 へ進む。SKIP へ再コメントしない / 重複 PR を作らない / クリーンな PR に手を出さない（A-15）」と助言、`>0` のときは着手優先順位（`PR_CONFLICT` 最優先 → `PR_FOLLOWUP` → `RECHECK` / `TRIAGE` / `PR_BEHIND` / `PR_UNKNOWN`）で内訳を提示する。既存の verdict ロジックと `results` / `openPrAudit` の JSON 形は不変。
+  3. **`--json` 出力に `actionability` フィールドを追加**（同じ純関数から算出。`repo` / `generatedAt` / `results` / `openPrAudit` に並べる）。
+  4. **純ロジック spec `tests/issue-triage-actionability.spec.mjs` を追加**。この環境では Playwright（`npx playwright test`）がブラウザ / npm 取得不可で走らないため、`@playwright/test` に依存せず `node <spec>` で直接自走する形（`tests/quiz-csv.spec.mjs` と同じ「モジュール直 import + `node:assert`」の純ロジックの型）にした。
+- **効率化の効果**: 着手可否の判断が「件数を目視で足し合わせて `OPEN_PR` / `SKIP` / `PR_OK` を頭の中で除外する」から、要約先頭の `ACTIONABLE=N` の 1 行を読むだけに置き換わった。判断が決定論的になり、実行間でぶれない。今回の実測では `ACTIONABLE=0` が出て、「新規着手なし → 機能 2〜4 へ」という結論が機械的に導かれた。
+- **検証**: `env -u NODE_OPTIONS node --check scripts/issue-triage.mjs`（成功）/ `env -u NODE_OPTIONS node --check tests/issue-triage-actionability.spec.mjs`（成功）/ spec 直接実行（7 件すべて pass）/ **実装を一時的に壊して spec が落ちること**を確認（`actionableIssues = 0` に固定 → 3 件失敗・exit 1 → 元に戻して 7 件 pass）/ 全件実行で要約先頭に `ACTIONABLE=0（着手対象 issue: 0 件 / 対応が要るオープン PR: 0 件）` が表示されることを確認。
+- **今回のバッチ振り返り（なぜ新規着手がゼロだったか）**: クライアント側で前進できる issue は既にすべてクリーンなオープン PR 化済みでレビュー待ち（OPEN_PR 5 件）、残りは AWS バックエンド必須で `agent:skipped` 済み（SKIP 3 件）。オープン PR 10 件も未対応コメント・コンフリクト・behind いずれも無し。したがって主要機能 1 で新規にやることは無く、A-15 の禁止（SKIP 再コメント・重複 PR・クリーン PR への手出し）を守って機能 2〜4（本エントリ＝効率化 + 知見永続化）に注力した。
+- **想定リスク**: 権限緩和・既存制約の削除は無し。スクリプトは引き続き読み取り専用（`gh api` の GET のみ・書き込み系エンドポイント・ファイル書き込み・git 操作を一切追加しない）。外部依存も追加なし（Node 標準 + `gh`）。既存の verdict ロジックと `--json` の `results` / `openPrAudit` の形は変えず、`actionability` フィールドの追加のみ。AWS 操作は行っていない。
+- **状態**: 実装済み（本 PR / ブランチ `chore/issue-resolver-actionability-summary`）。
+
 ## 更新履歴
 
+- 2026-09-17: トリアージに**今回の着手可否サマリ（`ACTIONABLE=N`）**を追加。純関数 `computeActionability(results, prAudit)` を新設・エクスポートし（着手対象 = issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE` + PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`、`OPEN_PR` / `SKIP` / `PR_OK` は除外）、`renderMarkdown` に要約ブロック・`--json` に `actionability` フィールドを追加（既存 verdict ロジックと `results` / `openPrAudit` の形は不変・読み取り専用も維持）。純ロジック spec `tests/issue-triage-actionability.spec.mjs` を追加（実装を壊すと落ちることを確認）。あわせて今回の landscape（OPEN_PR 5 件・SKIP 3 件・オープン PR 監査 10 件すべて PR_OK＝`ACTIONABLE=0`）と、目視集計を単一判定へ置換した効率化を記録。権限緩和は無し。
 - 2026-09-11: SKIP 済み issue への重複スキップコメントを防ぐ仕組みを制度化（#32 / #162 / #167）。`scripts/issue-triage.mjs` に既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を追加（読み取り専用は維持）。プロンプトに「SKIP には再コメントしない・再コメントは RECHECK のときだけ」を明文化し、playbook に落とし穴 A-15 と決定表 SKIP 行の追記を行った。あわせて現在の landscape（クライアント側 8 件は PR 化済みで滞留、AWS ブロックの 3 件は要人間対応でキューが枯れている）を振り返りとして記録。権限緩和は無し。
 - 2026-09-10: issue #194 対応として、PR への作業証跡（キャプチャ）添付を制度化した自己拡張エントリを追記。PR テンプレート（`## Testing`）・プロンプトの「検証」節・playbook の新設節に、UI 変更時の before / after キャプチャ添付と、ブラウザ不在環境での再現手順（`node dev-server.mjs`・URL / 画面・変更点）明記の切り分けを恒久ルール化。既存制約の緩和は無し（タスクリスト記法禁止も維持）。
 - 2026-09-06: `scripts/list-action-required.mjs`（要人間対応チェックリスト生成・issue #184 / PR #185）の実績エントリ、今回のレトロスペクティブ（open PR 3 件のコンフリクト解消 + 追随、#182 のタブ名エスカレーション、#184）、およびプロンプト自己拡張の要否判断（今回は本体無変更・知見は playbook A-13 / A-14 へ）を追記。

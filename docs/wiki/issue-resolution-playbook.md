@@ -1,6 +1,6 @@
 # issue 解決プレイブック
 
-- 最終更新日: 2026-09-10
+- 最終更新日: 2026-09-17
 - 対象範囲: `github-issue-resolver` エージェント（`.kiro/agents/github-issue-resolver.md`）が open issue を棚卸し・実装・PR 化する際の既知の落とし穴・判定基準・再利用可能なコマンド・リポジトリ固有の勘所
 - 出典/参照: `.kiro/agents/github-issue-resolver.md` / `docs/wiki/efficiency-log.md` / issue #32 #109 #137 #138 #161〜#169 #184 #194 / PR #113 #114 #139 #157 #160 #175〜#185
 
@@ -114,6 +114,14 @@
 - **根本原因**: SKIP の分岐は「ラベル・コメントはそのまま残す」としか言っておらず、「**新しいスキップコメントを付けてはいけない**」とは言っていなかった。禁止が明文化されていなかったため、実行のたびに同種のコメントが再投稿された。`scripts/issue-triage.mjs` も `updatedAfterMarker`（マーカー後の人間更新の有無）は出していたが、「既に何件のスキップコメントが付いているか」を可視化していなかったため、蓄積に気づけなかった。
 - **恒久対策**: (1) スクリプトが各 issue の既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と、`SKIP` 判定 issue への再コメント不要助言（`reSkipAdvice`）を出力するようにした。(2) プロンプト（`.kiro/agents/github-issue-resolver.md`）に「`SKIP`（マーカー付与後に新規の人間入力なし）の issue には再びスキップコメントを付けない（ラベル＋既存 1 件のマーカーで十分）。再コメントしてよいのは `RECHECK` のときだけ」という明示ルールを追加した。
 - **教訓**: 「スキップする」というルールは、**何を出力してはいけないか**（＝新規スキップコメントを付けない）も同時に定義しなければ、同じ副作用を毎回繰り返す。抑止したい反挙動は**機械可読な信号**（件数・助言）として可視化し、プロンプト側の禁止と両輪にする。
+
+### A-16: 着手可否を毎回「件数の目視集計」で再導出していた（`ACTIONABLE=0` の扱い）
+
+- **何が起きたか**: トリアージは判定値ごとの件数（`PR_FOLLOWUP` / `RECHECK` / `TRIAGE` / `OPEN_PR` / `SKIP` と PR 監査の 5 値）を出していたが、「結局この実行で新規に着手すべきものはあるのか？」という**単一の答え**が無かった。そのため毎回 LLM が件数を目視で足し合わせ、`OPEN_PR` / `SKIP` / `PR_OK` を頭の中で除外して着手可否を再導出していた。キューが枯れた landscape（クリーンなオープン PR が並び、残りは AWS ブロックの SKIP）が繰り返し発生するため、この目視集計は毎回発生する定型作業だった。
+- **恒久対策**: `scripts/issue-triage.mjs` に純関数 `computeActionability(results, prAudit)` を追加し、要約先頭に **「## 今回の着手可否サマリ」ブロック（`ACTIONABLE=N`）** を出すようにした。着手対象は issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE`、PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`（`OPEN_PR` / `SKIP` / `PR_OK` は着手対象に数えない）。`--json` にも `actionability` フィールドを出す。
+- **`ACTIONABLE=0` のときの正しい振る舞い**: 新規に**着手 / 追随 / コンフリクト解消**すべき対象はゼロ。主要機能 1（issue 実装）では何もせず、そのまま**主要機能 2〜4（振り返り・効率化・自己拡張）へ進む**。このとき **SKIP 判定の issue へ再びスキップコメントを付けない / 重複 PR を作らない / クリーンなオープン PR（`OPEN_PR`・`PR_OK`）に手を出さない**（A-15 と同じ禁止。`ACTIONABLE=0` はその状態を機械的に表した信号でもある）。
+- **`ACTIONABLE>0` のときの優先順位**: 要約が提示する順（`PR_CONFLICT` 最優先 → `PR_FOLLOWUP` → `RECHECK` / `TRIAGE` / `PR_BEHIND` / `PR_UNKNOWN`）で確認する。
+- **教訓（一般化）**: 判定値の件数を出すだけでは「で、今回やることはあるのか？」に毎回コストがかかる。**除外ルール（OPEN_PR / SKIP / PR_OK は着手対象でない）を機械側に固定**し、単一の `ACTIONABLE=N` に落とすと、判断が決定論的になり実行間でぶれない。
 
 ## 判定基準
 
@@ -254,6 +262,7 @@ env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<file.json>'
 
 ## 更新履歴
 
+- 2026-09-17: 落とし穴 **A-16（着手可否を毎回「件数の目視集計」で再導出していた / `ACTIONABLE=0` の扱い）** を追記。`scripts/issue-triage.mjs` に純関数 `computeActionability(results, prAudit)` と要約先頭の「今回の着手可否サマリ（`ACTIONABLE=N`）」ブロック・`--json` の `actionability` フィールドを追加し、`ACTIONABLE=0` のときは SKIP へ再コメントしない / 重複 PR を作らない / クリーンな PR に手を出さず主要機能 2〜4 へ進む（A-15 と同じ禁止）ことを明記。着手対象の定義は issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE`、PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`（`OPEN_PR` / `SKIP` / `PR_OK` は除外）。読み取り専用・既存 verdict ロジック不変。出典: 2026-09-17 バッチ（OPEN_PR 5 件・SKIP 3 件・オープン PR 監査 10 件すべて PR_OK ＝ `ACTIONABLE=0`）。
 - 2026-09-11: 落とし穴 **A-15（SKIP 済み issue に毎回スキップコメントを重ねて投稿していた）** を追記。あわせて「棚卸しの分岐」判定表の `SKIP` 行に「ラベル・コメントは残すが新規スキップコメントは付けない（再コメント禁止）」を明記。`scripts/issue-triage.mjs` が既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を出力するようにし、プロンプト側にも「再コメントは `RECHECK` のときだけ」の禁止ルールを追加した。出典: issue #32（同種スキップコメントの累積）/ #162 #167（予備軍）。
 - 2026-09-10: 「作業証跡（キャプチャ）を PR に残す（#194）」節を新設。UI 変更では変更前後（before / after）のキャプチャ、UI 以外でも該当する作業証跡（コマンド出力・テスト結果）を PR に残すこと、ブラウザが使える環境では Playwright / agent-browser で取得し、ブラウザ不在 / ヘッドレス環境では取得不可の理由と再現手順（`node dev-server.mjs`・URL / 画面・変更点）を明記する切り分けを表で整理。出典: issue #194 / `.kiro/agents/github-issue-resolver.md` の「検証」節。
 - 2026-09-06: 落とし穴 **A-13（ユーザーが却下した語に勝手な言い換えを当てて再提出した）** と **A-14（実行環境は毎回変わりうる。今回は Linux/bash・Playwright 実行不可・INTEGRATIONS_ONLY で、A-11 の PowerShell 環境とは真逆）** を追記。出典: PR #182（issue #163 のタブ名再変更「全般→ラーニングパス」エスカレーション）/ 本セッションの環境実測。あわせて、`fs_write` と `bash` ツールで `/tmp` のビューが異なりうるため PR 本文はヒアドキュメントか同一シェルから書ける一時パスで渡す注意を記載。
