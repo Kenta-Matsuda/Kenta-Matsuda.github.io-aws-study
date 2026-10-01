@@ -5541,6 +5541,44 @@ async function explainTerm({ els, exam, term, taskContext }) {
   const providerLabel = getActiveProviderLabel();
   showAiModal(els, `${getLocale() === 'ja' ? '用語解説' : 'Explain'}: ${term}`, true);
 
+  if (getLocale() === 'en') {
+    const systemPrompt =
+      `You are explaining an AWS/technical term to a beginner studying for ${exam.code} (${exam.shortLabel}). ` +
+      `Do not just give a dictionary definition — use concrete examples and analogies so the concept truly clicks for a newcomer. ` +
+      `Output in Markdown with clear headings and bullet points for readability. ` +
+      `When you introduce a new term that a beginner might not know, add a brief inline clarification in parentheses (5–15 words), ` +
+      `or collect them in a "Mini-Glossary" section at the end.\n\n` +
+      `[Reliability rules]\n` +
+      `- Base your explanation only on information found in AWS official documentation.\n` +
+      `- Do not include speculation or uncertain information. If you are unsure, say "Please refer to the official documentation".\n` +
+      `- End your explanation with a "📚 References" section listing 1–3 relevant official AWS documentation URLs.`;
+
+    const contextPrompt = taskContext
+      ? `\n\n[Task context]\n${taskContext}`
+      : '';
+
+    const userPrompt = `Term: "${term}" in the context of AWS.`;
+
+    let response = await callAiStream({
+      userPrompt,
+      systemPrompt: systemPrompt + contextPrompt,
+      onRequireApiKey: () => openSettingsModal(els),
+      onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
+    });
+
+    // Fallback to non-streaming when the runtime doesn't support streams/SSE.
+    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+      response = await callAi({
+        userPrompt,
+        systemPrompt: systemPrompt + contextPrompt,
+        onRequireApiKey: () => openSettingsModal(els),
+      });
+    }
+
+    if (response) updateAiModalContent(els, response);
+    return isSuccessfulAiResponse(response);
+  }
+
   const systemPrompt =
     `${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
     `指定されたAWS/技術用語を「腹落ち」するように解説してください。辞書的な定義の丸写しではなく、` +
