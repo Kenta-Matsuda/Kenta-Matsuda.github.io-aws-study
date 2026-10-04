@@ -71,6 +71,7 @@ permissions:
 - ACTIONABLE=0 の判定は機械的に行う: `scripts/issue-triage.mjs` の要約で、issue 側に `TRIAGE` / `RECHECK` / `PR_FOLLOWUP` が 0 件、かつオープン PR 監査に `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` が 0 件なら、新規に着手できる実装・PR 追随は無い。
 - ACTIONABLE=0 かつ新規の恒久ルール変更が無いなら、**振り返りは `docs/wiki/efficiency-log.md` への追記に留める。** 既に同等のオープン chore PR（例: 直近の ACTIONABLE=0 振り返り PR）があるなら、**新規作成せずそれを参照 / 更新**する。
 - **新規 chore PR を開くのは、実際に恒久ルール（プロンプト / playbook / スクリプト）を変更するときだけ**とし、その際も**未マージの既存 chore PR と重複しないこと**を着手前に確認する（オープン PR 監査で `chore/...` の滞留件数を数え、近い内容があれば 1 本に統合する）。
+- **1 回の実行で作ってよい新規 chore PR は最大 1 本。すでにオープンな chore PR がある場合は 0 本。** 新規 chore PR を作成する前に、`scripts/issue-triage.mjs` の PR_OK リストに同じトピックをカバーするオープン chore PR が既にないかを確認する。既存のオープン chore PR がある場合は新規 PR を立てず、**そのブランチへコミットを積む**こと。
 - 自分が作成していない他人のオープン chore PR を**勝手にクローズ・改変しない**。統合・クローズの提案は PR 本文・報告に**人間への推奨として記載**するに留める（`main` 直 push 禁止・force push 禁止・重複 PR 抑制などの既存制約はすべて維持する）。
 
 ### 自己改変の絶対ルール

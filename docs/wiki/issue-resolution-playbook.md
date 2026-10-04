@@ -1,6 +1,6 @@
 # issue 解決プレイブック
 
-- 最終更新日: 2026-09-25
+- 最終更新日: 2026-10-04
 - 対象範囲: `github-issue-resolver` エージェント（`.kiro/agents/github-issue-resolver.md`）が open issue を棚卸し・実装・PR 化する際の既知の落とし穴・判定基準・再利用可能なコマンド・リポジトリ固有の勘所
 - 出典/参照: `.kiro/agents/github-issue-resolver.md` / `docs/wiki/efficiency-log.md` / issue #32 #109 #137 #138 #161〜#169 #184 #194 #197 #202 #209 / PR #113 #114 #139 #157 #160 #175〜#185 #211 #213 #215 #216 #217 #218 #219
 
@@ -266,6 +266,7 @@ env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<file.json>'
 
 ## 更新履歴
 
+- 2026-10-04: chore PR 抑止ルールを強化。エージェントルール（`.kiro/agents/github-issue-resolver.md`）に「1回の実行で作ってよい新規 chore PR は最大1本、既存オープン chore PR がある場合は0本」という明示的な数量制約を追加。新規 chore PR を作らず既存 PR#220 ブランチへコミットを積む実践を記録。出典: PR#223重複クローズと2026-10-04の棚卸し（OPEN_PR: #193/#197/#202/#209/#221、PR_FOLLOWUP: #190(→クローズ済PR#223)、SKIP: #32/#162/#167）。
 - 2026-09-25: 落とし穴 **A-16（ACTIONABLE=0 の実行がほぼ同一の自己改善 chore PR を毎回量産して滞留させた）** を追記。根本原因（完了条件を『必ず新規 chore PR を開く』と解釈し、既存の同等オープン chore PR の有無を確認していなかった）・恒久対策（ACTIONABLE=0 かつ新規恒久ルール変更が無い実行では新規 chore PR を開かず efficiency-log 追記に留める。他人の PR #218 / #219 は勝手にクローズせず統合は人間へ推奨）を記録。あわせて「棚卸しの分岐」節に **ACTIONABLE=0 の判定** 注記を追加。出典: 今回（2026-09-25）の棚卸し結果 — OPEN_PR: #190 / #193 / #197 / #202 / #209、SKIP: #32 / #162 / #167、オープン PR 監査は全 13 件 `PR_OK`。滞留していた自己改善 chore PR: #211 / #213 / #215 / #216 / #217 / #218 / #219（#218 と #219 はほぼ同一）。
 - 2026-09-11: 落とし穴 **A-15（SKIP 済み issue に毎回スキップコメントを重ねて投稿していた）** を追記。あわせて「棚卸しの分岐」判定表の `SKIP` 行に「ラベル・コメントは残すが新規スキップコメントは付けない（再コメント禁止）」を明記。`scripts/issue-triage.mjs` が既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を出力するようにし、プロンプト側にも「再コメントは `RECHECK` のときだけ」の禁止ルールを追加した。出典: issue #32（同種スキップコメントの累積）/ #162 #167（予備軍）。
 - 2026-09-10: 「作業証跡（キャプチャ）を PR に残す（#194）」節を新設。UI 変更では変更前後（before / after）のキャプチャ、UI 以外でも該当する作業証跡（コマンド出力・テスト結果）を PR に残すこと、ブラウザが使える環境では Playwright / agent-browser で取得し、ブラウザ不在 / ヘッドレス環境では取得不可の理由と再現手順（`node dev-server.mjs`・URL / 画面・変更点）を明記する切り分けを表で整理。出典: issue #194 / `.kiro/agents/github-issue-resolver.md` の「検証」節。

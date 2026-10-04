@@ -1,6 +1,6 @@
 # 効率化・自己拡張ログ
 
-- 最終更新日: 2026-09-25
+- 最終更新日: 2026-10-04
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
 - 出典/参照: issue #69 #184 #197 #202 #209 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs` / PR #211 #213 #215 #216 #217 #218 #219
 
@@ -341,8 +341,25 @@
 - **想定リスク**: 権限緩和・既存制約の削除は**無し**（AWS 操作禁止・`main` 直 push 禁止・force push 禁止・秘密情報の非コミット・スクリプトの書き込み操作禁止・SKIP 再コメント禁止・重複 PR 抑制などの既存禁止事項はすべて維持し、**制約の追加・明確化のみ**）。他人の PR は改変せず、統合は推奨に留めた。
 - **状態**: 実装済み（本 PR）。
 
+### 2026-10-04: PR#223重複クローズとA-16（chore PR自己増殖）の恒久化
+
+- **日付**: 2026-10-04
+- **対象**: PR#223（重複クローズ）/ `docs/wiki/issue-resolution-playbook.md`（A-16追記）/ `.kiro/agents/github-issue-resolver.md`（chore PR抑止ルール追記）。
+- **今回の open issue / open PR の状況**:
+  - open issue 9件: PR_FOLLOWUP=1 / OPEN_PR=5 / SKIP=3 / TRIAGE=0
+  - 唯一のアクション可能な issue は #190 の重複PR#223クローズのみ。
+  - 他の5件（#193/#197/#202/#209/#221）はすべて既存オープンPRあり・未対応コメントなし。新規PR不要。
+  - 3件（#32/#162/#167）はAWS必須でskip済み。
+- **実施した作業**:
+  1. **PR#223をクローズ**: PR#195が先行する完全対応済みPRのため、コメントを添えてクローズ（重複PRの理由: PR#195が`fix/issue-190-aib-task-1-1-name`として先行オープン中で、AIB-C01タスク1.1修正＋横展開まで対応済み）。
+  2. **A-16 chore PR抑止ルールを強化**: `scripts/issue-triage.mjs` の PR_OK リストを確認してから新規 chore PR を作ること、および「1回の実行で作ってよい新規 chore PR は最大1本・既存オープン chore PR がある場合は0本」という明示的な制約をエージェントルールに追加。
+  3. **既存PR#220ブランチへコミットを積む**: 新規 chore PR を作らず、既存の chore PR ブランチへ変更を積むことで解決策自体が問題の一部（自己増殖）にならないよう設計。
+- **想定リスク**: 権限緩和・既存制約の削除は無し。制約の追加のみ。
+- **状態**: 実装済み（PR#220ブランチへ追加コミット）。
+
 ## 更新履歴
 
+- 2026-10-04: PR#223（重複クローズ）と chore PR 抑止ルール強化（エージェントルールに「1回の実行で新規 chore PR は最大1本、既存オープン chore PR があれば0本」を明示追加）を記録。新規 chore PR を作らず既存 PR#220 ブランチへコミットを積む方針を実践。open issue 9件（PR_FOLLOWUP=1 / OPEN_PR=5 / SKIP=3）。唯一のアクション可能な issue は #190 の重複PR#223クローズのみ。
 - 2026-09-25: ACTIONABLE=0 実行（open issue 8 件・実装として着手可能な新規 issue なし）の振り返りを記録し、自己改善 chore PR の滞留（#211 / #213 / #215 / #216 / #217 / #218 / #219。#218 と #219 はほぼ同一）を新しい根本原因として特定。playbook に落とし穴 A-16 を新設、プロンプトの完了条件に「ACTIONABLE=0 かつ新規恒久ルール変更が無いなら振り返りだけの新規 chore PR を開かない（efficiency-log 追記 / 既存 chore PR の参照・更新に留める）」抑止ルールを追加。機械的信号（着手可否サマリ）は既存の in-flight PR #217 に集約すべきと判断し新規実装は見送り。今回の棚卸し: OPEN_PR #190 / #193 / #197 / #202 / #209、SKIP #32 / #162 / #167、PR 監査は全 13 件 PR_OK。Playwright は INTEGRATIONS_ONLY のため未実行。権限緩和・既存制約の削除は無し。
 - 2026-09-11: SKIP 済み issue への重複スキップコメントを防ぐ仕組みを制度化（#32 / #162 / #167）。`scripts/issue-triage.mjs` に既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を追加（読み取り専用は維持）。プロンプトに「SKIP には再コメントしない・再コメントは RECHECK のときだけ」を明文化し、playbook に落とし穴 A-15 と決定表 SKIP 行の追記を行った。あわせて現在の landscape（クライアント側 8 件は PR 化済みで滞留、AWS ブロックの 3 件は要人間対応でキューが枯れている）を振り返りとして記録。権限緩和は無し。
 - 2026-09-10: issue #194 対応として、PR への作業証跡（キャプチャ）添付を制度化した自己拡張エントリを追記。PR テンプレート（`## Testing`）・プロンプトの「検証」節・playbook の新設節に、UI 変更時の before / after キャプチャ添付と、ブラウザ不在環境での再現手順（`node dev-server.mjs`・URL / 画面・変更点）明記の切り分けを恒久ルール化。既存制約の緩和は無し（タスクリスト記法禁止も維持）。
