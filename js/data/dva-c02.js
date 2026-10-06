@@ -1467,7 +1467,7 @@ export const DVA_C02 = {
 
         {
           id: '3.4',
-          title: 'Deploying code using AWS continuous integration and continuous delivery (CI/CD) services',
+          title: 'Deploy code using AWS continuous integration and continuous delivery (CI/CD) services.',
           jpTitle: 'AWS の継続的インテグレーションおよび継続的デリバリー (CI/CD) サービスを使用したコードのデプロイ',
           description: [
             'タスク 4: AWS の継続的インテグレーションおよび継続的デリバリー (CI/CD) サービスを使用したコードのデプロイ',
@@ -1492,7 +1492,7 @@ export const DVA_C02 = {
           ],
 
           descriptionEn: [
-            'Task 4: Deploying code using AWS continuous integration and continuous delivery (CI/CD) services',
+            'Task 4: Deploy code using AWS continuous integration and continuous delivery (CI/CD) services',
             'Target knowledge:',
             '- Git-based version control tools (Git, etc.)',
             '- Manual and automatic approvals in AWS CodePipeline',
