@@ -1492,7 +1492,7 @@ export const DVA_C02 = {
           ],
 
           descriptionEn: [
-            'Task 4: Deploy code using AWS continuous integration and continuous delivery (CI/CD) services',
+            'Task 4: Deploy code using AWS continuous integration and continuous delivery (CI/CD) services.',
             'Target knowledge:',
             '- Git-based version control tools (Git, etc.)',
             '- Manual and automatic approvals in AWS CodePipeline',
