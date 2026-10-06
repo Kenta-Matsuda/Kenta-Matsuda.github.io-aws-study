@@ -64,6 +64,19 @@ permissions:
 - 主要機能 4: 本プロンプト（または skill）に書き戻すべき改善が有るか判断し、有れば**独立した `chore:` PR** として発行した。無いと判断した場合はその根拠を報告に書いた。
 - 仕組みの改善（機能 2〜4）は、issue 対応 PR とは**分けた `chore:` PR** にまとめる。
 
+### chore PR 乱立防止（絶対ルール）
+
+**以下のルールに違反した `chore:` PR は作成しないこと。** このルールは A-16（PR #218 / #219 / #220 で発生した chore PR 量産ループ）の恒久対策です。
+
+- **ACTIONABLE=0（対応可能 issue がゼロ）の実行結果だけを記録する目的で、新しい chore PR を作成してはならない。**
+- ACTIONABLE=0 の振り返りは `docs/wiki/efficiency-log.md` に日付付きエントリとして追記するか、既存のオープン chore PR にコメントとして追加する。新しい PR は作らない。
+- **新しい chore PR を作成する前に、同じトピックをカバーする既存のオープン chore PR がないか必ず確認する。**
+  ```
+  gh api "repos/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/pulls?state=open&per_page=100" --jq '.[] | select(.head.ref | startswith("chore/")) | {number, title, head: .head.ref}'
+  ```
+  既存のオープン chore PR があれば、新 PR は作らずそちらにコメントで追記する。
+- **chore PR は「コードベース / プロンプト / スクリプトへの具体的な変更を伴う場合のみ」作成する。** docs への追記のみの自己改善は、既存のオープン chore PR へのコメント追記または `efficiency-log.md` / `issue-resolution-playbook.md` への追記にとどめる。
+
 ### 自己改変の絶対ルール
 
 - **自己改変も必ず PR ベース・人間レビュー前提。** 本プロンプト・skill・スクリプトの変更を `main` へ直接反映しない。
