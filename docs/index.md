@@ -25,6 +25,7 @@
 - [要人間対応事項をチェックリスト一覧として可視化 (#184)](issues/action-required-checklist-184.md)
 - [受験予定日のカウントダウンと合格お祝い (#200)](issues/exam-date-countdown-200.md)
 - [AI検索をHyDEでクエリ拡張し、検索導線を強化 (#201)](issues/ai-search-hyde-201.md)
+- [AI検索のHyDEクエリ拡張を試験ガイド由来のサービス辞書で補強 (#209)](issues/exam-guide-hyde-209.md)
 
 ## LLM Wiki（docs/wiki/）
 
