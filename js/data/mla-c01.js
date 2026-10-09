@@ -1182,7 +1182,7 @@ export const MLA_C01 = {
         {
           id: '3.3',
           title: 'Use automated orchestration tools to set up CI/CD pipelines.',
-          jpTitle: '自動オーケストレーションツールを使用して、CI/CD パイプラインを設定する。',
+          jpTitle: '自動オーケストレーションツールを使用して、継続的インテグレーションおよび継続的デリバリー (CI/CD) パイプラインを設定する。',
           description: [
             'タスク 3.3: 自動オーケストレーションツールを使用して、継続的インテグレーションおよび継続的デリバリー (CI/CD) パイプラインを設定する。',
             '対象知識:',
