@@ -77,7 +77,7 @@ import {
   messageKeyForStage,
   shouldCelebratePass,
 } from './examSchedule.js';
-import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates } from './resourceSearch.js';
+import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates, buildExamKeywordCatalog, augmentTermsWithCatalog, buildAugmentedScoringQuery } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -4925,6 +4925,23 @@ function getResourceSearchIndex() {
 }
 
 /**
+ * Lazily-built, memoized exam-guide keyword catalog (issue #209). The catalog is
+ * the durable, model-independent list of "which AWS services/concepts matter" per
+ * exam guide (e.g. Amazon QuickSight / Amazon Q), used to augment HyDE expanded
+ * terms so newer services the LLM was not trained on still surface in AI search.
+ * @type {string[] | null}
+ */
+let examKeywordCatalog = null;
+
+/** Build (or reuse) the memoized exam-guide keyword catalog. */
+function getExamKeywordCatalog() {
+  if (!examKeywordCatalog) {
+    examKeywordCatalog = buildExamKeywordCatalog();
+  }
+  return examKeywordCatalog;
+}
+
+/**
  * Pick the locale-aware value from a plain/JP title pair, falling back to
  * whichever is non-empty so a breadcrumb never renders blank.
  * @param {string} plain - English/plain field.
@@ -5173,13 +5190,23 @@ function wireResourceSearchHandlers({ els, exams }) {
     // service names / keywords via the model, then union-search the local
     // index across those terms. This makes vague queries yield candidates.
     let candidates = [];
+    // Terms actually searched (raw query + HyDE expansion + exam-guide catalog).
+    // Kept in this scope so grounding candidate selection can score against the
+    // SAME augmented term set, not just the raw query (#209 v1 review item 4).
+    let augmentedTerms = [query];
     try {
       const expandedTerms = await expandQueryToAwsKeywords(query);
       // Always include the raw query as one term so exact keyword hits are kept.
-      const terms = [query, ...expandedTerms];
-      candidates = searchResourcesMulti(index, terms, { examId });
+      const baseTerms = [query, ...expandedTerms];
+      // issue #209: fold in exam-guide catalog services relevant to the query so
+      // newer services the model may omit (the "Quick" → Amazon QuickSight / Amazon Q
+      // litmus test) still surface. augmentTermsWithCatalog is pure/unit-tested and
+      // guards over-matching short tokens (e.g. bare "Amazon Q") per the v1 review.
+      augmentedTerms = augmentTermsWithCatalog(baseTerms, getExamKeywordCatalog());
+      candidates = searchResourcesMulti(index, augmentedTerms, { examId });
     } catch {
       candidates = [];
+      augmentedTerms = [query];
     }
 
     // Fallback: if expansion produced nothing (e.g. AI call failed or returned
@@ -5204,7 +5231,12 @@ function wireResourceSearchHandlers({ els, exams }) {
     // strong keyword hit is never dropped from the model's view just because
     // it sits past the cap in the display ordering (#189 review item 2).
     const AI_CANDIDATE_CAP = 40;
-    const grounding = selectAiCandidates(candidates, query, AI_CANDIDATE_CAP).map((r, i) => {
+    // Score against the AUGMENTED term set (raw query + HyDE + catalog), not the raw
+    // query, so a resource pulled in ONLY via a catalog term (e.g. a QuickSight doc
+    // for a query lacking "quick") still scores > 0 and reaches the model instead of
+    // being evicted past the cap (#209 v1 review item 4).
+    const scoringQuery = buildAugmentedScoringQuery(augmentedTerms);
+    const grounding = selectAiCandidates(candidates, scoringQuery, AI_CANDIDATE_CAP).map((r, i) => {
       const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
       const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
       return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;
@@ -5540,6 +5572,44 @@ async function explainTerm({ els, exam, term, taskContext }) {
 
   const providerLabel = getActiveProviderLabel();
   showAiModal(els, `${getLocale() === 'ja' ? '用語解説' : 'Explain'}: ${term}`, true);
+
+  if (getLocale() === 'en') {
+    const systemPrompt =
+      `You are explaining an AWS/technical term to a beginner studying for ${exam.code} (${exam.shortLabel}). ` +
+      `Do not just give a dictionary definition — use concrete examples and analogies so the concept truly clicks for a newcomer. ` +
+      `Output in Markdown with clear headings and bullet points for readability. ` +
+      `When you introduce a new term that a beginner might not know, add a brief inline clarification in parentheses (5–15 words), ` +
+      `or collect them in a "Mini-Glossary" section at the end.\n\n` +
+      `[Reliability rules]\n` +
+      `- Base your explanation only on information found in AWS official documentation.\n` +
+      `- Do not include speculation or uncertain information. If you are unsure, say "Please refer to the official documentation".\n` +
+      `- End your explanation with a "📚 References" section listing 1–3 relevant official AWS documentation URLs.`;
+
+    const contextPrompt = taskContext
+      ? `\n\n[Task context]\n${taskContext}`
+      : '';
+
+    const userPrompt = `Term: "${term}" in the context of AWS.`;
+
+    let response = await callAiStream({
+      userPrompt,
+      systemPrompt: systemPrompt + contextPrompt,
+      onRequireApiKey: () => openSettingsModal(els),
+      onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
+    });
+
+    // Fallback to non-streaming when the runtime doesn't support streams/SSE.
+    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+      response = await callAi({
+        userPrompt,
+        systemPrompt: systemPrompt + contextPrompt,
+        onRequireApiKey: () => openSettingsModal(els),
+      });
+    }
+
+    if (response) updateAiModalContent(els, response);
+    return isSuccessfulAiResponse(response);
+  }
 
   const systemPrompt =
     `${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
