@@ -73,6 +73,7 @@ import { initChat, resetChat } from './chat.js';
 import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
+import { getRegisteredLocaleCodes, getLocaleLabel } from './localeRegistry.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
 import {
   describeExamSchedule,
@@ -2053,9 +2054,25 @@ function updateSidebarActiveState({ els, examId }) {
   });
 }
 
+// Build the settings-modal language buttons from js/localeRegistry.js so the
+// switcher always matches the locales actually loaded (issue #197).
+function renderLangSwitchButtons(container) {
+  const codes = getRegisteredLocaleCodes();
+  container.replaceChildren(...codes.map((code, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.lang = code;
+    btn.className = 'flex-1 px-4 py-2 text-sm font-medium transition-colors text-center';
+    if (i < codes.length - 1) btn.classList.add('border-r', 'border-gray-200');
+    btn.textContent = getLocaleLabel(code);
+    return btn;
+  }));
+}
+
 function wireSettingsModalSwitches({ els }) {
   // Language switch
   if (els.langSwitch) {
+    renderLangSwitchButtons(els.langSwitch);
     const updateLangBtns = () => {
       const current = getLocale();
       els.langSwitch.querySelectorAll('button[data-lang]').forEach(btn => {
