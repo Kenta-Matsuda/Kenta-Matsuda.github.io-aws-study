@@ -1,6 +1,6 @@
 # issue 解決プレイブック
 
-- 最終更新日: 2026-09-10
+- 最終更新日: 2026-09-25
 - 対象範囲: `github-issue-resolver` エージェント（`.kiro/agents/github-issue-resolver.md`）が open issue を棚卸し・実装・PR 化する際の既知の落とし穴・判定基準・再利用可能なコマンド・リポジトリ固有の勘所
 - 出典/参照: `.kiro/agents/github-issue-resolver.md` / `docs/wiki/efficiency-log.md` / issue #32 #109 #137 #138 #161〜#169 #184 #194 / PR #113 #114 #139 #157 #160 #175〜#185
 
@@ -114,6 +114,14 @@
 - **根本原因**: SKIP の分岐は「ラベル・コメントはそのまま残す」としか言っておらず、「**新しいスキップコメントを付けてはいけない**」とは言っていなかった。禁止が明文化されていなかったため、実行のたびに同種のコメントが再投稿された。`scripts/issue-triage.mjs` も `updatedAfterMarker`（マーカー後の人間更新の有無）は出していたが、「既に何件のスキップコメントが付いているか」を可視化していなかったため、蓄積に気づけなかった。
 - **恒久対策**: (1) スクリプトが各 issue の既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と、`SKIP` 判定 issue への再コメント不要助言（`reSkipAdvice`）を出力するようにした。(2) プロンプト（`.kiro/agents/github-issue-resolver.md`）に「`SKIP`（マーカー付与後に新規の人間入力なし）の issue には再びスキップコメントを付けない（ラベル＋既存 1 件のマーカーで十分）。再コメントしてよいのは `RECHECK` のときだけ」という明示ルールを追加した。
 - **教訓**: 「スキップする」というルールは、**何を出力してはいけないか**（＝新規スキップコメントを付けない）も同時に定義しなければ、同じ副作用を毎回繰り返す。抑止したい反挙動は**機械可読な信号**（件数・助言）として可視化し、プロンプト側の禁止と両輪にする。
+
+### A-16: chore PR 乱立アンチパターン（ACTIONABLE=0 の実行で chore PR を量産した）
+
+- **症状**: ACTIONABLE=0（対応可能 issue ゼロ）の実行のたびに、同じ問題を記録する新しい chore PR を作成するループ。
+- **実例**: PR #218, #219, #220 がほぼ同内容（3 件のうち 2 件は重複でクローズ済み）。各 PR は「A-16: chore PR 滞留問題の振り返り」という同じ内容を記録しようとして量産された。
+- **根本原因**: ACTIONABLE=0 の実行結果だけを目的とした chore PR 作成を禁止するルールが無かった。また、新規 chore PR 作成前に既存のオープン chore PR を確認するゲートが無かった。
+- **対策**: ACTIONABLE=0 の振り返りは `efficiency-log.md` への追記か、既存オープン chore PR へのコメントで行う。新規 chore PR は「具体的なコードベース / プロンプト / スクリプトへの変更を伴う場合のみ」作成する。
+- **再発防止**: `.kiro/agents/github-issue-resolver.md` の「chore PR 乱立防止」節を参照（新規 chore PR 作成前の既存オープン chore PR 確認ゲートが追加されている）。
 
 ## 判定基準
 
@@ -253,6 +261,8 @@ env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<file.json>'
 - **初心者ガイド（`#beginner`）は試験用のステップ定義を再利用する**が `exam` コンテキストを持たない。ステップに機能を足すときは `exam` の有無でガードする（#163）。
 
 ## 更新履歴
+
+- 2026-09-25: 落とし穴 **A-16（chore PR 乱立アンチパターン - ACTIONABLE=0 の実行のたびに同じ問題を記録する新規 chore PR を量産した）** を追記。実例は PR #218 / #219 / #220（3 件のうち 2 件は重複でクローズ済み）。対策として `.kiro/agents/github-issue-resolver.md` に「chore PR 乱立防止」節を追加し、ACTIONABLE=0 専用の新規 chore PR 禁止と既存オープン chore PR 確認ゲートを制度化。権限緩和は無し。出典: PR #218 #219 #220。
 
 - 2026-09-11: 落とし穴 **A-15（SKIP 済み issue に毎回スキップコメントを重ねて投稿していた）** を追記。あわせて「棚卸しの分岐」判定表の `SKIP` 行に「ラベル・コメントは残すが新規スキップコメントは付けない（再コメント禁止）」を明記。`scripts/issue-triage.mjs` が既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を出力するようにし、プロンプト側にも「再コメントは `RECHECK` のときだけ」の禁止ルールを追加した。出典: issue #32（同種スキップコメントの累積）/ #162 #167（予備軍）。
 - 2026-09-10: 「作業証跡（キャプチャ）を PR に残す（#194）」節を新設。UI 変更では変更前後（before / after）のキャプチャ、UI 以外でも該当する作業証跡（コマンド出力・テスト結果）を PR に残すこと、ブラウザが使える環境では Playwright / agent-browser で取得し、ブラウザ不在 / ヘッドレス環境では取得不可の理由と再現手順（`node dev-server.mjs`・URL / 画面・変更点）を明記する切り分けを表で整理。出典: issue #194 / `.kiro/agents/github-issue-resolver.md` の「検証」節。

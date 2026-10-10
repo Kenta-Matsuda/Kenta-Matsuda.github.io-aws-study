@@ -1,6 +1,6 @@
 # 効率化・自己拡張ログ
 
-- 最終更新日: 2026-09-10
+- 最終更新日: 2026-09-25
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
 - 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs`
 
@@ -319,7 +319,19 @@
 - **想定リスク**: 権限緩和・既存制約の削除は無し。スクリプトは引き続き読み取り専用（書き込み系エンドポイント・ファイル書き込み・git 操作を一切追加しない）。AWS 操作は行わない。
 - **状態**: 実装済み（本 PR）。
 
+### 2026-09-25: chore PR 乱立問題の発覚と恒久化
+
+- **日付**: 2026-09-25
+- **対象**: PR #218, #219, #220 がほぼ同内容の ACTIONABLE=0 振り返りとして量産された問題
+- **根本原因**: ACTIONABLE=0（対応可能 issue がゼロ）の実行のたびに、「chore PR 乱立問題を記録する」という新しい chore PR を作成するループに陥っていた。ACTIONABLE=0 の実行結果だけを目的とした chore PR 作成を禁止するルールが存在しなかったため、同じ問題を記録する PR が 3 件（#218 / #219 / #220）量産された。
+- **対策**: `.kiro/agents/github-issue-resolver.md` に「chore PR 乱立防止」節を追記（ACTIONABLE=0 専用の新規 chore PR 禁止・新規 chore PR 作成前の既存オープン chore PR 確認ゲートを追加）。#218 / #219 をクローズし #220 のみ残す。`docs/wiki/issue-resolution-playbook.md` に落とし穴 A-16（chore PR 乱立アンチパターン）を追記。
+- **効果**: 今後の実行で同じループに陥ることを防ぐ。ACTIONABLE=0 の振り返りは efficiency-log.md への追記か既存 chore PR へのコメントで行うルールを明記した。
+- **想定リスク**: 権限緩和・既存制約の削除は無し。ACTIONABLE=0 時の chore PR 禁止という制約の追加のみ。
+- **状態**: 実装済み（本 PR: `chore/prevent-duplicate-chore-prs`）。
+
 ## 更新履歴
+
+- 2026-09-25: chore PR 乱立問題（A-16）の恒久対策エントリを追記。ACTIONABLE=0 の実行のたびに新規 chore PR を量産するループに陥った根本原因と対策（プロンプトへの「chore PR 乱立防止」節追加・#218/#219 クローズ・playbook への A-16 追記）を記録。権限緩和は無し。
 
 - 2026-09-11: SKIP 済み issue への重複スキップコメントを防ぐ仕組みを制度化（#32 / #162 / #167）。`scripts/issue-triage.mjs` に既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を追加（読み取り専用は維持）。プロンプトに「SKIP には再コメントしない・再コメントは RECHECK のときだけ」を明文化し、playbook に落とし穴 A-15 と決定表 SKIP 行の追記を行った。あわせて現在の landscape（クライアント側 8 件は PR 化済みで滞留、AWS ブロックの 3 件は要人間対応でキューが枯れている）を振り返りとして記録。権限緩和は無し。
 - 2026-09-10: issue #194 対応として、PR への作業証跡（キャプチャ）添付を制度化した自己拡張エントリを追記。PR テンプレート（`## Testing`）・プロンプトの「検証」節・playbook の新設節に、UI 変更時の before / after キャプチャ添付と、ブラウザ不在環境での再現手順（`node dev-server.mjs`・URL / 画面・変更点）明記の切り分けを恒久ルール化。既存制約の緩和は無し（タスクリスト記法禁止も維持）。
