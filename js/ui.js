@@ -65,6 +65,9 @@ import {
   assignTaskTargets,
   assignAnswerLetters,
   buildAnswerPositionHint,
+  selectTaskResources,
+  buildResourceGroundingHint,
+  appendMissingResourceRefs,
   getExamLevel,
   QUIZ_MODE_CONFIG,
   EXAM_MOCK_CONFIG,
@@ -382,6 +385,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       exam,
       examId: req.examId,
       taskTitle: req.taskTitle,
+      taskId: req.taskId,
       taskContext: req.taskContext,
       session: quizSession,
       isDashboardQuiz: req.isDashboardQuiz,
@@ -1017,6 +1021,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       ? assignTaskTargets(exam.domains, total)
       : [];
     const answerLetters = assignAnswerLetters(total);
+    const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
+    const taskOccurrences = new Map();
 
     // Strictly bound the number of generation attempts per question slot so a
     // 65-question flow cannot blow up in time: one initial attempt plus at most
@@ -1031,12 +1037,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
       const targetDomain = slotTargets[i]?.domain || null;
       const targetTask = slotTargets[i]?.task || null;
+      const resourceTask = targetTask || requestTask;
+      const occurrence = taskOccurrences.get(resourceTask) || 0;
+      taskOccurrences.set(resourceTask, occurrence + 1);
+      const resources = pickQuizResources(resourceTask, occurrence);
       const dedupSuffix = recentTopics
         ? `\n\n【重要】以下の問題とは異なるAWSサービス・トピックで出題してください（同じサービスの繰り返しは禁止）:\n${recentTopics}`
         : '';
       const userPrompt = (request.isDashboardQuiz
         ? buildGeneralQuizUserPrompt(exam.code, targetDomain, targetTask)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + buildResourceGroundingHint(resources)
         + buildAnswerPositionHint(answerLetters[i])
         + dedupSuffix;
 
@@ -1087,6 +1098,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (parsed) {
         parsed.domainId = targetDomain?.id ?? null;
         parsed.taskId = targetTask?.id ?? null;
+        parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
       } else if (slotErrored) {
@@ -1243,12 +1255,20 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       ? assignTaskTargets(exam.domains, total)
       : [];
     const answerLetters = assignAnswerLetters(total);
+    const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
+    const taskOccurrences = new Map();
+    const slotResources = [];
 
     const batchRequests = [];
     for (let i = 0; i < total; i++) {
+      const resourceTask = slotTargets[i]?.task || requestTask;
+      const occurrence = taskOccurrences.get(resourceTask) || 0;
+      taskOccurrences.set(resourceTask, occurrence + 1);
+      slotResources[i] = pickQuizResources(resourceTask, occurrence);
       const userPrompt = (request.isDashboardQuiz
         ? buildGeneralQuizUserPrompt(exam.code, slotTargets[i]?.domain || null, slotTargets[i]?.task || null)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + buildResourceGroundingHint(slotResources[i])
         + buildAnswerPositionHint(answerLetters[i]);
       batchRequests.push({ userPrompt, systemPrompt });
     }
@@ -1339,6 +1359,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (parsed) {
         parsed.domainId = slotTargets[i]?.domain?.id ?? null;
         parsed.taskId = slotTargets[i]?.task?.id ?? null;
+        parsed.explanation = appendMissingResourceRefs(parsed.explanation, slotResources[i]);
         generated.push(parsed);
       }
     }
@@ -4548,6 +4569,30 @@ function renderKnowledgeRow({ knowledge, term, taskContext }) {
   `;
 }
 
+// Locate a task by id across the exam's domains (task-mode quiz requests only
+// carry the id).
+function findExamTask(exam, taskId) {
+  const id = String(taskId || '').trim();
+  if (!id) return null;
+  for (const d of exam?.domains || []) {
+    const task = (d.tasks || []).find((t) => String(t.id) === id);
+    if (task) return task;
+  }
+  return null;
+}
+
+// Recommended resources for the `occurrence`-th question on `task`, localized
+// to { title, url, note } for the prompt and explanation (#225 Step B).
+function pickQuizResources(task, occurrence) {
+  if (!task) return [];
+  const en = getLocale() === 'en';
+  return selectTaskResources(task, occurrence).map((item) => ({
+    title: en ? (item.titleEn || item.title) : (item.title || item.titleEn),
+    url: getLocalizedUrl(item.url, item.urlEn),
+    note: en ? (item.noteEn || item.note || '') : (item.note || item.noteEn || ''),
+  }));
+}
+
 function buildTaskAiContext(task) {
   if (!task || typeof task !== 'object') return '';
   const id = typeof task.id === 'string' ? task.id.trim() : String(task.id || '').trim();
@@ -5809,7 +5854,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   return isSuccessfulAiResponse(response);
 }
 
-async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz, domainId }) {
+async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session, isDashboardQuiz, domainId }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
@@ -5828,9 +5873,14 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
   const systemPrompt = (session && session.mode === 'mock')
     ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(session.examId))
     : buildQuizSystemPrompt(exam.code, exam.shortLabel);
+  // Rotate resources across the questions of a multi-question session.
+  const resources = isDashboardQuiz
+    ? []
+    : pickQuizResources(findExamTask(exam, taskId), session?.currentIndex || 0);
   const userPrompt = (isDashboardQuiz
     ? buildGeneralQuizUserPrompt(exam.code, null)
     : buildQuizUserPrompt(taskTitle, taskContext))
+    + buildResourceGroundingHint(resources)
     + buildAnswerPositionHint(assignAnswerLetters(1)[0]);
 
   let response = '';
@@ -5875,6 +5925,7 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
 
   if (parsed) {
     parsed.domainId = domainId ?? null;
+    parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
     // Render interactive quiz UI
     renderInteractiveQuiz({ els, quiz: parsed });
     return true;

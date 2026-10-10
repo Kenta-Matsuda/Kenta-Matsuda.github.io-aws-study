@@ -770,6 +770,91 @@ export function buildAnswerPositionHint(letter) {
   return `\n\n【正解の位置】正解は選択肢 ${letter} に配置してください（"correct": "${letter}"）。解説の選択肢記号もこの並びに合わせてください。`;
 }
 
+// ─── Recommended-resource grounding (issue #225, Step B) ────
+// Pick a task's recommended resources deterministically and pass their
+// title/URL/note to the model, so questions and explanations lean on the
+// site's curated sources. Page bodies are NOT fetched here (Step C).
+
+// Lower = preferred. Groups not listed (Black Belt overview links, training,
+// hands-on) are not useful as citations and are skipped.
+const RESOURCE_GROUP_PRIORITY = {
+  docs: 0,
+  whitepapers: 1,
+  'builders-library': 1,
+  'knowledge-center': 1,
+  'what-is': 1,
+  blogs: 2,
+  're:post': 2,
+  're:posts': 2,
+  products: 3,
+};
+
+/**
+ * A task's citable resource items, best first: by group priority, then
+ * `recommend: true`, then original order.
+ * @param {{ resources?: Array<{ key: string, items?: object[] }> }} task
+ * @returns {object[]}
+ */
+export function rankTaskResources(task) {
+  const ranked = [];
+  (task?.resources || []).forEach((group) => {
+    const priority = RESOURCE_GROUP_PRIORITY[group?.key];
+    if (priority === undefined) return;
+    (group.items || []).forEach((item) => {
+      if (item && item.url) ranked.push({ item, priority, rec: item.recommend === true ? 0 : 1, order: ranked.length });
+    });
+  });
+  ranked.sort((a, b) => a.priority - b.priority || a.rec - b.rec || a.order - b.order);
+  return ranked.map((r) => r.item);
+}
+
+/**
+ * Up to `limit` resources for the `occurrence`-th question on this task. The
+ * window advances with each occurrence so repeated questions on one task draw
+ * on different resources.
+ * @param {object} task
+ * @param {number} [occurrence]
+ * @param {number} [limit]
+ * @returns {object[]}
+ */
+export function selectTaskResources(task, occurrence = 0, limit = 3) {
+  const ranked = rankTaskResources(task);
+  if (ranked.length <= limit) return ranked;
+  const start = (occurrence * limit) % ranked.length;
+  return Array.from({ length: limit }, (_, i) => ranked[(start + i) % ranked.length]);
+}
+
+/**
+ * Prompt suffix listing the reference resources (already localized
+ * `{ title, url, note }`).
+ * @param {Array<{ title: string, url: string, note?: string }>} resources
+ * @returns {string}
+ */
+export function buildResourceGroundingHint(resources) {
+  if (!Array.isArray(resources) || resources.length === 0) return '';
+  const lines = resources.map((r, i) => `${i + 1}. ${r.title} — ${r.url}${r.note ? ` (${r.note})` : ''}`).join('\n');
+  if (getLocale() === 'en') {
+    return `\n\n[Reference Resources]\n${lines}\nBase the question and explanation on what these official resources cover. Cite the URL(s) you relied on from this list in the explanation; do not invent other URLs.`;
+  }
+  return `\n\n【参照リソース】\n${lines}\nこれらの公式リソースが扱う内容に基づいて問題と解説を作成し、解説には根拠にした URL をこの一覧から引用してください（一覧にない URL を作らないこと）。`;
+}
+
+/**
+ * If the explanation cites none of the given resources, append them as
+ * "recommended resources" so the learner always gets the curated links.
+ * @param {string} explanation
+ * @param {Array<{ title: string, url: string }>} resources
+ * @returns {string}
+ */
+export function appendMissingResourceRefs(explanation, resources) {
+  const text = String(explanation || '');
+  if (!Array.isArray(resources) || resources.length === 0) return text;
+  if (resources.some((r) => r.url && text.includes(r.url))) return text;
+  const heading = getLocale() === 'en' ? 'Recommended resources' : '参考リソース';
+  const list = resources.map((r) => `- [${r.title}](${r.url})`).join('\n');
+  return `${text}\n\n**${heading}**\n${list}`;
+}
+
 /**
  * Check if the session is complete (all questions answered or limit reached).
  */
