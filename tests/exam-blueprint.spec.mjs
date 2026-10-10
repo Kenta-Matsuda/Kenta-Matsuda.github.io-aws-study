@@ -4,6 +4,10 @@ import {
   assignAnswerLetters,
   buildAnswerPositionHint,
   buildGeneralQuizUserPrompt,
+  rankTaskResources,
+  selectTaskResources,
+  buildResourceGroundingHint,
+  appendMissingResourceRefs,
 } from '../js/quiz.js';
 import { SAA_C03 as exam } from '../js/data/saa-c03.js';
 
@@ -128,11 +132,114 @@ test.describe('pre-generation sends assigned task + answer position (#225)', () 
     for (const p of prompts) {
       expect(p).toMatch(/on Task \d+\.\d+:/);
       expect(p).toContain('[Task Statement]');
+      expect(p).toContain('[Reference Resources]');
+      expect(p).toMatch(/\n1\. .+ — https:\/\//);
       const m = p.match(/Place the correct answer at choice ([A-D])/);
       expect(m).not.toBeNull();
       letters.push(m[1]);
     }
     const counts = ['A', 'B', 'C', 'D'].map((l) => letters.filter((x) => x === l).length);
     expect(Math.max(...counts) - Math.min(...counts)).toBeLessThanOrEqual(1);
+  });
+});
+
+test.describe('recommended-resource grounding (#225 Step B)', () => {
+  const task = {
+    resources: [
+      { key: 'blackbelts', items: [{ title: 'BB', url: 'https://bb', recommend: true }] },
+      { key: 'blogs', items: [{ title: 'Blog', url: 'https://blog', recommend: true }] },
+      { key: 'docs', items: [
+        { title: 'Doc1', url: 'https://doc1' },
+        { title: 'Doc2', url: 'https://doc2', recommend: true },
+        { title: 'NoUrl' },
+      ] },
+      { key: 'whitepapers', items: [{ title: 'WP', url: 'https://wp' }] },
+    ],
+  };
+
+  test('ranks docs > whitepapers > blogs, recommended first, skips Black Belt and url-less items', () => {
+    expect(rankTaskResources(task).map((r) => r.title)).toEqual(['Doc2', 'Doc1', 'WP', 'Blog']);
+    expect(rankTaskResources({})).toEqual([]);
+  });
+
+  test('selection window rotates across occurrences of the same task', () => {
+    expect(selectTaskResources(task, 0, 2).map((r) => r.title)).toEqual(['Doc2', 'Doc1']);
+    expect(selectTaskResources(task, 1, 2).map((r) => r.title)).toEqual(['WP', 'Blog']);
+    expect(selectTaskResources(task, 2, 2).map((r) => r.title)).toEqual(['Doc2', 'Doc1']);
+    expect(selectTaskResources(task, 5, 10)).toHaveLength(4);
+  });
+
+  test('every task in the real exam data yields at least one citable resource', async () => {
+    const fs = await import('node:fs');
+    const files = fs.readdirSync('js/data').filter((f) => /^[a-z]{3}-c0\d\.js$/.test(f));
+    const empty = [];
+    for (const f of files) {
+      const mod = await import(`../js/data/${f}`);
+      const ex = Object.values(mod)[0];
+      for (const d of ex.domains || []) for (const t of d.tasks || []) {
+        if (selectTaskResources(t).length === 0) empty.push(`${ex.code} ${t.id}`);
+      }
+    }
+    expect(empty).toEqual([]);
+  });
+
+  test('hint lists resources; explanation gets links only when none are cited', () => {
+    const res = [{ title: 'Doc2', url: 'https://doc2', note: 'n' }];
+    const hint = buildResourceGroundingHint(res);
+    expect(hint).toContain('1. Doc2 — https://doc2 (n)');
+    expect(buildResourceGroundingHint([])).toBe('');
+    expect(appendMissingResourceRefs('see https://doc2', res)).toBe('see https://doc2');
+    expect(appendMissingResourceRefs('no cite', res)).toContain('- [Doc2](https://doc2)');
+    expect(appendMissingResourceRefs('x', [])).toBe('x');
+  });
+});
+
+// End-to-end for the task-card quiz (single question): the prompt carries that
+// task's recommended resources and, when the model cites none of them, the
+// explanation shows them as recommended resources.
+test.describe('task quiz uses the task\'s recommended resources (#225 Step B)', () => {
+  test('prompt lists resources and the explanation falls back to them', async ({ page }) => {
+    const { CLF_C02 } = await import('../js/data/clf-c02.js');
+    const firstTask = CLF_C02.domains[0].tasks[0];
+    const expected = selectTaskResources(firstTask)[0];
+    const prompts = [];
+    await page.addInitScript(() => {
+      localStorage.setItem('gemini_api_key', 'test-key-not-used');
+      localStorage.setItem('ai_provider', 'gemini');
+      localStorage.setItem('asn_locale', 'ja');
+      localStorage.setItem('asn_study_state_v1', JSON.stringify({
+        schemaVersion: 2,
+        profile: { name: 'testuser' },
+        xp: { total: 0, history: [], weekRing: [] },
+        quizHistory: [],
+      }));
+    });
+    await page.route('**generativelanguage.googleapis.com/**', async (route) => {
+      const body = route.request().postDataJSON() || {};
+      prompts.push((body.contents || []).flatMap((c) => c.parts || []).map((p) => p.text || '').join('\n'));
+      const quiz = JSON.stringify({ question: 'Q?', choices: ['A. a', 'B. b', 'C. c', 'D. d'], correct: 'A', explanation: '解説本文' });
+      await route.fulfill({
+        status: 200,
+        headers: { 'content-type': 'text/event-stream; charset=utf-8' },
+        body: `data: ${JSON.stringify({ candidates: [{ content: { parts: [{ text: quiz }] } }] })}\n\n`,
+      });
+    });
+
+    await page.goto('/#clf');
+    await page.waitForSelector('#siteTitle');
+    await page.locator('#domainTabs button', { hasText: 'Domain 1' }).first().click();
+    const quizBtn = page.locator(`button[data-action="quiz"][data-task-id="${firstTask.id}"]`).first();
+    await quizBtn.scrollIntoViewIfNeeded();
+    await quizBtn.click();
+    await page.waitForSelector('#quizQuestion:not(.hidden)', { timeout: 10000 });
+
+    expect(prompts).toHaveLength(1);
+    expect(prompts[0]).toContain('【参照リソース】');
+    expect(prompts[0]).toContain(expected.url);
+
+    // Answer to reveal the explanation.
+    await page.locator('#quizChoices button').first().click();
+    await expect(page.locator('#quizExplanation')).toContainText('参考リソース');
+    await expect(page.locator(`#quizExplanation a[href="${expected.url}"]`)).toHaveCount(1);
   });
 });
