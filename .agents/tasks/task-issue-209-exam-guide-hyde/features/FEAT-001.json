@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-001",
+  "type": "chore",
+  "description": "Establish the local verification baseline for this no-build static site under the INTEGRATIONS_ONLY sandbox (no npm/Playwright), and create the feature branch for issue #209. Baseline = node --check on the files this task will touch + JSON parse + a demonstration that pure-logic specs can be executed with plain node (since `npx playwright test` cannot run offline). This confirms the working state is green BEFORE making changes so any later failure is attributable to the change.",
+  "status": "completed",
+  "steps": [
+    "Confirm NODE_OPTIONS handling: this sandbox sets NODE_OPTIONS=--require /opt/amazon/kiro-agent/proxy-bootstrap.js which does NOT exist, so every node invocation MUST be prefixed with `env -u NODE_OPTIONS` (or run after `unset NODE_OPTIONS`). Confirm `env -u NODE_OPTIONS node --version` prints a v22 version.",
+    "Confirm the git baseline: `git switch main` and `git pull` (already on main at 564b6de). Then create the feature branch: `git switch -c feature/issue-209-exam-guide-hyde`. All #209 work happens on this branch. Do NOT push (the orchestrator pushes).",
+    "Baseline node --check on the files this task touches: `env -u NODE_OPTIONS node --check js/ui.js`, `env -u NODE_OPTIONS node --check js/resourceSearch.js`, `env -u NODE_OPTIONS node --check js/exams.js`. Confirm all pass on the untouched tree.",
+    "Baseline pure-spec executability: demonstrate that a pure-logic spec's assertions can be run WITHOUT Playwright by importing the module under test directly with node. Example one-liner (do NOT commit it): `env -u NODE_OPTIONS node --input-type=module -e \"import('./js/resourceSearch.js').then(m=>{const i=m.buildResourceIndex();console.log('index size', i.length); console.log('S3+IAM', m.searchResourcesMulti(i,['S3','IAM']).length>0);})\"`. Confirm it prints a non-zero index size and true. Record that `npx playwright test` itself cannot run (no cached browsers / offline).",
+    "Record the baseline results (commands + outputs) in this feature's findings so the coder for FEAT-002 can rely on the same verification recipe."
+  ],
+  "acceptance_criteria": [
+    "Feature branch feature/issue-209-exam-guide-hyde exists and is checked out from the latest main.",
+    "`env -u NODE_OPTIONS node --check` passes for js/ui.js, js/resourceSearch.js, js/exams.js on the untouched tree.",
+    "A node --input-type=module import of js/resourceSearch.js succeeds and buildResourceIndex() returns a non-empty array (proves pure specs are runnable offline).",
+    "Findings document the exact verification recipe (env -u NODE_OPTIONS node ...) and note that npx playwright test cannot run in-sandbox."
+  ],
+  "verification": [
+    "env -u NODE_OPTIONS node --version",
+    "env -u NODE_OPTIONS node --check js/ui.js && env -u NODE_OPTIONS node --check js/resourceSearch.js && env -u NODE_OPTIONS node --check js/exams.js",
+    "env -u NODE_OPTIONS node --input-type=module -e \"import('./js/resourceSearch.js').then(m=>{const i=m.buildResourceIndex();if(!Array.isArray(i)||i.length===0)process.exit(1);console.log('OK',i.length);})\"",
+    "git rev-parse --abbrev-ref HEAD  # expect feature/issue-209-exam-guide-hyde"
+  ],
+  "blocked_reason": null,
+  "findings": "Baseline verified GREEN on untouched tree at main=564b6de, before creating any #209 changes.\n\nENV: `env -u NODE_OPTIONS node --version` => v22.23.2. NODE_OPTIONS in this sandbox points at a non-existent /opt/amazon/kiro-agent/proxy-bootstrap.js, so EVERY node/npx invocation MUST be prefixed with `env -u NODE_OPTIONS` or it fails.\n\nBRANCH: created `feature/issue-209-exam-guide-hyde` from main (git switch -c). Currently checked out (git rev-parse --abbrev-ref HEAD => feature/issue-209-exam-guide-hyde). Not pushed (orchestrator pushes).\n\nSYNTAX CHECK (all passed on untouched tree):\n  env -u NODE_OPTIONS node --check js/ui.js            => ui.js OK\n  env -u NODE_OPTIONS node --check js/resourceSearch.js => resourceSearch.js OK\n  env -u NODE_OPTIONS node --check js/exams.js         => exams.js OK\n\nPURE-SPEC OFFLINE RECIPE (proves pure logic runs without Playwright/browser/network):\n  env -u NODE_OPTIONS node --input-type=module -e \"import('./js/resourceSearch.js').then(m=>{const i=m.buildResourceIndex();if(!Array.isArray(i)||i.length===0)process.exit(1);console.log('index size', i.length); console.log('S3+IAM', m.searchResourcesMulti(i,['S3','IAM']).length>0);})\"\n  => index size 1143 ; S3+IAM true\n  (A benign MODULE_TYPELESS_PACKAGE_JSON warning prints because package.json has no \"type\":\"module\"; it is harmless and can be ignored.)\n\nCANNOT RUN IN-SANDBOX: `npx playwright test` (and `npm test`, a placeholder that always exits 1) cannot run under INTEGRATIONS_ONLY — no cached Playwright browsers and no npm registry access. Verify pure-logic specs by importing the module under test directly with `env -u NODE_OPTIONS node --input-type=module` as shown above; do NOT treat the inability to run Playwright as a failure.\n\nVERIFICATION RECIPE for FEAT-002+ (reuse this): 1) `env -u NODE_OPTIONS node --check <changed .js>` for every changed JS incl. new modules/specs. 2) `env -u NODE_OPTIONS node -e \\\"JSON.parse(require('fs').readFileSync('<file>','utf8'))\\\"` for changed JSON. 3) import changed pure module(s) via `env -u NODE_OPTIONS node --input-type=module -e ...` and assert expected output (e.g. 'Quick' expansion surfaces Amazon QuickSight / Amazon Q). 4) For i18n changes confirm ja.json/en.json flattened key sets mirror."
+}
