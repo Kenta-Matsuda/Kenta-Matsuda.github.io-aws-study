@@ -479,12 +479,29 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
   );
 }
 
+function taskStatementLines(task, isEn) {
+  const raw = isEn ? (task.descriptionEn || task.description) : (task.description || task.descriptionEn);
+  if (Array.isArray(raw)) return raw.map((l) => String(l).trim()).filter(Boolean);
+  return raw ? [String(raw).trim()] : [];
+}
+
 /**
  * Build a general user prompt for cross-domain quiz (dashboard mode).
  * When targetDomain is provided, the prompt is scoped to that domain's topics.
+ * When targetTask is also provided (from assignTaskTargets, #225), the prompt
+ * names that task and its task statement instead of letting the model pick.
  */
-export function buildGeneralQuizUserPrompt(examCode, targetDomain) {
+export function buildGeneralQuizUserPrompt(examCode, targetDomain, targetTask) {
   if (getLocale() === 'en') {
+    if (targetDomain && targetTask) {
+      const name = targetDomain.title || targetDomain.jpTitle;
+      const taskName = targetTask.title || targetTask.jpTitle;
+      let prompt = `Create 1 question from the "${name}" domain of the ${examCode} exam in the specified JSON format, on Task ${targetTask.id}: "${taskName}".`;
+      const lines = taskStatementLines(targetTask, true);
+      if (lines.length) prompt += `\n\n[Task Statement]\n${lines.join('\n')}`;
+      prompt += '\n\nPick a knowledge/skill item from the task statement that differs from previous questions.';
+      return prompt;
+    }
     if (targetDomain) {
       const name = targetDomain.title || targetDomain.jpTitle;
       let prompt = `Create 1 question from the "${name}" domain of the ${examCode} exam in the specified JSON format. Use a different AWS service/topic than last time.`;
@@ -495,6 +512,15 @@ export function buildGeneralQuizUserPrompt(examCode, targetDomain) {
       return prompt;
     }
     return `Create 1 question from a random domain/topic of the ${examCode} exam in the specified JSON format. Cover a different domain, topic, and AWS service each time — do not repeat.`;
+  }
+  if (targetDomain && targetTask) {
+    const name = targetDomain.jpTitle || targetDomain.title;
+    const taskName = targetTask.jpTitle || targetTask.title;
+    let prompt = `${examCode}試験のドメイン「${name}」のタスク ${targetTask.id}「${taskName}」から問題を1問、指定のJSON形式で作成してください。`;
+    const lines = taskStatementLines(targetTask, false);
+    if (lines.length) prompt += `\n\n【タスクステートメント】\n${lines.join('\n')}`;
+    prompt += '\n\nタスクステートメントの対象知識・スキルのうち、前の問題と異なる項目を選んで出題してください。';
+    return prompt;
   }
   if (targetDomain) {
     const name = targetDomain.jpTitle || targetDomain.title;
@@ -671,6 +697,77 @@ export function assignDomainTargets(domains, questionCount) {
   }
 
   return targets;
+}
+
+// ─── Exam blueprint (issue #225, Step A) ────────────────────
+// Deterministic parts of mock-exam assembly that need no LLM: which task each
+// question covers, and where the correct answer sits. `rng` is injectable so
+// the allocation can be tested with a fixed sequence.
+
+function shuffleInPlace(arr, rng) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/**
+ * Distribute questions across domains by weight (as assignDomainTargets) and,
+ * within each domain, evenly across its task statements, so every task gets
+ * covered before any task repeats. Returns one `{ domain, task }` per question,
+ * shuffled. `task` is null for domains without tasks.
+ * @param {Array<{ weight?: number, tasks?: object[] }>} domains
+ * @param {number} questionCount
+ * @param {() => number} [rng]
+ * @returns {Array<{ domain: object, task: object|null } | null>}
+ */
+export function assignTaskTargets(domains, questionCount, rng = Math.random) {
+  const domainSlots = assignDomainTargets(domains, questionCount);
+  const tasksByDomain = new Map();
+  const targets = domainSlots.map((domain) => {
+    if (!domain) return null;
+    if (!tasksByDomain.has(domain)) {
+      const tasks = Array.isArray(domain.tasks) ? domain.tasks.slice() : [];
+      tasksByDomain.set(domain, { order: shuffleInPlace(tasks, rng), next: 0 });
+    }
+    const entry = tasksByDomain.get(domain);
+    const task = entry.order.length ? entry.order[entry.next++ % entry.order.length] : null;
+    return { domain, task };
+  });
+  return shuffleInPlace(targets, rng);
+}
+
+/**
+ * Pre-assign the correct-answer letter for each question so letters are
+ * balanced (each of A-D used count/4 times, remainder random) and shuffled.
+ * Models otherwise favor one position. The letter is asked for in the prompt
+ * rather than shuffling choices afterwards, because explanations refer to
+ * choices by letter.
+ * @param {number} questionCount
+ * @param {() => number} [rng]
+ * @returns {string[]}
+ */
+export function assignAnswerLetters(questionCount, rng = Math.random) {
+  const letters = ['A', 'B', 'C', 'D'];
+  const out = [];
+  for (let i = 0; i < questionCount; i++) out.push(letters[i % letters.length]);
+  // Rotate the start so the remainder slots are not always A/B/C.
+  const offset = Math.floor(rng() * letters.length);
+  return shuffleInPlace(out.map((l) => letters[(letters.indexOf(l) + offset) % letters.length]), rng);
+}
+
+/**
+ * Prompt suffix asking the model to place the correct answer at `letter`.
+ * @param {string} letter
+ * @returns {string}
+ */
+export function buildAnswerPositionHint(letter) {
+  if (!/^[A-D]$/.test(String(letter || ''))) return '';
+  if (getLocale() === 'en') {
+    return `\n\n[Answer position] Place the correct answer at choice ${letter} (set "correct": "${letter}"), and make the explanation refer to the choices by these letters.`;
+  }
+  return `\n\n【正解の位置】正解は選択肢 ${letter} に配置してください（"correct": "${letter}"）。解説の選択肢記号もこの並びに合わせてください。`;
 }
 
 /**
