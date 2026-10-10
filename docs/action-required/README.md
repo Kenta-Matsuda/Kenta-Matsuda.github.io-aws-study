@@ -88,3 +88,4 @@ node scripts/list-action-required.mjs --check    # 最新かどうかを検証�
 - [AWS Skill Builder のコース URL が全試験で失効している](skillbuilder-course-urls.md) — 🔴 未対応（要対応） / 種別: 手動確認（ブラウザ操作 / Skill Builder サインイン） / 関連: #69
 - [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / 検索基盤 / API 提供。問題集 CSV はクライアント側で実装済み） / 関連: #165 / PR #180
 - [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / 翻訳ソース・品質基準 / 翻訳コンテンツのオーナーシップ。AWS 操作は不要） / 関連: #197
+- [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 種別: 手動確認（試験ガイド Web ページ参照が必要 / ネットワーク要） / 関連: #190 / PR #195

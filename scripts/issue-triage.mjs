@@ -49,6 +49,16 @@
  *    助言（reSkipAdvice）を出すようにした。RECHECK（マーカー後に人間入力あり）の
  *    ときだけ再調査・再コメントする、というルールを機械可読な信号として支援する。
  *
+ * chore PR 乱立検知について（2026-10-06 追加）:
+ *  - エージェントが ACTIONABLE=0 の実行のたびに chore PR を量産するループが発生した
+ *    （PR #218 / #219 / #220 が同一内容の重複）。
+ *  - 従来の PR 監査は「コンフリクト・未対応コメント・behind」しか見ておらず、
+ *    「既に open な chore PR が何件あるか」を可視化していなかった。
+ *  - そこで PR 監査結果に `openChorePrCount`（head が `chore/` で始まるオープン PR 件数）
+ *    と `chorePrAdvice`（件数が 1 以上の場合の乱立防止アドバイス）を追加した。
+ *    `agentSkipCommentCount` / `reSkipAdvice` と同じパターンで、機械可読な信号として
+ *    エージェントが新規 chore PR を作る前に確認できるようにする。
+ *
  * 副作用なし: `gh api` の GET のみを実行し、書き込み系エンドポイントは呼ばない。
  * git 操作・ファイル書き込みも行わない。
  */
@@ -114,6 +124,8 @@ const USAGE = `使い方: env -u NODE_OPTIONS node scripts/issue-triage.mjs [オ
   - 重複スキップコメント検知: 既存の \`🤖 agent:skipped\` コメント件数
     （agentSkipCommentCount）と、SKIP 判定 issue への再コメント不要助言
     （reSkipAdvice）。新規の人間入力が無い限り再度スキップコメントを付けない。
+  - chore PR 乱立検知: open な chore PR 件数（openChorePrCount）と、
+    1 件以上の場合の新規 chore PR 作成抑止アドバイス（chorePrAdvice）。
 
 読み取り専用（gh api の GET のみ）。`;
 
@@ -388,6 +400,30 @@ const PR_VERDICT_ORDER = ['PR_CONFLICT', 'PR_FOLLOWUP', 'PR_BEHIND', 'PR_UNKNOWN
  * すべてのオープン PR を監査する。
  * issue に紐づかない PR（chore/... や docs/... ブランチ）も対象に含めるのが要点。
  */
+/**
+ * chore PR 乱立を検知するための純ロジック（副作用なし・テスト容易化のため分離）。
+ *
+ * @param {Array<{head: string|null}>} openPrs オープン PR の配列
+ * @returns {{openChorePrCount: number, chorePrAdvice: string|null}}
+ *
+ * 注: head ブランチ名が `chore/` で始まる PR を chore PR とみなす。
+ * 件数が 1 以上の場合は新規 chore PR 作成を抑止するアドバイスを返す。
+ * これは `agentSkipCommentCount` / `reSkipAdvice` と同じパターンで
+ * 機械可読な信号として chore PR 乱立防止を支援する。
+ */
+function computeChorePrSignal(openPrs) {
+  const openChorePrCount = (openPrs || []).filter(
+    (pr) => /^chore\//i.test(pr.head ?? ''),
+  ).length;
+  const chorePrAdvice =
+    openChorePrCount > 0
+      ? `既存 open chore PR が ${openChorePrCount} 件あります。` +
+        '新規の chore PR を作成しないこと（乱立防止）。' +
+        '既存の chore PR に追加コミットするか、docs/wiki/efficiency-log.md への追記のみにとどめる。'
+      : null;
+  return { openChorePrCount, chorePrAdvice };
+}
+
 async function auditOpenPrs(repo, allPrs, openIssueNumbers, opts) {
   const openPrs = allPrs.filter((pr) => pr.state === 'open');
   const results = [];
@@ -429,23 +465,31 @@ async function auditOpenPrs(repo, allPrs, openIssueNumbers, opts) {
   results.sort(
     (a, b) => PR_VERDICT_ORDER.indexOf(a.verdict) - PR_VERDICT_ORDER.indexOf(b.verdict) || a.number - b.number,
   );
-  return results;
+
+  // chore PR 乱立検知シグナルを付加する。
+  const { openChorePrCount, chorePrAdvice } = computeChorePrSignal(results);
+  return { results, openChorePrCount, chorePrAdvice };
 }
 
 function renderPrAudit(prAudit) {
+  const { results, openChorePrCount, chorePrAdvice } = prAudit;
   const lines = [];
   lines.push('## オープン PR 監査（issue に紐づかない PR も含む）');
   lines.push('');
-  lines.push(`- 対象オープン PR: ${prAudit.length} 件`);
-  const counts = PR_VERDICT_ORDER.map((v) => `${v}=${prAudit.filter((p) => p.verdict === v).length}`);
+  lines.push(`- 対象オープン PR: ${results.length} 件`);
+  const counts = PR_VERDICT_ORDER.map((v) => `${v}=${results.filter((p) => p.verdict === v).length}`);
   lines.push(`- 判定内訳: ${counts.join(' / ')}`);
+  lines.push(`- open chore PR 件数: ${openChorePrCount} 件`);
+  if (chorePrAdvice) {
+    lines.push(`- ⚠️ chore PR 乱立防止: ${chorePrAdvice}`);
+  }
   lines.push('');
   for (const v of PR_VERDICT_ORDER) {
-    if (!prAudit.some((p) => p.verdict === v)) continue;
+    if (!results.some((p) => p.verdict === v)) continue;
     lines.push(`- \`${v}\`: ${PR_VERDICT_LABEL[v]}`);
   }
   lines.push('');
-  for (const p of prAudit) {
+  for (const p of results) {
     lines.push(
       `### ${p.verdict} — PR #${p.number} ${p.title}`,
     );
@@ -498,7 +542,7 @@ function renderMarkdown(repo, results, prAudit) {
 
   // オープン PR 監査を先に出す: コンフリクト解消と未対応コメントへの追随は
   // 新規 issue の実装より優先されるため。
-  if (prAudit && prAudit.length) {
+  if (prAudit && prAudit.results?.length) {
     lines.push(renderPrAudit(prAudit));
   }
 
@@ -588,7 +632,7 @@ async function main() {
 
   // オープン PR 監査は「対象 issue を限定した」場合でも全件行う。
   // issue に紐づかない PR の見落としを防ぐことが目的なので、絞り込みの影響を受けさせない。
-  let prAudit = [];
+  let prAudit = { results: [], openChorePrCount: 0, chorePrAdvice: null };
   if (opts.withPrs && opts.withPrAudit) {
     const openIssues = opts.issues.length
       ? (await ghGetAll(`repos/${repo}/issues?state=open`)).filter((i) => !i.pull_request)
@@ -598,7 +642,7 @@ async function main() {
 
   if (opts.json) {
     process.stdout.write(
-      `${JSON.stringify({ repo, generatedAt: new Date().toISOString(), results, openPrAudit: prAudit }, null, 2)}\n`,
+      `${JSON.stringify({ repo, generatedAt: new Date().toISOString(), results, openPrAudit: prAudit.results, openChorePrCount: prAudit.openChorePrCount, chorePrAdvice: prAudit.chorePrAdvice }, null, 2)}\n`,
     );
   } else {
     process.stdout.write(`${renderMarkdown(repo, results, prAudit)}\n`);
@@ -614,4 +658,4 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   });
 }
 
-export { computeRedundantSkipSignal, isSkipMarker, isAgentMarker, SKIP_MARKER, DONE_MARKER };
+export { computeRedundantSkipSignal, computeChorePrSignal, isSkipMarker, isAgentMarker, SKIP_MARKER, DONE_MARKER };
