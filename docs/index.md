@@ -36,6 +36,7 @@
 - [AWS 公式リソース探索ノウハウ](wiki/aws-resource-discovery.md)
 - [試験リソース棚卸し台帳](wiki/exam-resource-inventory.md)
 - [issue 解決プレイブック](wiki/issue-resolution-playbook.md)
+- [恒久ブロック中の issue 索引（人間 / AWS 対応待ち）](wiki/blocked-issues-index.md)
 - [効率化・自己拡張ログ](wiki/efficiency-log.md)
 - [レビュー待ちオープン PR キュー](wiki/open-prs-review-queue.md) — `scripts/list-open-prs.mjs` が生成
 
