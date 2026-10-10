@@ -62,7 +62,9 @@ import {
   buildSpeedQuizSystemPrompt,
   buildMockQuizSystemPrompt,
   buildGeneralQuizUserPrompt,
-  assignDomainTargets,
+  assignTaskTargets,
+  assignAnswerLetters,
+  buildAnswerPositionHint,
   getExamLevel,
   QUIZ_MODE_CONFIG,
   EXAM_MOCK_CONFIG,
@@ -1009,10 +1011,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(request.examId))
         : buildQuizSystemPrompt(exam.code, exam.shortLabel);
 
-    // For dashboard quiz, distribute questions across domains by weight
-    const domainTargets = request.isDashboardQuiz
-      ? assignDomainTargets(exam.domains, total)
+    // For dashboard quiz, distribute questions across domains by weight and
+    // evenly across each domain's tasks (#225). Answer letters are balanced.
+    const slotTargets = request.isDashboardQuiz
+      ? assignTaskTargets(exam.domains, total)
       : [];
+    const answerLetters = assignAnswerLetters(total);
 
     // Strictly bound the number of generation attempts per question slot so a
     // 65-question flow cannot blow up in time: one initial attempt plus at most
@@ -1025,13 +1029,15 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     for (let i = 0; i < total; i++) {
       // Build dedup hint: list topics/services already covered to avoid repetition
       const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
-      const targetDomain = domainTargets[i] || null;
+      const targetDomain = slotTargets[i]?.domain || null;
+      const targetTask = slotTargets[i]?.task || null;
       const dedupSuffix = recentTopics
         ? `\n\n【重要】以下の問題とは異なるAWSサービス・トピックで出題してください（同じサービスの繰り返しは禁止）:\n${recentTopics}`
         : '';
       const userPrompt = (request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
+        ? buildGeneralQuizUserPrompt(exam.code, targetDomain, targetTask)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + buildAnswerPositionHint(answerLetters[i])
         + dedupSuffix;
 
       let parsed = null;
@@ -1080,6 +1086,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
       if (parsed) {
         parsed.domainId = targetDomain?.id ?? null;
+        parsed.taskId = targetTask?.id ?? null;
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
       } else if (slotErrored) {
@@ -1232,16 +1239,17 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const systemPrompt = buildMockQuizSystemPrompt(
       exam.code, exam.shortLabel, getExamLevel(request.examId)
     );
-    const domainTargets = request.isDashboardQuiz
-      ? assignDomainTargets(exam.domains, total)
+    const slotTargets = request.isDashboardQuiz
+      ? assignTaskTargets(exam.domains, total)
       : [];
+    const answerLetters = assignAnswerLetters(total);
 
     const batchRequests = [];
     for (let i = 0; i < total; i++) {
-      const targetDomain = domainTargets[i] || null;
-      const userPrompt = request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
-        : buildQuizUserPrompt(request.taskTitle, request.taskContext);
+      const userPrompt = (request.isDashboardQuiz
+        ? buildGeneralQuizUserPrompt(exam.code, slotTargets[i]?.domain || null, slotTargets[i]?.task || null)
+        : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + buildAnswerPositionHint(answerLetters[i]);
       batchRequests.push({ userPrompt, systemPrompt });
     }
 
@@ -1329,7 +1337,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (!text) continue;
       const parsed = parseQuizResponse(text);
       if (parsed) {
-        parsed.domainId = domainTargets[i]?.id ?? null;
+        parsed.domainId = slotTargets[i]?.domain?.id ?? null;
+        parsed.taskId = slotTargets[i]?.task?.id ?? null;
         generated.push(parsed);
       }
     }
@@ -5819,9 +5828,10 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
   const systemPrompt = (session && session.mode === 'mock')
     ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(session.examId))
     : buildQuizSystemPrompt(exam.code, exam.shortLabel);
-  const userPrompt = isDashboardQuiz
+  const userPrompt = (isDashboardQuiz
     ? buildGeneralQuizUserPrompt(exam.code, null)
-    : buildQuizUserPrompt(taskTitle, taskContext);
+    : buildQuizUserPrompt(taskTitle, taskContext))
+    + buildAnswerPositionHint(assignAnswerLetters(1)[0]);
 
   let response = '';
 
