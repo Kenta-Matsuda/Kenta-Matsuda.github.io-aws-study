@@ -1,4 +1,4 @@
-import { callAi, callAiStream, callAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
+import { callAi, callAiStream, callAiBatch, resumeAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
 import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
 import { applyResourceGroupDefaults } from './data/common-defaults.js';
@@ -84,6 +84,7 @@ import {
   createExamSet,
   appendExamSetQuestion,
   finalizeExamSet,
+  updateExamSet,
   listExamSets,
   deleteExamSet,
   markInterruptedExamSets,
@@ -375,7 +376,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // Every session that produces or imports questions gets an ExamSet, saved
   // question by question; every run through a set gets an Attempt. Storage
   // failures are logged and never block the quiz.
-  markInterruptedExamSets().catch(() => {});
+  markInterruptedExamSets()
+    .catch(() => {})
+    .then(() => resumePendingBatchSets())
+    .catch((err) => console.warn('[batch] resume failed:', err));
 
   async function attachExamSet(session, { source, title, questions = [] }) {
     if (!session || session.setId) return null;
@@ -671,9 +675,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       const ok = window.confirm(
         getLocale() === 'ja'
           ? '本番模擬試験を「Gemini Batch API」で生成します。\n\n' +
-            '⚠️ 注意事項\n' +
+            'ℹ️ ご案内\n' +
             '・完了まで数分〜最大数十分かかる場合があります\n' +
-            '・このタブ／ブラウザを閉じると生成は中断されます\n' +
+            '・タブやブラウザを閉じても生成は続きます。次に開いたときに結果を受け取ります\n' +
             '・完了したら画面右下に通知が表示されます\n\n' +
             '続行しますか？'
           : t('batch.confirmStart')
@@ -1413,6 +1417,146 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     } catch { /* ignore */ }
   }
 
+  function batchStateLabel(s) {
+    const isJa = getLocale() === 'ja';
+    switch (s) {
+      case 'JOB_STATE_PENDING':
+      case 'BATCH_STATE_PENDING':
+        return isJa ? '待機中' : t('batch.stateWaiting');
+      case 'JOB_STATE_RUNNING':
+      case 'BATCH_STATE_RUNNING':
+        return isJa ? '生成中' : t('batch.stateGenerating');
+      case 'JOB_STATE_SUCCEEDED':
+      case 'BATCH_STATE_SUCCEEDED':
+        return isJa ? '完了' : t('batch.stateComplete');
+      default:
+        return s || (isJa ? '実行中' : 'Running');
+    }
+  }
+
+  function showBatchProgress(total) {
+    return ({ state, done, total: t, failed }) => {
+      const denom = t || total;
+      setBatchToastState(
+        'running',
+        getLocale() === 'ja'
+          ? `${batchStateLabel(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
+          : `${batchStateLabel(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
+      );
+    };
+  }
+
+  async function markBatchSetFailed(session) {
+    if (!session?.setId) return;
+    try {
+      await updateExamSet(session.setId, { status: SET_STATUS.FAILED, pipeline: { jobName: null, stage: 'failed' } });
+    } catch (err) { console.warn('[examSets] mark failed:', err); }
+  }
+
+  // Boot-time resume (#225 design §6.1): a mock batch whose job name was saved
+  // before the page was closed keeps running on the provider side; pick it up.
+  async function resumePendingBatchSets() {
+    let pending = [];
+    try {
+      pending = (await listExamSets({ status: [SET_STATUS.GENERATING, SET_STATUS.PLANNING, SET_STATUS.JUDGING] }))
+        .filter((set) => set.pipeline?.jobName);
+    } catch { return; }
+    const set = pending[0];
+    if (!set) return;
+    const exam = getExamById(set.examId);
+    if (!exam) return;
+
+    const session = createQuizSession({ examId: set.examId, mode: set.mode });
+    session.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    session.setId = set.id;
+    const request = {
+      type: 'quiz',
+      examId: set.examId,
+      taskId: '',
+      taskTitle: set.title || exam.code,
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+    const total = set.requested || session.questionCount;
+
+    batchInProgress = true;
+    setBatchToastState('running', getLocale() === 'ja' ? '前回のバッチ生成を再開しています…' : t('batch.resuming'));
+    let result = null;
+    try {
+      result = await resumeAiBatch({
+        jobName: set.pipeline.jobName,
+        total,
+        model: set.pipeline.model,
+        onProgress: showBatchProgress(total),
+      });
+    } catch (err) {
+      console.warn('[batch] resume failed:', err);
+      batchInProgress = false;
+      await markBatchSetFailed(session);
+      setBatchToastState('error', `${getLocale() === 'ja' ? 'バッチ生成の再開に失敗しました' : t('batch.failed')}: ${err?.message || ''}`);
+      return;
+    }
+    batchInProgress = false;
+    if (!result || !Array.isArray(result.texts)) {
+      await markBatchSetFailed(session);
+      setBatchToastState('error', getLocale() === 'ja' ? 'バッチAPIから結果を取得できませんでした' : t('batch.failed'));
+      return;
+    }
+    await completeBatchSet({ session, request, result, slots: set.pipeline.slots || [] });
+  }
+
+  // Shared tail of the batch flow (live and resumed): parse, persist, offer to start.
+  async function completeBatchSet({ session, request, result, slots }) {
+    const generated = [];
+    for (let i = 0; i < result.texts.length; i++) {
+      const text = result.texts[i];
+      if (!text) continue;
+      const parsed = parseQuizResponse(text);
+      if (parsed) {
+        parsed.domainId = slots[i]?.domainId ?? null;
+        parsed.taskId = slots[i]?.taskId ?? null;
+        parsed.explanation = appendMissingResourceRefs(parsed.explanation, slots[i]?.resources || []);
+        generated.push(parsed);
+      }
+    }
+    if (generated.length === 0) {
+      await markBatchSetFailed(session);
+      setBatchToastState('error', '生成された問題を解析できませんでした');
+      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
+      return;
+    }
+
+    session.questions = generated;
+    session.questionCount = generated.length;
+    for (let i = 0; i < generated.length; i++) await persistSessionQuestion(session, i, generated[i]);
+    try { await updateExamSet(session.setId, { pipeline: { jobName: null } }); } catch { /* ignore */ }
+    await finalizeSessionSet(session, { requested: result.texts.length });
+    pendingBatchSession = session;
+    pendingBatchRequest = request;
+
+    const requested = result.texts.length;
+    const isPartial = generated.length < requested;
+    const modelLabel = result.model || 'gemini-3';
+    const isJa = getLocale() === 'ja';
+    const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
+    const readyMessage = isPartial
+      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}${modelSuffix}`
+      : (isJa
+        ? `${generated.length} 問の準備が完了しました${modelSuffix}`
+        : `${generated.length} questions ready${modelSuffix}`);
+    setBatchToastState('ready', readyMessage);
+    notifyBrowser(
+      isJa ? '問題の準備ができました！' : 'Questions are ready!',
+      isPartial
+        ? (isJa
+          ? `${requested}問中${generated.length}問のクイズを開始できます`
+          : `${generated.length} of ${requested} quiz questions ready to start`)
+        : (isJa
+          ? `${generated.length} 問のクイズを開始できます`
+          : `${generated.length} quiz questions ready to start`)
+    );
+  }
+
   async function startMockBatchInBackground({ els, session, request, config }) {
     const exam = getExamById(request.examId);
     const total = session.questionCount;
@@ -1441,6 +1585,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const slotResources = [];
 
     await attachExamSet(session, { source: 'batch', title: request.taskTitle });
+    // Per-slot metadata needed to interpret the results, saved with the set so a
+    // resumed job (after a reload) can be parsed the same way.
+    const slots = [];
 
     const batchRequests = [];
     for (let i = 0; i < total; i++) {
@@ -1454,24 +1601,15 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         + buildResourceGroundingHint(slotResources[i])
         + buildAnswerPositionHint(answerLetters[i]);
       batchRequests.push({ userPrompt, systemPrompt });
+      slots.push({
+        domainId: slotTargets[i]?.domain?.id ?? null,
+        taskId: slotTargets[i]?.task?.id ?? null,
+        resources: slotResources[i].map((r) => ({ title: r.title, url: r.url })),
+      });
     }
-
-    const stateLabelOf = (s) => {
-      const isJa = getLocale() === 'ja';
-      switch (s) {
-        case 'JOB_STATE_PENDING':
-        case 'BATCH_STATE_PENDING':
-          return isJa ? '待機中' : t('batch.stateWaiting');
-        case 'JOB_STATE_RUNNING':
-        case 'BATCH_STATE_RUNNING':
-          return isJa ? '生成中' : t('batch.stateGenerating');
-        case 'JOB_STATE_SUCCEEDED':
-        case 'BATCH_STATE_SUCCEEDED':
-          return isJa ? '完了' : t('batch.stateComplete');
-        default:
-          return s || (isJa ? '実行中' : 'Running');
-      }
-    };
+    if (session.setId) {
+      try { await updateExamSet(session.setId, { pipeline: { stage: 'writing', slots } }); } catch { /* ignore */ }
+    }
 
     let result = null;
     try {
@@ -1479,15 +1617,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         requests: batchRequests,
         displayName: `mock-${request.examId}-${Date.now()}`,
         onRequireApiKey: () => openSettingsModal(els),
-        onProgress: ({ state, done, total: t, failed }) => {
-          const denom = t || total;
-          setBatchToastState(
-            'running',
-            getLocale() === 'ja'
-              ? `${stateLabelOf(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
-              : `${stateLabelOf(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
-          );
+        // Save the job name immediately: from here on, closing the tab no
+        // longer loses the generation (resumePendingBatchSets picks it up).
+        onCreated: ({ name, model }) => {
+          if (!session.setId) return;
+          updateExamSet(session.setId, { pipeline: { jobName: name, model, submittedAt: new Date().toISOString() } })
+            .catch((err) => console.warn('[examSets] save job name failed:', err));
         },
+        onProgress: showBatchProgress(total),
       });
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -1518,6 +1655,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         return;
       }
 
+      await markBatchSetFailed(session);
       setBatchToastState(
         'error',
         `バッチAPIでの生成に失敗しました: ${msg || '不明なエラー'}`
@@ -1529,58 +1667,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     batchInProgress = false;
 
     if (!result || !Array.isArray(result.texts)) {
+      await markBatchSetFailed(session);
       setBatchToastState('error', 'バッチAPIから結果を取得できませんでした');
       return;
     }
 
-    // Parse results
-    const generated = [];
-    for (let i = 0; i < result.texts.length; i++) {
-      const text = result.texts[i];
-      if (!text) continue;
-      const parsed = parseQuizResponse(text);
-      if (parsed) {
-        parsed.domainId = slotTargets[i]?.domain?.id ?? null;
-        parsed.taskId = slotTargets[i]?.task?.id ?? null;
-        parsed.explanation = appendMissingResourceRefs(parsed.explanation, slotResources[i]);
-        generated.push(parsed);
-      }
-    }
-    if (generated.length === 0) {
-      setBatchToastState('error', '生成された問題を解析できませんでした');
-      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
-      return;
-    }
-
-    session.questions = generated;
-    session.questionCount = generated.length;
-    for (let i = 0; i < generated.length; i++) await persistSessionQuestion(session, i, generated[i]);
-    await finalizeSessionSet(session, { requested: result.texts.length });
-    pendingBatchSession = session;
-    pendingBatchRequest = request;
-
-    const requested = result.texts.length;
-    const isPartial = generated.length < requested;
-    const modelLabel = result.model || 'gemini-3';
-    const isJa = getLocale() === 'ja';
-    const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
-    const readyMessage = isPartial
-      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}${modelSuffix}`
-      : (isJa
-        ? `${generated.length} 問の準備が完了しました${modelSuffix}`
-        : `${generated.length} questions ready${modelSuffix}`);
-    setBatchToastState('ready', readyMessage);
-    notifyBrowser(
-      isJa ? '問題の準備ができました！' : 'Questions are ready!',
-      isPartial
-        ? (isJa
-          ? `${requested}問中${generated.length}問のクイズを開始できます`
-          : `${generated.length} of ${requested} quiz questions ready to start`)
-        : (isJa
-          ? `${generated.length} 問のクイズを開始できます`
-          : `${generated.length} quiz questions ready to start`)
-    );
+    await completeBatchSet({ session, request, result, slots });
   }
+
 
   function startReadyMockSession() {
     if (!pendingBatchSession || !pendingBatchRequest) return;
@@ -1636,14 +1730,6 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (!ok) return;
     }
     hideBatchToast();
-  });
-
-  // Warn before closing the tab while batch is in progress
-  window.addEventListener('beforeunload', (e) => {
-    if (!batchInProgress) return;
-    e.preventDefault();
-    e.returnValue = '';
-    return '';
   });
 
   // Clean up timer when AI modal is closed

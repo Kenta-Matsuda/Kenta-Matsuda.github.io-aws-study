@@ -8,7 +8,7 @@
 
 import { callGemini, callGeminiStream, getPreferredGemini3Model } from './gemini.js';
 import { callOpenAi, callOpenAiStream } from './openai.js';
-import { callGeminiBatch } from './geminiBatch.js';
+import { callGeminiBatch, pollGeminiBatch } from './geminiBatch.js';
 import { getAiProvider, getApiKey, getOpenAiApiKey } from './storage.js';
 
 /**
@@ -104,14 +104,16 @@ export async function callAiStream({ userPrompt, systemPrompt, onRequireApiKey, 
  * @param {Array<{userPrompt:string,systemPrompt:string,history?:Array}>} opts.requests
  * @param {string} [opts.displayName]
  * @param {(info:{state:string,done:number,total:number,failed:number,pending:number})=>void} [opts.onProgress]
+ * @param {(info:{name:string,model:string})=>void} [opts.onCreated] job created; persist `name` to resume later
  * @param {() => void} [opts.onRequireApiKey]
  * @param {() => boolean} [opts.shouldAbort]
- * @returns {Promise<{ texts:(string|null)[], errors:(string|null)[], model:string } | null>}
+ * @returns {Promise<{ texts:(string|null)[], errors:(string|null)[], model:string, name:string } | null>}
  */
 export async function callAiBatch({
   requests,
   displayName,
   onProgress,
+  onCreated,
   onRequireApiKey,
   shouldAbort,
 }) {
@@ -126,9 +128,23 @@ export async function callAiBatch({
     requests,
     displayName,
     onProgress,
+    onCreated: onCreated ? ({ name }) => onCreated({ name, model }) : undefined,
     onRequireApiKey,
     shouldAbort,
   });
   if (!result) return null;
   return { ...result, model };
+}
+
+/**
+ * Resume polling a batch job created earlier (its name was persisted before the
+ * page was closed). Gemini only; returns null for other providers.
+ *
+ * @param {{ jobName: string, total: number, model?: string, onProgress?: Function, shouldAbort?: () => boolean }} opts
+ * @returns {Promise<{ texts:(string|null)[], errors:(string|null)[], model:string, name:string } | null>}
+ */
+export async function resumeAiBatch({ jobName, total, model, onProgress, shouldAbort }) {
+  if (resolveProvider() !== 'gemini') return null;
+  const result = await pollGeminiBatch({ name: jobName, total, onProgress, shouldAbort });
+  return { ...result, model: model || getPreferredGemini3Model() || 'gemini-3', name: jobName };
 }
