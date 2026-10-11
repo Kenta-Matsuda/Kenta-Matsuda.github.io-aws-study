@@ -64,6 +64,19 @@ permissions:
 - 主要機能 4: 本プロンプト（または skill）に書き戻すべき改善が有るか判断し、有れば**独立した `chore:` PR** として発行した。無いと判断した場合はその根拠を報告に書いた。
 - 仕組みの改善（機能 2〜4）は、issue 対応 PR とは**分けた `chore:` PR** にまとめる。
 
+### chore PR 乱立防止（絶対ルール）
+
+**以下のルールに違反した `chore:` PR は作成しないこと。** このルールは A-16（PR #218 / #219 / #220 で発生した chore PR 量産ループ）の恒久対策です。
+
+- **ACTIONABLE=0（対応可能 issue がゼロ）の実行結果だけを記録する目的で、新しい chore PR を作成してはならない。**
+- ACTIONABLE=0 の振り返りは `docs/wiki/efficiency-log.md` に日付付きエントリとして追記するか、既存のオープン chore PR にコメントとして追加する。新しい PR は作らない。
+- **新しい chore PR を作成する前に、同じトピックをカバーする既存のオープン chore PR がないか必ず確認する。**
+  ```
+  gh api "repos/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/pulls?state=open&per_page=100" --jq '.[] | select(.head.ref | startswith("chore/")) | {number, title, head: .head.ref}'
+  ```
+  既存のオープン chore PR があれば、新 PR は作らずそちらにコメントで追記する。
+- **chore PR は「コードベース / プロンプト / スクリプトへの具体的な変更を伴う場合のみ」作成する。** docs への追記のみの自己改善は、既存のオープン chore PR へのコメント追記または `efficiency-log.md` / `issue-resolution-playbook.md` への追記にとどめる。
+
 ### 自己改変の絶対ルール
 
 - **自己改変も必ず PR ベース・人間レビュー前提。** 本プロンプト・skill・スクリプトの変更を `main` へ直接反映しない。
@@ -201,6 +214,7 @@ permissions:
    - **根拠（なぜこのゲートが必要か）**: 従来このコメントファーストの指針は「既存オープン PR の新規コメント対応」節という埋もれた箇所にしか無く、参照されずに遵守されなかった。その結果、オープン PR に付いていたユーザーのエスカレーション済みコメントが未対応のまま放置された。同じ失敗を防ぐため、本ゲートを手順の先頭に無条件の事前条件として置き、さらにスクリプトで機械的に検出できるようにした。コンフリクト解消も同様に「コメントで依頼されたときだけ行う派生対応」として埋もれており、依頼が無いコンフリクト PR が放置され得た。そのため本ゲートに (iii) を加え、能動的な解消を無条件の事前条件に含める。
 2. `gh api "repos/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues?state=open&per_page=100" --jq '.[] | select(.pull_request == null) | {number, title}'` で open な issue を一覧化し、各 issue の内容を `gh api repos/{owner}/{repo}/issues/{n}` で確認する（`scripts/issue-triage.mjs` を使う場合はこの一覧化も同スクリプトが行う）。
 3. **「対応保留（skip）マーカー」による棚卸し前フィルタを適用する。** 過去に「着手不能 / 要人間対応」と判断してマーカー（後述の `agent:skipped` ラベル）を付けた issue は、原則として調査対象から除外する。ただし、マーカーを付けた**判断時点以降に新しい更新がある**ものは除外を解除し、通常どおり調査対象に戻す（判定手順は「対応保留マーカーの運用」節を参照。`scripts/issue-triage.mjs` はこの判定を `SKIP` / `RECHECK` として出力する）。除外した issue は「今回スキップ（更新なし）」として最初に一覧で示す。
+   - **【恒久ブロック索引を最初に参照する（制約の追加・明確化）】** このフィルタを適用する前に、まず [`docs/wiki/blocked-issues-index.md`](../../docs/wiki/blocked-issues-index.md) を読む。同ページには、人間 / AWS 対応が本質的に必要でクライアントサイドでは前進できない**恒久ブロック中の issue**（例: #32 グローバルリーダーボード / #162 アカウント不要 issue 投稿 / #167 フィードバック分析）が、ブロック種別・理由・解消に必要な人間 / AWS 対応・成果物ポインタ付きで一覧化されている。索引に載っている issue は、**その記録日以降に新しい人間入力（本文編集・エージェント以外の新規コメント）が無い限り、内容をゼロから読み直して再トリアージしない**（`scripts/issue-triage.mjs` が `SKIP` を出すのと同じ扱い）。これは毎回同じ「AWS バックエンドが必要 → スキップ」の再導出を避けるための**追加のゲート**であり、既存の `agent:skipped` マーカー機構（ラベル + 判断コメント）を置き換えず**補完する**。記録日以降に更新があれば索引の記載に関わらず `RECHECK` として通常調査へ戻す。この索引は既存の禁止事項（AWS 操作禁止・`main` 直接 push 禁止・force push 禁止・秘密情報の非コミット）を一切緩めない。
 4. 残った（＝調査対象の）各 issue の内容を理解し、対応可能なものを対応しやすい順（影響範囲が小さく、判断が明確なものから）に並べる。並べた結果と着手順の理由を最初に簡潔に示す。
 5. 実装前に必ず関連する既存コードを読む。既存のコードスタイル・命名規約・使用ライブラリに合わせ、新しい依存やパターンを勝手に持ち込まない。
 6. issue ごとに独立した feature ブランチを `main` の最新から作成する。
@@ -536,10 +550,17 @@ issue / コメントのバッチ処理に着手する前に、短いレトロス
   PR 監査の判定値: `PR_CONFLICT`（`dirty`。最優先で解消）/ `PR_FOLLOWUP`（未対応コメント）/ `PR_BEHIND`（`behind`）/ `PR_UNKNOWN`（`mergeable` が `null`。`git rev-list` にフォールバック）/ `PR_OK`。
   マーカー検出は本文接頭辞 `🤖 agent:skipped` / `🤖 対応済み` に依存するため、**コメント時は必ず規定の接頭辞を使う**こと。
   **監査は 1 PR あたり 4 リクエストを投げるため完了に 1〜3 分かかる。** タイムアウトの短い同期実行ではなく、バックグラウンド実行 + ファイル出力にする。`NODE_OPTIONS` の前置きが必要かは手順 0 の判定に従う。
+- **`scripts/list-open-prs.mjs`（読み取り専用 / レビュー待ち PR の索引生成）**: すべてのオープン PR を `mergeable_state`（`clean` / `blocked` / `behind` / `dirty` / `unknown` などを人間向けの区分に対応づけ）と紐づく issue（本文の `Closes` / `Refs` 等、無ければ head ブランチ名 `.../issue-<N>-...` から抽出）とともに一覧化し、**完成済みだがレビュー / マージ待ちで滞留している PR を俯瞰する**ための索引を生成する。`scripts/issue-triage.mjs` の PR 監査が実行時の要約なのに対し、こちらは**リポジトリに残る索引**（`docs/wiki/open-prs-review-queue.md`）を機械生成する点が異なる（`docs/action-required/CHECKLIST.md` と同じパターン）。
+  ```
+  node scripts/list-open-prs.mjs            # レビューキューの要約を標準出力へ（読み取り専用）
+  node scripts/list-open-prs.mjs --write     # docs/wiki/open-prs-review-queue.md を再生成
+  ```
+  **実行のたびに `--write` で再生成し、レビュー待ち PR の滞留をメンテナが俯瞰できる状態を保つ。** ゼロから着手できる新規 issue が枯れている（クライアント側は PR 化済みで滞留し、残りは要人間対応）ときに、追加の issue 実装 PR を重ねて PR 乱立・マージ滞留を悪化させる代わりに、滞留状況の可視化という成果物を出すために使う。読み取り専用（`gh api` の GET のみ）で、書き込み操作は行わない。`docs/wiki/blocked-issues-index.md`（AWS / 人間対応待ちの **issue** の索引）とは別物なので混同しない（こちらはレビュー待ちの **open PR** の索引）。
 - 参考にできる既存スクリプト（`exam-content-maintainer` が同じ方針で育てた資産）:
   - `scripts/check-resource-links.mjs` — `js/data/` の全リソース URL を抽出して HTTP 死活・リダイレクトを一覧化。
   - `scripts/collect-resource-urls.mjs` — リソース URL の件数・ドメイン内訳を集計。
   - `scripts/list-aws-doc-pages.mjs` — AWS 公式ガイド内の下位ページを機械的に列挙。
+  - `scripts/list-action-required.mjs` — `docs/action-required/` のステータス行から要人間対応チェックリストを機械生成（`docs/wiki/open-prs-review-queue.md` と同じ「スクリプト生成 Markdown 索引」パターン）。
   - `scripts/generate-icons.mjs` — 外部ツールに依存せず決定論的に PNG を生成する自己完結スクリプトの例。
 
 ## スクリプトを拡張・追加する
@@ -582,6 +603,7 @@ issue / コメントのバッチ処理に着手する前に、短いレトロス
 - **`scripts/` のスクリプトを追加・変更した場合**は、構文チェックに加えて**実際に 1 回実行**し、期待した要約が出ることを確認する（読み取り専用であることも確認する）。
 - **i18n** に関わる変更をした場合、`js/locales/ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。片方だけにキーがある状態を作らない。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、相対リンクが実在ファイルを指すことを確認する（デッドリンク・孤立ファイル禁止）。
+- **レビュー待ち PR の索引を再生成する。** 実行のたびに `node scripts/list-open-prs.mjs --write` を実行して `docs/wiki/open-prs-review-queue.md` を最新化し、完成済みだがレビュー / マージ待ちで滞留しているオープン PR をメンテナが俯瞰できる状態を保つ（`scripts/list-action-required.mjs` の再生成と同じ運用）。生成物を手で編集せず、スクリプトを実行して再生成する。
 - **作業証跡（キャプチャ等）を PR 本文に残す。** レビュワー（人間）が変更を確認できるよう、検証した事実を証跡として添付する。これは既存の「実行できる検証を省略しない」原則の強化であり、検証を弱めるものではない。
   - **UI に影響する変更**（画面・スタイル・文言・レイアウトの変更）の PR では、**変更前後（before / after）のキャプチャ**を添付する。ブラウザが使える環境では手順 0 で確認したうえで、Playwright（`npx playwright test` のスクリーンショット / `page.screenshot()`）や power の agent-browser 等でキャプチャを取得する。
   - **ヘッドレス / ブラウザ不在の実行環境でキャプチャを取得できない場合**（INTEGRATIONS_ONLY で npm・ブラウザを取得できない等）は、**その旨と理由を PR 本文に明記**し、人間が UI を確認できるよう**再現手順**を記載する。再現手順には少なくとも次を含める: 開発サーバの起動方法（`node dev-server.mjs`）、確認する URL / 画面、変更点（どこがどう変わるか）。これは修正や静的検証を省略する理由にはならない。

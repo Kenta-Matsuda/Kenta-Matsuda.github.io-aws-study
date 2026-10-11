@@ -73,10 +73,12 @@ const SUCCEEDED_STATES = new Set(['JOB_STATE_SUCCEEDED', 'BATCH_STATE_SUCCEEDED'
  * @param {BatchRequestItem[]} opts.requests
  * @param {string} [opts.displayName]
  * @param {(info:{state:string,done:number,total:number,failed:number,pending:number})=>void} [opts.onProgress]
+ * @param {(info:{name:string})=>void} [opts.onCreated] called once the job exists, with its
+ *   resource name ("batches/…"). Persist it to resume polling after a reload (see pollGeminiBatch).
  * @param {() => void} [opts.onRequireApiKey]
  * @param {number} [opts.pollIntervalMs] default 5000
  * @param {() => boolean} [opts.shouldAbort] called between polls; if true, attempt cancel and throw
- * @returns {Promise<{ texts: (string|null)[], errors: (string|null)[] }>}
+ * @returns {Promise<{ texts: (string|null)[], errors: (string|null)[], name: string }>}
  *   The arrays match the request order.
  */
 export async function callGeminiBatch({
@@ -84,8 +86,9 @@ export async function callGeminiBatch({
   requests,
   displayName,
   onProgress,
+  onCreated,
   onRequireApiKey,
-  pollIntervalMs = 5000,
+  pollIntervalMs,
   shouldAbort,
 }) {
   const apiKey = getApiKey();
@@ -175,6 +178,7 @@ export async function callGeminiBatch({
   }
   // eslint-disable-next-line no-console
   console.log('[geminiBatch] polling resource:', batchName);
+  onCreated?.({ name: batchName });
 
   onProgress?.({
     state: 'JOB_STATE_PENDING',
@@ -185,6 +189,39 @@ export async function callGeminiBatch({
   });
 
   // 2) Poll for completion
+  const result = await pollGeminiBatch({ name: batchName, total: requests.length, onProgress, pollIntervalMs, shouldAbort });
+  return { ...result, name: batchName };
+}
+
+// Tests shorten the poll interval through this global; production uses 5 s.
+function defaultPollIntervalMs() {
+  const override = typeof globalThis !== 'undefined' ? Number(globalThis.__ASN_BATCH_POLL_MS__) : NaN;
+  return Number.isFinite(override) && override > 0 ? override : 5000;
+}
+
+/**
+ * Poll an existing batch job until it completes and return its results.
+ *
+ * Separate from callGeminiBatch so a job whose name was persisted before the
+ * page was closed can be resumed on the next visit (issue #225, design §6.1):
+ * the job keeps running on Google's side regardless of the browser.
+ *
+ * @param {Object} opts
+ * @param {string} opts.name  resource name ("batches/…")
+ * @param {number} opts.total number of requests in the job (sizes the result arrays)
+ * @param {(info:{state:string,done:number,total:number,failed:number,pending:number})=>void} [opts.onProgress]
+ * @param {number} [opts.pollIntervalMs]
+ * @param {() => boolean} [opts.shouldAbort]
+ * @returns {Promise<{ texts: (string|null)[], errors: (string|null)[] }>}
+ */
+export async function pollGeminiBatch({ name, total, onProgress, pollIntervalMs, shouldAbort }) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('API キーが設定されていません。');
+  const batchName = String(name || '');
+  if (!batchName) throw new Error('バッチジョブ名が指定されていません。');
+  const requestCount = Math.max(0, Number(total) || 0);
+  const interval = pollIntervalMs || defaultPollIntervalMs();
+
   // batchName is "batches/xxx" — use directly. (For operations/xxx fall back to /v1beta/{name})
   const pollName = batchName.startsWith('batches/') || batchName.startsWith('operations/')
     ? batchName
@@ -208,7 +245,7 @@ export async function callGeminiBatch({
     }
 
     // eslint-disable-next-line no-await-in-loop
-    await new Promise((r) => setTimeout(r, pollIntervalMs));
+    await new Promise((r) => setTimeout(r, interval));
 
     let getRes;
     try {
@@ -240,7 +277,7 @@ export async function callGeminiBatch({
     const state =
       batchObj?.state || data?.metadata?.state || data?.state || 'JOB_STATE_RUNNING';
     const stats = batchObj?.batchStats || data?.metadata?.batchStats || {};
-    const total = Number(stats.requestCount || requests.length);
+    const total = Number(stats.requestCount || requestCount);
     const success = Number(stats.successfulRequestCount || 0);
     const failed = Number(stats.failedRequestCount || 0);
     const pending = Number(stats.pendingRequestCount || total - success - failed);
@@ -271,8 +308,9 @@ export async function callGeminiBatch({
         output?.inlinedResponses ||
         [];
 
-      const texts = new Array(requests.length).fill(null);
-      const errors = new Array(requests.length).fill(null);
+      const size = Math.max(requestCount, inlined.length);
+      const texts = new Array(size).fill(null);
+      const errors = new Array(size).fill(null);
 
       // Prefer matching by metadata.key when available; otherwise fall back to order.
       for (let i = 0; i < inlined.length; i += 1) {
@@ -284,7 +322,7 @@ export async function callGeminiBatch({
           const m = keyStr.match(/request-(\d+)/);
           if (m) idx = Number(m[1]);
         }
-        if (idx < 0 || idx >= requests.length) continue;
+        if (idx < 0 || idx >= size) continue;
 
         if (item?.response) {
           texts[idx] = extractTextFromGenerateContentResponse(item.response);
