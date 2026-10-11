@@ -31,7 +31,6 @@
 
 import { getLocale } from './i18n.js';
 import { assignTaskTargets, assignAnswerLetters } from './quiz.js';
-import { renderUnitForPrompt } from './cards.js';
 
 // ─── Stage 0: blueprint ─────────────────────────────────────
 
@@ -123,12 +122,10 @@ export function extractTaskItems(task) {
  * @param {number} opts.count                number of questions
  * @param {object} [opts.task]               fixed task (task-mode quiz); omit for cross-domain
  * @param {string} [opts.level]              exam level ('Business' picks business perspectives)
- * @param {Map<string, object[]>} [opts.unitsByTask]  card units per task id (js/cards.js indexUnitsByTask);
- *   a slot whose task has units tests the next unit instead of a task-statement item
  * @param {() => number} [opts.rng]
- * @returns {Array<{ index: number, domain: object|null, task: object|null, item: string, unit: object|null, type: object, perspective: object, industry: object, answerLetter: string }>}
+ * @returns {Array<{ index: number, domain: object|null, task: object|null, item: string, type: object, perspective: object, industry: object, answerLetter: string }>}
  */
-export function buildExamBlueprint({ exam, count, task = null, level = 'Associate', unitsByTask = null, rng = Math.random }) {
+export function buildExamBlueprint({ exam, count, task = null, level = 'Associate', rng = Math.random }) {
   const targets = task
     ? Array.from({ length: count }, () => ({ domain: null, task }))
     : assignTaskTargets(exam?.domains || [], count, rng);
@@ -146,33 +143,18 @@ export function buildExamBlueprint({ exam, count, task = null, level = 'Associat
     const c = itemCursor.get(t);
     return c.items.length ? c.items[c.next++ % c.items.length] : '';
   };
-  // Card units (design §4) take precedence over task-statement items: a task
-  // with units cycles through them (shuffled once) before any unit repeats.
-  const unitCursor = new Map();
-  const nextUnit = (t) => {
-    const units = t && unitsByTask ? unitsByTask.get(String(t.id)) : null;
-    if (!units || !units.length) return null;
-    if (!unitCursor.has(t)) unitCursor.set(t, { units: shuffle(units, rng), next: 0 });
-    const c = unitCursor.get(t);
-    return c.units[c.next++ % c.units.length];
-  };
 
-  return targets.map((tg, i) => {
-    const t = tg?.task || null;
-    const unit = nextUnit(t);
-    return {
-      index: i,
-      domain: tg?.domain || null,
-      task: t,
-      unit,
-      item: unit ? unit.label : nextItem(t),
+  return targets.map((tg, i) => ({
+    index: i,
+    domain: tg?.domain || null,
+    task: tg?.task || null,
+    item: nextItem(tg?.task || null),
     // Cycle lengths 7 / 6 / 10 are pairwise distinct so combinations repeat late.
-      type: types[i % types.length],
-      perspective: perspectives[i % perspectives.length],
-      industry: industries[i % industries.length],
-      answerLetter: letters[i],
-    };
-  });
+    type: types[i % types.length],
+    perspective: perspectives[i % perspectives.length],
+    industry: industries[i % industries.length],
+    answerLetter: letters[i],
+  }));
 }
 
 /**
@@ -187,7 +169,6 @@ export function compactBlueprint(blueprint) {
     domainId: s.domain?.id ?? null,
     taskId: s.task?.id ?? null,
     item: s.item,
-    unitId: s.unit?.id ?? null,
     type: s.type?.id,
     perspective: s.perspective?.en,
     industry: s.industry?.en,
@@ -207,8 +188,7 @@ function slotLabel(slot) {
   const taskName = task ? (isEn() ? (task.title || task.jpTitle) : (task.jpTitle || task.title)) : '';
   const taskPart = task ? `Task ${task.id} ${taskName}` : (isEn() ? 'any domain' : '任意のドメイン');
   const l = isEn() ? 'en' : 'ja';
-  const unitTag = slot.unit ? (isEn() ? ` [${slot.unit.kind} card]` : ` [${slot.unit.kind} カード]`) : '';
-  return `${slot.index + 1}. ${taskPart} | ${isEn() ? 'item' : '項目'}: ${slot.item || '-'}${unitTag} | ${isEn() ? 'type' : '設問タイプ'}: ${slot.type[l]} | ${isEn() ? 'perspective' : '視点'}: ${slot.perspective[l]} | ${isEn() ? 'industry' : '業種'}: ${slot.industry[l]}`;
+  return `${slot.index + 1}. ${taskPart} | ${isEn() ? 'item' : '項目'}: ${slot.item || '-'} | ${isEn() ? 'type' : '設問タイプ'}: ${slot.type[l]} | ${isEn() ? 'perspective' : '視点'}: ${slot.perspective[l]} | ${isEn() ? 'industry' : '業種'}: ${slot.industry[l]}`;
 }
 
 /**
@@ -385,13 +365,6 @@ export function buildSlotPromptSuffix({ slot, plan = null, banned = [] }) {
     if (plan?.concept) lines.push(`- 正解が問う概念（これに限定する）: ${plan.concept}`);
     if (plan?.scenario) lines.push(`- シナリオの種: ${plan.scenario}`);
     if (plan?.distractors?.length) lines.push(`- 誤答の方向性: ${plan.distractors.join('／')}`);
-  }
-  if (slot.unit) {
-    lines.push('');
-    lines.push(renderUnitForPrompt(slot.unit, { locale: isEn() ? 'en' : 'ja' }));
-    lines.push(isEn()
-      ? 'Base the question on this material only; build the wrong choices from the rejected alternatives / misconceptions listed.'
-      : 'この素材の範囲で出題し、誤答は列挙された不採用案・誤解から作ってください。');
   }
   const uniq = [...new Set((banned || []).map((b) => String(b || '').trim()).filter(Boolean))].slice(0, MAX_BANNED_IN_PROMPT);
   if (uniq.length) {
