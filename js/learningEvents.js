@@ -123,7 +123,10 @@ let sink = defaultSink;
  */
 export async function recordLearningEvent(event) {
   const normalized = normalizeLearningEvent(event);
-  if (!normalized) return null;
+  // examId is the aggregation key and the server rejects events without it;
+  // never store one (a rejected event at the head of the queue would otherwise
+  // block the batch behind it).
+  if (!normalized || !normalized.examId) return null;
   const stored = { id: newId(), ...normalized };
   try {
     const b = await backend();
@@ -150,7 +153,9 @@ export async function clearLearningEvents() {
 
 /**
  * Replace the sink (tests / future transports). A sink receives an array of
- * events and resolves to true when they were accepted and can be deleted.
+ * events and resolves to true when they can be deleted locally: accepted by
+ * the backend, or rejected for good (a 4xx other than 429). Only transient
+ * failures (5xx, 429, network) keep the batch for a retry.
  * @param {(events: object[]) => Promise<boolean>} fn
  */
 export function setLearningEventSink(fn) {
@@ -169,7 +174,10 @@ async function defaultSink(events, { keepalive = false } = {}) {
       body: JSON.stringify({ events: events.map(({ id, ...rest }) => rest) }),
       keepalive,
     });
-    return res.ok;
+    // 4xx (except 429) means the batch will never be accepted: drop it rather
+    // than resend it forever and block everything queued behind it.
+    if (res.ok) return true;
+    return res.status >= 400 && res.status < 500 && res.status !== 429;
   } catch {
     return false;
   }

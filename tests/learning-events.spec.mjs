@@ -15,7 +15,13 @@ import {
  */
 
 test.describe('learning events – client logic', () => {
-  test.beforeEach(async () => { await clearLearningEvents(); setLearningEventSink(null); });
+  test.beforeEach(async () => {
+    await clearLearningEvents();
+    setLearningEventSink(null);
+    // Node has no `location`, so the production FEEDBACK_API_URL would count as
+    // configured: disable the backend explicitly for these pure tests.
+    globalThis.__ASN_FEEDBACK_API_URL__ = '';
+  });
 
   test('normalizes to the wire schema and drops unknown types/fields', () => {
     const e = normalizeLearningEvent({ type: 'question_answered', examId: 'aib-c01', questionId: 'q_1', isCorrect: true, userAnswer: 2, elapsedMs: '1200', junk: 'x', value: 'meh' });
@@ -47,6 +53,11 @@ test.describe('learning events – client logic', () => {
     expect(await listPendingLearningEvents()).toHaveLength(0);
   });
 
+  test('events without an examId are never recorded (they could block the queue)', async () => {
+    expect(await recordLearningEvent({ type: 'question_answered', questionId: 'q_1', isCorrect: true })).toBeNull();
+    expect(await listPendingLearningEvents()).toHaveLength(0);
+  });
+
   test('the default sink does nothing when the backend is not configured', async () => {
     await recordLearningEvent({ type: 'set_completed', examId: 'clf-c02', score: 0.8, total: 5 });
     const r = await flushLearningEvents();
@@ -73,7 +84,8 @@ test.describe('learning events – browser', () => {
     }, STATE);
     await page.route('https://feedback.example.test/**', async (route) => {
       posted.push({ path: new URL(route.request().url()).pathname, body: JSON.parse(route.request().postData() || '{}') });
-      await route.fulfill({ json: { ok: true, accepted: 1 } });
+      const status = await page.evaluate(() => window.__eventsStatus || 202);
+      await route.fulfill({ status, json: { ok: status < 300, accepted: status < 300 ? 1 : 0 } });
     });
     await page.route('**generativelanguage.googleapis.com/**', async (route) => {
       const quiz = JSON.stringify({ question: 'S3 の静的ホスティングに必要な設定は？', choices: ['A. 静的ウェブサイトホスティングを有効にする', 'B. EC2 を起動する', 'C. RDS を作成する', 'D. VPC を作る'], correct: 'A', explanation: '解説' });
@@ -101,6 +113,7 @@ test.describe('learning events – browser', () => {
       return m.flushLearningEvents();
     });
     expect(result).toEqual({ sent: 2, pending: 0 });
+
     expect(posted).toHaveLength(1);
     expect(posted[0].path).toBe('/events');
     const events = posted[0].body.events;
@@ -111,5 +124,23 @@ test.describe('learning events – browser', () => {
       expect(e.id).toBeUndefined();
       expect(JSON.stringify(e)).not.toContain('静的ホスティング'); // no question text leaves the device
     }
+
+    // A permanent rejection (4xx other than 429) drops the batch instead of
+    // retrying it forever; a transient failure (5xx) keeps it.
+    const drop = await page.evaluate(async () => {
+      const m = await import('/js/learningEvents.js');
+      await m.recordLearningEvent({ type: 'set_completed', examId: 'clf-c02', score: 1, total: 1 });
+      window.__eventsStatus = 400;
+      const a = await m.flushLearningEvents();
+      await m.recordLearningEvent({ type: 'set_completed', examId: 'clf-c02', score: 1, total: 1 });
+      window.__eventsStatus = 503;
+      const b = await m.flushLearningEvents();
+      window.__eventsStatus = 429;
+      const c = await m.flushLearningEvents();
+      return { a, b, c };
+    });
+    expect(drop.a).toEqual({ sent: 1, pending: 0 });
+    expect(drop.b).toEqual({ sent: 0, pending: 1 });
+    expect(drop.c).toEqual({ sent: 0, pending: 1 });
   });
 });

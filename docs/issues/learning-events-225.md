@@ -12,7 +12,7 @@
 
 - イベント種別: `question_generated` / `question_shown`（未使用）/ `question_answered` / `question_voted`（未使用。AI 解説への Good/Bad は既存の `/votes` で送られている）/ `set_completed`。
 - **ID だけを送る**（セット・問題・ドメイン・タスク・出題単位）。問題文・選択肢・解説は一切含めない。横断集計は端末ごとに違う `questionId` ではなく、安定した `examId` + `unitId` / `taskId` で行う。
-- IndexedDB（`asn-learning-events`）に蓄積し、5 秒のデバウンス・50 件のバッチ・ページ非表示時の `keepalive` 送信で `${FEEDBACK_API_URL}/events` へ POST（`text/plain` の JSON = プリフライト無し、`/votes` と同じ作法）。受理（2xx）されたものだけ削除、失敗時は保留（最大 5,000 件）。バックエンド未設定（`FEEDBACK_API_URL` 空、localhost）では送らない。
+- IndexedDB（`asn-learning-events`）に蓄積し、5 秒のデバウンス・50 件のバッチ・ページ非表示時の `keepalive` 送信で `${FEEDBACK_API_URL}/events` へ POST（`text/plain` の JSON = プリフライト無し、`/votes` と同じ作法）。2xx と **429 以外の 4xx**（＝再送しても受理されない）は削除し、5xx・429・ネットワーク断だけ保留して再送（最大 5,000 件）。`examId` の無いイベントは最初から記録しない（先頭の不正イベントが後続を塞がないため）。バックエンド未設定（`FEEDBACK_API_URL` 空、localhost）では送らない。
 - `setLearningEventSink()` で送信先を差し替え可能（テスト・将来の別経路）。
 
 ### 発火点（`js/ui.js`）
@@ -25,8 +25,8 @@
 
 ### バックエンド `infra/feedback/src/index.mjs`
 
-- `POST /events`: 種別とフィールドの**許可リスト**で検証（ID は 120 文字で切り詰め、数値は範囲チェック、範囲外は保存しない）、1 リクエスト 100 件まで、**IP 単位のレート制限 60 件/分**、既存と同じ Origin 制限・停止スイッチ・IP ハッシュ化。
-- 保存: `pk = event#<examId>#<type>`、`sk = <at>#<rand>`、`type = learning_event`、出題単位などは属性、TTL 約 800 日。
+- `POST /events`: 種別とフィールドの**許可リスト**で検証（ID は 120 文字で切り詰め、数値は範囲チェック、範囲外は保存しない）、1 リクエスト 100 件まで、**IP 単位のレート制限 60 件/分**、既存と同じ Origin 制限・停止スイッチ・IP ハッシュ化。**不正なイベントはバッチ全体ではなく個別に捨て**、`{ ok, accepted, rejected }` を返す（有効なイベントが 0 件のときだけ 400）。
+- 保存: `pk = event#<examId>#<type>`、`sk = <at>#<rand>`、`type = learning_event`。属性名は投票・フィードバックと同じ **snake_case**（`set_id` / `question_id` / `unit_id` / `user_answer` / `elapsed_ms` / `judge_score` …。ワイヤ上の JSON は設計 §9 の camelCase）。TTL 約 800 日。
 - `template.yaml` の変更は不要（ルーティングはコード内）。**デプロイ（`sam build && sam deploy`）は人間の AWS 操作**として `docs/action-required/issue-225-resource-grounded-exam-generation.md` に記載。
 
 ### エクスポート `scripts/export-learning-events.mjs`

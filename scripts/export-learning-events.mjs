@@ -80,18 +80,18 @@ function scanEvents(table, profile) {
 function summarizeByUnit(events) {
   const byUnit = new Map();
   for (const e of events) {
-    const unit = e.unitId || e.taskId || '(none)';
+    const unit = e.unit_id || e.task_id || '(none)';
     const key = `${e.exam_id}|${unit}`;
-    if (!byUnit.has(key)) byUnit.set(key, { exam_id: e.exam_id, unit_id: unit, task_id: e.taskId || '', generated: 0, answered: 0, correct: 0, elapsed_sum: 0, elapsed_n: 0, judge_sum: 0, judge_n: 0 });
+    if (!byUnit.has(key)) byUnit.set(key, { exam_id: e.exam_id, unit_id: unit, task_id: e.task_id || '', generated: 0, answered: 0, correct: 0, elapsed_sum: 0, elapsed_n: 0, judge_sum: 0, judge_n: 0 });
     const row = byUnit.get(key);
     if (e.event_type === 'question_generated') {
       row.generated += 1;
-      if (Number.isFinite(e.judgeScore)) { row.judge_sum += e.judgeScore; row.judge_n += 1; }
+      if (Number.isFinite(e.judge_score)) { row.judge_sum += e.judge_score; row.judge_n += 1; }
     }
     if (e.event_type === 'question_answered') {
       row.answered += 1;
       if (e.is_correct === true) row.correct += 1;
-      if (Number.isFinite(e.elapsedMs)) { row.elapsed_sum += e.elapsedMs; row.elapsed_n += 1; }
+      if (Number.isFinite(e.elapsed_ms)) { row.elapsed_sum += e.elapsed_ms; row.elapsed_n += 1; }
     }
   }
   return [...byUnit.values()].map((r) => ({
@@ -112,7 +112,7 @@ const table = args.table || resolveTableName(args.profile);
 const events = scanEvents(table, args.profile);
 mkdirSync(args.out, { recursive: true });
 
-const eventColumns = ['received_at', 'event_type', 'exam_id', 'mode', 'setId', 'questionId', 'domainId', 'taskId', 'unitId', 'cardId', 'is_correct', 'userAnswer', 'elapsedMs', 'judgeScore', 'score', 'total', 'value', 'reason', 'schema'];
+const eventColumns = ['received_at', 'event_type', 'exam_id', 'mode', 'set_id', 'question_id', 'domain_id', 'task_id', 'unit_id', 'card_id', 'is_correct', 'user_answer', 'elapsed_ms', 'judge_score', 'score', 'total', 'value', 'reason', 'schema'];
 writeFileSync(join(args.out, 'learning-events.csv'), toCsv(events, eventColumns), 'utf8');
 const summary = summarizeByUnit(events);
 writeFileSync(join(args.out, 'unit-summary.csv'), toCsv(summary, ['exam_id', 'unit_id', 'task_id', 'generated', 'answered', 'correct', 'accuracy', 'avg_elapsed_ms', 'avg_judge_score']), 'utf8');

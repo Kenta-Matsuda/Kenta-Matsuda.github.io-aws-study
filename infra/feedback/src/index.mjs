@@ -184,35 +184,41 @@ export function validateVotes(body) {
 }
 
 const LEARNING_EVENT_TYPES = ['question_generated', 'question_shown', 'question_answered', 'question_voted', 'set_completed'];
-const LEARNING_EVENT_ID_KEYS = ['mode', 'setId', 'questionId', 'domainId', 'taskId', 'unitId', 'cardId', 'reason'];
-const LEARNING_EVENT_NUM_KEYS = { userAnswer: [-1, 10], elapsedMs: [0, 3600000], judgeScore: [0, 25], score: [0, 1], total: [0, 500], schema: [0, 100] };
+// Wire field (camelCase, design §9) -> stored attribute (snake_case, like votes/feedback).
+const LEARNING_EVENT_ID_KEYS = { mode: 'mode', setId: 'set_id', questionId: 'question_id', domainId: 'domain_id', taskId: 'task_id', unitId: 'unit_id', cardId: 'card_id', reason: 'reason' };
+const LEARNING_EVENT_NUM_KEYS = { userAnswer: ['user_answer', -1, 10], elapsedMs: ['elapsed_ms', 0, 3600000], judgeScore: ['judge_score', 0, 25], score: ['score', 0, 1], total: ['total', 0, 500], schema: ['schema', 0, 100] };
 
 // Learning events (issue #225 §9): a fixed allow-list of types and fields, ids
 // clipped, numbers range-checked. Anything else is dropped, never stored.
+// Invalid events are rejected INDIVIDUALLY (not the whole batch): a client
+// retries only on transient errors, so one bad event must not block the rest.
 export function validateLearningEvents(body) {
   const events = Array.isArray(body.events) ? body.events : null;
   if (!events || events.length === 0) throw new HttpError(400, 'no_events');
   if (events.length > MAX_LEARNING_EVENTS) throw new HttpError(400, 'too_many_events');
 
-  return events.map((e) => {
+  const valid = [];
+  let rejected = 0;
+  for (const e of events) {
     const type = String(e?.type || '');
-    if (!LEARNING_EVENT_TYPES.includes(type)) throw new HttpError(400, 'invalid_event_type');
     const examId = String(e?.examId || '').trim().toLowerCase();
-    if (!/^[a-z0-9_-]{1,32}$/.test(examId)) throw new HttpError(400, 'invalid_exam_id');
+    if (!LEARNING_EVENT_TYPES.includes(type) || !/^[a-z0-9_-]{1,32}$/.test(examId)) { rejected += 1; continue; }
     const at = Number.isNaN(Date.parse(e?.at)) ? null : new Date(e.at).toISOString();
-    const out = { type, examId, at };
-    for (const key of LEARNING_EVENT_ID_KEYS) {
+    const out = { type, exam_id: examId, at };
+    for (const [key, attr] of Object.entries(LEARNING_EVENT_ID_KEYS)) {
       const v = e?.[key];
-      if (v !== undefined && v !== null && String(v) !== '') out[key] = clip(v, 120);
+      if (v !== undefined && v !== null && String(v) !== '') out[attr] = clip(v, 120);
     }
-    for (const [key, [min, max]] of Object.entries(LEARNING_EVENT_NUM_KEYS)) {
+    for (const [key, [attr, min, max]] of Object.entries(LEARNING_EVENT_NUM_KEYS)) {
       const n = Number(e?.[key]);
-      if (e?.[key] !== undefined && e?.[key] !== null && Number.isFinite(n) && n >= min && n <= max) out[key] = n;
+      if (e?.[key] !== undefined && e?.[key] !== null && Number.isFinite(n) && n >= min && n <= max) out[attr] = n;
     }
-    if (typeof e?.isCorrect === 'boolean') out.isCorrect = e.isCorrect;
+    if (typeof e?.isCorrect === 'boolean') out.is_correct = e.isCorrect;
     if (e?.value === 'good' || e?.value === 'bad') out.value = e.value;
-    return out;
-  });
+    valid.push(out);
+  }
+  if (valid.length === 0) throw new HttpError(400, 'no_valid_events');
+  return { events: valid, rejected };
 }
 
 export function buildIssue({ category, text, lang, appVersion, page, imageUrls = [] }) {
@@ -374,7 +380,7 @@ export function createHandler(deps) {
   }
 
   async function handleLearningEvents(body, ipHash) {
-    const events = validateLearningEvents(body);
+    const { events, rejected } = validateLearningEvents(body);
     await enforceRateLimit('events', ipHash);
 
     const ts = now();
@@ -383,23 +389,23 @@ export function createHandler(deps) {
       // Partition by exam + type; the unit/task ids are attributes so an export
       // can aggregate per unit (stable across users) rather than per question.
       const item = {
-        pk: { S: `event#${e.examId}#${e.type}` },
+        pk: { S: `event#${e.exam_id}#${e.type}` },
         sk: { S: `${e.at || ts.toISOString()}#${randomSuffix()}` },
         type: { S: 'learning_event' },
         event_type: { S: e.type },
-        exam_id: { S: e.examId },
+        exam_id: { S: e.exam_id },
         received_at: { S: ts.toISOString() },
         ip_hash: { S: ipHash },
         ttl: { N: ttl },
       };
-      for (const key of LEARNING_EVENT_ID_KEYS) if (e[key] !== undefined) item[key] = { S: e[key] };
-      for (const key of Object.keys(LEARNING_EVENT_NUM_KEYS)) if (e[key] !== undefined) item[key] = { N: String(e[key]) };
-      if (e.isCorrect !== undefined) item.is_correct = { BOOL: e.isCorrect };
+      for (const attr of Object.values(LEARNING_EVENT_ID_KEYS)) if (e[attr] !== undefined) item[attr] = { S: e[attr] };
+      for (const [attr] of Object.values(LEARNING_EVENT_NUM_KEYS)) if (e[attr] !== undefined) item[attr] = { N: String(e[attr]) };
+      if (e.is_correct !== undefined) item.is_correct = { BOOL: e.is_correct };
       if (e.value !== undefined) item.value = { S: e.value };
       return item;
     });
     await ddb.batchWrite(table, items);
-    return json(202, { ok: true, accepted: items.length });
+    return json(202, { ok: true, accepted: items.length, rejected });
   }
 
   return async function handler(event) {

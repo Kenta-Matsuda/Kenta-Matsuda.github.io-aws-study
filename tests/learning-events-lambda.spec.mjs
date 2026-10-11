@@ -40,30 +40,38 @@ const answered = { type: 'question_answered', at: '2026-10-12T00:00:00.000Z', ex
 
 test.describe('learning events Lambda (#225 §9)', () => {
   test('validateLearningEvents keeps allow-listed fields, clips ids, range-checks numbers', () => {
-    const [e] = validateLearningEvents({ events: [{ ...answered, question: 'TEXT MUST NOT PASS', elapsedMs: 99999999, judgeScore: 21, unitId: 'x'.repeat(500) }] });
+    const { events: [e], rejected } = validateLearningEvents({ events: [{ ...answered, question: 'TEXT MUST NOT PASS', elapsedMs: 99999999, judgeScore: 21, unitId: 'x'.repeat(500) }] });
+    expect(rejected).toBe(0);
     expect(e.question).toBeUndefined();
-    expect(e.elapsedMs).toBeUndefined(); // out of range → dropped, not stored
-    expect(e.judgeScore).toBe(21);
-    expect(e.unitId).toHaveLength(120);
-    expect(e).toMatchObject({ type: 'question_answered', examId: 'aib-c01', isCorrect: false, userAnswer: 2, schema: 1 });
+    expect(e.elapsed_ms).toBeUndefined(); // out of range → dropped, not stored
+    expect(e.judge_score).toBe(21);
+    expect(e.unit_id).toHaveLength(120);
+    // Stored attributes are snake_case like votes/feedback; the wire stays camelCase.
+    expect(e).toMatchObject({ type: 'question_answered', exam_id: 'aib-c01', is_correct: false, user_answer: 2, schema: 1, set_id: 'set_1', question_id: 'q_1', task_id: '4.3' });
+    expect(e.examId).toBeUndefined();
     expect(() => validateLearningEvents({ events: [] })).toThrow();
-    expect(() => validateLearningEvents({ events: [{ type: 'hacked', examId: 'aib-c01' }] })).toThrow();
-    expect(() => validateLearningEvents({ events: [{ type: 'set_completed', examId: 'DROP TABLE' }] })).toThrow();
     expect(() => validateLearningEvents({ events: Array(MAX_LEARNING_EVENTS + 1).fill(answered) })).toThrow();
+    // Invalid events are rejected individually, never the whole batch.
+    const mixed = validateLearningEvents({ events: [{ type: 'hacked', examId: 'aib-c01' }, { type: 'set_completed', examId: 'DROP TABLE' }, answered] });
+    expect(mixed.events).toHaveLength(1);
+    expect(mixed.rejected).toBe(2);
+    expect(() => validateLearningEvents({ events: [{ type: 'hacked', examId: 'aib-c01' }] })).toThrow(/no_valid_events/);
   });
 
   test('stores events partitioned by exam + type with the unit as an attribute', async () => {
     const ddb = makeDdb();
     const handler = createHandler({ ddb, fetchImpl: async () => ({ ok: false }), getGithubToken: async () => null, env: makeEnv(), now: () => new Date('2026-10-12T01:00:00Z') });
-    const res = await handler(post('/events', { events: [answered, { type: 'set_completed', examId: 'aib-c01', setId: 'set_1', score: 0.8, total: 10 }] }));
+    const res = await handler(post('/events', { events: [answered, { type: 'set_completed', examId: 'aib-c01', setId: 'set_1', score: 0.8, total: 10 }, { type: 'question_answered', examId: '' }] }));
     expect(res.statusCode).toBe(202);
-    expect(JSON.parse(res.body)).toEqual({ ok: true, accepted: 2 });
+    expect(JSON.parse(res.body)).toEqual({ ok: true, accepted: 2, rejected: 1 });
     expect(ddb.puts).toHaveLength(2);
     expect(ddb.puts[0].pk.S).toBe('event#aib-c01#question_answered');
     expect(ddb.puts[0].sk.S.startsWith('2026-10-12T00:00:00.000Z#')).toBe(true);
-    expect(ddb.puts[0].unitId.S).toBe(answered.unitId);
+    expect(ddb.puts[0].unit_id.S).toBe(answered.unitId);
+    expect(ddb.puts[0].set_id.S).toBe('set_1');
     expect(ddb.puts[0].is_correct.BOOL).toBe(false);
-    expect(ddb.puts[0].elapsedMs.N).toBe('15000');
+    expect(ddb.puts[0].elapsed_ms.N).toBe('15000');
+    expect(ddb.puts[0].unitId).toBeUndefined();
     expect(ddb.puts[0].type.S).toBe('learning_event');
     expect(Number(ddb.puts[0].ttl.N)).toBeGreaterThan(Date.parse('2026-10-12T01:00:00Z') / 1000 + 700 * 86400);
     expect(ddb.puts[1].pk.S).toBe('event#aib-c01#set_completed');
@@ -76,7 +84,7 @@ test.describe('learning events Lambda (#225 §9)', () => {
     const ddb = makeDdb();
     const handler = createHandler({ ddb, fetchImpl: async () => ({ ok: false }), getGithubToken: async () => null, env: makeEnv() });
     expect((await handler(post('/events', { events: [answered] }, { origin: 'https://evil.example' }))).statusCode).toBe(403);
-    expect((await handler(post('/events', { events: [{ type: 'question_answered' }] }))).statusCode).toBe(400);
+    expect((await handler(post('/events', { events: [{ type: 'question_answered' }] }))).statusCode).toBe(400); // nothing valid
     let last = null;
     for (let i = 0; i < 61; i++) last = await handler(post('/events', { events: [answered] }));
     expect(last.statusCode).toBe(429);
