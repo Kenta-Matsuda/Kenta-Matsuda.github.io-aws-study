@@ -322,7 +322,7 @@
 ### 2026-09-17: トリアージに「今回の着手可否サマリ（ACTIONABLE=N）」を追加し、着手可否の目視集計をやめた（機能 3）
 
 - **日付**: 2026-09-17
-- **対象**: `scripts/issue-triage.mjs`（拡張・読み取り専用は維持） / `tests/issue-triage-actionability.spec.mjs`（新規・純ロジック spec） / `docs/wiki/issue-resolution-playbook.md`（A-16 追記） / `.kiro/agents/github-issue-resolver.md`（追加的な一文） / 本ログ。
+- **対象**: `scripts/issue-triage.mjs`（拡張・読み取り専用は維持） / `tests/issue-triage-actionability.spec.mjs`（新規・純ロジック spec） / `docs/wiki/issue-resolution-playbook.md`（A-21 追記） / `.kiro/agents/github-issue-resolver.md`（追加的な一文） / 本ログ。
 - **今回の open issue / open PR の landscape（2026-09-17 実測）**: open issue 8 件（`PR_FOLLOWUP=0 / RECHECK=0 / TRIAGE=0 / OPEN_PR=5 / SKIP=3`）。オープン PR 監査 10 件はすべて `PR_OK`（`PR_CONFLICT=0 / PR_FOLLOWUP=0 / PR_BEHIND=0 / PR_UNKNOWN=0`）。`mergeable_state` は `blocked`（レビュー・チェック要件でありコンフリクトではない）。
   - OPEN_PR: #190(PR#195) / #193(PR#206) / #197(PR#214,#215) / #202(PR#203) / #209(PR#210) はいずれもクリーンなオープン PR あり・未対応コメント 0・コンフリクト無しでレビュー待ち。
   - SKIP: #32 / #162 / #167 は AWS バックエンドが本質的に必要で `agent:skipped` 済み・マーカー後の更新なし。
