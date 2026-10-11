@@ -90,6 +90,15 @@ test.describe('cross-resource search wiring (#189) — app boot smoke [browser, 
 
     await page.addInitScript(() => {
       localStorage.setItem('asn_locale', 'ja');
+      // Seed a named profile like the other browser specs do: without it the
+      // locked first-run name modal (#userModal) covers the header and
+      // intercepts the click on #resourceSearchBtn.
+      localStorage.setItem('asn_study_state_v1', JSON.stringify({
+        schemaVersion: 2,
+        profile: { name: 'testuser' },
+        xp: { total: 0, history: [], weekRing: [] },
+        quizHistory: [],
+      }));
     });
     await page.goto('/#clf');
     await page.waitForSelector('#siteTitle');
