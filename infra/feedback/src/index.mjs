@@ -10,6 +10,9 @@
 //        embedded in the issue through CloudFront.
 //   POST /votes     { events: [{ targetType, targetId, action, value, at, meta }] }
 //     -> appends Good/Bad vote events to DynamoDB for later analysis.
+//   POST /events    { events: [{ type, at, examId, mode, setId, questionId, taskId, unitId, ... }] }
+//     -> appends per-question learning events (issue #225 design §9) for
+//        aggregation by exam + unit/task. Ids only; no question text.
 //   GET  /health
 //
 // CORS is handled by the Function URL config (template.yaml); this handler
@@ -25,6 +28,7 @@ export const FEEDBACK_MAX_LENGTH = 1000;
 export const MAX_URLS_IN_FEEDBACK = 3;
 export const MIN_COMPOSE_MS = 2000;
 export const MAX_VOTE_EVENTS = 50;
+export const MAX_LEARNING_EVENTS = 100;
 export const MAX_IMAGES = 3;
 export const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 // Function URLs accept up to 6 MB; 3 base64 images of 1.5 MB fit under this.
@@ -40,11 +44,13 @@ const IMAGE_SIGNATURES = [
 
 const FEEDBACK_TTL_DAYS = 400;
 const VOTE_TTL_DAYS = 800;
+const LEARNING_EVENT_TTL_DAYS = 800;
 
 // Per-IP limits: [bucket seconds, max requests per bucket]
 const RATE_LIMITS = {
   feedback: [600, 3],
   votes: [60, 30],
+  events: [60, 60],
 };
 
 const CATEGORIES = {
@@ -174,6 +180,38 @@ export function validateVotes(body) {
       if (v !== undefined && v !== null && String(v) !== '') meta[key] = clip(v, 300);
     }
     return { targetType, targetId, action, value, at, meta };
+  });
+}
+
+const LEARNING_EVENT_TYPES = ['question_generated', 'question_shown', 'question_answered', 'question_voted', 'set_completed'];
+const LEARNING_EVENT_ID_KEYS = ['mode', 'setId', 'questionId', 'domainId', 'taskId', 'unitId', 'cardId', 'reason'];
+const LEARNING_EVENT_NUM_KEYS = { userAnswer: [-1, 10], elapsedMs: [0, 3600000], judgeScore: [0, 25], score: [0, 1], total: [0, 500], schema: [0, 100] };
+
+// Learning events (issue #225 §9): a fixed allow-list of types and fields, ids
+// clipped, numbers range-checked. Anything else is dropped, never stored.
+export function validateLearningEvents(body) {
+  const events = Array.isArray(body.events) ? body.events : null;
+  if (!events || events.length === 0) throw new HttpError(400, 'no_events');
+  if (events.length > MAX_LEARNING_EVENTS) throw new HttpError(400, 'too_many_events');
+
+  return events.map((e) => {
+    const type = String(e?.type || '');
+    if (!LEARNING_EVENT_TYPES.includes(type)) throw new HttpError(400, 'invalid_event_type');
+    const examId = String(e?.examId || '').trim().toLowerCase();
+    if (!/^[a-z0-9_-]{1,32}$/.test(examId)) throw new HttpError(400, 'invalid_exam_id');
+    const at = Number.isNaN(Date.parse(e?.at)) ? null : new Date(e.at).toISOString();
+    const out = { type, examId, at };
+    for (const key of LEARNING_EVENT_ID_KEYS) {
+      const v = e?.[key];
+      if (v !== undefined && v !== null && String(v) !== '') out[key] = clip(v, 120);
+    }
+    for (const [key, [min, max]] of Object.entries(LEARNING_EVENT_NUM_KEYS)) {
+      const n = Number(e?.[key]);
+      if (e?.[key] !== undefined && e?.[key] !== null && Number.isFinite(n) && n >= min && n <= max) out[key] = n;
+    }
+    if (typeof e?.isCorrect === 'boolean') out.isCorrect = e.isCorrect;
+    if (e?.value === 'good' || e?.value === 'bad') out.value = e.value;
+    return out;
   });
 }
 
@@ -335,6 +373,35 @@ export function createHandler(deps) {
     return json(202, { ok: true, accepted: items.length });
   }
 
+  async function handleLearningEvents(body, ipHash) {
+    const events = validateLearningEvents(body);
+    await enforceRateLimit('events', ipHash);
+
+    const ts = now();
+    const ttl = String(Math.floor(ts.getTime() / 1000) + LEARNING_EVENT_TTL_DAYS * 86400);
+    const items = events.map((e) => {
+      // Partition by exam + type; the unit/task ids are attributes so an export
+      // can aggregate per unit (stable across users) rather than per question.
+      const item = {
+        pk: { S: `event#${e.examId}#${e.type}` },
+        sk: { S: `${e.at || ts.toISOString()}#${randomSuffix()}` },
+        type: { S: 'learning_event' },
+        event_type: { S: e.type },
+        exam_id: { S: e.examId },
+        received_at: { S: ts.toISOString() },
+        ip_hash: { S: ipHash },
+        ttl: { N: ttl },
+      };
+      for (const key of LEARNING_EVENT_ID_KEYS) if (e[key] !== undefined) item[key] = { S: e[key] };
+      for (const key of Object.keys(LEARNING_EVENT_NUM_KEYS)) if (e[key] !== undefined) item[key] = { N: String(e[key]) };
+      if (e.isCorrect !== undefined) item.is_correct = { BOOL: e.isCorrect };
+      if (e.value !== undefined) item.value = { S: e.value };
+      return item;
+    });
+    await ddb.batchWrite(table, items);
+    return json(202, { ok: true, accepted: items.length });
+  }
+
   return async function handler(event) {
     const method = event?.requestContext?.http?.method || 'GET';
     const path = String(event?.rawPath || '/').replace(/\/+$/, '') || '/';
@@ -357,6 +424,7 @@ export function createHandler(deps) {
 
       if (path === '/feedback') return await handleFeedback(body, ipHash);
       if (path === '/votes') return await handleVotes(body, ipHash);
+      if (path === '/events') return await handleLearningEvents(body, ipHash);
       throw new HttpError(404, 'not_found');
     } catch (err) {
       if (err instanceof HttpError) return json(err.status, { ok: false, error: err.code });

@@ -30,6 +30,7 @@
 - [AI検索のHyDEクエリ拡張を試験ガイド由来のサービス辞書で補強 (#209)](issues/exam-guide-hyde-209.md)
 - [模擬試験の出題構成・正解位置・参照リソースをコードで決める (#225 Step A / B)](issues/exam-blueprint-225.md)
 - [問題セットを IndexedDB に保存し、1 問ごとに保存・中断から再開できるようにする (#225 / PR 2)](issues/exam-sets-225.md)
+- [問題単位の学習イベントの蓄積と送信（`/events`） (#225 / PR 7)](issues/learning-events-225.md)
 
 ## LLM Wiki（docs/wiki/）
 

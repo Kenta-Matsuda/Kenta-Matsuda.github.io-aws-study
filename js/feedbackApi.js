@@ -43,6 +43,12 @@ export function isFeedbackApiEnabled() {
   return Boolean(getBaseUrl());
 }
 
+// Base URL ('' when disabled) for other collectors that share this backend
+// (js/learningEvents.js posts to /events with the same conventions).
+export function getFeedbackApiBaseUrl() {
+  return getBaseUrl();
+}
+
 function blobToBase64(blob) {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();

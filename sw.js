@@ -38,6 +38,7 @@ const APP_SHELL = [
   './js/gemini.js',
   './js/geminiBatch.js',
   './js/i18n.js',
+  './js/learningEvents.js',
   './js/localeRegistry.js',
   './js/milestones.js',
   './js/missions.js',
