@@ -58,14 +58,15 @@ issue の指摘どおり、**LLM が要らない工程はコードで決定的�
 
 ## 要人間対応事項
 
-⚠️ 要人間対応: プロダクト判断が必要（現段階の Step A〜D では AWS 操作は不要）
+> ✅ **2026-10-12: プロダクト判断（決定 1〜4）は確定し、正式な設計書 [`docs/design/exam-generation-pipeline.md`](../../docs/design/exam-generation-pipeline.md) に反映した。** 決定内容: 生成は利用者のブラウザ・利用者の API キーで行い、素材（カード）は CI のエージェントが事前にデータ化して人間レビューする／長時間処理は Gemini Batch の連鎖で行い Gemini を標準とする（OpenAI は制約を明示）／Professional の横断問題はケースカードの判断ポイント連結で設計する。以下は設計書 §9 に伴う**残りの要人間対応**。
 
-- **決定 1 — 生成方式**: (a) 利用者の API キーでその場生成（Step C/D）、(b) 事前生成の問題バンクを配布（利用者コストゼロ・品質検証しやすいが更新はバッチ）、(c) 両方。
-- **決定 2 — トークンコスト**: Step C は 1 問ごとに数ページ分の入力トークンが増える。65 問の模擬試験 1 回で利用者の無料枠/課金に与える影響を許容するか、上限（1 問あたり URL 数・ページ数）をどう置くか。
-- **決定 3 — プロバイダ差の扱い**: `url_context` は Gemini 限定。OpenAI 利用者はフォールバック（現状同等）で良いか、自前プロキシ（AWS 操作要）まで行うか。
-- **決定 4 — Professional の横断比率**: 横断シナリオ問題の比率と、組み合わせるタスク数。
-- 推奨: まず **Step A → Step B** をエージェントに依頼（コスト・外部依存なし）、Step C 以降は決定 1〜3 の後。
+⚠️ 要人間対応: AWS操作が必要（問題単位の集計を Amazon Quick で見る）
+- 必要な操作内容: #162/#167 のフィードバック・投票バックエンド（Lambda Function URL + DynamoDB）に、問題単位イベント用の `POST /events` ルートと検証・レート制限を追加しデプロイする。集計用に DynamoDB → CSV のエクスポート経路を用意し、Amazon Quick（QuickSight とは別サービス）で可視化する。
+- 対象リソース: `infra/feedback/template.yaml` のスタック `aws-study-feedback`（ap-northeast-1）、`FeedbackFunction`、`FeedbackTable`。
+- 想定コマンド: `sam build && sam deploy`（`infra/feedback/`）、`node scripts/export-feedback.mjs` と同様のエクスポートスクリプト。
+- 補足: クライアント側のイベント蓄積と送信口（sink）は設計書 §9 のスキーマで先行実装し、バックエンドができたら接続する。
 
 ## 更新履歴
 
 - 2026-10-11: 初版（現状監査と設計案。#225）
+- 2026-10-12: プロダクト判断確定を反映。設計は `docs/design/exam-generation-pipeline.md` へ移管し、残りの要人間対応を集計バックエンド（`/events`）と Amazon Quick に絞った
