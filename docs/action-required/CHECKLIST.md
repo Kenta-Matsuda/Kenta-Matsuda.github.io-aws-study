@@ -1,6 +1,6 @@
 # 要人間対応チェックリスト
 
-- 最終更新日: 2026-10-10
+- 最終更新日: 2026-10-11
 - 対象範囲: `docs/action-required/` にある人間側の要対応事項（AWS 操作など、エージェントが実行できない作業）を、リポジトリ上で俯瞰できるチェックリストにしたもの
 - 生成元: `scripts/list-action-required.mjs`（各ファイルの冒頭ステータス行・タイトル・種別・関連 issue を機械的に抽出）。`node scripts/list-action-required.mjs --write` で再生成できます。手で編集せず、元ファイルを直してから再生成してください。
 - 出典/参照: issue #184 / `docs/action-required/README.md`
@@ -30,4 +30,4 @@
 
 ## 更新履歴
 
-- 2026-10-10: `scripts/list-action-required.mjs` により生成 / 更新。
+- 2026-10-11: `scripts/list-action-required.mjs` により生成 / 更新。

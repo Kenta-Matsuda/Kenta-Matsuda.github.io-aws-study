@@ -4,7 +4,7 @@ GitHub アカウント無しのフィードバック送信（#162）と、Good /
 
 ```
 ブラウザ（GitHub Pages）
-   │ POST /feedback, POST /votes（text/plain の JSON = CORS プリフライト無し）
+   │ POST /feedback, POST /votes, POST /events（text/plain の JSON = CORS プリフライト無し）
    ▼
 Lambda Function URL（API Gateway は使わない）── CORS / Origin を GitHub Pages に限定
    │ 入力検証・ハニーポット・送信までの経過時間チェック・IP 単位レート制限・停止スイッチ
@@ -73,7 +73,7 @@ Lambda Function URL（API Gateway は使わない）── CORS / Origin を Git
 ## 運用
 
 - **停止**: `sam deploy ... --parameter-overrides AcceptSubmissions=false`
-- **集計**: `node scripts/export-feedback.mjs` で `feedback-export/` に CSV（自由記述 / 投票イベント / 対象ごとの Good・Bad 集計）を書き出します。表計算ソフトや Amazon Quick（後述）にそのまま渡せます。
+- **集計**: `node scripts/export-feedback.mjs` で `feedback-export/` に CSV（自由記述 / 投票イベント / 対象ごとの Good・Bad 集計）を書き出します。問題単位の学習イベント（`POST /events`、issue #225 §9: 生成・回答・セット完了。問題文は含まず ID のみ）は `node scripts/export-learning-events.mjs` で `learning-events.csv` と `unit-summary.csv`（試験 × 出題単位ごとの回答数・正答率）を書き出します。表計算ソフトや Amazon Quick（後述）にそのまま渡せます。
 - **データ保持**: フィードバックは約 400 日、投票は約 800 日で TTL により自動削除。IP は生値を保存せず、スタック固有のソルト付きハッシュのみ保持します。
 - **ログ**: `/aws/lambda/<関数名>`（14 日保持）。GitHub 投稿失敗は `github_issue_failed` で出力されます。
 
