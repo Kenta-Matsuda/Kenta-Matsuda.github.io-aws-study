@@ -268,7 +268,19 @@
     "sent": "Issue 作成画面を新しいタブで開きました。内容を確認して送信してください。",
     "sentWithImages": "Issue 作成画面を新しいタブで開きました。本文に画像を貼り付けてから送信してください。",
     "validationEmpty": "フィードバック内容を入力してください。",
-    "validationLength": "1000文字以内で入力してください。"
+    "validationLength": "1000文字以内で入力してください。",
+    "directDescription": "このアプリの改善に向けたご意見・ご要望をお聞かせください。「送信」を押すと、GitHub アカウント無しでそのまま開発者に届きます（公開の GitHub Issue として登録されます）。",
+    "directLead": "アカウント不要で送信できます",
+    "directNote": "送信内容は公開の GitHub Issue として掲載されます（添付画像も公開されます）。個人情報や API キーなどが写り込まないようご注意ください。自分の GitHub アカウントで投稿したい場合は「GitHub で投稿」を使ってください。",
+    "directImageHelp": "画像は 3 枚まで一緒に送信できます（送信前に端末内で縮小し、位置情報などのメタデータは削除されます）。",
+    "sendDirect": "送信",
+    "postOnGithub": "GitHub で投稿",
+    "sending": "送信中…",
+    "sentDirect": "送信しました。ご意見ありがとうございます！",
+    "sentDirectImagesSkipped": "送信しました（画像 {{count}} 枚は送信できませんでした）。ご意見ありがとうございます！",
+    "viewIssue": "登録された Issue を見る",
+    "sendFailed": "送信できませんでした。時間をおいて再度お試しいただくか、「GitHub で投稿」または「テキストをコピー」をご利用ください。",
+    "sendRateLimited": "短時間に送信が集中しています。10 分ほど時間をおいてから再度お試しください。"
   },
   "feedbackNudge": {
     "title": "ひとことフィードバックしませんか？",

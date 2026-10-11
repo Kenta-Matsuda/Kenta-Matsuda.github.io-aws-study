@@ -39,6 +39,7 @@ import {
   markExamCelebrated,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
+import { encodeFeedbackImage, isFeedbackApiEnabled, MAX_FEEDBACK_IMAGES, sendFeedback } from './feedbackApi.js';
 import { quizHistoryToCsv } from './quizCsv.js';
 import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
 import {
@@ -2263,6 +2264,8 @@ function getElements() {
     feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
     feedbackImagePreview: document.getElementById('feedbackImagePreview'),
     feedbackCopyBtn: document.getElementById('feedbackCopyBtn'),
+    feedbackGithubBtn: document.getElementById('feedbackGithubBtn'),
+    feedbackWebsite: document.getElementById('feedbackWebsite'),
     // Feedback nudge (issue #100)
     feedbackNudge: document.getElementById('feedbackNudge'),
     feedbackNudgeOpenBtn: document.getElementById('feedbackNudgeOpenBtn'),
@@ -4756,10 +4759,55 @@ const FEEDBACK_MAX_LENGTH = 1000;
 // object URLs revoked) on modal open/close to avoid leaks.
 let feedbackImages = [];
 
+// When the modal was last opened; sent as elapsedMs so the backend can reject
+// instant (scripted) submissions.
+let feedbackOpenedAt = 0;
+
+// Guards against double submission while a direct-send request is in flight.
+let feedbackSending = false;
+
+// #162: when the feedback backend is deployed (FEEDBACK_API_URL set), the
+// primary button sends directly without a GitHub account, and the GitHub
+// prefilled-issue flow moves to a secondary "Post on GitHub" button (useful for
+// image attachments). Swapping the data-i18n keys keeps later locale switches
+// consistent because translateStaticElements() re-reads them.
+const FEEDBACK_DIRECT_I18N = {
+  'feedbackModal.description': 'feedbackModal.directDescription',
+  'feedbackModal.noAccountLead': 'feedbackModal.directLead',
+  'feedbackModal.noAccountNote': 'feedbackModal.directNote',
+  'feedbackModal.imageHelp': 'feedbackModal.directImageHelp',
+  'feedbackModal.submitToIssue': 'feedbackModal.sendDirect',
+};
+
+function applyFeedbackDirectMode(els) {
+  if (!isFeedbackApiEnabled()) return;
+  Object.entries(FEEDBACK_DIRECT_I18N).forEach(([from, to]) => {
+    els.feedbackModal.querySelectorAll(`[data-i18n="${from}"]`).forEach((el) => {
+      el.setAttribute('data-i18n', to);
+      el.textContent = t(to);
+    });
+  });
+  // Font Awesome may already have swapped the <i> for an <svg>; replace either.
+  const icon = els.feedbackSubmitBtn?.querySelector('i, svg');
+  if (icon) {
+    const sendIcon = document.createElement('i');
+    sendIcon.className = 'fas fa-paper-plane';
+    icon.replaceWith(sendIcon);
+  }
+  els.feedbackCopyBtn?.classList.add('hidden');
+  els.feedbackGithubBtn?.classList.remove('hidden');
+}
+
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
 
+  applyFeedbackDirectMode(els);
+
   els.feedbackBtn.addEventListener('click', () => openFeedbackModal(els));
+
+  els.feedbackGithubBtn?.addEventListener('click', () => {
+    submitFeedbackViaGithub(els);
+  });
 
   els.feedbackTextarea?.addEventListener('input', () => {
     updateFeedbackCharCount(els);
@@ -4890,6 +4938,8 @@ function openFeedbackModal(els) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
   els.feedbackMessage?.classList?.add('hidden');
+  if (els.feedbackWebsite) els.feedbackWebsite.value = '';
+  feedbackOpenedAt = Date.now();
   // Start every session with a clean image list (revokes any stale URLs).
   clearFeedbackImages(els);
   updateFeedbackCharCount(els);
@@ -4931,17 +4981,9 @@ function composeFeedbackIssue({ text, category }) {
 // a user who does not have (or does not want to use) a GitHub account can send
 // it by any channel they prefer, without ever opening the GitHub issue screen.
 function copyFeedbackText(els) {
-  const text = String(els.feedbackTextarea?.value || '').trim();
-  const category = String(els.feedbackCategorySelect?.value || 'general');
-
-  if (!text) {
-    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationEmpty'), 'text-red-600');
-    return;
-  }
-  if (text.length > FEEDBACK_MAX_LENGTH) {
-    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationLength'), 'text-red-600');
-    return;
-  }
+  const draft = readFeedbackDraft(els);
+  if (!draft) return;
+  const { text, category } = draft;
 
   const { issueBody } = composeFeedbackIssue({ text, category });
   copyTextToClipboard(issueBody)
@@ -4957,18 +4999,35 @@ function copyFeedbackText(els) {
     });
 }
 
-function submitFeedback(els) {
+// Read and validate the draft. Shows the validation message and returns null
+// when the draft cannot be sent.
+function readFeedbackDraft(els) {
   const text = String(els.feedbackTextarea?.value || '').trim();
   const category = String(els.feedbackCategorySelect?.value || 'general');
 
   if (!text) {
     showInlineMessage(els.feedbackMessage, t('feedbackModal.validationEmpty'), 'text-red-600');
-    return;
+    return null;
   }
   if (text.length > FEEDBACK_MAX_LENGTH) {
     showInlineMessage(els.feedbackMessage, t('feedbackModal.validationLength'), 'text-red-600');
-    return;
+    return null;
   }
+  return { text, category };
+}
+
+function submitFeedback(els) {
+  if (isFeedbackApiEnabled()) {
+    submitFeedbackDirect(els);
+  } else {
+    submitFeedbackViaGithub(els);
+  }
+}
+
+function submitFeedbackViaGithub(els) {
+  const draft = readFeedbackDraft(els);
+  if (!draft) return;
+  const { text, category } = draft;
 
   // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
   // user click (static site => no token => tokenless prefilled URL pattern,
@@ -4990,6 +5049,72 @@ function submitFeedback(els) {
 
   const sentKey = hasImages ? 'feedbackModal.sentWithImages' : 'feedbackModal.sent';
   showInlineMessage(els.feedbackMessage, t(sentKey), 'text-teal-600');
+  finishFeedbackSubmission(els, 1500);
+}
+
+// #162: send straight to the feedback backend — no GitHub account needed. The
+// backend files the GitHub issue on the user's behalf and returns its URL.
+async function submitFeedbackDirect(els) {
+  if (feedbackSending) return;
+  const draft = readFeedbackDraft(els);
+  if (!draft) return;
+  const { text, category } = draft;
+
+  feedbackSending = true;
+  if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = true;
+  showInlineMessage(els.feedbackMessage, t('feedbackModal.sending'), 'text-gray-600');
+
+  // Screenshots are shrunk/re-encoded on-device (also stripping EXIF). Any
+  // image beyond the limit or that cannot be encoded is skipped, and the user
+  // is told so; the text is always sent.
+  const encoded = await Promise.all(
+    feedbackImages.slice(0, MAX_FEEDBACK_IMAGES).map((entry) => encodeFeedbackImage(entry.file)),
+  );
+  const images = encoded.filter(Boolean);
+  const skippedImages = feedbackImages.length - images.length;
+
+  const result = await sendFeedback({
+    category,
+    text,
+    lang: getLocale(),
+    page: String(location.hash || '').slice(0, 200),
+    elapsedMs: feedbackOpenedAt ? Date.now() - feedbackOpenedAt : 0,
+    website: String(els.feedbackWebsite?.value || ''),
+    images,
+  });
+
+  feedbackSending = false;
+  if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = false;
+
+  if (!result.ok) {
+    const key = result.error === 'rate_limited' ? 'feedbackModal.sendRateLimited' : 'feedbackModal.sendFailed';
+    showInlineMessage(els.feedbackMessage, t(key), 'text-red-600');
+    // Offer the account-free copy path as a fallback when sending failed.
+    els.feedbackCopyBtn?.classList.remove('hidden');
+    return;
+  }
+
+  showInlineMessage(
+    els.feedbackMessage,
+    t(skippedImages > 0 ? 'feedbackModal.sentDirectImagesSkipped' : 'feedbackModal.sentDirect', { count: skippedImages }),
+    'text-teal-600',
+  );
+  if (result.issueUrl && /^https:\/\/github\.com\//.test(result.issueUrl) && els.feedbackMessage) {
+    const link = document.createElement('a');
+    link.href = result.issueUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = 'underline font-medium ml-1';
+    link.textContent = t('feedbackModal.viewIssue');
+    els.feedbackMessage.appendChild(link);
+  }
+  // Keep the modal open a little longer so the issue link can be clicked.
+  finishFeedbackSubmission(els, result.issueUrl ? 4000 : 2000);
+}
+
+// Shared tail of a successful submission: reset the draft, award the daily XP
+// bonus and auto-close the modal.
+function finishFeedbackSubmission(els, closeDelayMs) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   clearFeedbackImages(els);
   updateFeedbackCharCount(els);
@@ -5024,7 +5149,8 @@ function submitFeedback(els) {
   setTimeout(() => {
     closeModal(els.feedbackModal);
     els.feedbackMessage?.classList?.add('hidden');
-  }, 1500);
+    if (isFeedbackApiEnabled()) els.feedbackCopyBtn?.classList.add('hidden');
+  }, closeDelayMs);
 }
 
 // Map a feedback category <option> value to its i18n category label key under
