@@ -35,6 +35,7 @@ const APP_SHELL = [
   './js/examPipeline.js',
   './js/examSets.js',
   './js/examSchedule.js',
+  './js/feedbackApi.js',
   './js/gemini.js',
   './js/geminiBatch.js',
   './js/i18n.js',

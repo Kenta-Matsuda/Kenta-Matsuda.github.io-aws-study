@@ -6,6 +6,15 @@
 - 関連: #167（本件） / #162（同じ API 基盤に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
 - 位置づけ: 本ファイルは**設計と人間側の作業の引き継ぎ**です。エージェントは `aws` 操作を**一切実行していません**。記載するコマンドは AWS 権限を持つ人間が精査・調整して実行するための提案（テキスト）です。
 
+
+## 実装状況（2026-10-11 更新）
+
+収集パイプラインのコードは実装済みです（#162 と同じスタック）。残りは**デプロイ（人間対応）**です。
+
+- `js/votes.js` の `submitVote()` / `clearVote()` が `js/feedbackApi.js` 経由で投票イベントを数秒単位でまとめて `POST /votes` に送り、[`infra/feedback/`](../../infra/feedback/README.md) の Lambda が DynamoDB に追記する（`pk = vote#{targetType}#{targetId}`、`sk = 投票時刻#乱数`、TTL 約 800 日、メタデータはホワイトリストのみ）。
+- 集計は `node scripts/export-feedback.mjs` で CSV（投票イベント / 対象ごとの Good・Bad 集計 / 自由記述）を出力する。
+- **Amazon Quick について**: 2026-10 時点で Free / Plus / Max プランには Quick Sight（BI ダッシュボード）が含まれず、ダッシュボード作成は Enterprise（$40/ユーザー/月 + $250/アカウント/月、30 日トライアル後は自動課金）が必要。無料の範囲では「CSV を Quick Free のチャット / Spaces に渡して分析させる」までとし、下記の S3 + Athena + Quick Sight 構成は必要になった時点の拡張とする。
+
 ## 症状（と前提の訂正）
 
 issue #167:
