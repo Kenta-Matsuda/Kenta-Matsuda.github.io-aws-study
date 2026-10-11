@@ -91,6 +91,7 @@ import {
   correctChoiceText,
   summarizeDiversity,
 } from './examPipeline.js';
+import { listUnits, indexUnitsByTask } from './cards.js';
 import {
   SET_STATUS,
   createExamSet,
@@ -1209,7 +1210,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // by weight, the exact task-statement item, question type, perspective,
     // industry and the correct-answer letter — all decided in code.
     const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
-    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId) });
+    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId), unitsByTask: await loadUnitsByTask(request.examId) });
     const taskOccurrences = new Map();
 
     // Save each question as soon as it exists (#225): a reload or a closed tab
@@ -1321,7 +1322,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (parsed) {
         parsed.domainId = targetDomain?.id ?? null;
         parsed.taskId = slot.task?.id ?? null;
-        parsed.unitId = slot.item || null;
+        parsed.unitId = slot.unit?.id || slot.item || null;
         parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
@@ -1626,7 +1627,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // requests are independent, so the plan is what keeps them from converging
     // on the same answer; the planner runs synchronously before submission.
     const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
-    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId) });
+    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId), unitsByTask: await loadUnitsByTask(request.examId) });
     const taskOccurrences = new Map();
     const slotResources = [];
 
@@ -1657,7 +1658,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       slots.push({
         domainId: slot.domain?.id ?? null,
         taskId: slot.task?.id ?? null,
-        unitId: slot.item || null,
+        unitId: slot.unit?.id || slot.item || null,
         resources: slotResources[i].map((r) => ({ title: r.title, url: r.url })),
       });
     }
@@ -4933,6 +4934,24 @@ function pickQuizResources(task, occurrence) {
   }));
 }
 
+// Card units per exam (#225, design §4): js/data/cards/<exam>.js when it exists.
+// Loaded once per exam; a missing file just means "no cards" (task statements
+// are used instead), so the import failure is expected and swallowed.
+const unitsByExam = new Map();
+async function loadUnitsByTask(examId) {
+  const id = String(examId || '');
+  if (!id) return null;
+  if (!unitsByExam.has(id)) {
+    unitsByExam.set(id, import(`./data/cards/${id}.js`)
+      .then((mod) => {
+        const data = Object.values(mod).find((v) => v && (Array.isArray(v) || Array.isArray(v.cards)));
+        return data ? indexUnitsByTask(listUnits(data)) : null;
+      })
+      .catch(() => null));
+  }
+  return unitsByExam.get(id);
+}
+
 // Stage 1 of the exam pipeline (#225, design §5): one planner call designs the
 // whole exam before any question is written. Never blocks generation — on any
 // failure the writer runs on the blueprint alone.
@@ -6370,7 +6389,7 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
   // One blueprint slot (#225): question type / perspective / industry vary per
   // call, and answers already given in this session must not recur.
   const task = isDashboardQuiz ? null : findExamTask(exam, taskId);
-  const slot = buildExamBlueprint({ exam, count: 1, task, level: getExamLevel(session?.examId || exam.id) })[0];
+  const slot = buildExamBlueprint({ exam, count: 1, task, level: getExamLevel(session?.examId || exam.id), unitsByTask: await loadUnitsByTask(exam.id) })[0];
   // Rotate resources across the questions of a multi-question session.
   const resources = pickQuizResources(slot.task, session?.currentIndex || 0);
   const banned = (session?.questions || []).filter(Boolean).map(correctChoiceText);
@@ -6424,7 +6443,7 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
   if (parsed) {
     parsed.domainId = domainId ?? slot.domain?.id ?? null;
     parsed.taskId = slot.task?.id ?? null;
-    parsed.unitId = slot.item || null;
+    parsed.unitId = slot.unit?.id || slot.item || null;
     parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
     if (onQuestionGenerated) await onQuestionGenerated(parsed);
     // Render interactive quiz UI
