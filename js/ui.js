@@ -1,4 +1,4 @@
-import { callAi, callAiStream, callAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
+import { callAi, callAiStream, callAiBatch, resumeAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
 import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
 import { applyResourceGroupDefaults } from './data/common-defaults.js';
@@ -30,6 +30,8 @@ import {
   getEffectiveTheme,
   getSmartReviewCombined,
   addReviewSchedule,
+  getMissionsSummary,
+  recordMissionEvent,
   getExamDateEntry,
   setExamDate,
   clearExamDate,
@@ -37,6 +39,7 @@ import {
   markExamCelebrated,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
+import { encodeFeedbackImage, isFeedbackApiEnabled, MAX_FEEDBACK_IMAGES, sendFeedback } from './feedbackApi.js';
 import { quizHistoryToCsv } from './quizCsv.js';
 import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
 import {
@@ -60,7 +63,12 @@ import {
   buildSpeedQuizSystemPrompt,
   buildMockQuizSystemPrompt,
   buildGeneralQuizUserPrompt,
-  assignDomainTargets,
+  assignTaskTargets,
+  assignAnswerLetters,
+  buildAnswerPositionHint,
+  selectTaskResources,
+  buildResourceGroundingHint,
+  appendMissingResourceRefs,
   getExamLevel,
   QUIZ_MODE_CONFIG,
   EXAM_MOCK_CONFIG,
@@ -71,13 +79,31 @@ import { initChat, resetChat } from './chat.js';
 import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
+import { getRegisteredLocaleCodes, getLocaleLabel } from './localeRegistry.js';
+import { recordLearningEvent } from './learningEvents.js';
+import {
+  SET_STATUS,
+  createExamSet,
+  appendExamSetQuestion,
+  finalizeExamSet,
+  updateExamSet,
+  listExamSets,
+  deleteExamSet,
+  markInterruptedExamSets,
+  summarizeExamSet,
+  createAttempt,
+  recordAttemptAnswer,
+  finishAttempt,
+  listAttempts,
+  clearExamSetStorage,
+} from './examSets.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
 import {
   describeExamSchedule,
   messageKeyForStage,
   shouldCelebratePass,
 } from './examSchedule.js';
-import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates } from './resourceSearch.js';
+import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates, buildExamKeywordCatalog, augmentTermsWithCatalog, buildAugmentedScoringQuery } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
 /**
@@ -348,6 +374,163 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   let pendingBatchSession = null; // session ready to start when user clicks "クイズを開始する"
   let pendingBatchRequest = null;
 
+  // ── Exam sets (IndexedDB, #225 design §7) ──
+  // Every session that produces or imports questions gets an ExamSet, saved
+  // question by question; every run through a set gets an Attempt. Storage
+  // failures are logged and never block the quiz.
+  markInterruptedExamSets()
+    .catch(() => {})
+    .then(() => resumePendingBatchSets())
+    .catch((err) => console.warn('[batch] resume failed:', err));
+
+  async function attachExamSet(session, { source, title, questions = [] }) {
+    if (!session || session.setId) return null;
+    try {
+      const set = await createExamSet({
+        examId: session.examId, mode: session.mode, source, title,
+        requested: session.questionCount, questions,
+      });
+      session.setId = set.id;
+      // Imported questions get their stored ids so answers can reference them.
+      set.questions.forEach((q, i) => { if (session.questions[i]) session.questions[i].id = q.id; });
+      return set;
+    } catch (err) {
+      console.warn('[examSets] create failed:', err);
+      return null;
+    }
+  }
+
+  async function persistSessionQuestion(session, index, question) {
+    if (!session?.setId || !question) return;
+    try {
+      const stored = await appendExamSetQuestion(session.setId, { ...question, slotIndex: index });
+      if (stored) question.id = stored.id;
+    } catch (err) {
+      console.warn('[examSets] append failed:', err);
+    }
+    // Learning event (#225 §9): ids only, no question text.
+    recordLearningEvent({
+      type: 'question_generated', examId: session.examId, mode: session.mode, setId: session.setId,
+      questionId: question.id, domainId: question.domainId, taskId: question.taskId, unitId: question.unitId,
+      judgeScore: question.judge?.score,
+    });
+  }
+
+  async function finalizeSessionSet(session, metrics = {}) {
+    if (!session?.setId) return;
+    try { await finalizeExamSet(session.setId, { metrics }); } catch (err) { console.warn('[examSets] finalize failed:', err); }
+  }
+
+  // Serialized so the attempt exists before its first answer is recorded.
+  let attemptChain = Promise.resolve();
+  function recordSessionAnswer(session, question, { userAnswer, isCorrect, elapsedMs, xpEarned }) {
+    if (!session?.setId) return;
+    attemptChain = attemptChain.then(async () => {
+      if (!session.attemptId) {
+        const attempt = await createAttempt({ setId: session.setId, examId: session.examId, mode: session.mode });
+        session.attemptId = attempt.id;
+      }
+      await recordAttemptAnswer(session.attemptId, { questionId: question?.id, userAnswer, isCorrect, elapsedMs, xpEarned });
+    }).catch((err) => console.warn('[examSets] record answer failed:', err));
+  }
+
+  // Start a saved set as a new session (from the set library).
+  function startExamSetSession(set) {
+    const exam = getExamById(set.examId);
+    if (!exam) return;
+    const session = createQuizSession({ examId: set.examId, mode: set.mode });
+    session.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    session.questionCount = set.questions.length;
+    session.questions = set.questions.map((q) => ({ ...q }));
+    session.preGenerate = true;
+    session.setId = set.id;
+    const request = {
+      type: 'quiz',
+      examId: set.examId,
+      taskId: '',
+      taskTitle: set.title || exam.code,
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+    closeModal(els.examSetsModal);
+    beginPreparedSession(session, request);
+  }
+
+  async function renderExamSetsModal() {
+    const list = els.examSetsList;
+    if (!list) return;
+    let sets = [];
+    let attempts = [];
+    try {
+      [sets, attempts] = await Promise.all([listExamSets(), listAttempts()]);
+    } catch (err) {
+      console.warn('[examSets] list failed:', err);
+    }
+    const attemptsBySet = attempts.reduce((m, a) => m.set(a.setId, (m.get(a.setId) || 0) + 1), new Map());
+    if (els.examSetsEmpty) els.examSetsEmpty.classList.toggle('hidden', sets.length > 0);
+    list.innerHTML = sets.map((set) => {
+      const exam = getExamById(set.examId);
+      const summary = summarizeExamSet(set);
+      const config = QUIZ_MODE_CONFIG[set.mode] || QUIZ_MODE_CONFIG.single;
+      const statusKey = Object.values(SET_STATUS).includes(set.status) ? set.status : 'failed';
+      const badgeClass = {
+        ready: 'bg-emerald-100 text-emerald-700',
+        partial: 'bg-amber-100 text-amber-700',
+        failed: 'bg-red-100 text-red-700',
+      }[statusKey] || 'bg-indigo-100 text-indigo-700';
+      const taken = attemptsBySet.get(set.id) || 0;
+      const date = new Date(set.createdAt);
+      const dateLabel = Number.isNaN(date.getTime()) ? '' : date.toLocaleString(getLocale() === 'ja' ? 'ja-JP' : 'en-US');
+      return `
+        <div class="rounded-lg border border-gray-200 bg-white p-3 flex flex-col sm:flex-row sm:items-center gap-3" data-set-id="${escapeHtml(set.id)}" data-set-status="${escapeHtml(statusKey)}">
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-indigo-700">${escapeHtml(exam?.code || set.examId)}</span>
+              <span class="text-xs text-gray-500">${escapeHtml(localizedModeLabel(config))}</span>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${badgeClass}" data-set-status-label>${escapeHtml(t(`examSets.status.${statusKey}`))}</span>
+            </div>
+            <div class="text-sm text-gray-800 font-medium truncate">${escapeHtml(set.title || '')}</div>
+            <div class="text-xs text-gray-500 mt-1">
+              <span data-set-progress>${escapeHtml(t('examSets.progress', { done: summary.done, requested: summary.requested }))}</span>
+              · ${escapeHtml(t('examSets.attempts', { count: taken }))}
+              ${dateLabel ? `· ${escapeHtml(dateLabel)}` : ''}
+            </div>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            ${summary.startable ? `<button type="button" data-set-action="start" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition-colors flex items-center gap-1"><i class="fas fa-play"></i> ${escapeHtml(t(taken > 0 ? 'examSets.retry' : 'examSets.start'))}</button>` : ''}
+            <button type="button" data-set-action="delete" class="px-3 py-1.5 bg-white hover:bg-gray-50 text-gray-600 border border-gray-200 rounded-lg text-xs font-medium transition-colors"><i class="fas fa-trash"></i></button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  async function openExamSetsModal() {
+    await renderExamSetsModal();
+    openModal(els.examSetsModal);
+  }
+
+  els.dashboardExamSetsBtn?.addEventListener('click', () => { openExamSetsModal(); });
+  els.quizModeSetsBtn?.addEventListener('click', () => {
+    closeModal(els.quizModeModal);
+    openExamSetsModal();
+  });
+  els.examSetsList?.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-set-action]');
+    const row = e.target.closest('[data-set-id]');
+    if (!btn || !row) return;
+    const setId = row.dataset.setId;
+    if (btn.dataset.setAction === 'delete') {
+      if (!window.confirm(t('examSets.confirmDelete'))) return;
+      try { await deleteExamSet(setId); } catch (err) { console.warn('[examSets] delete failed:', err); }
+      await renderExamSetsModal();
+      return;
+    }
+    if (btn.dataset.setAction === 'start') {
+      const set = (await listExamSets()).find((s) => s.id === setId);
+      if (set) startExamSetSession(set);
+    }
+  });
+
   /** Helper to get/set current parsed quiz (shared between initApp scope and module-level renderInteractiveQuiz) */
   function getCurrentParsedQuiz() {
     return window.__currentParsedQuiz || null;
@@ -377,10 +560,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       exam,
       examId: req.examId,
       taskTitle: req.taskTitle,
+      taskId: req.taskId,
       taskContext: req.taskContext,
       session: quizSession,
       isDashboardQuiz: req.isDashboardQuiz,
       domainId: typeof state.currentDomainId === 'number' ? state.currentDomainId : null,
+      onQuestionGenerated: async (question) => {
+        // Sequential modes save before the question is shown (#225).
+        if (!quizSession) return;
+        await attachExamSet(quizSession, { source: 'ai', title: req.taskTitle });
+        await persistSessionQuestion(quizSession, quizSession.currentIndex, question);
+        if (quizSession.currentIndex + 1 >= quizSession.questionCount) await finalizeSessionSet(quizSession);
+      },
     });
     if (ok && quizSession) {
       updateQuizProgress();
@@ -461,6 +652,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       quizSession.preGenerate = true;
       quizSession.startedAt = Date.now();
       quizSession._isSmartReview = true;
+      attachExamSet(quizSession, { source: 'smartReview', title: getLocale() === 'ja' ? 'スマート復習' : 'Smart Review', questions: quizSession.questions });
 
       const exam = getExamById(lastAiRequest.examId);
       showAiModal(els, getLocale() === 'ja' ? `スマート復習（${reviewQuestions.length}問）` : `Smart Review (${reviewQuestions.length} questions)`, true);
@@ -491,9 +683,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       const ok = window.confirm(
         getLocale() === 'ja'
           ? '本番模擬試験を「Gemini Batch API」で生成します。\n\n' +
-            '⚠️ 注意事項\n' +
+            'ℹ️ ご案内\n' +
             '・完了まで数分〜最大数十分かかる場合があります\n' +
-            '・このタブ／ブラウザを閉じると生成は中断されます\n' +
+            '・タブやブラウザを閉じても生成は続きます。次に開いたときに結果を受け取ります\n' +
             '・完了したら画面右下に通知が表示されます\n\n' +
             '続行しますか？'
           : t('batch.confirmStart')
@@ -580,6 +772,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
     quizSession._isDailyChallenge = true;
+    attachExamSet(quizSession, { source: 'daily', title: getLocale() === 'ja' ? 'デイリーチャレンジ' : 'Daily Challenge', questions: quizSession.questions });
 
     const dailyTitle = getLocale() === 'ja'
       ? `デイリーチャレンジ（${questions.length}問）`
@@ -638,6 +831,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
     quizSession._isOfflineExam = true;
+    attachExamSet(quizSession, { source: 'offline', title: getLocale() === 'ja' ? '本番形式（APIキー不要）' : 'Practice Exam (no API key)', questions: quizSession.questions });
 
     const exam = getExamById(offlineExamId);
     const offlineTitle = getLocale() === 'ja'
@@ -744,6 +938,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }));
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
+    attachExamSet(quizSession, { source: 'smartReview', title: getLocale() === 'ja' ? '間違えた問題の解き直し' : 'Retry incorrect questions', questions: quizSession.questions });
 
     const exam = getExamById(retryExamId);
     showAiModal(els, getLocale() === 'ja' ? `間違えた問題の解き直し（${unique.length}問）` : `Retry Incorrect Questions (${unique.length})`, true);
@@ -1006,15 +1201,23 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(request.examId))
         : buildQuizSystemPrompt(exam.code, exam.shortLabel);
 
-    // For dashboard quiz, distribute questions across domains by weight
-    const domainTargets = request.isDashboardQuiz
-      ? assignDomainTargets(exam.domains, total)
+    // For dashboard quiz, distribute questions across domains by weight and
+    // evenly across each domain's tasks (#225). Answer letters are balanced.
+    const slotTargets = request.isDashboardQuiz
+      ? assignTaskTargets(exam.domains, total)
       : [];
+    const answerLetters = assignAnswerLetters(total);
+    const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
+    const taskOccurrences = new Map();
 
     // Strictly bound the number of generation attempts per question slot so a
     // 65-question flow cannot blow up in time: one initial attempt plus at most
     // one extra regeneration when the response fails to parse.
     const MAX_ATTEMPTS_PER_QUESTION = 2;
+
+    // Save each question as soon as it exists (#225): a reload or a closed tab
+    // keeps what was generated so far.
+    await attachExamSet(session, { source: 'ai', title: request.taskTitle });
 
     const generated = [];
     let errorCount = 0;      // slots whose generation threw (callAi fallback also failed)
@@ -1022,13 +1225,20 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     for (let i = 0; i < total; i++) {
       // Build dedup hint: list topics/services already covered to avoid repetition
       const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
-      const targetDomain = domainTargets[i] || null;
+      const targetDomain = slotTargets[i]?.domain || null;
+      const targetTask = slotTargets[i]?.task || null;
+      const resourceTask = targetTask || requestTask;
+      const occurrence = taskOccurrences.get(resourceTask) || 0;
+      taskOccurrences.set(resourceTask, occurrence + 1);
+      const resources = pickQuizResources(resourceTask, occurrence);
       const dedupSuffix = recentTopics
         ? `\n\n【重要】以下の問題とは異なるAWSサービス・トピックで出題してください（同じサービスの繰り返しは禁止）:\n${recentTopics}`
         : '';
       const userPrompt = (request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
+        ? buildGeneralQuizUserPrompt(exam.code, targetDomain, targetTask)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + buildResourceGroundingHint(resources)
+        + buildAnswerPositionHint(answerLetters[i])
         + dedupSuffix;
 
       let parsed = null;
@@ -1077,8 +1287,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
       if (parsed) {
         parsed.domainId = targetDomain?.id ?? null;
+        parsed.taskId = targetTask?.id ?? null;
+        parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
+        await persistSessionQuestion(session, generated.length - 1, parsed);
       } else if (slotErrored) {
         errorCount++;
       } else {
@@ -1090,6 +1303,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? `${done} / ${total} 問` : `${done} / ${total}`;
       if (els.quizPregenFill) els.quizPregenFill.style.width = `${(done / total) * 100}%`;
     }
+
+    await finalizeSessionSet(session, { errors: errorCount, parseFailures: parseFailCount });
 
     // If we couldn't generate anything, surface the total-failure message.
     if (generated.length === 0) {
@@ -1210,6 +1425,146 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     } catch { /* ignore */ }
   }
 
+  function batchStateLabel(s) {
+    const isJa = getLocale() === 'ja';
+    switch (s) {
+      case 'JOB_STATE_PENDING':
+      case 'BATCH_STATE_PENDING':
+        return isJa ? '待機中' : t('batch.stateWaiting');
+      case 'JOB_STATE_RUNNING':
+      case 'BATCH_STATE_RUNNING':
+        return isJa ? '生成中' : t('batch.stateGenerating');
+      case 'JOB_STATE_SUCCEEDED':
+      case 'BATCH_STATE_SUCCEEDED':
+        return isJa ? '完了' : t('batch.stateComplete');
+      default:
+        return s || (isJa ? '実行中' : 'Running');
+    }
+  }
+
+  function showBatchProgress(total) {
+    return ({ state, done, total: t, failed }) => {
+      const denom = t || total;
+      setBatchToastState(
+        'running',
+        getLocale() === 'ja'
+          ? `${batchStateLabel(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
+          : `${batchStateLabel(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
+      );
+    };
+  }
+
+  async function markBatchSetFailed(session) {
+    if (!session?.setId) return;
+    try {
+      await updateExamSet(session.setId, { status: SET_STATUS.FAILED, pipeline: { jobName: null, stage: 'failed' } });
+    } catch (err) { console.warn('[examSets] mark failed:', err); }
+  }
+
+  // Boot-time resume (#225 design §6.1): a mock batch whose job name was saved
+  // before the page was closed keeps running on the provider side; pick it up.
+  async function resumePendingBatchSets() {
+    let pending = [];
+    try {
+      pending = (await listExamSets({ status: [SET_STATUS.GENERATING, SET_STATUS.PLANNING, SET_STATUS.JUDGING] }))
+        .filter((set) => set.pipeline?.jobName);
+    } catch { return; }
+    const set = pending[0];
+    if (!set) return;
+    const exam = getExamById(set.examId);
+    if (!exam) return;
+
+    const session = createQuizSession({ examId: set.examId, mode: set.mode });
+    session.sessionId = 'qs_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6);
+    session.setId = set.id;
+    const request = {
+      type: 'quiz',
+      examId: set.examId,
+      taskId: '',
+      taskTitle: set.title || exam.code,
+      taskContext: '',
+      isDashboardQuiz: true,
+    };
+    const total = set.requested || session.questionCount;
+
+    batchInProgress = true;
+    setBatchToastState('running', getLocale() === 'ja' ? '前回のバッチ生成を再開しています…' : t('batch.resuming'));
+    let result = null;
+    try {
+      result = await resumeAiBatch({
+        jobName: set.pipeline.jobName,
+        total,
+        model: set.pipeline.model,
+        onProgress: showBatchProgress(total),
+      });
+    } catch (err) {
+      console.warn('[batch] resume failed:', err);
+      batchInProgress = false;
+      await markBatchSetFailed(session);
+      setBatchToastState('error', `${getLocale() === 'ja' ? 'バッチ生成の再開に失敗しました' : t('batch.failed')}: ${err?.message || ''}`);
+      return;
+    }
+    batchInProgress = false;
+    if (!result || !Array.isArray(result.texts)) {
+      await markBatchSetFailed(session);
+      setBatchToastState('error', getLocale() === 'ja' ? 'バッチAPIから結果を取得できませんでした' : t('batch.failed'));
+      return;
+    }
+    await completeBatchSet({ session, request, result, slots: set.pipeline.slots || [] });
+  }
+
+  // Shared tail of the batch flow (live and resumed): parse, persist, offer to start.
+  async function completeBatchSet({ session, request, result, slots }) {
+    const generated = [];
+    for (let i = 0; i < result.texts.length; i++) {
+      const text = result.texts[i];
+      if (!text) continue;
+      const parsed = parseQuizResponse(text);
+      if (parsed) {
+        parsed.domainId = slots[i]?.domainId ?? null;
+        parsed.taskId = slots[i]?.taskId ?? null;
+        parsed.explanation = appendMissingResourceRefs(parsed.explanation, slots[i]?.resources || []);
+        generated.push(parsed);
+      }
+    }
+    if (generated.length === 0) {
+      await markBatchSetFailed(session);
+      setBatchToastState('error', '生成された問題を解析できませんでした');
+      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
+      return;
+    }
+
+    session.questions = generated;
+    session.questionCount = generated.length;
+    for (let i = 0; i < generated.length; i++) await persistSessionQuestion(session, i, generated[i]);
+    try { await updateExamSet(session.setId, { pipeline: { jobName: null } }); } catch { /* ignore */ }
+    await finalizeSessionSet(session, { requested: result.texts.length });
+    pendingBatchSession = session;
+    pendingBatchRequest = request;
+
+    const requested = result.texts.length;
+    const isPartial = generated.length < requested;
+    const modelLabel = result.model || 'gemini-3';
+    const isJa = getLocale() === 'ja';
+    const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
+    const readyMessage = isPartial
+      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}${modelSuffix}`
+      : (isJa
+        ? `${generated.length} 問の準備が完了しました${modelSuffix}`
+        : `${generated.length} questions ready${modelSuffix}`);
+    setBatchToastState('ready', readyMessage);
+    notifyBrowser(
+      isJa ? '問題の準備ができました！' : 'Questions are ready!',
+      isPartial
+        ? (isJa
+          ? `${requested}問中${generated.length}問のクイズを開始できます`
+          : `${generated.length} of ${requested} quiz questions ready to start`)
+        : (isJa
+          ? `${generated.length} 問のクイズを開始できます`
+          : `${generated.length} quiz questions ready to start`)
+    );
+  }
+
   async function startMockBatchInBackground({ els, session, request, config }) {
     const exam = getExamById(request.examId);
     const total = session.questionCount;
@@ -1229,35 +1584,40 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const systemPrompt = buildMockQuizSystemPrompt(
       exam.code, exam.shortLabel, getExamLevel(request.examId)
     );
-    const domainTargets = request.isDashboardQuiz
-      ? assignDomainTargets(exam.domains, total)
+    const slotTargets = request.isDashboardQuiz
+      ? assignTaskTargets(exam.domains, total)
       : [];
+    const answerLetters = assignAnswerLetters(total);
+    const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
+    const taskOccurrences = new Map();
+    const slotResources = [];
+
+    await attachExamSet(session, { source: 'batch', title: request.taskTitle });
+    // Per-slot metadata needed to interpret the results, saved with the set so a
+    // resumed job (after a reload) can be parsed the same way.
+    const slots = [];
 
     const batchRequests = [];
     for (let i = 0; i < total; i++) {
-      const targetDomain = domainTargets[i] || null;
-      const userPrompt = request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, targetDomain)
-        : buildQuizUserPrompt(request.taskTitle, request.taskContext);
+      const resourceTask = slotTargets[i]?.task || requestTask;
+      const occurrence = taskOccurrences.get(resourceTask) || 0;
+      taskOccurrences.set(resourceTask, occurrence + 1);
+      slotResources[i] = pickQuizResources(resourceTask, occurrence);
+      const userPrompt = (request.isDashboardQuiz
+        ? buildGeneralQuizUserPrompt(exam.code, slotTargets[i]?.domain || null, slotTargets[i]?.task || null)
+        : buildQuizUserPrompt(request.taskTitle, request.taskContext))
+        + buildResourceGroundingHint(slotResources[i])
+        + buildAnswerPositionHint(answerLetters[i]);
       batchRequests.push({ userPrompt, systemPrompt });
+      slots.push({
+        domainId: slotTargets[i]?.domain?.id ?? null,
+        taskId: slotTargets[i]?.task?.id ?? null,
+        resources: slotResources[i].map((r) => ({ title: r.title, url: r.url })),
+      });
     }
-
-    const stateLabelOf = (s) => {
-      const isJa = getLocale() === 'ja';
-      switch (s) {
-        case 'JOB_STATE_PENDING':
-        case 'BATCH_STATE_PENDING':
-          return isJa ? '待機中' : t('batch.stateWaiting');
-        case 'JOB_STATE_RUNNING':
-        case 'BATCH_STATE_RUNNING':
-          return isJa ? '生成中' : t('batch.stateGenerating');
-        case 'JOB_STATE_SUCCEEDED':
-        case 'BATCH_STATE_SUCCEEDED':
-          return isJa ? '完了' : t('batch.stateComplete');
-        default:
-          return s || (isJa ? '実行中' : 'Running');
-      }
-    };
+    if (session.setId) {
+      try { await updateExamSet(session.setId, { pipeline: { stage: 'writing', slots } }); } catch { /* ignore */ }
+    }
 
     let result = null;
     try {
@@ -1265,15 +1625,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         requests: batchRequests,
         displayName: `mock-${request.examId}-${Date.now()}`,
         onRequireApiKey: () => openSettingsModal(els),
-        onProgress: ({ state, done, total: t, failed }) => {
-          const denom = t || total;
-          setBatchToastState(
-            'running',
-            getLocale() === 'ja'
-              ? `${stateLabelOf(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
-              : `${stateLabelOf(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
-          );
+        // Save the job name immediately: from here on, closing the tab no
+        // longer loses the generation (resumePendingBatchSets picks it up).
+        onCreated: ({ name, model }) => {
+          if (!session.setId) return;
+          updateExamSet(session.setId, { pipeline: { jobName: name, model, submittedAt: new Date().toISOString() } })
+            .catch((err) => console.warn('[examSets] save job name failed:', err));
         },
+        onProgress: showBatchProgress(total),
       });
     } catch (err) {
       // eslint-disable-next-line no-console
@@ -1304,6 +1663,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         return;
       }
 
+      await markBatchSetFailed(session);
       setBatchToastState(
         'error',
         `バッチAPIでの生成に失敗しました: ${msg || '不明なエラー'}`
@@ -1315,54 +1675,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     batchInProgress = false;
 
     if (!result || !Array.isArray(result.texts)) {
+      await markBatchSetFailed(session);
       setBatchToastState('error', 'バッチAPIから結果を取得できませんでした');
       return;
     }
 
-    // Parse results
-    const generated = [];
-    for (let i = 0; i < result.texts.length; i++) {
-      const text = result.texts[i];
-      if (!text) continue;
-      const parsed = parseQuizResponse(text);
-      if (parsed) {
-        parsed.domainId = domainTargets[i]?.id ?? null;
-        generated.push(parsed);
-      }
-    }
-    if (generated.length === 0) {
-      setBatchToastState('error', '生成された問題を解析できませんでした');
-      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
-      return;
-    }
-
-    session.questions = generated;
-    session.questionCount = generated.length;
-    pendingBatchSession = session;
-    pendingBatchRequest = request;
-
-    const requested = result.texts.length;
-    const isPartial = generated.length < requested;
-    const modelLabel = result.model || 'gemini-3';
-    const isJa = getLocale() === 'ja';
-    const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
-    const readyMessage = isPartial
-      ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}${modelSuffix}`
-      : (isJa
-        ? `${generated.length} 問の準備が完了しました${modelSuffix}`
-        : `${generated.length} questions ready${modelSuffix}`);
-    setBatchToastState('ready', readyMessage);
-    notifyBrowser(
-      isJa ? '問題の準備ができました！' : 'Questions are ready!',
-      isPartial
-        ? (isJa
-          ? `${requested}問中${generated.length}問のクイズを開始できます`
-          : `${generated.length} of ${requested} quiz questions ready to start`)
-        : (isJa
-          ? `${generated.length} 問のクイズを開始できます`
-          : `${generated.length} quiz questions ready to start`)
-    );
+    await completeBatchSet({ session, request, result, slots });
   }
+
 
   function startReadyMockSession() {
     if (!pendingBatchSession || !pendingBatchRequest) return;
@@ -1372,10 +1692,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     pendingBatchSession = null;
     pendingBatchRequest = null;
 
+    beginPreparedSession(session, request);
+  }
+
+  // Start a session whose questions already exist (batch result or saved set).
+  function beginPreparedSession(session, request) {
     quizSession = session;
     lastAiRequest = request;
 
-    const exam = getExamById(request.examId);
     const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.mock;
 
     // Open the AI modal and prepare the quiz UI (mirrors preGenerateQuestions tail).
@@ -1414,14 +1738,6 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (!ok) return;
     }
     hideBatchToast();
-  });
-
-  // Warn before closing the tab while batch is in progress
-  window.addEventListener('beforeunload', (e) => {
-    if (!batchInProgress) return;
-    e.preventDefault();
-    e.returnValue = '';
-    return '';
   });
 
   // Clean up timer when AI modal is closed
@@ -1575,6 +1891,19 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
     }
 
+    // Local missions (issue #193): every answered question counts toward the
+    // "quiz" metric; a correct answer additionally counts toward "correct".
+    // Mission play is not gated by the daily-XP cap above (the mission counters
+    // track engagement); the reward XP itself is granted through addXp.
+    {
+      const missionRes = recordMissionEvent('quiz');
+      handleMissionCompletions({ els, missionRes });
+      if (isCorrect) {
+        const correctRes = recordMissionEvent('correct');
+        handleMissionCompletions({ els, missionRes: correctRes });
+      }
+    }
+
     // Store quiz result
     const elapsedMs = window.__questionShownAt ? Date.now() - window.__questionShownAt : null;
     window.__questionShownAt = 0;
@@ -1602,6 +1931,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       sessionId: quizSession?.sessionId || '',
       mode: quizSession?.mode || '',
       elapsedMs,
+    });
+    recordSessionAnswer(quizSession, quiz, { userAnswer: answerIndex, isCorrect, elapsedMs, xpEarned: result.xpEarned });
+    recordLearningEvent({
+      type: 'question_answered', examId: resultExamId, mode: quizSession?.mode, setId: quizSession?.setId,
+      questionId: quiz.id, domainId: quizDomainId, taskId: lastAiRequest?.taskId || quiz.taskId, unitId: quiz.unitId,
+      isCorrect, userAnswer: answerIndex, elapsedMs,
     });
 
     renderXpDashboard({ els, exam, state: appState });
@@ -2038,9 +2373,25 @@ function updateSidebarActiveState({ els, examId }) {
   });
 }
 
+// Build the settings-modal language buttons from js/localeRegistry.js so the
+// switcher always matches the locales actually loaded (issue #197).
+function renderLangSwitchButtons(container) {
+  const codes = getRegisteredLocaleCodes();
+  container.replaceChildren(...codes.map((code, i) => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.lang = code;
+    btn.className = 'flex-1 px-4 py-2 text-sm font-medium transition-colors text-center';
+    if (i < codes.length - 1) btn.classList.add('border-r', 'border-gray-200');
+    btn.textContent = getLocaleLabel(code);
+    return btn;
+  }));
+}
+
 function wireSettingsModalSwitches({ els }) {
   // Language switch
   if (els.langSwitch) {
+    renderLangSwitchButtons(els.langSwitch);
     const updateLangBtns = () => {
       const current = getLocale();
       els.langSwitch.querySelectorAll('button[data-lang]').forEach(btn => {
@@ -2089,6 +2440,11 @@ function wireXpLinkHandlers({ els, state, getExamById }) {
     const result = addXp({ amount: XP_RULES.link, reason: 'link', url: href });
     if (result?.unlocked?.length) {
       showMilestoneToast({ els, unlocked: result.unlocked });
+    }
+    // Local missions (issue #193): count the link visit and grant mission XP.
+    if (result?.applied) {
+      const missionRes = recordMissionEvent('link');
+      handleMissionCompletions({ els, missionRes });
     }
     renderXpDashboard({ els, exam: getExamById(state.examId), state });
   };
@@ -2145,6 +2501,11 @@ function getElements() {
     xpMotivation: document.getElementById('xpMotivation'),
     editUserNameBtn: document.getElementById('editUserNameBtn'),
     tweetBtn: document.getElementById('tweetBtn'),
+
+    // Local missions (issue #193)
+    missionsList: document.getElementById('missionsList'),
+    missionToast: document.getElementById('missionToast'),
+    missionToastText: document.getElementById('missionToastText'),
 
     // modals
     aiModal: document.getElementById('aiModal'),
@@ -2212,6 +2573,8 @@ function getElements() {
     feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
     feedbackImagePreview: document.getElementById('feedbackImagePreview'),
     feedbackCopyBtn: document.getElementById('feedbackCopyBtn'),
+    feedbackGithubBtn: document.getElementById('feedbackGithubBtn'),
+    feedbackWebsite: document.getElementById('feedbackWebsite'),
     // Feedback nudge (issue #100)
     feedbackNudge: document.getElementById('feedbackNudge'),
     feedbackNudgeOpenBtn: document.getElementById('feedbackNudgeOpenBtn'),
@@ -2258,6 +2621,11 @@ function getElements() {
     quizModeModal: document.getElementById('quizModeModal'),
     quizModeCards: document.getElementById('quizModeCards'),
     quizModeStartBtn: document.getElementById('quizModeStartBtn'),
+    quizModeSetsBtn: document.getElementById('quizModeSetsBtn'),
+    dashboardExamSetsBtn: document.getElementById('dashboardExamSetsBtn'),
+    examSetsModal: document.getElementById('examSetsModal'),
+    examSetsList: document.getElementById('examSetsList'),
+    examSetsEmpty: document.getElementById('examSetsEmpty'),
     quizModeTaskLabel: document.getElementById('quizModeTaskLabel'),
 
     // Quiz timer / progress / pregen / summary
@@ -2504,6 +2872,7 @@ function wireGlobalUiHandlers({ els, exams }) {
     const ok = window.confirm(t('settings.resetConfirm'));
     if (!ok) return;
     resetAppStorage();
+    clearExamSetStorage().catch(() => {});
     closeModal(els.settingsModal);
     // Ensure UI + in-memory state is consistent
     window.location.reload();
@@ -2866,6 +3235,110 @@ function renderLearningStatus({ els, exam, state }) {
   }
 }
 
+// ─── Local Missions UI (issue #193) ─────────────────────────
+
+const MISSION_PERIOD_ORDER = ['daily', 'weekly', 'monthly'];
+
+/**
+ * Build the localized label for a mission from i18n, with a metric/target based
+ * fallback so a missing key never renders an empty row.
+ */
+function missionLabel(mission) {
+  const key = `missions.items.${mission.id}`;
+  const localized = t(key);
+  if (localized && localized !== key) return localized;
+  // Fallback: "<metric> x<target>"
+  const metricLabel = t(`missions.metric.${mission.metric}`);
+  const metric = metricLabel && !metricLabel.startsWith('missions.') ? metricLabel : mission.metric;
+  return `${metric} × ${mission.target}`;
+}
+
+/**
+ * Render the daily/weekly/monthly missions panel on the (cert-independent)
+ * dashboard. Pure read: pulls the current mission state from storage and paints
+ * progress + reward. Completion/XP is handled elsewhere via recordMissionEvent.
+ */
+function renderMissionsPanel(els) {
+  const container = els.missionsList;
+  if (!container) return;
+
+  const { missions } = getMissionsSummary();
+  const byPeriod = new Map(MISSION_PERIOD_ORDER.map((p) => [p, []]));
+  for (const m of missions) {
+    if (byPeriod.has(m.period)) byPeriod.get(m.period).push(m);
+  }
+
+  const sections = [];
+  for (const period of MISSION_PERIOD_ORDER) {
+    const list = byPeriod.get(period) || [];
+    if (!list.length) continue;
+
+    const heading = t(`missions.period.${period}`);
+    const rows = list.map((m) => {
+      const pct = Math.round(Math.max(0, Math.min(1, m.progress01)) * 100);
+      const doneClass = m.completed ? ' text-emerald-600' : ' text-gray-500';
+      const check = m.completed ? '<i class="fas fa-check-circle text-emerald-500 mr-1"></i>' : '';
+      const rewardLabel = t('missions.reward', { xp: m.xpReward });
+      return `
+        <div class="mission-row">
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <span class="font-medium text-gray-700 truncate">${check}${escapeHtml(missionLabel(m))}</span>
+            <span class="whitespace-nowrap font-bold${doneClass}">${escapeHtml(rewardLabel)}</span>
+          </div>
+          <div class="mt-1 flex items-center gap-2">
+            <div class="flex-1 h-1.5 rounded-full bg-gray-200 overflow-hidden">
+              <div class="h-1.5 rounded-full bg-indigo-500" style="width: ${pct}%"></div>
+            </div>
+            <span class="text-[10px] font-mono text-gray-500 whitespace-nowrap">${Math.min(m.progress, m.target)}/${m.target}</span>
+          </div>
+        </div>`;
+    }).join('');
+
+    sections.push(`
+      <div class="mission-section">
+        <div class="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1.5">${escapeHtml(heading)}</div>
+        <div class="space-y-2">${rows}</div>
+      </div>`);
+  }
+
+  container.innerHTML = sections.join('');
+}
+
+/**
+ * React to newly-completed missions returned by recordMissionEvent: surface any
+ * milestone unlocked by the reward XP, and repaint the missions panel.
+ */
+function handleMissionCompletions({ els, missionRes }) {
+  if (!missionRes) return;
+  if (Array.isArray(missionRes.unlocked) && missionRes.unlocked.length) {
+    showMilestoneToast({ els, unlocked: missionRes.unlocked });
+  }
+  if (Array.isArray(missionRes.completed) && missionRes.completed.length) {
+    const first = missionRes.completed[0];
+    showMissionToast({ els, mission: first, xpAwarded: missionRes.xpAwarded });
+  }
+  renderMissionsPanel(els);
+}
+
+/**
+ * Lightweight toast announcing a completed mission and its XP reward. Reuses the
+ * milestone toast element if a dedicated mission toast is not present in the DOM.
+ */
+function showMissionToast({ els, mission, xpAwarded }) {
+  const toast = els.missionToast;
+  const text = els.missionToastText;
+  if (!toast || !text || !mission) return;
+  text.textContent = t('missions.toast', {
+    mission: missionLabel(mission),
+    xp: Number(xpAwarded || mission.xpReward || 0),
+  });
+  toast.classList.remove('hidden');
+  window.clearTimeout?.(els.__missionToastTimer);
+  els.__missionToastTimer = window.setTimeout(() => {
+    toast.classList.add('hidden');
+  }, 4000);
+}
+
 function renderXpDashboard({ els, exam, state }) {
   if (!els.xpDashboard) return;
 
@@ -2902,6 +3375,9 @@ function renderXpDashboard({ els, exam, state }) {
 
   // Streak display
   renderStreakDisplay(els);
+
+  // Local missions panel (issue #193)
+  renderMissionsPanel(els);
 
   // Planned exam date countdown (issue #200)
   renderExamDateWidget({ els, exam });
@@ -3617,7 +4093,9 @@ function renderRecentXpActionsHtml(actions) {
             ? t('xpActions.explain')
             : reason === 'quiz'
               ? t('xpActions.quiz')
-              : reason || t('xpActions.xp');
+              : reason === 'mission'
+                ? t('xpActions.mission')
+                : reason || t('xpActions.xp');
 
       let timeText = '';
       try {
@@ -4388,6 +4866,30 @@ function renderKnowledgeRow({ knowledge, term, taskContext }) {
   `;
 }
 
+// Locate a task by id across the exam's domains (task-mode quiz requests only
+// carry the id).
+function findExamTask(exam, taskId) {
+  const id = String(taskId || '').trim();
+  if (!id) return null;
+  for (const d of exam?.domains || []) {
+    const task = (d.tasks || []).find((t) => String(t.id) === id);
+    if (task) return task;
+  }
+  return null;
+}
+
+// Recommended resources for the `occurrence`-th question on `task`, localized
+// to { title, url, note } for the prompt and explanation (#225 Step B).
+function pickQuizResources(task, occurrence) {
+  if (!task) return [];
+  const en = getLocale() === 'en';
+  return selectTaskResources(task, occurrence).map((item) => ({
+    title: en ? (item.titleEn || item.title) : (item.title || item.titleEn),
+    url: getLocalizedUrl(item.url, item.urlEn),
+    note: en ? (item.noteEn || item.note || '') : (item.note || item.noteEn || ''),
+  }));
+}
+
 function buildTaskAiContext(task) {
   if (!task || typeof task !== 'object') return '';
   const id = typeof task.id === 'string' ? task.id.trim() : String(task.id || '').trim();
@@ -4596,10 +5098,55 @@ const FEEDBACK_MAX_LENGTH = 1000;
 // object URLs revoked) on modal open/close to avoid leaks.
 let feedbackImages = [];
 
+// When the modal was last opened; sent as elapsedMs so the backend can reject
+// instant (scripted) submissions.
+let feedbackOpenedAt = 0;
+
+// Guards against double submission while a direct-send request is in flight.
+let feedbackSending = false;
+
+// #162: when the feedback backend is deployed (FEEDBACK_API_URL set), the
+// primary button sends directly without a GitHub account, and the GitHub
+// prefilled-issue flow moves to a secondary "Post on GitHub" button (useful for
+// image attachments). Swapping the data-i18n keys keeps later locale switches
+// consistent because translateStaticElements() re-reads them.
+const FEEDBACK_DIRECT_I18N = {
+  'feedbackModal.description': 'feedbackModal.directDescription',
+  'feedbackModal.noAccountLead': 'feedbackModal.directLead',
+  'feedbackModal.noAccountNote': 'feedbackModal.directNote',
+  'feedbackModal.imageHelp': 'feedbackModal.directImageHelp',
+  'feedbackModal.submitToIssue': 'feedbackModal.sendDirect',
+};
+
+function applyFeedbackDirectMode(els) {
+  if (!isFeedbackApiEnabled()) return;
+  Object.entries(FEEDBACK_DIRECT_I18N).forEach(([from, to]) => {
+    els.feedbackModal.querySelectorAll(`[data-i18n="${from}"]`).forEach((el) => {
+      el.setAttribute('data-i18n', to);
+      el.textContent = t(to);
+    });
+  });
+  // Font Awesome may already have swapped the <i> for an <svg>; replace either.
+  const icon = els.feedbackSubmitBtn?.querySelector('i, svg');
+  if (icon) {
+    const sendIcon = document.createElement('i');
+    sendIcon.className = 'fas fa-paper-plane';
+    icon.replaceWith(sendIcon);
+  }
+  els.feedbackCopyBtn?.classList.add('hidden');
+  els.feedbackGithubBtn?.classList.remove('hidden');
+}
+
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
 
+  applyFeedbackDirectMode(els);
+
   els.feedbackBtn.addEventListener('click', () => openFeedbackModal(els));
+
+  els.feedbackGithubBtn?.addEventListener('click', () => {
+    submitFeedbackViaGithub(els);
+  });
 
   els.feedbackTextarea?.addEventListener('input', () => {
     updateFeedbackCharCount(els);
@@ -4730,6 +5277,8 @@ function openFeedbackModal(els) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
   els.feedbackMessage?.classList?.add('hidden');
+  if (els.feedbackWebsite) els.feedbackWebsite.value = '';
+  feedbackOpenedAt = Date.now();
   // Start every session with a clean image list (revokes any stale URLs).
   clearFeedbackImages(els);
   updateFeedbackCharCount(els);
@@ -4771,17 +5320,9 @@ function composeFeedbackIssue({ text, category }) {
 // a user who does not have (or does not want to use) a GitHub account can send
 // it by any channel they prefer, without ever opening the GitHub issue screen.
 function copyFeedbackText(els) {
-  const text = String(els.feedbackTextarea?.value || '').trim();
-  const category = String(els.feedbackCategorySelect?.value || 'general');
-
-  if (!text) {
-    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationEmpty'), 'text-red-600');
-    return;
-  }
-  if (text.length > FEEDBACK_MAX_LENGTH) {
-    showInlineMessage(els.feedbackMessage, t('feedbackModal.validationLength'), 'text-red-600');
-    return;
-  }
+  const draft = readFeedbackDraft(els);
+  if (!draft) return;
+  const { text, category } = draft;
 
   const { issueBody } = composeFeedbackIssue({ text, category });
   copyTextToClipboard(issueBody)
@@ -4797,18 +5338,35 @@ function copyFeedbackText(els) {
     });
 }
 
-function submitFeedback(els) {
+// Read and validate the draft. Shows the validation message and returns null
+// when the draft cannot be sent.
+function readFeedbackDraft(els) {
   const text = String(els.feedbackTextarea?.value || '').trim();
   const category = String(els.feedbackCategorySelect?.value || 'general');
 
   if (!text) {
     showInlineMessage(els.feedbackMessage, t('feedbackModal.validationEmpty'), 'text-red-600');
-    return;
+    return null;
   }
   if (text.length > FEEDBACK_MAX_LENGTH) {
     showInlineMessage(els.feedbackMessage, t('feedbackModal.validationLength'), 'text-red-600');
-    return;
+    return null;
   }
+  return { text, category };
+}
+
+function submitFeedback(els) {
+  if (isFeedbackApiEnabled()) {
+    submitFeedbackDirect(els);
+  } else {
+    submitFeedbackViaGithub(els);
+  }
+}
+
+function submitFeedbackViaGithub(els) {
+  const draft = readFeedbackDraft(els);
+  if (!draft) return;
+  const { text, category } = draft;
 
   // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
   // user click (static site => no token => tokenless prefilled URL pattern,
@@ -4830,6 +5388,72 @@ function submitFeedback(els) {
 
   const sentKey = hasImages ? 'feedbackModal.sentWithImages' : 'feedbackModal.sent';
   showInlineMessage(els.feedbackMessage, t(sentKey), 'text-teal-600');
+  finishFeedbackSubmission(els, 1500);
+}
+
+// #162: send straight to the feedback backend — no GitHub account needed. The
+// backend files the GitHub issue on the user's behalf and returns its URL.
+async function submitFeedbackDirect(els) {
+  if (feedbackSending) return;
+  const draft = readFeedbackDraft(els);
+  if (!draft) return;
+  const { text, category } = draft;
+
+  feedbackSending = true;
+  if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = true;
+  showInlineMessage(els.feedbackMessage, t('feedbackModal.sending'), 'text-gray-600');
+
+  // Screenshots are shrunk/re-encoded on-device (also stripping EXIF). Any
+  // image beyond the limit or that cannot be encoded is skipped, and the user
+  // is told so; the text is always sent.
+  const encoded = await Promise.all(
+    feedbackImages.slice(0, MAX_FEEDBACK_IMAGES).map((entry) => encodeFeedbackImage(entry.file)),
+  );
+  const images = encoded.filter(Boolean);
+  const skippedImages = feedbackImages.length - images.length;
+
+  const result = await sendFeedback({
+    category,
+    text,
+    lang: getLocale(),
+    page: String(location.hash || '').slice(0, 200),
+    elapsedMs: feedbackOpenedAt ? Date.now() - feedbackOpenedAt : 0,
+    website: String(els.feedbackWebsite?.value || ''),
+    images,
+  });
+
+  feedbackSending = false;
+  if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = false;
+
+  if (!result.ok) {
+    const key = result.error === 'rate_limited' ? 'feedbackModal.sendRateLimited' : 'feedbackModal.sendFailed';
+    showInlineMessage(els.feedbackMessage, t(key), 'text-red-600');
+    // Offer the account-free copy path as a fallback when sending failed.
+    els.feedbackCopyBtn?.classList.remove('hidden');
+    return;
+  }
+
+  showInlineMessage(
+    els.feedbackMessage,
+    t(skippedImages > 0 ? 'feedbackModal.sentDirectImagesSkipped' : 'feedbackModal.sentDirect', { count: skippedImages }),
+    'text-teal-600',
+  );
+  if (result.issueUrl && /^https:\/\/github\.com\//.test(result.issueUrl) && els.feedbackMessage) {
+    const link = document.createElement('a');
+    link.href = result.issueUrl;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = 'underline font-medium ml-1';
+    link.textContent = t('feedbackModal.viewIssue');
+    els.feedbackMessage.appendChild(link);
+  }
+  // Keep the modal open a little longer so the issue link can be clicked.
+  finishFeedbackSubmission(els, result.issueUrl ? 4000 : 2000);
+}
+
+// Shared tail of a successful submission: reset the draft, award the daily XP
+// bonus and auto-close the modal.
+function finishFeedbackSubmission(els, closeDelayMs) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   clearFeedbackImages(els);
   updateFeedbackCharCount(els);
@@ -4864,7 +5488,8 @@ function submitFeedback(els) {
   setTimeout(() => {
     closeModal(els.feedbackModal);
     els.feedbackMessage?.classList?.add('hidden');
-  }, 1500);
+    if (isFeedbackApiEnabled()) els.feedbackCopyBtn?.classList.add('hidden');
+  }, closeDelayMs);
 }
 
 // Map a feedback category <option> value to its i18n category label key under
@@ -4922,6 +5547,23 @@ function getResourceSearchIndex() {
     resourceSearchIndex = buildResourceIndex();
   }
   return resourceSearchIndex;
+}
+
+/**
+ * Lazily-built, memoized exam-guide keyword catalog (issue #209). The catalog is
+ * the durable, model-independent list of "which AWS services/concepts matter" per
+ * exam guide (e.g. Amazon QuickSight / Amazon Q), used to augment HyDE expanded
+ * terms so newer services the LLM was not trained on still surface in AI search.
+ * @type {string[] | null}
+ */
+let examKeywordCatalog = null;
+
+/** Build (or reuse) the memoized exam-guide keyword catalog. */
+function getExamKeywordCatalog() {
+  if (!examKeywordCatalog) {
+    examKeywordCatalog = buildExamKeywordCatalog();
+  }
+  return examKeywordCatalog;
 }
 
 /**
@@ -5173,13 +5815,23 @@ function wireResourceSearchHandlers({ els, exams }) {
     // service names / keywords via the model, then union-search the local
     // index across those terms. This makes vague queries yield candidates.
     let candidates = [];
+    // Terms actually searched (raw query + HyDE expansion + exam-guide catalog).
+    // Kept in this scope so grounding candidate selection can score against the
+    // SAME augmented term set, not just the raw query (#209 v1 review item 4).
+    let augmentedTerms = [query];
     try {
       const expandedTerms = await expandQueryToAwsKeywords(query);
       // Always include the raw query as one term so exact keyword hits are kept.
-      const terms = [query, ...expandedTerms];
-      candidates = searchResourcesMulti(index, terms, { examId });
+      const baseTerms = [query, ...expandedTerms];
+      // issue #209: fold in exam-guide catalog services relevant to the query so
+      // newer services the model may omit (the "Quick" → Amazon QuickSight / Amazon Q
+      // litmus test) still surface. augmentTermsWithCatalog is pure/unit-tested and
+      // guards over-matching short tokens (e.g. bare "Amazon Q") per the v1 review.
+      augmentedTerms = augmentTermsWithCatalog(baseTerms, getExamKeywordCatalog());
+      candidates = searchResourcesMulti(index, augmentedTerms, { examId });
     } catch {
       candidates = [];
+      augmentedTerms = [query];
     }
 
     // Fallback: if expansion produced nothing (e.g. AI call failed or returned
@@ -5204,7 +5856,12 @@ function wireResourceSearchHandlers({ els, exams }) {
     // strong keyword hit is never dropped from the model's view just because
     // it sits past the cap in the display ordering (#189 review item 2).
     const AI_CANDIDATE_CAP = 40;
-    const grounding = selectAiCandidates(candidates, query, AI_CANDIDATE_CAP).map((r, i) => {
+    // Score against the AUGMENTED term set (raw query + HyDE + catalog), not the raw
+    // query, so a resource pulled in ONLY via a catalog term (e.g. a QuickSight doc
+    // for a query lacking "quick") still scores > 0 and reaches the model instead of
+    // being evicted past the cap (#209 v1 review item 4).
+    const scoringQuery = buildAugmentedScoringQuery(augmentedTerms);
+    const grounding = selectAiCandidates(candidates, scoringQuery, AI_CANDIDATE_CAP).map((r, i) => {
       const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
       const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
       return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;
@@ -5541,6 +6198,44 @@ async function explainTerm({ els, exam, term, taskContext }) {
   const providerLabel = getActiveProviderLabel();
   showAiModal(els, `${getLocale() === 'ja' ? '用語解説' : 'Explain'}: ${term}`, true);
 
+  if (getLocale() === 'en') {
+    const systemPrompt =
+      `You are explaining an AWS/technical term to a beginner studying for ${exam.code} (${exam.shortLabel}). ` +
+      `Do not just give a dictionary definition — use concrete examples and analogies so the concept truly clicks for a newcomer. ` +
+      `Output in Markdown with clear headings and bullet points for readability. ` +
+      `When you introduce a new term that a beginner might not know, add a brief inline clarification in parentheses (5–15 words), ` +
+      `or collect them in a "Mini-Glossary" section at the end.\n\n` +
+      `[Reliability rules]\n` +
+      `- Base your explanation only on information found in AWS official documentation.\n` +
+      `- Do not include speculation or uncertain information. If you are unsure, say "Please refer to the official documentation".\n` +
+      `- End your explanation with a "📚 References" section listing 1–3 relevant official AWS documentation URLs.`;
+
+    const contextPrompt = taskContext
+      ? `\n\n[Task context]\n${taskContext}`
+      : '';
+
+    const userPrompt = `Term: "${term}" in the context of AWS.`;
+
+    let response = await callAiStream({
+      userPrompt,
+      systemPrompt: systemPrompt + contextPrompt,
+      onRequireApiKey: () => openSettingsModal(els),
+      onTextDelta: (_delta, fullText) => updateAiModalContentStreaming(els, fullText),
+    });
+
+    // Fallback to non-streaming when the runtime doesn't support streams/SSE.
+    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+      response = await callAi({
+        userPrompt,
+        systemPrompt: systemPrompt + contextPrompt,
+        onRequireApiKey: () => openSettingsModal(els),
+      });
+    }
+
+    if (response) updateAiModalContent(els, response);
+    return isSuccessfulAiResponse(response);
+  }
+
   const systemPrompt =
     `${exam.code}（${exam.shortLabel}）の初学者に向けて、` +
     `指定されたAWS/技術用語を「腹落ち」するように解説してください。辞書的な定義の丸写しではなく、` +
@@ -5579,7 +6274,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   return isSuccessfulAiResponse(response);
 }
 
-async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDashboardQuiz, domainId }) {
+async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session, isDashboardQuiz, domainId, onQuestionGenerated }) {
   if (!getApiKey() && !getOpenAiApiKey()) {
     openSettingsModal(els);
     return;
@@ -5598,9 +6293,15 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
   const systemPrompt = (session && session.mode === 'mock')
     ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(session.examId))
     : buildQuizSystemPrompt(exam.code, exam.shortLabel);
-  const userPrompt = isDashboardQuiz
+  // Rotate resources across the questions of a multi-question session.
+  const resources = isDashboardQuiz
+    ? []
+    : pickQuizResources(findExamTask(exam, taskId), session?.currentIndex || 0);
+  const userPrompt = (isDashboardQuiz
     ? buildGeneralQuizUserPrompt(exam.code, null)
-    : buildQuizUserPrompt(taskTitle, taskContext);
+    : buildQuizUserPrompt(taskTitle, taskContext))
+    + buildResourceGroundingHint(resources)
+    + buildAnswerPositionHint(assignAnswerLetters(1)[0]);
 
   let response = '';
 
@@ -5644,6 +6345,8 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
 
   if (parsed) {
     parsed.domainId = domainId ?? null;
+    parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
+    if (onQuestionGenerated) await onQuestionGenerated(parsed);
     // Render interactive quiz UI
     renderInteractiveQuiz({ els, quiz: parsed });
     return true;
@@ -5666,7 +6369,11 @@ async function generateQuiz({ els, exam, taskTitle, taskContext, session, isDash
 
 function showQuizSummary({ els, session }) {
   if (!session) return;
+  if (session.attemptId) finishAttempt(session.attemptId, { maxCombo: session.maxCombo }).catch(() => {});
   const summary = getSessionSummary(session);
+  if (session.setId) {
+    recordLearningEvent({ type: 'set_completed', examId: session.examId, mode: session.mode, setId: session.setId, score: summary.accuracy, total: summary.total });
+  }
   const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single;
 
   // Hide question area, show summary

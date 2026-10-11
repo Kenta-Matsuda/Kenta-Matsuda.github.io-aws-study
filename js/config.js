@@ -44,3 +44,8 @@ export const AI_RELIABILITY_CONFIG = {
   // AIの温度パラメータ (低い=より保守的な回答)
   temperature: 0.3,
 };
+
+// フィードバック収集バックエンド（infra/feedback, issue #162 / #167）の Lambda Function URL。
+// 空文字ならバックエンド未デプロイとして扱い、フィードバックは従来どおり GitHub の
+// 事前入力 issue 画面へ、Good/Bad 投票は端末内（localStorage）のみに保存します。
+export const FEEDBACK_API_URL = 'https://wneqwkukpmgsg2jdl7tstu3rcu0jezij.lambda-url.ap-northeast-1.on.aws';

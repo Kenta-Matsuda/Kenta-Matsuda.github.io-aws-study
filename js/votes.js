@@ -1,3 +1,5 @@
+import { queueVoteEvent } from './feedbackApi.js';
+
 const VOTE_STORAGE_KEY = 'asn_votes_v1';
 
 function safeLocalStorageGetItem(key) {
@@ -74,6 +76,8 @@ export function clearVote({ targetType, targetId, meta }) {
     delete s.votes[key];
   }
   saveVoteState(s);
+  // #167: mirror the change to the feedback backend (no-op when not deployed).
+  queueVoteEvent({ targetType, targetId: id, action: 'clear', value: existing, meta });
 
   return { ok: true, cleared: true, previous: existing };
 }
@@ -97,6 +101,7 @@ export function submitVote({ targetType, targetId, value, meta }) {
     meta: meta && typeof meta === 'object' ? meta : undefined,
   };
   saveVoteState(s);
+  queueVoteEvent({ targetType, targetId: id, action: 'set', value: v, meta });
 
   const updated = Boolean(existing && existing !== v);
 

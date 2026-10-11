@@ -107,6 +107,12 @@
       "title": "ドメイン別スキル",
       "placeholder": "クイズに回答するとスキルチャートが表示されます"
     },
+    "missions": {
+      "title": "ミッション",
+      "badge": "APIキー不要",
+      "subtitle": "ミッションをクリアしてXPを獲得しよう",
+      "toastTitle": "ミッション達成！"
+    },
     "examDate": {
       "titleShort": "受験予定日",
       "title": "{{exam}} の受験予定日",
@@ -262,7 +268,19 @@
     "sent": "Issue 作成画面を新しいタブで開きました。内容を確認して送信してください。",
     "sentWithImages": "Issue 作成画面を新しいタブで開きました。本文に画像を貼り付けてから送信してください。",
     "validationEmpty": "フィードバック内容を入力してください。",
-    "validationLength": "1000文字以内で入力してください。"
+    "validationLength": "1000文字以内で入力してください。",
+    "directDescription": "このアプリの改善に向けたご意見・ご要望をお聞かせください。「送信」を押すと、GitHub アカウント無しでそのまま開発者に届きます（公開の GitHub Issue として登録されます）。",
+    "directLead": "アカウント不要で送信できます",
+    "directNote": "送信内容は公開の GitHub Issue として掲載されます（添付画像も公開されます）。個人情報や API キーなどが写り込まないようご注意ください。自分の GitHub アカウントで投稿したい場合は「GitHub で投稿」を使ってください。",
+    "directImageHelp": "画像は 3 枚まで一緒に送信できます（送信前に端末内で縮小し、位置情報などのメタデータは削除されます）。",
+    "sendDirect": "送信",
+    "postOnGithub": "GitHub で投稿",
+    "sending": "送信中…",
+    "sentDirect": "送信しました。ご意見ありがとうございます！",
+    "sentDirectImagesSkipped": "送信しました（画像 {{count}} 枚は送信できませんでした）。ご意見ありがとうございます！",
+    "viewIssue": "登録された Issue を見る",
+    "sendFailed": "送信できませんでした。時間をおいて再度お試しいただくか、「GitHub で投稿」または「テキストをコピー」をご利用ください。",
+    "sendRateLimited": "短時間に送信が集中しています。10 分ほど時間をおいてから再度お試しください。"
   },
   "feedbackNudge": {
     "title": "ひとことフィードバックしませんか？",
@@ -303,8 +321,32 @@
     "link": "URL遷移",
     "explain": "AI解説",
     "quiz": "AI作問",
+    "mission": "ミッション達成",
     "xp": "XP",
     "noHistory": "まだ獲得履歴がありません"
+  },
+  "missions": {
+    "period": {
+      "daily": "デイリー",
+      "weekly": "ウィークリー",
+      "monthly": "マンスリー"
+    },
+    "metric": {
+      "quiz": "クイズ回答",
+      "correct": "クイズ正解",
+      "link": "リソース閲覧",
+      "xp": "XP獲得"
+    },
+    "reward": "+{{xp}} XP",
+    "toast": "「{{mission}}」を達成（+{{xp}} XP）",
+    "items": {
+      "daily_quiz_3": "クイズに3問回答する",
+      "daily_correct_1": "クイズに1問正解する",
+      "daily_link_1": "学習リソースを1つ開く",
+      "weekly_quiz_20": "今週クイズに20問回答する",
+      "weekly_correct_10": "今週クイズに10問正解する",
+      "monthly_xp_500": "今月500 XPを獲得する"
+    }
   },
   "greeting": {
     "morning": "おはようございます。",
@@ -342,12 +384,13 @@
   },
   "batch": {
     "alreadyInProgress": "既にバッチ生成が進行中です。完了するまでお待ちください。",
-    "confirmStart": "本番模擬試験を「Gemini Batch API」で生成します。\n\n完了まで数分〜数十分かかる場合があります。このタブ／ブラウザを閉じると生成は中断されます。\n\n続行しますか？",
+    "confirmStart": "本番模擬試験を「Gemini Batch API」で生成します。\n\n完了まで数分〜数十分かかる場合があります。タブやブラウザを閉じても生成は続き、次に開いたときに結果を受け取ります。\n\n続行しますか？",
     "ready": "本番模擬試験の準備ができました",
     "failed": "生成に失敗しました",
     "generating": "本番模擬試験を生成中",
     "requesting": "バッチAPIにリクエスト中…",
-    "warning": "⚠️ 完了まで数分〜数十分かかる場合があります。このタブ／ブラウザを閉じると生成は中断されます。",
+    "warning": "ℹ️ 完了まで数分〜数十分かかる場合があります。タブやブラウザを閉じても生成は続き、次に開いたときに結果を受け取ります。",
+    "resuming": "前回のバッチ生成を再開しています…",
     "startQuiz": "クイズを開始する",
     "stateWaiting": "待機中",
     "stateGenerating": "生成中",
@@ -421,5 +464,25 @@
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
+  },
+  "examSets": {
+    "title": "問題セット",
+    "open": "問題セット",
+    "hint": "生成された問題は 1 問ごとに保存されるため、途中で中断したセットも開始できます。",
+    "empty": "保存された問題セットはまだありません。",
+    "emptyHint": "クイズを生成すると、ここに表示されます。",
+    "start": "開始",
+    "retry": "再挑戦",
+    "confirmDelete": "この問題セットと受験記録を削除しますか？",
+    "progress": "{{done}} / {{requested}} 問",
+    "attempts": "受験 {{count}} 回",
+    "status": {
+      "planning": "計画中",
+      "generating": "生成中",
+      "judging": "査読中",
+      "ready": "準備完了",
+      "partial": "一部のみ",
+      "failed": "失敗"
+    }
   }
 }
