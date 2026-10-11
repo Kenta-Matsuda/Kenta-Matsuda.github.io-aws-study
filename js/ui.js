@@ -78,6 +78,7 @@ import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { getRegisteredLocaleCodes, getLocaleLabel } from './localeRegistry.js';
+import { recordLearningEvent } from './learningEvents.js';
 import {
   PLANNER_MIN_QUESTIONS,
   buildExamBlueprint,
@@ -418,6 +419,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     } catch (err) {
       console.warn('[examSets] append failed:', err);
     }
+    // Learning event (#225 §9): ids only, no question text.
+    recordLearningEvent({
+      type: 'question_generated', examId: session.examId, mode: session.mode, setId: session.setId,
+      questionId: question.id, domainId: question.domainId, taskId: question.taskId, unitId: question.unitId,
+      judgeScore: question.judge?.score,
+    });
   }
 
   async function finalizeSessionSet(session, metrics = {}) {
@@ -1981,6 +1988,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       elapsedMs,
     });
     recordSessionAnswer(quizSession, quiz, { userAnswer: answerIndex, isCorrect, elapsedMs, xpEarned: result.xpEarned });
+    recordLearningEvent({
+      type: 'question_answered', examId: resultExamId, mode: quizSession?.mode, setId: quizSession?.setId,
+      questionId: quiz.id, domainId: quizDomainId, taskId: lastAiRequest?.taskId || quiz.taskId, unitId: quiz.unitId,
+      isCorrect, userAnswer: answerIndex, elapsedMs,
+    });
 
     renderXpDashboard({ els, exam, state: appState });
     renderLearningStatus({ els, exam, state: appState });
@@ -6451,6 +6463,9 @@ function showQuizSummary({ els, session }) {
   if (!session) return;
   if (session.attemptId) finishAttempt(session.attemptId, { maxCombo: session.maxCombo }).catch(() => {});
   const summary = getSessionSummary(session);
+  if (session.setId) {
+    recordLearningEvent({ type: 'set_completed', examId: session.examId, mode: session.mode, setId: session.setId, score: summary.accuracy, total: summary.total });
+  }
   const config = QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single;
 
   // Hide question area, show summary
