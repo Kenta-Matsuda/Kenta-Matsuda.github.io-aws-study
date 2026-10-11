@@ -2,6 +2,7 @@ import { getPublicExams, getExamById, resolveExamFromHash } from './exams.js';
 import { DEFAULT_EXAM_ID } from './config.js';
 import { initApp } from './ui.js';
 import { initI18n, setLocale, getLocale, translateStaticElements } from './i18n.js';
+import { getRegisteredLocaleCodes, nextLocale } from './localeRegistry.js';
 
 function handleBootError(e) {
   // index.html のフォールバックバナーで表示する
@@ -14,13 +15,15 @@ function handleBootError(e) {
 
 async function loadLocales() {
   const base = import.meta.url ? new URL('.', import.meta.url).href : './js/';
-  const [jaRes, enRes, urlsRes] = await Promise.all([
-    fetch(`${base}locales/ja.json`),
-    fetch(`${base}locales/en.json`),
-    fetch(`${base}locales/urls.json`),
+  // Load every registered locale dictionary (js/localeRegistry.js) plus the
+  // URL map. initI18n derives the supported set from these keys.
+  const codes = getRegisteredLocaleCodes();
+  const [dicts, urls] = await Promise.all([
+    Promise.all(codes.map((code) => fetch(`${base}locales/${code}.json`).then((r) => r.json()))),
+    fetch(`${base}locales/urls.json`).then((r) => r.json()),
   ]);
-  const [ja, en, urls] = await Promise.all([jaRes.json(), enRes.json(), urlsRes.json()]);
-  return { ja, en, urls };
+  const localeData = Object.fromEntries(codes.map((code, i) => [code, dicts[i]]));
+  return { localeData, urls };
 }
 
 /**
@@ -34,8 +37,8 @@ function getInitialExamId() {
 
 async function boot() {
   // Initialize i18n before app to ensure t() is ready
-  const { ja, en, urls } = await loadLocales();
-  initI18n({ ja, en }, urls);
+  const { localeData, urls } = await loadLocales();
+  initI18n(localeData, urls);
   translateStaticElements();
 
   // Wire up the language toggle button
@@ -45,7 +48,7 @@ async function boot() {
     // Set initial label
     if (langLabel) langLabel.textContent = getLocale().toUpperCase();
     langBtn.addEventListener('click', () => {
-      const next = getLocale() === 'ja' ? 'en' : 'ja';
+      const next = nextLocale(getLocale());
       setLocale(next);
       if (langLabel) langLabel.textContent = next.toUpperCase();
     });

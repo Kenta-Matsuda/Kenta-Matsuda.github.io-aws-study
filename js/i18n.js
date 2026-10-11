@@ -1,39 +1,68 @@
 /**
  * Internationalization (i18n) module for AWS Study Navigator.
- * Supports Japanese (ja) and English (en).
+ *
+ * N-locale-capable core. The engine itself is locale-agnostic: the set of
+ * supported locales is derived at runtime from the locale dictionaries passed
+ * to `initI18n`, so adding a language only requires a locale dictionary (plus,
+ * for content, human-verified translations) rather than changes to this file.
+ *
+ * The site currently ships Japanese (`ja`) and English (`en`). All observable
+ * ja/en behavior (default `en`, `navigator.language === 'ja'` detection,
+ * ja↔en URL localization and English fallback) is preserved byte-for-byte.
+ *
+ * See issue #197 and docs/action-required/issue-197-multilanguage-support.md
+ * ("i18n コアが 2 言語をハードコードしている" — layer 1) for the scope of this
+ * generalization. Adding real languages further requires locale dictionaries
+ * and human-verified content translation, which remain out of scope here.
  */
 
 const LOCALE_STORAGE_KEY = 'asn_locale';
-const SUPPORTED_LOCALES = ['ja', 'en'];
+// Locales assumed when no locale data is supplied (legacy default shape).
+const DEFAULT_SUPPORTED_LOCALES = ['ja', 'en'];
 const DEFAULT_LOCALE = 'en';
+// Locale used by t() when a key is missing in the current locale. English is
+// the guaranteed-complete dictionary, matching the historical ja/en fallback.
+const FALLBACK_LOCALE = 'en';
 
 let currentLocale = DEFAULT_LOCALE;
-let locales = {}; // { ja: {...}, en: {...} }
-let urlMap = {}; // Japanese URL → English URL mapping
+// Supported locales are derived from the locale data passed to initI18n and
+// default to ['ja', 'en'] when none is supplied (legacy shape).
+let supportedLocales = DEFAULT_SUPPORTED_LOCALES.slice();
+let locales = {}; // { <lang>: {...}, ... } (currently { ja, en })
+let urlMap = {}; // Japanese (base) URL → alternate-locale URL mapping (currently ja → en)
 let listeners = [];
 
 /**
  * Initialize i18n with locale data.
- * @param {{ ja: object, en: object }} localeData
- * @param {object} [urlMapping] - Japanese URL to English URL mapping
+ *
+ * Accepts either the legacy 2-language shape `{ ja: {...}, en: {...} }` or a
+ * general map of `{ <lang>: {...}, ... }`. Supported locales are derived from
+ * the keys of `localeData`, falling back to ['ja', 'en'] when it is empty.
+ *
+ * @param {{ [lang: string]: object }} localeData
+ * @param {object} [urlMapping] - Base (Japanese) URL to alternate-locale URL mapping
  */
 export function initI18n(localeData, urlMapping) {
   locales = localeData || {};
   urlMap = urlMapping || {};
+  const derived = Object.keys(locales);
+  supportedLocales = derived.length ? derived : DEFAULT_SUPPORTED_LOCALES.slice();
   const saved = localStorage.getItem(LOCALE_STORAGE_KEY);
-  if (saved && SUPPORTED_LOCALES.includes(saved)) {
+  if (saved && supportedLocales.includes(saved)) {
     currentLocale = saved;
   } else {
-    // Detect browser language
+    // Detect browser language: use the 2-letter navigator.language when it is
+    // a supported locale, otherwise the default locale. For the current ja/en
+    // set this keeps 'ja' -> 'ja' and everything-else -> 'en' unchanged.
     const browserLang = (navigator.language || '').slice(0, 2);
-    currentLocale = browserLang === 'ja' ? 'ja' : DEFAULT_LOCALE;
+    currentLocale = supportedLocales.includes(browserLang) ? browserLang : DEFAULT_LOCALE;
   }
   applyLocaleToDocument();
 }
 
 /**
  * Get the current locale.
- * @returns {'ja' | 'en'}
+ * @returns {string} e.g. 'ja' | 'en'
  */
 export function getLocale() {
   return currentLocale;
@@ -41,10 +70,10 @@ export function getLocale() {
 
 /**
  * Set the locale and persist to localStorage.
- * @param {'ja' | 'en'} locale
+ * @param {string} locale - must be one of the supported locales
  */
 export function setLocale(locale) {
-  if (!SUPPORTED_LOCALES.includes(locale)) return;
+  if (!supportedLocales.includes(locale)) return;
   currentLocale = locale;
   localStorage.setItem(LOCALE_STORAGE_KEY, locale);
   applyLocaleToDocument();
@@ -61,11 +90,11 @@ export function setLocale(locale) {
  * @returns {string}
  */
 export function t(key, params) {
-  const dict = locales[currentLocale] || locales['en'] || {};
+  const dict = locales[currentLocale] || locales[FALLBACK_LOCALE] || {};
   let value = resolveKey(dict, key);
   if (value === undefined) {
-    // Fallback to English
-    const fallback = locales['en'] || {};
+    // Fallback to the fallback locale (English).
+    const fallback = locales[FALLBACK_LOCALE] || {};
     value = resolveKey(fallback, key);
   }
   if (value === undefined) return key;
@@ -79,17 +108,33 @@ export function t(key, params) {
   return value;
 }
 
+// The base locale whose URL is the default (unmapped) argument to
+// getLocalizedUrl. Japanese is the base: getLocalizedUrl(jaUrl, enUrl) returns
+// jaUrl unless a non-base locale has an explicit or mapped alternate.
+const BASE_URL_LOCALE = 'ja';
+
 /**
- * Get a locale-aware URL. If the current locale is 'en' and an English URL exists, use it.
- * Checks: 1) explicit enUrl parameter, 2) URL mapping table.
- * @param {string} jaUrl - Japanese URL (default)
- * @param {string} [enUrl] - English URL (optional, explicit override)
+ * Get a locale-aware URL.
+ *
+ * The first argument is the base (Japanese) URL and the second is the explicit
+ * alternate-locale (English) URL. When the current locale is the base locale
+ * (`ja`) the base URL is returned unchanged. For any non-base locale the
+ * explicit alternate is preferred, then the `urlMap` lookup, then the base URL
+ * as a final fallback.
+ *
+ * For the current ja/en locale set this is identical to the previous
+ * ja↔en behavior (base `ja` -> jaUrl; `en` -> enUrl, else urlMap[jaUrl], else
+ * jaUrl). Per-locale URL maps (keyed by locale) are a future extension point;
+ * the current `urlMap` remains the ja→en map.
+ *
+ * @param {string} jaUrl - base (Japanese) URL (default)
+ * @param {string} [enUrl] - alternate-locale (English) URL (optional, explicit override)
  * @returns {string}
  */
 export function getLocalizedUrl(jaUrl, enUrl) {
-  if (currentLocale === 'en') {
+  if (currentLocale !== BASE_URL_LOCALE) {
     if (enUrl) return enUrl;
-    // Check URL mapping
+    // Check URL mapping (currently the ja → en map)
     const mapped = urlMap[jaUrl];
     if (mapped) return mapped;
   }
@@ -121,7 +166,12 @@ function resolveKey(dict, key) {
 }
 
 function applyLocaleToDocument() {
-  document.documentElement.lang = currentLocale === 'ja' ? 'ja' : 'en';
+  // Set documentElement.lang to the current locale when it is a supported
+  // 2-letter code, otherwise the default locale. For the ja/en set this keeps
+  // 'ja' -> 'ja' and 'en' -> 'en' unchanged.
+  const isTwoLetter = /^[a-z]{2}$/.test(currentLocale);
+  document.documentElement.lang =
+    isTwoLetter && supportedLocales.includes(currentLocale) ? currentLocale : DEFAULT_LOCALE;
 }
 
 /**

@@ -479,12 +479,29 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
   );
 }
 
+function taskStatementLines(task, isEn) {
+  const raw = isEn ? (task.descriptionEn || task.description) : (task.description || task.descriptionEn);
+  if (Array.isArray(raw)) return raw.map((l) => String(l).trim()).filter(Boolean);
+  return raw ? [String(raw).trim()] : [];
+}
+
 /**
  * Build a general user prompt for cross-domain quiz (dashboard mode).
  * When targetDomain is provided, the prompt is scoped to that domain's topics.
+ * When targetTask is also provided (from assignTaskTargets, #225), the prompt
+ * names that task and its task statement instead of letting the model pick.
  */
-export function buildGeneralQuizUserPrompt(examCode, targetDomain) {
+export function buildGeneralQuizUserPrompt(examCode, targetDomain, targetTask) {
   if (getLocale() === 'en') {
+    if (targetDomain && targetTask) {
+      const name = targetDomain.title || targetDomain.jpTitle;
+      const taskName = targetTask.title || targetTask.jpTitle;
+      let prompt = `Create 1 question from the "${name}" domain of the ${examCode} exam in the specified JSON format, on Task ${targetTask.id}: "${taskName}".`;
+      const lines = taskStatementLines(targetTask, true);
+      if (lines.length) prompt += `\n\n[Task Statement]\n${lines.join('\n')}`;
+      prompt += '\n\nPick a knowledge/skill item from the task statement that differs from previous questions.';
+      return prompt;
+    }
     if (targetDomain) {
       const name = targetDomain.title || targetDomain.jpTitle;
       let prompt = `Create 1 question from the "${name}" domain of the ${examCode} exam in the specified JSON format. Use a different AWS service/topic than last time.`;
@@ -495,6 +512,15 @@ export function buildGeneralQuizUserPrompt(examCode, targetDomain) {
       return prompt;
     }
     return `Create 1 question from a random domain/topic of the ${examCode} exam in the specified JSON format. Cover a different domain, topic, and AWS service each time — do not repeat.`;
+  }
+  if (targetDomain && targetTask) {
+    const name = targetDomain.jpTitle || targetDomain.title;
+    const taskName = targetTask.jpTitle || targetTask.title;
+    let prompt = `${examCode}試験のドメイン「${name}」のタスク ${targetTask.id}「${taskName}」から問題を1問、指定のJSON形式で作成してください。`;
+    const lines = taskStatementLines(targetTask, false);
+    if (lines.length) prompt += `\n\n【タスクステートメント】\n${lines.join('\n')}`;
+    prompt += '\n\nタスクステートメントの対象知識・スキルのうち、前の問題と異なる項目を選んで出題してください。';
+    return prompt;
   }
   if (targetDomain) {
     const name = targetDomain.jpTitle || targetDomain.title;
@@ -671,6 +697,162 @@ export function assignDomainTargets(domains, questionCount) {
   }
 
   return targets;
+}
+
+// ─── Exam blueprint (issue #225, Step A) ────────────────────
+// Deterministic parts of mock-exam assembly that need no LLM: which task each
+// question covers, and where the correct answer sits. `rng` is injectable so
+// the allocation can be tested with a fixed sequence.
+
+function shuffleInPlace(arr, rng) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+/**
+ * Distribute questions across domains by weight (as assignDomainTargets) and,
+ * within each domain, evenly across its task statements, so every task gets
+ * covered before any task repeats. Returns one `{ domain, task }` per question,
+ * shuffled. `task` is null for domains without tasks.
+ * @param {Array<{ weight?: number, tasks?: object[] }>} domains
+ * @param {number} questionCount
+ * @param {() => number} [rng]
+ * @returns {Array<{ domain: object, task: object|null } | null>}
+ */
+export function assignTaskTargets(domains, questionCount, rng = Math.random) {
+  const domainSlots = assignDomainTargets(domains, questionCount);
+  const tasksByDomain = new Map();
+  const targets = domainSlots.map((domain) => {
+    if (!domain) return null;
+    if (!tasksByDomain.has(domain)) {
+      const tasks = Array.isArray(domain.tasks) ? domain.tasks.slice() : [];
+      tasksByDomain.set(domain, { order: shuffleInPlace(tasks, rng), next: 0 });
+    }
+    const entry = tasksByDomain.get(domain);
+    const task = entry.order.length ? entry.order[entry.next++ % entry.order.length] : null;
+    return { domain, task };
+  });
+  return shuffleInPlace(targets, rng);
+}
+
+/**
+ * Pre-assign the correct-answer letter for each question so letters are
+ * balanced (each of A-D used count/4 times, remainder random) and shuffled.
+ * Models otherwise favor one position. The letter is asked for in the prompt
+ * rather than shuffling choices afterwards, because explanations refer to
+ * choices by letter.
+ * @param {number} questionCount
+ * @param {() => number} [rng]
+ * @returns {string[]}
+ */
+export function assignAnswerLetters(questionCount, rng = Math.random) {
+  const letters = ['A', 'B', 'C', 'D'];
+  const out = [];
+  for (let i = 0; i < questionCount; i++) out.push(letters[i % letters.length]);
+  // Rotate the start so the remainder slots are not always A/B/C.
+  const offset = Math.floor(rng() * letters.length);
+  return shuffleInPlace(out.map((l) => letters[(letters.indexOf(l) + offset) % letters.length]), rng);
+}
+
+/**
+ * Prompt suffix asking the model to place the correct answer at `letter`.
+ * @param {string} letter
+ * @returns {string}
+ */
+export function buildAnswerPositionHint(letter) {
+  if (!/^[A-D]$/.test(String(letter || ''))) return '';
+  if (getLocale() === 'en') {
+    return `\n\n[Answer position] Place the correct answer at choice ${letter} (set "correct": "${letter}"), and make the explanation refer to the choices by these letters.`;
+  }
+  return `\n\n【正解の位置】正解は選択肢 ${letter} に配置してください（"correct": "${letter}"）。解説の選択肢記号もこの並びに合わせてください。`;
+}
+
+// ─── Recommended-resource grounding (issue #225, Step B) ────
+// Pick a task's recommended resources deterministically and pass their
+// title/URL/note to the model, so questions and explanations lean on the
+// site's curated sources. Page bodies are NOT fetched here (Step C).
+
+// Lower = preferred. Groups not listed (Black Belt overview links, training,
+// hands-on) are not useful as citations and are skipped.
+const RESOURCE_GROUP_PRIORITY = {
+  docs: 0,
+  whitepapers: 1,
+  'builders-library': 1,
+  'knowledge-center': 1,
+  'what-is': 1,
+  blogs: 2,
+  're:post': 2,
+  're:posts': 2,
+  products: 3,
+};
+
+/**
+ * A task's citable resource items, best first: by group priority, then
+ * `recommend: true`, then original order.
+ * @param {{ resources?: Array<{ key: string, items?: object[] }> }} task
+ * @returns {object[]}
+ */
+export function rankTaskResources(task) {
+  const ranked = [];
+  (task?.resources || []).forEach((group) => {
+    const priority = RESOURCE_GROUP_PRIORITY[group?.key];
+    if (priority === undefined) return;
+    (group.items || []).forEach((item) => {
+      if (item && item.url) ranked.push({ item, priority, rec: item.recommend === true ? 0 : 1, order: ranked.length });
+    });
+  });
+  ranked.sort((a, b) => a.priority - b.priority || a.rec - b.rec || a.order - b.order);
+  return ranked.map((r) => r.item);
+}
+
+/**
+ * Up to `limit` resources for the `occurrence`-th question on this task. The
+ * window advances with each occurrence so repeated questions on one task draw
+ * on different resources.
+ * @param {object} task
+ * @param {number} [occurrence]
+ * @param {number} [limit]
+ * @returns {object[]}
+ */
+export function selectTaskResources(task, occurrence = 0, limit = 3) {
+  const ranked = rankTaskResources(task);
+  if (ranked.length <= limit) return ranked;
+  const start = (occurrence * limit) % ranked.length;
+  return Array.from({ length: limit }, (_, i) => ranked[(start + i) % ranked.length]);
+}
+
+/**
+ * Prompt suffix listing the reference resources (already localized
+ * `{ title, url, note }`).
+ * @param {Array<{ title: string, url: string, note?: string }>} resources
+ * @returns {string}
+ */
+export function buildResourceGroundingHint(resources) {
+  if (!Array.isArray(resources) || resources.length === 0) return '';
+  const lines = resources.map((r, i) => `${i + 1}. ${r.title} — ${r.url}${r.note ? ` (${r.note})` : ''}`).join('\n');
+  if (getLocale() === 'en') {
+    return `\n\n[Reference Resources]\n${lines}\nBase the question and explanation on what these official resources cover. Cite the URL(s) you relied on from this list in the explanation; do not invent other URLs.`;
+  }
+  return `\n\n【参照リソース】\n${lines}\nこれらの公式リソースが扱う内容に基づいて問題と解説を作成し、解説には根拠にした URL をこの一覧から引用してください（一覧にない URL を作らないこと）。`;
+}
+
+/**
+ * If the explanation cites none of the given resources, append them as
+ * "recommended resources" so the learner always gets the curated links.
+ * @param {string} explanation
+ * @param {Array<{ title: string, url: string }>} resources
+ * @returns {string}
+ */
+export function appendMissingResourceRefs(explanation, resources) {
+  const text = String(explanation || '');
+  if (!Array.isArray(resources) || resources.length === 0) return text;
+  if (resources.some((r) => r.url && text.includes(r.url))) return text;
+  const heading = getLocale() === 'en' ? 'Recommended resources' : '参考リソース';
+  const list = resources.map((r) => `- [${r.title}](${r.url})`).join('\n');
+  return `${text}\n\n**${heading}**\n${list}`;
 }
 
 /**
