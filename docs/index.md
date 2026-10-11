@@ -33,6 +33,7 @@
 - [Gemini Batch のジョブを保存し、ブラウザを閉じても生成が続くようにする (#225 / PR 3)](issues/batch-resume-225.md)
 - [問題生成を多段化する: 設計図 → 計画 → 作問 → 重複検査 (#225 / PR 4)](issues/exam-pipeline-engine-225.md)
 - [カード: 問題生成が参照する「何を問うか」をデータ化する (#225 / PR 5)](issues/cards-225.md)
+- [生成した問題の品質評価: 決定的チェック・Solver・Judge・Editor と回帰評価 (#225 / PR 6)](issues/judge-225.md)
 
 ## LLM Wiki（docs/wiki/）
 

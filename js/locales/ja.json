@@ -454,6 +454,10 @@
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
   },
   "examSets": {
+    "metrics": {
+      "judge": "査読通過 {{passed}}/{{judged}}",
+      "cluster": "正解の重複 最大 {{n}}"
+    },
     "title": "問題セット",
     "open": "問題セット",
     "hint": "生成された問題は 1 問ごとに保存されるため、途中で中断したセットも開始できます。",
