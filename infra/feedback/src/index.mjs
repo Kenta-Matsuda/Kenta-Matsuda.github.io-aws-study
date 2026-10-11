@@ -10,6 +10,9 @@
 //        embedded in the issue through CloudFront.
 //   POST /votes     { events: [{ targetType, targetId, action, value, at, meta }] }
 //     -> appends Good/Bad vote events to DynamoDB for later analysis.
+//   POST /events    { events: [{ type, at, examId, mode, setId, questionId, taskId, unitId, ... }] }
+//     -> appends per-question learning events (issue #225 design §9) for
+//        aggregation by exam + unit/task. Ids only; no question text.
 //   GET  /health
 //
 // CORS is handled by the Function URL config (template.yaml); this handler
@@ -25,6 +28,7 @@ export const FEEDBACK_MAX_LENGTH = 1000;
 export const MAX_URLS_IN_FEEDBACK = 3;
 export const MIN_COMPOSE_MS = 2000;
 export const MAX_VOTE_EVENTS = 50;
+export const MAX_LEARNING_EVENTS = 100;
 export const MAX_IMAGES = 3;
 export const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 // Function URLs accept up to 6 MB; 3 base64 images of 1.5 MB fit under this.
@@ -40,11 +44,13 @@ const IMAGE_SIGNATURES = [
 
 const FEEDBACK_TTL_DAYS = 400;
 const VOTE_TTL_DAYS = 800;
+const LEARNING_EVENT_TTL_DAYS = 800;
 
 // Per-IP limits: [bucket seconds, max requests per bucket]
 const RATE_LIMITS = {
   feedback: [600, 3],
   votes: [60, 30],
+  events: [60, 60],
 };
 
 const CATEGORIES = {
@@ -175,6 +181,44 @@ export function validateVotes(body) {
     }
     return { targetType, targetId, action, value, at, meta };
   });
+}
+
+const LEARNING_EVENT_TYPES = ['question_generated', 'question_shown', 'question_answered', 'question_voted', 'set_completed'];
+// Wire field (camelCase, design §9) -> stored attribute (snake_case, like votes/feedback).
+const LEARNING_EVENT_ID_KEYS = { mode: 'mode', setId: 'set_id', questionId: 'question_id', domainId: 'domain_id', taskId: 'task_id', unitId: 'unit_id', cardId: 'card_id', reason: 'reason' };
+const LEARNING_EVENT_NUM_KEYS = { userAnswer: ['user_answer', -1, 10], elapsedMs: ['elapsed_ms', 0, 3600000], judgeScore: ['judge_score', 0, 25], score: ['score', 0, 1], total: ['total', 0, 500], schema: ['schema', 0, 100] };
+
+// Learning events (issue #225 §9): a fixed allow-list of types and fields, ids
+// clipped, numbers range-checked. Anything else is dropped, never stored.
+// Invalid events are rejected INDIVIDUALLY (not the whole batch): a client
+// retries only on transient errors, so one bad event must not block the rest.
+export function validateLearningEvents(body) {
+  const events = Array.isArray(body.events) ? body.events : null;
+  if (!events || events.length === 0) throw new HttpError(400, 'no_events');
+  if (events.length > MAX_LEARNING_EVENTS) throw new HttpError(400, 'too_many_events');
+
+  const valid = [];
+  let rejected = 0;
+  for (const e of events) {
+    const type = String(e?.type || '');
+    const examId = String(e?.examId || '').trim().toLowerCase();
+    if (!LEARNING_EVENT_TYPES.includes(type) || !/^[a-z0-9_-]{1,32}$/.test(examId)) { rejected += 1; continue; }
+    const at = Number.isNaN(Date.parse(e?.at)) ? null : new Date(e.at).toISOString();
+    const out = { type, exam_id: examId, at };
+    for (const [key, attr] of Object.entries(LEARNING_EVENT_ID_KEYS)) {
+      const v = e?.[key];
+      if (v !== undefined && v !== null && String(v) !== '') out[attr] = clip(v, 120);
+    }
+    for (const [key, [attr, min, max]] of Object.entries(LEARNING_EVENT_NUM_KEYS)) {
+      const n = Number(e?.[key]);
+      if (e?.[key] !== undefined && e?.[key] !== null && Number.isFinite(n) && n >= min && n <= max) out[attr] = n;
+    }
+    if (typeof e?.isCorrect === 'boolean') out.is_correct = e.isCorrect;
+    if (e?.value === 'good' || e?.value === 'bad') out.value = e.value;
+    valid.push(out);
+  }
+  if (valid.length === 0) throw new HttpError(400, 'no_valid_events');
+  return { events: valid, rejected };
 }
 
 export function buildIssue({ category, text, lang, appVersion, page, imageUrls = [] }) {
@@ -335,6 +379,35 @@ export function createHandler(deps) {
     return json(202, { ok: true, accepted: items.length });
   }
 
+  async function handleLearningEvents(body, ipHash) {
+    const { events, rejected } = validateLearningEvents(body);
+    await enforceRateLimit('events', ipHash);
+
+    const ts = now();
+    const ttl = String(Math.floor(ts.getTime() / 1000) + LEARNING_EVENT_TTL_DAYS * 86400);
+    const items = events.map((e) => {
+      // Partition by exam + type; the unit/task ids are attributes so an export
+      // can aggregate per unit (stable across users) rather than per question.
+      const item = {
+        pk: { S: `event#${e.exam_id}#${e.type}` },
+        sk: { S: `${e.at || ts.toISOString()}#${randomSuffix()}` },
+        type: { S: 'learning_event' },
+        event_type: { S: e.type },
+        exam_id: { S: e.exam_id },
+        received_at: { S: ts.toISOString() },
+        ip_hash: { S: ipHash },
+        ttl: { N: ttl },
+      };
+      for (const attr of Object.values(LEARNING_EVENT_ID_KEYS)) if (e[attr] !== undefined) item[attr] = { S: e[attr] };
+      for (const [attr] of Object.values(LEARNING_EVENT_NUM_KEYS)) if (e[attr] !== undefined) item[attr] = { N: String(e[attr]) };
+      if (e.is_correct !== undefined) item.is_correct = { BOOL: e.is_correct };
+      if (e.value !== undefined) item.value = { S: e.value };
+      return item;
+    });
+    await ddb.batchWrite(table, items);
+    return json(202, { ok: true, accepted: items.length, rejected });
+  }
+
   return async function handler(event) {
     const method = event?.requestContext?.http?.method || 'GET';
     const path = String(event?.rawPath || '/').replace(/\/+$/, '') || '/';
@@ -357,6 +430,7 @@ export function createHandler(deps) {
 
       if (path === '/feedback') return await handleFeedback(body, ipHash);
       if (path === '/votes') return await handleVotes(body, ipHash);
+      if (path === '/events') return await handleLearningEvents(body, ipHash);
       throw new HttpError(404, 'not_found');
     } catch (err) {
       if (err instanceof HttpError) return json(err.status, { ok: false, error: err.code });
