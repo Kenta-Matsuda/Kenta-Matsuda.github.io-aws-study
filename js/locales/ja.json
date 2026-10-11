@@ -451,5 +451,25 @@
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
+  },
+  "examSets": {
+    "title": "問題セット",
+    "open": "問題セット",
+    "hint": "生成された問題は 1 問ごとに保存されるため、途中で中断したセットも開始できます。",
+    "empty": "保存された問題セットはまだありません。",
+    "emptyHint": "クイズを生成すると、ここに表示されます。",
+    "start": "開始",
+    "retry": "再挑戦",
+    "confirmDelete": "この問題セットと受験記録を削除しますか？",
+    "progress": "{{done}} / {{requested}} 問",
+    "attempts": "受験 {{count}} 回",
+    "status": {
+      "planning": "計画中",
+      "generating": "生成中",
+      "judging": "査読中",
+      "ready": "準備完了",
+      "partial": "一部のみ",
+      "failed": "失敗"
+    }
   }
 }
