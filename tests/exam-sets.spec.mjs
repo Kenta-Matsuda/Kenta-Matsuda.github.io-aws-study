@@ -87,10 +87,17 @@ const STATE = {
 
 function stubGemini(page, { delayMs = 0 } = {}) {
   let n = 0;
+  const WORDS = ['Amazon S3', 'DynamoDB', 'Lambda', 'CloudFront', 'Route 53', 'Kinesis', 'Aurora', 'EventBridge', 'Step Functions', 'Transit Gateway', 'Cognito', 'Glue', 'Athena', 'Redshift', 'SQS', 'SNS', 'ECS', 'EKS', 'Fargate', 'Bedrock'];
   return page.route('**generativelanguage.googleapis.com/**', async (route) => {
+    // The planner (stage 1) is a non-streaming call; answer it with an empty plan.
+    if (!route.request().url().includes('streamGenerateContent')) {
+      await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: '[]' }] } }] } });
+      return;
+    }
     n += 1;
     if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
-    const quiz = JSON.stringify({ question: `Generated question ${n}?`, choices: ['A. a', 'B. b', 'C. c', 'D. d'], correct: 'A', explanation: `Explanation ${n}` });
+    const w = WORDS[n % WORDS.length];
+    const quiz = JSON.stringify({ question: `Generated question ${n}: ${w}?`, choices: [`A. ${w}`, 'B. beta', 'C. gamma', 'D. delta'], correct: 'A', explanation: `Explanation ${n}` });
     await route.fulfill({
       status: 200,
       headers: { 'content-type': 'text/event-stream; charset=utf-8' },

@@ -31,6 +31,7 @@
 - [模擬試験の出題構成・正解位置・参照リソースをコードで決める (#225 Step A / B)](issues/exam-blueprint-225.md)
 - [問題セットを IndexedDB に保存し、1 問ごとに保存・中断から再開できるようにする (#225 / PR 2)](issues/exam-sets-225.md)
 - [Gemini Batch のジョブを保存し、ブラウザを閉じても生成が続くようにする (#225 / PR 3)](issues/batch-resume-225.md)
+- [問題生成を多段化する: 設計図 → 計画 → 作問 → 重複検査 (#225 / PR 4)](issues/exam-pipeline-engine-225.md)
 
 ## LLM Wiki（docs/wiki/）
 
