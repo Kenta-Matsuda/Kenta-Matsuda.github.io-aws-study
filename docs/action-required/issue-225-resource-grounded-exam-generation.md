@@ -61,10 +61,10 @@ issue の指摘どおり、**LLM が要らない工程はコードで決定的�
 > ✅ **2026-10-12: プロダクト判断（決定 1〜4）は確定し、正式な設計書 [`docs/design/exam-generation-pipeline.md`](../../docs/design/exam-generation-pipeline.md) に反映した。** 決定内容: 生成は利用者のブラウザ・利用者の API キーで行い、素材（カード）は CI のエージェントが事前にデータ化して人間レビューする／長時間処理は Gemini Batch の連鎖で行い Gemini を標準とする（OpenAI は制約を明示）／Professional の横断問題はケースカードの判断ポイント連結で設計する。以下は設計書 §9 に伴う**残りの要人間対応**。
 
 ⚠️ 要人間対応: AWS操作が必要（問題単位の集計を Amazon Quick で見る）
-- 必要な操作内容: #162/#167 のフィードバック・投票バックエンド（Lambda Function URL + DynamoDB）に、問題単位イベント用の `POST /events` ルートと検証・レート制限を追加しデプロイする。集計用に DynamoDB → CSV のエクスポート経路を用意し、Amazon Quick（QuickSight とは別サービス）で可視化する。
+- 必要な操作内容: #162/#167 のフィードバック・投票バックエンド（Lambda Function URL + DynamoDB）に **`POST /events` ルート（コードは PR 7 で追加: `infra/feedback/src/index.mjs`）** を**デプロイ**する。デプロイ後、`node scripts/export-learning-events.mjs` で DynamoDB → CSV（`learning-events.csv` / `unit-summary.csv`）を書き出し、Amazon Quick（QuickSight とは別サービス）で可視化する。
 - 対象リソース: `infra/feedback/template.yaml` のスタック `aws-study-feedback`（ap-northeast-1）、`FeedbackFunction`、`FeedbackTable`。
-- 想定コマンド: `sam build && sam deploy`（`infra/feedback/`）、`node scripts/export-feedback.mjs` と同様のエクスポートスクリプト。
-- 補足: クライアント側のイベント蓄積と送信口（sink）は設計書 §9 のスキーマで先行実装し、バックエンドができたら接続する。
+- 想定コマンド: `cd infra/feedback && sam build && sam deploy`（既存スタック `aws-study-feedback` の更新。`template.yaml` の変更は不要）、`node scripts/export-learning-events.mjs`。
+- 補足: クライアント側（`js/learningEvents.js`、PR 7）は実装済み。`FEEDBACK_API_URL` が設定されている本番では、Lambda がデプロイされるまで `/events` は 404 を返し、イベントはブラウザ内に保留される（最大 5,000 件）。デプロイ後の訪問で自動送信される。
 
 ## 更新履歴
 
