@@ -109,11 +109,24 @@ test.describe('pre-generation sends assigned task + answer position (#225)', () 
         quizHistory: [],
       }));
     });
+    const plannerPrompts = [];
+    const WORDS = ['Amazon S3', 'DynamoDB', 'Lambda', 'CloudFront', 'Route 53', 'Kinesis', 'Aurora', 'EventBridge', 'Step Functions', 'Transit Gateway', 'Cognito', 'Glue', 'Athena', 'Redshift', 'SQS', 'SNS', 'ECS', 'EKS', 'Fargate', 'Bedrock'];
     await page.route('**generativelanguage.googleapis.com/**', async (route) => {
       const body = route.request().postDataJSON() || {};
       const text = (body.contents || []).flatMap((c) => c.parts || []).map((p) => p.text || '').join('\n');
+      // Stage 1 planner (one non-streaming call): reply with an empty plan so the
+      // writers run on the blueprint alone.
+      if (text.includes('[Exam Plan]')) {
+        plannerPrompts.push(text);
+        await route.fulfill({ json: { candidates: [{ content: { parts: [{ text: '[]' }] } }] } });
+        return;
+      }
       prompts.push(text);
-      const quiz = JSON.stringify({ question: `Q${prompts.length}?`, choices: ['A. a', 'B. b', 'C. c', 'D. d'], correct: 'A', explanation: 'e' });
+      // Distinct answers per call: identical answers would (correctly) trigger
+      // the stage-3 duplicate regeneration and inflate the call count.
+      const n = prompts.length;
+      const w = WORDS[n % WORDS.length];
+      const quiz = JSON.stringify({ question: `Scenario ${n}: ${w}?`, choices: [`A. ${w}`, 'B. beta', 'C. gamma', 'D. delta'], correct: 'A', explanation: 'e' });
       await route.fulfill({
         status: 200,
         headers: { 'content-type': 'text/event-stream; charset=utf-8' },
@@ -127,6 +140,7 @@ test.describe('pre-generation sends assigned task + answer position (#225)', () 
     await page.click('.quiz-mode-card[data-quiz-mode="speed"]');
     await page.click('#quizModeStartBtn');
     await expect.poll(() => prompts.length, { timeout: 20000 }).toBe(10);
+    expect(plannerPrompts).toHaveLength(1);
 
     const letters = [];
     for (const p of prompts) {

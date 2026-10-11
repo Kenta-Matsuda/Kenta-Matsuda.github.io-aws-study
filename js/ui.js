@@ -63,8 +63,6 @@ import {
   buildSpeedQuizSystemPrompt,
   buildMockQuizSystemPrompt,
   buildGeneralQuizUserPrompt,
-  assignTaskTargets,
-  assignAnswerLetters,
   buildAnswerPositionHint,
   selectTaskResources,
   buildResourceGroundingHint,
@@ -81,6 +79,19 @@ import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-
 import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
 import { getRegisteredLocaleCodes, getLocaleLabel } from './localeRegistry.js';
 import { recordLearningEvent } from './learningEvents.js';
+import {
+  PLANNER_MIN_QUESTIONS,
+  buildExamBlueprint,
+  compactBlueprint,
+  buildPlannerPrompt,
+  parsePlan,
+  validatePlan,
+  buildSlotPromptSuffix,
+  buildDuplicateRetryHint,
+  isDuplicateQuestion,
+  correctChoiceText,
+  summarizeDiversity,
+} from './examPipeline.js';
 import {
   SET_STATUS,
   createExamSet,
@@ -1201,55 +1212,70 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(request.examId))
         : buildQuizSystemPrompt(exam.code, exam.shortLabel);
 
-    // For dashboard quiz, distribute questions across domains by weight and
-    // evenly across each domain's tasks (#225). Answer letters are balanced.
-    const slotTargets = request.isDashboardQuiz
-      ? assignTaskTargets(exam.domains, total)
-      : [];
-    const answerLetters = assignAnswerLetters(total);
+    // Stage 0 (#225, design §5): one blueprint slot per question — domain/task
+    // by weight, the exact task-statement item, question type, perspective,
+    // industry and the correct-answer letter — all decided in code.
     const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
+    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId) });
     const taskOccurrences = new Map();
-
-    // Strictly bound the number of generation attempts per question slot so a
-    // 65-question flow cannot blow up in time: one initial attempt plus at most
-    // one extra regeneration when the response fails to parse.
-    const MAX_ATTEMPTS_PER_QUESTION = 2;
 
     // Save each question as soon as it exists (#225): a reload or a closed tab
     // keeps what was generated so far.
     await attachExamSet(session, { source: 'ai', title: request.taskTitle });
 
+    // Stage 1: one planner call designs the whole exam (a unique concept per
+    // question) before any question is written. Skipped for short sessions.
+    let planRows = Array(total).fill(null);
+    if (total >= PLANNER_MIN_QUESTIONS) {
+      if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? '出題計画を作成中…' : 'Designing the exam plan…';
+      if (session.setId) await updateExamSet(session.setId, { pipeline: { stage: 'planning' } }).catch(() => {});
+      planRows = (await planExam({ els, exam, blueprint })).rows;
+    }
+    if (session.setId) {
+      // Awaited: a concurrent read-modify-write (appending the first question)
+      // would otherwise overwrite the blueprint/plan.
+      await updateExamSet(session.setId, { blueprint: compactBlueprint(blueprint), plan: planRows, pipeline: { stage: 'writing' } }).catch(() => {});
+    }
+
+    // Strictly bound the number of generation attempts per question slot so a
+    // 65-question flow cannot blow up in time: one initial attempt, at most one
+    // regeneration when the response fails to parse, and at most one when the
+    // result duplicates an earlier question (stage 3).
+    const MAX_ATTEMPTS_PER_QUESTION = 3;
+
     const generated = [];
     let errorCount = 0;      // slots whose generation threw (callAi fallback also failed)
     let parseFailCount = 0;  // slots where every attempt returned an unparseable response
+    let duplicateCount = 0;  // slots regenerated because the answer duplicated an earlier one
     for (let i = 0; i < total; i++) {
-      // Build dedup hint: list topics/services already covered to avoid repetition
-      const recentTopics = generated.slice(-5).map((q, idx) => `問${idx + 1}: ${q.question.slice(0, 80)}`).join('\n');
-      const targetDomain = slotTargets[i]?.domain || null;
-      const targetTask = slotTargets[i]?.task || null;
-      const resourceTask = targetTask || requestTask;
+      const slot = blueprint[i];
+      const targetDomain = slot.domain;
+      const resourceTask = slot.task;
       const occurrence = taskOccurrences.get(resourceTask) || 0;
       taskOccurrences.set(resourceTask, occurrence + 1);
       const resources = pickQuizResources(resourceTask, occurrence);
-      const dedupSuffix = recentTopics
-        ? `\n\n【重要】以下の問題とは異なるAWSサービス・トピックで出題してください（同じサービスの繰り返しは禁止）:\n${recentTopics}`
-        : '';
+      const planRow = planRows[i];
+      // Stage 2: the writer is told exactly what to test and what is taken.
       const userPrompt = (request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, targetDomain, targetTask)
+        ? buildGeneralQuizUserPrompt(exam.code, targetDomain, slot.task)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
         + buildResourceGroundingHint(resources)
-        + buildAnswerPositionHint(answerLetters[i])
-        + dedupSuffix;
+        + buildSlotPromptSuffix({ slot, plan: planRow, banned: bannedConceptsFor({ planRows, generated, index: i, pinned: Boolean(planRow) }) })
+        + buildAnswerPositionHint(slot.answerLetter);
 
       let parsed = null;
       let slotErrored = false;
+      let nearDuplicate = null;  // kept as a fallback if the regeneration does not improve
+      let lastFailure = null;    // 'parse' | 'duplicate'
       for (let attempt = 0; attempt < MAX_ATTEMPTS_PER_QUESTION && !parsed; attempt++) {
-        // On regeneration attempts, nudge the model to emit strictly valid JSON so
-        // the retry can recover a previous parse failure rather than re-rolling the
-        // byte-identical prompt (which only helps under non-deterministic sampling).
-        const attemptPrompt = attempt === 0
-          ? userPrompt
-          : `${userPrompt}\n\n【重要】前回の応答は解析できませんでした。有効なJSONオブジェクトのみを返してください（コードフェンスや説明文は不要です）。/ The previous response could not be parsed. Return only a single valid JSON object (no code fences or prose).`;
+        // On regeneration attempts, tell the model what went wrong: emit strictly
+        // valid JSON after a parse failure, or avoid the duplicated answer.
+        let attemptPrompt = userPrompt;
+        if (lastFailure === 'parse') {
+          attemptPrompt = `${userPrompt}\n\n【重要】前回の応答は解析できませんでした。有効なJSONオブジェクトのみを返してください（コードフェンスや説明文は不要です）。/ The previous response could not be parsed. Return only a single valid JSON object (no code fences or prose).`;
+        } else if (lastFailure === 'duplicate') {
+          attemptPrompt = `${userPrompt}${buildDuplicateRetryHint(correctChoiceText(nearDuplicate))}`;
+        }
         let response = '';
         try {
           response = await callAiStream({
@@ -1282,12 +1308,27 @@ export function initApp({ exams, getExamById, defaultExamId }) {
           }
         }
 
-        parsed = parseQuizResponse(response);
+        const candidate = parseQuizResponse(response);
+        if (!candidate) {
+          lastFailure = 'parse';
+          continue;
+        }
+        // Stage 3: regenerate once when the answer duplicates an earlier question.
+        if (!nearDuplicate && isDuplicateQuestion(candidate, generated)) {
+          nearDuplicate = candidate;
+          lastFailure = 'duplicate';
+          duplicateCount++;
+          continue;
+        }
+        parsed = candidate;
       }
+      // A near-duplicate beats a missing question.
+      if (!parsed && nearDuplicate) parsed = nearDuplicate;
 
       if (parsed) {
         parsed.domainId = targetDomain?.id ?? null;
-        parsed.taskId = targetTask?.id ?? null;
+        parsed.taskId = slot.task?.id ?? null;
+        parsed.unitId = slot.item || null;
         parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
         generated.push(parsed);
         session.questions[generated.length - 1] = parsed;
@@ -1304,7 +1345,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.quizPregenFill) els.quizPregenFill.style.width = `${(done / total) * 100}%`;
     }
 
-    await finalizeSessionSet(session, { errors: errorCount, parseFailures: parseFailCount });
+    const diversity = summarizeDiversity(generated);
+    // eslint-disable-next-line no-console
+    console.info('[pipeline] diversity', { ...diversity, regeneratedForDuplicate: duplicateCount });
+    await finalizeSessionSet(session, { errors: errorCount, parseFailures: parseFailCount, duplicatesRegenerated: duplicateCount, clusters: diversity.clusters, largestCluster: diversity.largestCluster });
 
     // If we couldn't generate anything, surface the total-failure message.
     if (generated.length === 0) {
@@ -1523,6 +1567,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (parsed) {
         parsed.domainId = slots[i]?.domainId ?? null;
         parsed.taskId = slots[i]?.taskId ?? null;
+        parsed.unitId = slots[i]?.unitId ?? null;
         parsed.explanation = appendMissingResourceRefs(parsed.explanation, slots[i]?.resources || []);
         generated.push(parsed);
       }
@@ -1584,39 +1629,49 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const systemPrompt = buildMockQuizSystemPrompt(
       exam.code, exam.shortLabel, getExamLevel(request.examId)
     );
-    const slotTargets = request.isDashboardQuiz
-      ? assignTaskTargets(exam.domains, total)
-      : [];
-    const answerLetters = assignAnswerLetters(total);
+    // Stages 0–2 of the exam pipeline (#225), as in preGenerateQuestions. Batch
+    // requests are independent, so the plan is what keeps them from converging
+    // on the same answer; the planner runs synchronously before submission.
     const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
+    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId) });
     const taskOccurrences = new Map();
     const slotResources = [];
 
     await attachExamSet(session, { source: 'batch', title: request.taskTitle });
+    let planRows = Array(total).fill(null);
+    if (total >= PLANNER_MIN_QUESTIONS) {
+      setBatchToastState('running', getLocale() === 'ja' ? '出題計画を作成中…' : 'Designing the exam plan…');
+      if (session.setId) await updateExamSet(session.setId, { pipeline: { stage: 'planning' } }).catch(() => {});
+      planRows = (await planExam({ els, exam, blueprint })).rows;
+    }
     // Per-slot metadata needed to interpret the results, saved with the set so a
     // resumed job (after a reload) can be parsed the same way.
     const slots = [];
 
     const batchRequests = [];
     for (let i = 0; i < total; i++) {
-      const resourceTask = slotTargets[i]?.task || requestTask;
-      const occurrence = taskOccurrences.get(resourceTask) || 0;
-      taskOccurrences.set(resourceTask, occurrence + 1);
-      slotResources[i] = pickQuizResources(resourceTask, occurrence);
+      const slot = blueprint[i];
+      const occurrence = taskOccurrences.get(slot.task) || 0;
+      taskOccurrences.set(slot.task, occurrence + 1);
+      slotResources[i] = pickQuizResources(slot.task, occurrence);
       const userPrompt = (request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, slotTargets[i]?.domain || null, slotTargets[i]?.task || null)
+        ? buildGeneralQuizUserPrompt(exam.code, slot.domain, slot.task)
         : buildQuizUserPrompt(request.taskTitle, request.taskContext))
         + buildResourceGroundingHint(slotResources[i])
-        + buildAnswerPositionHint(answerLetters[i]);
+        + buildSlotPromptSuffix({ slot, plan: planRows[i], banned: bannedConceptsFor({ planRows, generated: [], index: i, pinned: Boolean(planRows[i]) }) })
+        + buildAnswerPositionHint(slot.answerLetter);
       batchRequests.push({ userPrompt, systemPrompt });
       slots.push({
-        domainId: slotTargets[i]?.domain?.id ?? null,
-        taskId: slotTargets[i]?.task?.id ?? null,
+        domainId: slot.domain?.id ?? null,
+        taskId: slot.task?.id ?? null,
+        unitId: slot.item || null,
         resources: slotResources[i].map((r) => ({ title: r.title, url: r.url })),
       });
     }
     if (session.setId) {
-      try { await updateExamSet(session.setId, { pipeline: { stage: 'writing', slots } }); } catch { /* ignore */ }
+      try {
+        await updateExamSet(session.setId, { blueprint: compactBlueprint(blueprint), plan: planRows, pipeline: { stage: 'writing', slots } });
+      } catch { /* ignore */ }
     }
 
     let result = null;
@@ -4890,6 +4945,37 @@ function pickQuizResources(task, occurrence) {
   }));
 }
 
+// Stage 1 of the exam pipeline (#225, design §5): one planner call designs the
+// whole exam before any question is written. Never blocks generation — on any
+// failure the writer runs on the blueprint alone.
+async function planExam({ els, exam, blueprint }) {
+  const empty = { rows: Array(blueprint.length).fill(null), duplicates: 0, failed: true };
+  const { systemPrompt, userPrompt } = buildPlannerPrompt({ exam, blueprint });
+  try {
+    const text = await callAi({ userPrompt, systemPrompt, onRequireApiKey: () => openSettingsModal(els) });
+    const parsed = parsePlan(text, blueprint.length);
+    if (!parsed) {
+      console.warn('[pipeline] planner response not parseable; using blueprint only');
+      return empty;
+    }
+    const validated = validatePlan(parsed);
+    if (validated.duplicates) console.info(`[pipeline] planner: dropped ${validated.duplicates} duplicate concept(s)`);
+    return { ...validated, failed: false };
+  } catch (err) {
+    console.warn('[pipeline] planner failed; using blueprint only:', err);
+    return empty;
+  }
+}
+
+// Concepts the writer must not use as the correct answer of slot `index`:
+// answers already generated (most recent first), then — when the slot has no
+// pinned plan concept — the concepts planned for the other slots.
+function bannedConceptsFor({ planRows, generated, index, pinned }) {
+  const banned = generated.slice().reverse().map(correctChoiceText);
+  if (!pinned) planRows.forEach((r, i) => { if (r && i !== index) banned.push(r.concept); });
+  return banned;
+}
+
 function buildTaskAiContext(task) {
   if (!task || typeof task !== 'object') return '';
   const id = typeof task.id === 'string' ? task.id.trim() : String(task.id || '').trim();
@@ -6293,15 +6379,19 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
   const systemPrompt = (session && session.mode === 'mock')
     ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(session.examId))
     : buildQuizSystemPrompt(exam.code, exam.shortLabel);
+  // One blueprint slot (#225): question type / perspective / industry vary per
+  // call, and answers already given in this session must not recur.
+  const task = isDashboardQuiz ? null : findExamTask(exam, taskId);
+  const slot = buildExamBlueprint({ exam, count: 1, task, level: getExamLevel(session?.examId || exam.id) })[0];
   // Rotate resources across the questions of a multi-question session.
-  const resources = isDashboardQuiz
-    ? []
-    : pickQuizResources(findExamTask(exam, taskId), session?.currentIndex || 0);
+  const resources = pickQuizResources(slot.task, session?.currentIndex || 0);
+  const banned = (session?.questions || []).filter(Boolean).map(correctChoiceText);
   const userPrompt = (isDashboardQuiz
-    ? buildGeneralQuizUserPrompt(exam.code, null)
+    ? buildGeneralQuizUserPrompt(exam.code, slot.domain, slot.task)
     : buildQuizUserPrompt(taskTitle, taskContext))
     + buildResourceGroundingHint(resources)
-    + buildAnswerPositionHint(assignAnswerLetters(1)[0]);
+    + buildSlotPromptSuffix({ slot, banned })
+    + buildAnswerPositionHint(slot.answerLetter);
 
   let response = '';
 
@@ -6344,7 +6434,9 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
   }
 
   if (parsed) {
-    parsed.domainId = domainId ?? null;
+    parsed.domainId = domainId ?? slot.domain?.id ?? null;
+    parsed.taskId = slot.task?.id ?? null;
+    parsed.unitId = slot.item || null;
     parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
     if (onQuestionGenerated) await onQuestionGenerated(parsed);
     // Render interactive quiz UI
