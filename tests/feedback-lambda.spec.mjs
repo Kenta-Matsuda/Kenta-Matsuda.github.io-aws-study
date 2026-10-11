@@ -184,6 +184,57 @@ test.describe('feedback Lambda (#162 / #167)', () => {
     expect(issue.labels).toEqual(['feedback', 'from-app', 'enhancement']);
   });
 
+  test('uploads screenshots and embeds them in the issue', async () => {
+    const ddb = makeDdb();
+    const fetchImpl = makeFetch();
+    const uploads = [];
+    const handler = createHandler({
+      ddb,
+      fetchImpl,
+      getGithubToken: async () => 'tok',
+      putImage: async (key, bytes, type) => uploads.push({ key, bytes, type }),
+      env: makeEnv({ IMAGES_BASE_URL: 'https://cdn.example/' }),
+    });
+    const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(16)]);
+    const jpeg = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(16)]);
+
+    const res = await handler(post('/feedback', {
+      ...validFeedback,
+      images: [{ data: png.toString('base64') }, { data: jpeg.toString('base64') }],
+    }));
+    expect(res.statusCode).toBe(201);
+    expect(uploads.map((u) => u.type)).toEqual(['image/png', 'image/jpeg']);
+    expect(uploads[0].key).toMatch(/^fb\/\d{4}\/\d{2}\/[0-9a-f]{32}\.png$/);
+    const body = fetchImpl.calls[0].body.body;
+    expect(body).toContain(`![screenshot 1](https://cdn.example/${uploads[0].key})`);
+    expect(body).toContain(`![screenshot 2](https://cdn.example/${uploads[1].key})`);
+    expect(ddb.puts[0].image_urls.L).toHaveLength(2);
+  });
+
+  test('rejects non-image, oversized and too many attachments', async () => {
+    const uploads = [];
+    const handler = createHandler({
+      ddb: makeDdb(),
+      fetchImpl: makeFetch(),
+      getGithubToken: async () => null,
+      putImage: async (key) => uploads.push(key),
+      env: makeEnv({ IMAGES_BASE_URL: 'https://cdn.example' }),
+    });
+    const png = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(16)]);
+    const cases = [
+      [[{ data: Buffer.from('<svg onload=alert(1)></svg>').toString('base64') }], 'unsupported_image'],
+      [[{ data: 'not base64!' }], 'invalid_image'],
+      [[{ data: Buffer.concat([png, Buffer.alloc(1.6 * 1024 * 1024)]).toString('base64') }], 'image_too_large'],
+      [Array(4).fill({ data: png.toString('base64') }), 'too_many_images'],
+    ];
+    for (const [images, code] of cases) {
+      const res = await handler(post('/feedback', { ...validFeedback, images }));
+      expect(res.statusCode).toBe(400);
+      expect(JSON.parse(res.body).error).toBe(code);
+    }
+    expect(uploads).toHaveLength(0);
+  });
+
   test('health check and unknown routes', async () => {
     const handler = createHandler({ ddb: makeDdb(), fetchImpl: makeFetch(), getGithubToken: async () => null, env: makeEnv() });
     const health = await handler({ rawPath: '/health', requestContext: { http: { method: 'GET' } } });

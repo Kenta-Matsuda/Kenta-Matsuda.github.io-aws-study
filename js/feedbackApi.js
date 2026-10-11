@@ -10,6 +10,10 @@
 import { FEEDBACK_API_URL } from './config.js';
 
 const REQUEST_TIMEOUT_MS = 10000;
+const UPLOAD_TIMEOUT_MS = 45000;
+// Must stay under MAX_IMAGE_BYTES / MAX_IMAGES in infra/feedback/src/index.mjs.
+const MAX_IMAGE_UPLOAD_BYTES = 1.4 * 1024 * 1024;
+export const MAX_FEEDBACK_IMAGES = 3;
 const VOTE_FLUSH_DELAY_MS = 3000;
 const VOTE_BATCH_MAX = 50;
 
@@ -39,19 +43,60 @@ export function isFeedbackApiEnabled() {
   return Boolean(getBaseUrl());
 }
 
+function blobToBase64(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+    reader.onerror = () => reject(reader.error);
+    reader.readAsDataURL(blob);
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => canvas.toBlob(resolve, type, quality));
+}
+
+// Downscale and re-encode an attached image so it fits the backend limit.
+// Re-encoding through a canvas also strips EXIF metadata such as GPS
+// location before anything leaves the device. Resolves to base64 or null.
+export async function encodeFeedbackImage(file) {
+  try {
+    const bitmap = await createImageBitmap(file);
+    for (const [maxSide, quality] of [[1600, 0.85], [1280, 0.75], [960, 0.65]]) {
+      const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bitmap.width * scale));
+      canvas.height = Math.max(1, Math.round(bitmap.height * scale));
+      canvas.getContext('2d').drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      // Browsers without WebP encoding silently return PNG; fall back to JPEG then.
+      let blob = await canvasToBlob(canvas, 'image/webp', quality);
+      if (!blob || blob.type !== 'image/webp') blob = await canvasToBlob(canvas, 'image/jpeg', quality);
+      if (blob && blob.size <= MAX_IMAGE_UPLOAD_BYTES) return await blobToBase64(blob);
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 // POST the user's feedback. Resolves to { ok: true, issueUrl } or
 // { ok: false, error } — never rejects, so callers can branch on `ok`.
-export async function sendFeedback({ category, text, lang, appVersion, page, elapsedMs, website = '' }) {
+// `images` is a list of base64 strings from encodeFeedbackImage().
+export async function sendFeedback({ category, text, lang, appVersion, page, elapsedMs, website = '', images = [] }) {
   const base = getBaseUrl();
   if (!base) return { ok: false, error: 'disabled' };
 
   const controller = typeof AbortController !== 'undefined' ? new AbortController() : null;
-  const timer = controller ? setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS) : null;
+  const timeoutMs = images.length ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS;
+  const timer = controller ? setTimeout(() => controller.abort(), timeoutMs) : null;
   try {
     const res = await fetch(`${base}/feedback`, {
       method: 'POST',
       headers: { 'content-type': 'text/plain;charset=UTF-8' },
-      body: JSON.stringify({ category, text, lang, appVersion, page, elapsedMs, website }),
+      body: JSON.stringify({
+        category, text, lang, appVersion, page, elapsedMs, website,
+        images: images.map((data) => ({ data })),
+      }),
       signal: controller?.signal,
     });
     let data = null;

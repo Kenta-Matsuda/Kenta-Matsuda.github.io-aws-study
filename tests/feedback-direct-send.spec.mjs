@@ -71,6 +71,34 @@ test.describe('feedback modal with backend (#162)', () => {
     expect(posted.body.elapsedMs).toBeGreaterThan(0);
   });
 
+  test('re-encodes attached images and sends them with the feedback', async ({ page }) => {
+    let posted = null;
+    await page.route(`${API}/feedback`, async (route) => {
+      posted = JSON.parse(route.request().postData());
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ ok: true, issueUrl: null }),
+      });
+    });
+    await seedState(page, { apiUrl: API });
+    await openFeedback(page);
+
+    // 1x1 PNG
+    const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==', 'base64');
+    await page.setInputFiles('#feedbackImageInput', { name: 'shot.png', mimeType: 'image/png', buffer: png });
+    await page.fill('#feedbackTextarea', '画像付き');
+    await page.click('#feedbackSubmitBtn');
+
+    await expect(page.locator('#feedbackMessage')).toHaveClass(/text-teal-600/);
+    expect(posted.images).toHaveLength(1);
+    const bytes = Buffer.from(posted.images[0].data, 'base64');
+    const isWebp = bytes.subarray(0, 4).toString('latin1') === 'RIFF' && bytes.subarray(8, 12).toString('latin1') === 'WEBP';
+    const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
+    expect(isWebp || isJpeg).toBe(true);
+  });
+
   test('shows an error and offers copy when sending fails', async ({ page }) => {
     await page.route(`${API}/feedback`, (route) => route.fulfill({
       status: 500,

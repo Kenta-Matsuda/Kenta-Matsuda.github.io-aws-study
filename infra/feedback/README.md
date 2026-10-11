@@ -9,8 +9,11 @@ GitHub アカウント無しのフィードバック送信（#162）と、Good /
 Lambda Function URL（API Gateway は使わない）── CORS / Origin を GitHub Pages に限定
    │ 入力検証・ハニーポット・送信までの経過時間チェック・IP 単位レート制限・停止スイッチ
    ├─▶ DynamoDB（オンデマンド, TTL で自動削除）… フィードバック本文・投票イベント・レート制限カウンタ
+   ├─▶ S3（非公開）+ CloudFront（OAC）… 添付スクリーンショット（最大 3 枚）。issue 本文に CloudFront の URL で埋め込む
    └─▶ GitHub REST API … SSM の fine-grained PAT で issue を代理作成（ラベル feedback / from-app）
 ```
+
+添付画像はブラウザ側で縮小・WebP（非対応なら JPEG）に再エンコードしてから送ります（EXIF の位置情報なども消えます）。Lambda はファイルシグネチャで JPEG / PNG / WebP だけを受け付け、推測できないランダムなキーで保存します。画像は issue に埋め込まれるため**公開**扱いで、期限による自動削除はしていません（削除すると issue の画像が切れるため）。
 
 ## コスト
 
@@ -22,6 +25,7 @@ Lambda Function URL（API Gateway は使わない）── CORS / Origin を Git
 | DynamoDB オンデマンド | 25 GB ストレージ（常時無料） | 書き込みは 100 万件あたり約 $0.7 程度の従量。投票 1 件 = 書き込み約 2 件 |
 | SSM Parameter Store（Standard） | 無料 | Secrets Manager（$0.40/月）は使わない |
 | CloudWatch Logs | 5 GB 取り込み（常時無料） | 保持 14 日 |
+| S3 + CloudFront | CloudFront は月 1 TB 転送 / 1,000 万リクエスト（常時無料） | S3 保存は約 $0.025/GB 月。スクリーンショット数千枚でも月数セント |
 
 - `BudgetEmail` パラメータを渡すと月 $1 の予算アラートも作成します（AWS Budgets は 2 個まで無料）。
 - 濫用でコストが出そうなときは `AcceptSubmissions=false` で再デプロイすれば即停止できます。
@@ -51,10 +55,12 @@ Lambda Function URL（API Gateway は使わない）── CORS / Origin を Git
 
    ```powershell
    aws ssm put-parameter --region ap-northeast-1 --type SecureString `
-     --name /aws-study/feedback/github-token --value <TOKEN>
+     --name /study-navigator/feedback/github-token --value <TOKEN>
    ```
 
    トークンが無い間も送信は受け付け、DynamoDB にだけ保存されます（issue は作られない）。
+   なお SSM は `aws` / `ssm` で始まる名前（`/aws-xxx/...` のような先頭階層も含む）を予約しているため使えません。
+   Git Bash で実行する場合は `/` 始まりの引数がパス変換されるので `MSYS_NO_PATHCONV=1` を付けてください。
 
 4. `js/config.js` の `FEEDBACK_API_URL` に手順 1 の URL を設定して公開すると、フィードバックの「送信」がアカウント不要の直接送信に切り替わり、Good / Bad 投票も送られるようになります。空文字に戻せば従来の挙動です。
 

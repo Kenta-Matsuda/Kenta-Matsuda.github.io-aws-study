@@ -39,7 +39,7 @@ import {
   markExamCelebrated,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
-import { isFeedbackApiEnabled, sendFeedback } from './feedbackApi.js';
+import { encodeFeedbackImage, isFeedbackApiEnabled, MAX_FEEDBACK_IMAGES, sendFeedback } from './feedbackApi.js';
 import { quizHistoryToCsv } from './quizCsv.js';
 import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
 import {
@@ -5064,7 +5064,15 @@ async function submitFeedbackDirect(els) {
   if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = true;
   showInlineMessage(els.feedbackMessage, t('feedbackModal.sending'), 'text-gray-600');
 
-  const hadImages = feedbackImages.length > 0;
+  // Screenshots are shrunk/re-encoded on-device (also stripping EXIF). Any
+  // image beyond the limit or that cannot be encoded is skipped, and the user
+  // is told so; the text is always sent.
+  const encoded = await Promise.all(
+    feedbackImages.slice(0, MAX_FEEDBACK_IMAGES).map((entry) => encodeFeedbackImage(entry.file)),
+  );
+  const images = encoded.filter(Boolean);
+  const skippedImages = feedbackImages.length - images.length;
+
   const result = await sendFeedback({
     category,
     text,
@@ -5072,6 +5080,7 @@ async function submitFeedbackDirect(els) {
     page: String(location.hash || '').slice(0, 200),
     elapsedMs: feedbackOpenedAt ? Date.now() - feedbackOpenedAt : 0,
     website: String(els.feedbackWebsite?.value || ''),
+    images,
   });
 
   feedbackSending = false;
@@ -5087,7 +5096,7 @@ async function submitFeedbackDirect(els) {
 
   showInlineMessage(
     els.feedbackMessage,
-    t(hadImages ? 'feedbackModal.sentDirectNoImages' : 'feedbackModal.sentDirect'),
+    t(skippedImages > 0 ? 'feedbackModal.sentDirectImagesSkipped' : 'feedbackModal.sentDirect', { count: skippedImages }),
     'text-teal-600',
   );
   if (result.issueUrl && /^https:\/\/github\.com\//.test(result.issueUrl) && els.feedbackMessage) {

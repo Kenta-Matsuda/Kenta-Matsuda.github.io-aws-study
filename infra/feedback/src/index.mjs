@@ -3,9 +3,11 @@
 // Exposed through a Lambda Function URL (no API Gateway) so the whole stack
 // stays inside the AWS always-free tier at this site's traffic level.
 //
-//   POST /feedback  { category, text, lang, appVersion, page, elapsedMs, website }
+//   POST /feedback  { category, text, lang, appVersion, page, elapsedMs, website, images? }
 //     -> stores the feedback in DynamoDB and, when a GitHub token is configured
 //        in SSM, files it as a GitHub issue on the user's behalf (no account).
+//        Optional screenshots (base64) go to a private S3 bucket and are
+//        embedded in the issue through CloudFront.
 //   POST /votes     { events: [{ targetType, targetId, action, value, at, meta }] }
 //     -> appends Good/Bad vote events to DynamoDB for later analysis.
 //   GET  /health
@@ -23,7 +25,18 @@ export const FEEDBACK_MAX_LENGTH = 1000;
 export const MAX_URLS_IN_FEEDBACK = 3;
 export const MIN_COMPOSE_MS = 2000;
 export const MAX_VOTE_EVENTS = 50;
-export const MAX_BODY_BYTES = 32 * 1024;
+export const MAX_IMAGES = 3;
+export const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
+// Function URLs accept up to 6 MB; 3 base64 images of 1.5 MB fit under this.
+export const MAX_BODY_BYTES = 5.5 * 1024 * 1024;
+
+// The client re-encodes screenshots before upload, but never trust the
+// declared type: detect it from the file signature instead.
+const IMAGE_SIGNATURES = [
+  { type: 'image/jpeg', ext: 'jpg', test: (b) => b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff },
+  { type: 'image/png', ext: 'png', test: (b) => b.subarray(0, 8).equals(Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) },
+  { type: 'image/webp', ext: 'webp', test: (b) => b.subarray(0, 4).toString('latin1') === 'RIFF' && b.subarray(8, 12).toString('latin1') === 'WEBP' },
+];
 
 const FEEDBACK_TTL_DAYS = 400;
 const VOTE_TTL_DAYS = 800;
@@ -118,10 +131,27 @@ export function validateFeedback(body) {
   return {
     category,
     text,
+    images: validateImages(body.images),
     lang: clip(body.lang, 10),
     appVersion: clip(body.appVersion, 40),
     page: clip(body.page, 200),
   };
+}
+
+// images: [{ data: '<base64>' }] -> [{ bytes: Buffer, type, ext }]
+export function validateImages(images) {
+  if (images === undefined || images === null) return [];
+  if (!Array.isArray(images)) throw new HttpError(400, 'invalid_images');
+  if (images.length > MAX_IMAGES) throw new HttpError(400, 'too_many_images');
+  return images.map((img) => {
+    const data = String(img?.data || '');
+    if (!data || !/^[A-Za-z0-9+/]+=*$/.test(data)) throw new HttpError(400, 'invalid_image');
+    const bytes = Buffer.from(data, 'base64');
+    if (bytes.length > MAX_IMAGE_BYTES) throw new HttpError(400, 'image_too_large');
+    const sig = IMAGE_SIGNATURES.find((s) => bytes.length >= 12 && s.test(bytes));
+    if (!sig) throw new HttpError(400, 'unsupported_image');
+    return { bytes, type: sig.type, ext: sig.ext };
+  });
 }
 
 export function validateVotes(body) {
@@ -147,7 +177,7 @@ export function validateVotes(body) {
   });
 }
 
-export function buildIssue({ category, text, lang, appVersion, page }) {
+export function buildIssue({ category, text, lang, appVersion, page, imageUrls = [] }) {
   const cat = CATEGORIES[category] || CATEGORIES.general;
   const title = `[Feedback] ${cat.ja}`;
   const context = [
@@ -160,6 +190,7 @@ export function buildIssue({ category, text, lang, appVersion, page }) {
     '',
     sanitizeForIssue(text),
     '',
+    ...imageUrls.flatMap((url, i) => [`![screenshot ${i + 1}](${url})`, '']),
     '---',
     'AWS Study Navigator アプリのフィードバックフォームから、GitHub アカウント無しで送信されました（Lambda 経由の代理投稿）。',
     context ? `<sub>${context.replace(/[<>]/g, '')}</sub>` : '',
@@ -172,6 +203,7 @@ export function createHandler(deps) {
   const {
     ddb, // { updateItem(params), putItem(params), batchWrite(items) }
     getGithubToken, // async () => string | null
+    putImage, // async (key, bytes, contentType) => void
     fetchImpl = fetch,
     now = () => new Date(),
     env = process.env,
@@ -179,6 +211,7 @@ export function createHandler(deps) {
 
   const table = env.TABLE_NAME;
   const repo = env.GITHUB_REPO; // "owner/name"
+  const imagesBaseUrl = String(env.IMAGES_BASE_URL || '').replace(/\/+$/, '');
   const allowedOrigins = String(env.ALLOWED_ORIGINS || '').split(',').map((s) => s.trim()).filter(Boolean);
 
   async function enforceRateLimit(kind, ipHash) {
@@ -231,11 +264,25 @@ export function createHandler(deps) {
     await enforceRateLimit('feedback', ipHash);
 
     const ts = now();
+    // Random, unguessable keys: the images are public via CloudFront once
+    // embedded in the (public) issue, but cannot be enumerated.
+    const imageKeys = [];
+    if (fb.images.length) {
+      if (!putImage || !imagesBaseUrl) throw new HttpError(400, 'images_unavailable');
+      const month = ts.toISOString().slice(0, 7).replace('-', '/');
+      for (const img of fb.images) {
+        const key = `fb/${month}/${randomBytes(16).toString('hex')}.${img.ext}`;
+        await putImage(key, img.bytes, img.type);
+        imageKeys.push(key);
+      }
+    }
+    const imageUrls = imageKeys.map((key) => `${imagesBaseUrl}/${key}`);
+
     // Issue creation is best-effort: the submission is never lost because it is
     // persisted below even when GitHub is down or the token is not configured.
     let issue = null;
     try {
-      issue = await createGithubIssue(buildIssue(fb));
+      issue = await createGithubIssue(buildIssue({ ...fb, imageUrls }));
     } catch (err) {
       console.error('github_issue_error', err);
     }
@@ -252,6 +299,7 @@ export function createHandler(deps) {
     if (fb.lang) item.lang = { S: fb.lang };
     if (fb.appVersion) item.app_version = { S: fb.appVersion };
     if (fb.page) item.page = { S: fb.page };
+    if (imageUrls.length) item.image_urls = { L: imageUrls.map((u) => ({ S: u })) };
     if (issue) {
       item.issue_number = { N: String(issue.number) };
       item.issue_url = { S: issue.url };
@@ -325,8 +373,18 @@ let cachedHandler = null;
 async function buildAwsHandler() {
   const { DynamoDBClient, UpdateItemCommand, PutItemCommand, BatchWriteItemCommand } = await import('@aws-sdk/client-dynamodb');
   const { SSMClient, GetParameterCommand } = await import('@aws-sdk/client-ssm');
+  const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
   const dynamo = new DynamoDBClient({});
   const ssm = new SSMClient({});
+  const s3 = new S3Client({});
+
+  const putImage = (key, bytes, contentType) => s3.send(new PutObjectCommand({
+    Bucket: process.env.IMAGES_BUCKET,
+    Key: key,
+    Body: bytes,
+    ContentType: contentType,
+    CacheControl: 'public, max-age=31536000, immutable',
+  }));
 
   let tokenPromise = null;
   const getGithubToken = () => {
@@ -358,7 +416,7 @@ async function buildAwsHandler() {
     },
   };
 
-  return createHandler({ ddb, getGithubToken });
+  return createHandler({ ddb, getGithubToken, putImage });
 }
 
 export async function handler(event) {
