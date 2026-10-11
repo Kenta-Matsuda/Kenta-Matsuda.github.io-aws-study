@@ -1,0 +1,116 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AWS Study Navigator feedback collector (issues #162, #167).
+  Lambda Function URL + DynamoDB. Files account-free feedback as GitHub issues
+  and stores Good/Bad votes for analysis.
+
+Parameters:
+  AllowedOrigins:
+    Type: CommaDelimitedList
+    Default: https://kenta-matsuda.github.io,http://localhost:8877
+    Description: Browser origins allowed to call the Function URL.
+  GithubRepo:
+    Type: String
+    Default: Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study
+  GithubTokenParam:
+    Type: String
+    Default: /aws-study/feedback/github-token
+    Description: >
+      SSM SecureString holding a fine-grained GitHub PAT (this repo only, Issues: read & write).
+      Create it by hand; until it exists feedback is stored in DynamoDB only.
+  AcceptSubmissions:
+    Type: String
+    Default: 'true'
+    AllowedValues: ['true', 'false']
+    Description: Kill switch. Redeploy with false to stop accepting writes.
+  BudgetEmail:
+    Type: String
+    Default: ''
+    Description: Optional. When set, a $1/month cost budget alerts this address.
+
+Conditions:
+  HasBudgetEmail: !Not [!Equals [!Ref BudgetEmail, '']]
+
+Resources:
+  FeedbackTable:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Retain
+    UpdateReplacePolicy: Retain
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - { AttributeName: pk, AttributeType: S }
+        - { AttributeName: sk, AttributeType: S }
+      KeySchema:
+        - { AttributeName: pk, KeyType: HASH }
+        - { AttributeName: sk, KeyType: RANGE }
+      TimeToLiveSpecification:
+        AttributeName: ttl
+        Enabled: true
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: false
+
+  FeedbackFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: index.handler
+      Runtime: nodejs22.x
+      Architectures: [arm64]
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref FeedbackTable
+          GITHUB_REPO: !Ref GithubRepo
+          GITHUB_TOKEN_PARAM: !Ref GithubTokenParam
+          ALLOWED_ORIGINS: !Join [',', !Ref AllowedOrigins]
+          ACCEPT_SUBMISSIONS: !Ref AcceptSubmissions
+          # Not a secret; only makes stored IP hashes stack-specific.
+          HASH_SALT: !Select [2, !Split ['/', !Ref AWS::StackId]]
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action: [dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:BatchWriteItem]
+              Resource: !GetAtt FeedbackTable.Arn
+            - Effect: Allow
+              Action: ssm:GetParameter
+              Resource: !Sub arn:${AWS::Partition}:ssm:${AWS::Region}:${AWS::AccountId}:parameter${GithubTokenParam}
+      FunctionUrlConfig:
+        AuthType: NONE
+        Cors:
+          AllowOrigins: !Ref AllowedOrigins
+          AllowMethods: [GET, POST]
+          AllowHeaders: [content-type]
+          MaxAge: 86400
+
+  FeedbackFunctionLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub /aws/lambda/${FeedbackFunction}
+      RetentionInDays: 14
+
+  CostBudget:
+    Type: AWS::Budgets::Budget
+    Condition: HasBudgetEmail
+    Properties:
+      Budget:
+        BudgetName: aws-study-feedback-monthly
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit: { Amount: 1, Unit: USD }
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+          Subscribers:
+            - { SubscriptionType: EMAIL, Address: !Ref BudgetEmail }
+
+Outputs:
+  FunctionUrl:
+    Description: Set this as FEEDBACK_API_URL in js/config.js
+    Value: !GetAtt FeedbackFunctionUrl.FunctionUrl
+  TableName:
+    Value: !Ref FeedbackTable

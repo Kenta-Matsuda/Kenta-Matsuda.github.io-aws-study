@@ -6,6 +6,19 @@
 - 関連: #162（本件） / #101 #100（クライアント側で下げられる摩擦は対応済み: [フィードバックのハードルを下げる](../issues/feedback-nudge-and-account-free.md)） / #166（画像添付の自動化も同じ経路に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
 - 位置づけ: 本ファイルは**設計と人間側の作業の引き継ぎ**です。エージェントは `aws` / `sam` / `cdk` などの操作を**一切実行していません**。記載するコマンドは AWS 権限を持つ人間が精査・調整して実行するための提案（テキスト）です。
 
+
+## 実装状況（2026-10-11 更新）
+
+コードは実装済みです。残りは**デプロイとトークン登録（人間対応）だけ**です。
+
+- バックエンド: [`infra/feedback/`](../../infra/feedback/README.md)（SAM。Lambda Function URL + DynamoDB + SSM の GitHub トークン）。下記「提案アーキテクチャ」から次の点を簡素化しています。
+  - API Gateway / WAF を使わず **Lambda Function URL** にした（常時無料枠内・固定費ゼロ）。濫用対策は Origin 制限・ハニーポット・送信までの経過時間チェック・IP ハッシュ単位のレート制限（10 分に 3 件）・リンク数上限・停止スイッチ（`AcceptSubmissions`）で代替。
+  - 資格情報は GitHub App ではなく **fine-grained PAT（このリポジトリの Issues: Read and write のみ）を SSM SecureString** に保存（Secrets Manager の月額を避ける）。
+  - 画像添付は対象外（従来の「GitHub で投稿」経路で添付する）。
+- クライアント: `js/feedbackApi.js` / `js/ui.js`。`js/config.js` の `FEEDBACK_API_URL` が空なら従来どおり、設定すると「送信」がアカウント不要の直接送信になる。
+- テスト: `tests/feedback-lambda.spec.mjs`（Lambda の純ロジック）/ `tests/feedback-direct-send.spec.mjs`（UI）。
+- 人間対応: [`infra/feedback/README.md`](../../infra/feedback/README.md) の「デプロイ手順」1〜4。
+
 ## 症状
 
 issue #162:
