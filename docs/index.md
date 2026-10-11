@@ -32,6 +32,12 @@
 - [問題セットを IndexedDB に保存し、1 問ごとに保存・中断から再開できるようにする (#225 / PR 2)](issues/exam-sets-225.md)
 - [問題単位の学習イベントの蓄積と送信（`/events`） (#225 / PR 7)](issues/learning-events-225.md)
 
+## 設計ドキュメント（docs/design/）
+
+実装が複数 PR にまたがる機能の、確定した設計を置きます。各 PR の解説（docs/issues/）はここを参照します。
+
+- [問題生成パイプライン設計（multi-agent 化と品質評価） — #225](design/exam-generation-pipeline.md)
+
 ## LLM Wiki（docs/wiki/）
 
 自己改善型エージェント（`exam-content-maintainer` / `github-issue-resolver`）が獲得した知見を**構造化して永続化**する Wiki です。各ページは**最終更新日と更新履歴**を持ち、棚卸しによる**最新化**と**過去ドキュメントとの整合性確保**が可能であることを前提に運用します。運用ルールは README を参照してください。
