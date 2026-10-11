@@ -463,5 +463,25 @@
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
+  },
+  "examSets": {
+    "title": "Question Sets",
+    "open": "Question Sets",
+    "hint": "Questions are saved as soon as they are generated, so sets interrupted mid-generation can still be started.",
+    "empty": "No saved question sets yet.",
+    "emptyHint": "Generate a quiz and it will appear here.",
+    "start": "Start",
+    "retry": "Retry",
+    "confirmDelete": "Delete this question set and its attempts?",
+    "progress": "{{done}} / {{requested}} questions",
+    "attempts": "{{count}} attempt(s)",
+    "status": {
+      "planning": "Planning",
+      "generating": "Generating",
+      "judging": "Reviewing",
+      "ready": "Ready",
+      "partial": "Partial",
+      "failed": "Failed"
+    }
   }
 }
