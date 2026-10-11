@@ -32,6 +32,7 @@
 - **解消に必要な人間 / AWS 対応**: 投稿プロキシ（Lambda + API Gateway）のプロビジョニングと、GitHub App / トークンの資格情報管理・スパム対策。
 - **成果物 / 引き継ぎ**: [アカウント不要の issue 投稿](../action-required/issue-162-account-free-issue-submission.md) / [バックエンド実装計画（アンブレラ）](../action-required/issue-117-backend-implementation-plan.md)
 - **記録日**: 2026-09-12（`agent:skipped` 済み）
+- **2026-10-11 更新**: コード実装済み（[`infra/feedback/`](../../infra/feedback/README.md) / `js/feedbackApi.js`）。残る人間対応はスタックのデプロイと GitHub トークンの SSM 登録、`FEEDBACK_API_URL` の設定のみ。
 
 ### #167 — Good / Bad フィードバックを DynamoDB に集約し BI で可視化する
 
@@ -40,6 +41,7 @@
 - **解消に必要な人間 / AWS 対応**: 収集パイプライン（Lambda → DynamoDB）のプロビジョニングと、Amazon QuickSight 連携・データ保持方針の決定。#162 と同じ API 基盤に載る。
 - **成果物 / 引き継ぎ**: [フィードバック分析（DynamoDB）](../action-required/issue-167-feedback-analytics-dynamodb.md) / [バックエンド実装計画（アンブレラ）](../action-required/issue-117-backend-implementation-plan.md)
 - **記録日**: 2026-09-12（`agent:skipped` 済み）
+- **2026-10-11 更新**: 収集パイプライン（投票 → Lambda → DynamoDB）と CSV エクスポート（`scripts/export-feedback.mjs`）を #162 と同じスタックで実装済み。残る人間対応はデプロイのみ。Amazon Quick は Free プランに BI ダッシュボードが含まれないため、常設 BI は保留。
 
 ## メンテナンス方法
 
@@ -49,4 +51,5 @@
 
 ## 更新履歴
 
+- 2026-10-11: #162 / #167 のコード実装（`infra/feedback/`）を反映。両 issue の残作業はデプロイ等の人間対応のみになった。
 - 2026-09-12: 初版作成。人間 / AWS 対応待ちで恒久ブロック中の open issue（#32 グローバルリーダーボード / #162 アカウント不要 issue 投稿 / #167 フィードバック分析）を、毎回の再トリアージ重複を避けるための恒久索引としてシードした。既存の `agent:skipped` マーカー機構（GitHub ラベル + 判断コメント）と `scripts/issue-triage.mjs` の `SKIP` / `RECHECK` 判定を置き換えず補完する位置づけを明記（出典: `.kiro/agents/github-issue-resolver.md` / `docs/wiki/issue-resolution-playbook.md` A-15 / `docs/action-required/`）。
