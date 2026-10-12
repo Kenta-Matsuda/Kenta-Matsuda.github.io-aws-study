@@ -58,6 +58,15 @@ const APP_SHELL = [
   './js/votes.js',
   './js/locales/en.json',
   './js/locales/ja.json',
+  './js/locales/ko.json',
+  './js/locales/zh-CN.json',
+  './js/locales/zh-TW.json',
+  './js/locales/fr.json',
+  './js/locales/de.json',
+  './js/locales/es.json',
+  './js/locales/it.json',
+  './js/locales/pt-BR.json',
+  './js/locales/id.json',
   './js/locales/urls.json',
   // Content-overlay manifest (#197). The overlay files themselves are cached on
   // first use by stale-while-revalidate (only the active locale's are fetched).

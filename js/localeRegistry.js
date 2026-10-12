@@ -49,7 +49,7 @@ export const LOCALE_METADATA = Object.freeze({
  * @type {ReadonlyArray<LocaleEntry>}
  */
 export const LOCALE_REGISTRY = Object.freeze(
-  ['ja', 'en'].map((code) => LOCALE_METADATA[code]),
+  ['ja', 'en', 'ko', 'zh-CN', 'zh-TW', 'fr', 'de', 'es', 'it', 'pt-BR', 'id'].map((code) => LOCALE_METADATA[code]),
 );
 
 function entryFor(code) {

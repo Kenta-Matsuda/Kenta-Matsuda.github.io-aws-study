@@ -76,7 +76,7 @@ import {
 import { initChat, resetChat } from './chat.js';
 import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
-import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl, formatDate } from './i18n.js';
+import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl, formatDate, formatNumber } from './i18n.js';
 import { localizedField, pickLocalized, loadContentOverlays, usesJapanesePrompt, outputLanguageDirective, promptLanguageName } from './localeContent.js';
 import { isStreamingUnsupportedResponse } from './aiErrors.js';
 import { getRegisteredLocaleCodes, getLocaleLabel, isMachineTranslatedLocale } from './localeRegistry.js';
@@ -3317,7 +3317,7 @@ function renderXpDashboard({ els, exam, state }) {
     els.xpUserLine.textContent = buildDashboardHeadline({ userName: name });
   }
 
-  if (els.xpTotal) els.xpTotal.textContent = String(summary.totalXp);
+  if (els.xpTotal) els.xpTotal.textContent = formatNumber(summary.totalXp);
   if (els.xpRecentActions) {
     els.xpRecentActions.innerHTML = renderRecentXpActionsHtml(summary.recentActions);
   }
@@ -6427,7 +6427,7 @@ function showQuizSummary({ els, session }) {
   if (els.quizSumCorrect) els.quizSumCorrect.textContent = String(summary.correct);
   if (els.quizSumTotal) els.quizSumTotal.textContent = String(summary.total);
   if (els.quizSumAccuracy) els.quizSumAccuracy.textContent = `${Math.round(summary.accuracy * 100)}%`;
-  if (els.quizSumXp) els.quizSumXp.textContent = String(summary.totalXp);
+  if (els.quizSumXp) els.quizSumXp.textContent = formatNumber(summary.totalXp);
   if (els.quizSumCombo) els.quizSumCombo.textContent = String(summary.maxCombo);
 
   // Time display

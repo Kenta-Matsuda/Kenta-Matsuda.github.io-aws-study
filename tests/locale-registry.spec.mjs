@@ -27,8 +27,8 @@ const flatEntries = (obj, prefix = '') => Object.entries(obj).flatMap(([k, v]) =
   v && typeof v === 'object' && !Array.isArray(v) ? flatEntries(v, `${prefix}${k}.`) : [[`${prefix}${k}`, v]]);
 
 test.describe('locale registry – pure logic (#197)', () => {
-  test('ships ja and en first, each with a dictionary that mirrors en.json keys', () => {
-    expect(getRegisteredLocaleCodes().slice(0, 2)).toEqual(['ja', 'en']);
+  test('ships all 11 AWS docs languages (ja, en first), each with a dictionary that mirrors en.json keys', () => {
+    expect(getRegisteredLocaleCodes()).toEqual(['ja', 'en', 'ko', 'zh-CN', 'zh-TW', 'fr', 'de', 'es', 'it', 'pt-BR', 'id']);
     const enKeys = flatKeys(JSON.parse(readFileSync('js/locales/en.json', 'utf8'))).sort();
     for (const { code } of LOCALE_REGISTRY) {
       const keys = flatKeys(JSON.parse(readFileSync(`js/locales/${code}.json`, 'utf8'))).sort();

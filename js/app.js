@@ -2,7 +2,7 @@ import { getPublicExams, getExamById, resolveExamFromHash } from './exams.js';
 import { DEFAULT_EXAM_ID } from './config.js';
 import { initApp } from './ui.js';
 import { initI18n, setLocale, getLocale, translateStaticElements } from './i18n.js';
-import { getRegisteredLocaleCodes, nextLocale } from './localeRegistry.js';
+import { getRegisteredLocaleCodes, nextLocale, matchBrowserLocale } from './localeRegistry.js';
 import { loadContentOverlays } from './localeContent.js';
 
 function handleBootError(e) {
@@ -40,6 +40,11 @@ async function boot() {
   // Initialize i18n before app to ensure t() is ready
   const { localeData, urls } = await loadLocales();
   initI18n(localeData, urls);
+  // ?lang=<code> (e.g. a shared link) selects and remembers a language; regional
+  // variants map like browser detection (?lang=zh-HK -> zh-TW, ?lang=pt -> pt-BR).
+  const langParam = new URLSearchParams(location.search).get('lang');
+  const langFromUrl = langParam ? matchBrowserLocale([langParam], getRegisteredLocaleCodes()) : null;
+  if (langFromUrl && langFromUrl !== getLocale()) setLocale(langFromUrl);
   translateStaticElements();
 
   // Wire up the language toggle button
