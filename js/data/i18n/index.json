@@ -1,3 +1,40 @@
 {
-  "locales": {}
+  "locales": {
+    "de": [
+      "common",
+      "soa-c03"
+    ],
+    "es": [
+      "common",
+      "soa-c03"
+    ],
+    "fr": [
+      "common",
+      "soa-c03"
+    ],
+    "id": [
+      "common",
+      "soa-c03"
+    ],
+    "it": [
+      "common",
+      "soa-c03"
+    ],
+    "ko": [
+      "common",
+      "soa-c03"
+    ],
+    "pt-BR": [
+      "common",
+      "soa-c03"
+    ],
+    "zh-CN": [
+      "common",
+      "soa-c03"
+    ],
+    "zh-TW": [
+      "common",
+      "soa-c03"
+    ]
+  }
 }
