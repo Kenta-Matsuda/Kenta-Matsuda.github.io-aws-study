@@ -123,6 +123,13 @@
 - **対策**: ACTIONABLE=0 の振り返りは `efficiency-log.md` への追記か、既存オープン chore PR へのコメントで行う。新規 chore PR は「具体的なコードベース / プロンプト / スクリプトへの変更を伴う場合のみ」作成する。
 - **再発防止**: `.kiro/agents/github-issue-resolver.md` の「chore PR 乱立防止」節を参照（新規 chore PR 作成前の既存オープン chore PR 確認ゲートが追加されている）。
 
+### A-21: 着手可否を毎回「件数の目視集計」で再導出していた（`ACTIONABLE=0` の扱い）
+
+- **何が起きたか**: トリアージは判定値ごとの件数（`PR_FOLLOWUP` / `RECHECK` / `TRIAGE` / `OPEN_PR` / `SKIP` と PR 監査の 5 値）を出していたが、「結局この実行で新規に着手すべきものはあるのか？」という**単一の答え**が無かった。そのため毎回 LLM が件数を目視で足し合わせ、`OPEN_PR` / `SKIP` / `PR_OK` を頭の中で除外して着手可否を再導出していた。キューが枯れた landscape（クリーンなオープン PR が並び、残りは AWS ブロックの SKIP）が繰り返し発生するため、この目視集計は毎回発生する定型作業だった。
+- **恒久対策**: `scripts/issue-triage.mjs` に純関数 `computeActionability(results, prAudit)` を追加し、要約先頭に **「## 今回の着手可否サマリ」ブロック（`ACTIONABLE=N`）** を出すようにした。着手対象は issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE`、PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`（`OPEN_PR` / `SKIP` / `PR_OK` は着手対象に数えない）。`--json` にも `actionability` フィールドを出す。
+- **`ACTIONABLE=0` のときの正しい振る舞い**: 新規に**着手 / 追随 / コンフリクト解消**すべき対象はゼロ。主要機能 1（issue 実装）では何もせず、そのまま**主要機能 2〜4（振り返り・効率化・自己拡張）へ進む**。このとき **SKIP 判定の issue へ再びスキップコメントを付けない / 重複 PR を作らない / クリーンなオープン PR（`OPEN_PR`・`PR_OK`）に手を出さない**（A-15 と同じ禁止。`ACTIONABLE=0` はその状態を機械的に表した信号でもある）。
+- **`ACTIONABLE>0` のときの優先順位**: 要約が提示する順（`PR_CONFLICT` 最優先 → `PR_FOLLOWUP` → `RECHECK` / `TRIAGE` / `PR_BEHIND` / `PR_UNKNOWN`）で確認する。
+- **教訓（一般化）**: 判定値の件数を出すだけでは「で、今回やることはあるのか？」に毎回コストがかかる。**除外ルール（OPEN_PR / SKIP / PR_OK は着手対象でない）を機械側に固定**し、単一の `ACTIONABLE=N` に落とすと、判断が決定論的になり実行間でぶれない。
 ### A-17: `issue-triage.mjs` をバックグラウンド実行したまま観測シェルがタイムアウトで殺され、空の出力ファイルが残った
 
 - **何が起きたか**: トリアージ（`scripts/issue-triage.mjs`）はオープン PR 監査を含むため 1〜3 分かかる。これをリポジトリ内で `... &` のバックグラウンドジョブとして起動し、同じシェルで出力ファイルをポーリングしていたところ、**観測している側のシェル呼び出しがツールのタイムアウトで打ち切られた**。バックグラウンドジョブは親シェルの終了に巻き込まれて死に、**書きかけ（実質空）の出力ファイルだけが残った**。中身が空なのを「issue が 0 件」と誤読しかける危険もあった（本セッションで実際に発生）。
@@ -287,7 +294,7 @@ env -u NODE_OPTIONS node -e "JSON.parse(require('fs').readFileSync('<file.json>'
 
 - 2026-10-12: A-18 に補足 1（action-required doc がサブタスク単位で『エージェント可』と分類した項目は `Refs #n` の部分対応 PR で前進させる）と補足 2（`(#n)` 参照のみで自動クローズされなかった issue は充足確認のうえ説明コメント付きでクローズする）を統合。内容が A-18 と重複していた PR #215 の知見を本 PR に集約し、#215 はクローズ。出典: issue #197 / #200、PR #205 #214 #215。
 - 2026-09-25: 落とし穴 **A-16（chore PR 乱立アンチパターン - ACTIONABLE=0 の実行のたびに同じ問題を記録する新規 chore PR を量産した）** を追記。実例は PR #218 / #219 / #220（3 件のうち 2 件は重複でクローズ済み）。対策として `.kiro/agents/github-issue-resolver.md` に「chore PR 乱立防止」節を追加し、ACTIONABLE=0 専用の新規 chore PR 禁止と既存オープン chore PR 確認ゲートを制度化。権限緩和は無し。出典: PR #218 #219 #220。
-
+- 2026-09-17: 落とし穴 **A-21（着手可否を毎回「件数の目視集計」で再導出していた / `ACTIONABLE=0` の扱い）** を追記。`scripts/issue-triage.mjs` に純関数 `computeActionability(results, prAudit)` と要約先頭の「今回の着手可否サマリ（`ACTIONABLE=N`）」ブロック・`--json` の `actionability` フィールドを追加し、`ACTIONABLE=0` のときは SKIP へ再コメントしない / 重複 PR を作らない / クリーンな PR に手を出さず主要機能 2〜4 へ進む（A-15 と同じ禁止）ことを明記。着手対象の定義は issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE`、PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`（`OPEN_PR` / `SKIP` / `PR_OK` は除外）。読み取り専用・既存 verdict ロジック不変。出典: 2026-09-17 バッチ（OPEN_PR 5 件・SKIP 3 件・オープン PR 監査 10 件すべて PR_OK ＝ `ACTIONABLE=0`）。
 - 2026-09-12: 落とし穴 **A-17（`issue-triage.mjs` をバックグラウンド実行したまま観測シェルがタイムアウトで殺され空の出力ファイルが残った）**、**A-18（長期 SKIP の issue が最新マーカーより前の未回答の人間依頼を隠していた）**、**A-19（試験ガイドが PDF から Web ページへ移行 → タスクステートメント検証の正典を Web 版に切り替える）** を追記。あわせて「スキップしてよい / いけない」に (d) `要人間対応` ラベルだけを理由に丸ごとスキップしないことと、再スキップ前の必須確認（マーカー前の未回答依頼の確認 / AWS 操作要否での切り分け）を追加し、「棚卸しの分岐」判定表の `SKIP` 行に A-18 の注意を追記。プロンプト（`.kiro/agents/github-issue-resolver.md`）手順 1 のトリアージ実行注記に「detached（`nohup`/`setsid`）+ リポジトリ外へのファイル出力 + 別シェルでのポーリング」を明文化（A-17 の恒久ゲート化）。出典: 本セッションのレトロスペクティブ / issue #32（マーカー前の DynamoDB コスト試算依頼が未回答だった）/ issue #190・PR #195（試験ガイドの PDF → Web 移行フォローアップ）/ PR #203・PR #206（本バッチの issue 対応 PR）。
 - 2026-09-11: 落とし穴 **A-15（SKIP 済み issue に毎回スキップコメントを重ねて投稿していた）** を追記。あわせて「棚卸しの分岐」判定表の `SKIP` 行に「ラベル・コメントは残すが新規スキップコメントは付けない（再コメント禁止）」を明記。`scripts/issue-triage.mjs` が既存 `🤖 agent:skipped` コメント件数（`agentSkipCommentCount`）と `SKIP` 判定への再コメント不要助言（`reSkipAdvice`）を出力するようにし、プロンプト側にも「再コメントは `RECHECK` のときだけ」の禁止ルールを追加した。出典: issue #32（同種スキップコメントの累積）/ #162 #167（予備軍）。
 - 2026-09-10: 「作業証跡（キャプチャ）を PR に残す（#194）」節を新設。UI 変更では変更前後（before / after）のキャプチャ、UI 以外でも該当する作業証跡（コマンド出力・テスト結果）を PR に残すこと、ブラウザが使える環境では Playwright / agent-browser で取得し、ブラウザ不在 / ヘッドレス環境では取得不可の理由と再現手順（`node dev-server.mjs`・URL / 画面・変更点）を明記する切り分けを表で整理。出典: issue #194 / `.kiro/agents/github-issue-resolver.md` の「検証」節。
