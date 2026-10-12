@@ -32,6 +32,7 @@
 - [問題セットを IndexedDB に保存し、1 問ごとに保存・中断から再開できるようにする (#225 / PR 2)](issues/exam-sets-225.md)
 - [Gemini Batch のジョブを保存し、ブラウザを閉じても生成が続くようにする (#225 / PR 3)](issues/batch-resume-225.md)
 - [問題生成を多段化する: 設計図 → 計画 → 作問 → 重複検査 (#225 / PR 4)](issues/exam-pipeline-engine-225.md)
+- [カード: 問題生成が参照する「何を問うか」をデータ化する (#225 / PR 5)](issues/cards-225.md)
 - [問題単位の学習イベントの蓄積と送信（`/events`） (#225 / PR 7)](issues/learning-events-225.md)
 
 ## 設計ドキュメント（docs/design/）
