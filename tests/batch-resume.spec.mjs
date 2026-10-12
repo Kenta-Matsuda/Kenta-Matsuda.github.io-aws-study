@@ -27,6 +27,10 @@ const quizJson = (i) => JSON.stringify({
 });
 
 function stubBatch(page, flags) {
+  // Stage 1 planner: a normal generateContent call before the batch is submitted.
+  const planner = page.route('**/v1beta/models/*:generateContent*', (route) => route.fulfill({
+    json: { candidates: [{ content: { parts: [{ text: '[]' }] } }] },
+  }));
   const create = page.route('**/v1beta/models/*:batchGenerateContent*', async (route) => {
     flags.created += 1;
     await route.fulfill({ json: { name: JOB, metadata: { '@type': BATCH_TYPE, name: JOB, state: 'BATCH_STATE_PENDING' } } });
@@ -50,7 +54,7 @@ function stubBatch(page, flags) {
       },
     });
   });
-  return Promise.all([create, poll]);
+  return Promise.all([planner, create, poll]);
 }
 
 async function readSets(page) {

@@ -466,6 +466,10 @@
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
   },
   "examSets": {
+    "metrics": {
+      "judge": "Reviewed {{passed}}/{{judged}} passed",
+      "cluster": "Largest answer overlap {{n}}"
+    },
     "title": "Question Sets",
     "open": "Question Sets",
     "hint": "Questions are saved as soon as they are generated, so sets interrupted mid-generation can still be started.",

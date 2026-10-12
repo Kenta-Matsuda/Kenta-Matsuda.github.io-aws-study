@@ -232,6 +232,17 @@ node scripts/analyze-resource-coverage.mjs --md test-results/coverage.md
 6. 作業後に再度 `analyze-resource-coverage.mjs` を実行し、**before / after の `median` / `thin` / `singleKind` を PR 本文に載せる**。
 7. 3 件に届かなかったタスクは、**未達であることと調査済みの候補を PR 本文に明記**して次回に引き継ぐ（黙って放置しない）。
 
+## 主要機能 1c: カード採掘（問題生成パイプラインの「何を問うか」をデータ化する）
+
+問題生成パイプライン（`docs/design/exam-generation-pipeline.md` §4、issue #225）は、実行時に外部ページを読まず、**事前にデータ化した「カード」**から出題単位を取る。カードは本エージェントが作り、人間レビューを経てマージする。機械生成したカードを未レビューでマージしない。
+
+- **置き場所とスキーマ**: `js/data/cards/<exam-id>.js`（`export const CARDS_<CODE> = { examId, cards: [...] }`）。種別は `case`（アーキテクチャ型: 構築事例の判断ポイント）/ `framework`（フレームワーク型: 視点 × 段階 × 能力のセル）/ `concept`（基礎型: 用語カード）。各フィールドの意味は `js/cards.js` 冒頭と既存ファイル（`aib-c01.js` / `saa-c03.js`）を正とする。
+- **素材の選び方**: `case` は推奨リソースにある AWS 公式ブログの構築事例・Prescriptive Guidance から、**状況・制約・判断ポイント・採用案とその理由・不採用案とその理由**を抜き出す。不採用案は誤答の素材なので省かない。記事が触れていないことは推測せず「記事は言及していない」と書く。`framework` はフレームワーク自身の構造（視点・能力・段階）をセルにし、LLM に概念を発明させない。
+- **出典の記録**: `source.url` / `title` / `publishedAt` / `verifiedAt` を必ず入れる。ページが「historical reference only」等のアーカイブ表示なら `source.archived: true` と、より新しい公式資料があればその URL を `source.note` に書く。URL は `scripts/check-resource-links.mjs --urls "<URL>"` で 200 を確認する。
+- **タスクへの対応付け**: 各単位（判断ポイント / セル / 概念）に `tasks: ['1.1', ...]` で試験ガイドのタスク ID を付ける。存在しないタスク ID は `scripts/check-card-coverage.mjs` が INVALID として検出する。
+- **在庫の検査**: 作業前後に `node scripts/check-card-coverage.mjs --only <exam-id>` を実行し、単位数（要件は問題数 × 1.5）と未カバーのタスクを PR 本文に before / after で載せる。要件未達でも PR は出してよい（パイプラインはタスクステートメントへフォールバックする）が、未達であることと次に採掘すべき素材を明記する。
+- **PR の単位**: 試験ごとに分ける。`feat(cards): <exam> ...` または `docs:` ではなく **`feat:`** で、カードの追加は利用者に見える出題内容の変更だと扱う。
+
 ## 主要機能 2: 探索ノウハウの永続化・最新化（棚卸し）
 
 「より良い AWS 公式リソースを探すためのノウハウ」を **`docs/wiki/`（LLM Wiki）** に蓄積し、繰り返し利用できる形に育てます。
@@ -282,6 +293,7 @@ node scripts/analyze-resource-coverage.mjs --md test-results/coverage.md
   ```
 - **リソースを追加・削除したら `node scripts/analyze-resource-coverage.mjs --only <試験コード>` を実行**し、items 0 件のタスクが発生していないこと、`thin` / `singleKind` が悪化していないことを確認する（ネットワーク不要なのでどの環境でも実施できる）。before / after を PR 本文に載せる。
 - **`js/data/` の URL を変更したら、必ず `scripts/check-resource-links.mjs --only <試験コード>` を実行し、`broken` / `soft-404` / `redirect` / `fragment-miss` が 0 件になったことを確認する**（ネットワークが使えない環境では `--no-fetch` に留め、未検証を明記する）。修正前後の件数を PR 本文に載せる。
+- **カード（`js/data/cards/`）を追加・変更したら `node scripts/check-card-coverage.mjs --only <exam-id>` を実行**し、INVALID が 0 件であることと、単位数・未カバータスクの before / after を PR 本文に載せる。
 - **i18n**（`js/locales/`）に関わる変更をした場合、`ja.json` と `en.json` の**キー集合が完全に一致（相互ミラー）していること**を確認する。
 - **docs を追加・移動・削除**したら `docs/index.md` を同じ PR で更新し、**デッドリンク・孤立ファイルを作らない**。`docs/wiki/` の内部相対リンクが実在ファイルを指すことを確認する。
 - **Playwright**（`npx playwright test`）はブラウザ / npm を取得できず失敗する可能性があります。実行可能なら実行し、そうでなければ「実行できなかった旨と理由」を記録する。
