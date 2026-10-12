@@ -403,7 +403,7 @@
       "Continua, ci arriverai."
     ],
     "withName": "{{greeting}}, {{name}}!",
-    "you": "studente"
+    "you": "amico"
   },
   "days": {
     "mon": "Lun",
