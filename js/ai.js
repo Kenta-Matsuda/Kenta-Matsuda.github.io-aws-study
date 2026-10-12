@@ -32,6 +32,11 @@ function resolveProvider() {
   return pref || 'gemini';
 }
 
+/** The provider that will actually be used ('gemini' | 'openai'). */
+export function getActiveProvider() {
+  return resolveProvider();
+}
+
 export function getActiveProviderLabel() {
   const p = resolveProvider();
   return p === 'openai' ? 'OpenAI' : 'Gemini';

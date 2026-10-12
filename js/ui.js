@@ -1,4 +1,4 @@
-import { callAi, callAiStream, callAiBatch, resumeAiBatch, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
+import { callAi, callAiStream, callAiBatch, resumeAiBatch, getActiveProvider, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
 import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
 import { applyResourceGroupDefaults } from './data/common-defaults.js';
@@ -87,12 +87,10 @@ import {
   parsePlan,
   validatePlan,
   buildSlotPromptSuffix,
-  buildDuplicateRetryHint,
-  isDuplicateQuestion,
   correctChoiceText,
-  summarizeDiversity,
 } from './examPipeline.js';
 import { listUnits, indexUnitsByTask } from './cards.js';
+import { generateExamQuestions } from './examGenerator.js';
 import {
   SET_STATUS,
   createExamSet,
@@ -505,6 +503,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
             <div class="text-xs text-gray-500 mt-1">
               <span data-set-progress>${escapeHtml(t('examSets.progress', { done: summary.done, requested: summary.requested }))}</span>
               · ${escapeHtml(t('examSets.attempts', { count: taken }))}
+              ${set.metrics?.judged ? `· <span data-set-judge>${escapeHtml(t('examSets.metrics.judge', { passed: set.metrics.passed ?? 0, judged: set.metrics.judged }))}</span>` : ''}
+              ${set.metrics?.largestCluster > 1 ? `· <span data-set-cluster>${escapeHtml(t('examSets.metrics.cluster', { n: set.metrics.largestCluster }))}</span>` : ''}
               ${dateLabel ? `· ${escapeHtml(dateLabel)}` : ''}
             </div>
           </div>
@@ -1213,143 +1213,60 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         ? buildMockQuizSystemPrompt(exam.code, exam.shortLabel, getExamLevel(request.examId))
         : buildQuizSystemPrompt(exam.code, exam.shortLabel);
 
-    // Stage 0 (#225, design §5): one blueprint slot per question — domain/task
-    // by weight, the exact task-statement item, question type, perspective,
-    // industry and the correct-answer letter — all decided in code.
     const requestTask = request.isDashboardQuiz ? null : findExamTask(exam, request.taskId);
-    const blueprint = buildExamBlueprint({ exam, count: total, task: requestTask, level: getExamLevel(request.examId), unitsByTask: await loadUnitsByTask(request.examId) });
-    const taskOccurrences = new Map();
 
     // Save each question as soon as it exists (#225): a reload or a closed tab
     // keeps what was generated so far.
     await attachExamSet(session, { source: 'ai', title: request.taskTitle });
 
-    // Stage 1: one planner call designs the whole exam (a unique concept per
-    // question) before any question is written. Skipped for short sessions.
-    let planRows = Array(total).fill(null);
-    if (total >= PLANNER_MIN_QUESTIONS) {
-      if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? '出題計画を作成中…' : 'Designing the exam plan…';
-      if (session.setId) await updateExamSet(session.setId, { pipeline: { stage: 'planning' } }).catch(() => {});
-      planRows = (await planExam({ els, exam, blueprint })).rows;
-    }
-    if (session.setId) {
-      // Awaited: a concurrent read-modify-write (appending the first question)
-      // would otherwise overwrite the blueprint/plan.
-      await updateExamSet(session.setId, { blueprint: compactBlueprint(blueprint), plan: planRows, pipeline: { stage: 'writing' } }).catch(() => {});
-    }
-
-    // Strictly bound the number of generation attempts per question slot so a
-    // 65-question flow cannot blow up in time: one initial attempt, at most one
-    // regeneration when the response fails to parse, and at most one when the
-    // result duplicates an earlier question (stage 3).
-    const MAX_ATTEMPTS_PER_QUESTION = 3;
-
-    const generated = [];
-    let errorCount = 0;      // slots whose generation threw (callAi fallback also failed)
-    let parseFailCount = 0;  // slots where every attempt returned an unparseable response
-    let duplicateCount = 0;  // slots regenerated because the answer duplicated an earlier one
-    for (let i = 0; i < total; i++) {
-      const slot = blueprint[i];
-      const targetDomain = slot.domain;
-      const resourceTask = slot.task;
-      const occurrence = taskOccurrences.get(resourceTask) || 0;
-      taskOccurrences.set(resourceTask, occurrence + 1);
-      const resources = pickQuizResources(resourceTask, occurrence);
-      const planRow = planRows[i];
-      // Stage 2: the writer is told exactly what to test and what is taken.
-      const userPrompt = (request.isDashboardQuiz
-        ? buildGeneralQuizUserPrompt(exam.code, targetDomain, slot.task)
-        : buildQuizUserPrompt(request.taskTitle, request.taskContext))
-        + buildResourceGroundingHint(resources)
-        + buildSlotPromptSuffix({ slot, plan: planRow, banned: bannedConceptsFor({ planRows, generated, index: i, pinned: Boolean(planRow) }) })
-        + buildAnswerPositionHint(slot.answerLetter);
-
-      let parsed = null;
-      let slotErrored = false;
-      let nearDuplicate = null;  // kept as a fallback if the regeneration does not improve
-      let lastFailure = null;    // 'parse' | 'duplicate'
-      for (let attempt = 0; attempt < MAX_ATTEMPTS_PER_QUESTION && !parsed; attempt++) {
-        // On regeneration attempts, tell the model what went wrong: emit strictly
-        // valid JSON after a parse failure, or avoid the duplicated answer.
-        let attemptPrompt = userPrompt;
-        if (lastFailure === 'parse') {
-          attemptPrompt = `${userPrompt}\n\n【重要】前回の応答は解析できませんでした。有効なJSONオブジェクトのみを返してください（コードフェンスや説明文は不要です）。/ The previous response could not be parsed. Return only a single valid JSON object (no code fences or prose).`;
-        } else if (lastFailure === 'duplicate') {
-          attemptPrompt = `${userPrompt}${buildDuplicateRetryHint(correctChoiceText(nearDuplicate))}`;
-        }
-        let response = '';
-        try {
-          response = await callAiStream({
-            userPrompt: attemptPrompt,
-            systemPrompt,
-            onRequireApiKey: () => openSettingsModal(els),
-            onTextDelta: () => {},  // silent during pre-gen
-          });
-
-          if (String(response || '').includes('ストリーミングに対応していない環境')) {
-            response = await callAi({
-              userPrompt: attemptPrompt,
-              systemPrompt,
-              onRequireApiKey: () => openSettingsModal(els),
-            });
-          }
-          slotErrored = false;
-        } catch (err) {
-          // retry once on error via the non-streaming path
-          try {
-            response = await callAi({
-              userPrompt: attemptPrompt,
-              systemPrompt,
-              onRequireApiKey: () => openSettingsModal(els),
-            });
-            slotErrored = false;
-          } catch {
-            slotErrored = true;
-            continue; // try the next bounded attempt (if any)
-          }
-        }
-
-        const candidate = parseQuizResponse(response);
-        if (!candidate) {
-          lastFailure = 'parse';
-          continue;
-        }
-        // Stage 3: regenerate once when the answer duplicates an earlier question.
-        if (!nearDuplicate && isDuplicateQuestion(candidate, generated)) {
-          nearDuplicate = candidate;
-          lastFailure = 'duplicate';
-          duplicateCount++;
-          continue;
-        }
-        parsed = candidate;
+    // Stages 0–4 (#225, design §5) run in js/examGenerator.js: blueprint →
+    // planner → writer → deterministic checks → solver/judge → editor. The UI
+    // only supplies prompts, resources, the model call and persistence hooks.
+    const statusText = ({ stage, done }) => {
+      const ja = getLocale() === 'ja';
+      switch (stage) {
+        case 'planning': return ja ? '出題計画を作成中…' : 'Designing the exam plan…';
+        case 'judging': return ja ? `査読中… ${done} / ${total} 問` : `Reviewing… ${done} / ${total}`;
+        case 'fixing': return ja ? `修正中… ${done} / ${total} 問` : `Fixing… ${done} / ${total}`;
+        default: return ja ? `${done} / ${total} 問` : `${done} / ${total}`;
       }
-      // A near-duplicate beats a missing question.
-      if (!parsed && nearDuplicate) parsed = nearDuplicate;
-
-      if (parsed) {
-        parsed.domainId = targetDomain?.id ?? null;
-        parsed.taskId = slot.task?.id ?? null;
-        parsed.unitId = slot.unit?.id || slot.item || null;
-        parsed.explanation = appendMissingResourceRefs(parsed.explanation, resources);
-        generated.push(parsed);
-        session.questions[generated.length - 1] = parsed;
-        await persistSessionQuestion(session, generated.length - 1, parsed);
-      } else if (slotErrored) {
-        errorCount++;
-      } else {
-        parseFailCount++;
-      }
-
-      // Update progress
-      const done = generated.length;
-      if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? `${done} / ${total} 問` : `${done} / ${total}`;
-      if (els.quizPregenFill) els.quizPregenFill.style.width = `${(done / total) * 100}%`;
-    }
-
-    const diversity = summarizeDiversity(generated);
+    };
+    const result = await generateExamQuestions({
+      exam,
+      count: total,
+      task: requestTask,
+      level: getExamLevel(request.examId),
+      unitsByTask: await loadUnitsByTask(request.examId),
+      systemPrompt,
+      baseUserPrompt: (slot) => (request.isDashboardQuiz
+        ? buildGeneralQuizUserPrompt(exam.code, slot.domain, slot.task)
+        : buildQuizUserPrompt(request.taskTitle, request.taskContext)),
+      resourcesFor: (slot, occurrence) => pickQuizResources(slot.task, occurrence),
+      callModel: ({ systemPrompt: sp, userPrompt, kind }) => callModelForPipeline({ els, systemPrompt: sp, userPrompt, kind }),
+      judge: { enabled: isJudgeEnabled(session.mode), dropRejected: true },
+      hooks: {
+        onPlan: async (planRows, blueprint) => {
+          if (!session.setId) return;
+          // Awaited inside the generator before any question is appended, so
+          // the blueprint/plan cannot be lost to a concurrent read-modify-write.
+          await updateExamSet(session.setId, { blueprint: compactBlueprint(blueprint), plan: planRows, pipeline: { stage: 'writing' } }).catch(() => {});
+        },
+        onQuestion: async (question, index) => {
+          session.questions[index] = question;
+          await persistSessionQuestion(session, index, question);
+        },
+        onProgress: (p) => {
+          if (p.stage === 'planning' && session.setId) updateExamSet(session.setId, { pipeline: { stage: 'planning' } }).catch(() => {});
+          if (els.quizPregenStatus) els.quizPregenStatus.textContent = statusText(p);
+          if (els.quizPregenFill) els.quizPregenFill.style.width = `${(p.done / total) * 100}%`;
+        },
+      },
+    });
+    const generated = result.questions;
+    const { errors: errorCount, parseFailures: parseFailCount } = result.metrics;
     // eslint-disable-next-line no-console
-    console.info('[pipeline] diversity', { ...diversity, regeneratedForDuplicate: duplicateCount });
-    await finalizeSessionSet(session, { errors: errorCount, parseFailures: parseFailCount, duplicatesRegenerated: duplicateCount, clusters: diversity.clusters, largestCluster: diversity.largestCluster });
+    console.info('[pipeline] metrics', result.metrics);
+    await finalizeSessionSet(session, result.metrics);
 
     // If we couldn't generate anything, surface the total-failure message.
     if (generated.length === 0) {
@@ -4962,6 +4879,34 @@ async function loadUnitsByTask(examId) {
       .catch(() => null));
   }
   return unitsByExam.get(id);
+}
+
+// Model call used by the sequential pipeline: stream silently with the
+// non-streaming fallback the quiz paths always had.
+async function callModelForPipeline({ els, systemPrompt, userPrompt, kind }) {
+  const onRequireApiKey = () => openSettingsModal(els);
+  // Planner / solver / judge / editor return one JSON object: no streaming.
+  if (kind && kind !== 'writer') return callAi({ userPrompt, systemPrompt, onRequireApiKey });
+  try {
+    const response = await callAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta: () => {} });
+    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+      return callAi({ userPrompt, systemPrompt, onRequireApiKey });
+    }
+    return response;
+  } catch {
+    return callAi({ userPrompt, systemPrompt, onRequireApiKey });
+  }
+}
+
+// Judging (solver + judge [+ editor]) doubles the model calls per question, so
+// it is on by default only for mock exams on Gemini (design §6.3 / §8).
+// localStorage `asn_pipeline_judge` = 'on' | 'off' overrides for any mode.
+export function isJudgeEnabled(mode) {
+  let pref = null;
+  try { pref = localStorage.getItem('asn_pipeline_judge'); } catch { /* ignore */ }
+  if (pref === 'off') return false;
+  if (pref === 'on') return true;
+  return mode === 'mock' && getActiveProvider() === 'gemini';
 }
 
 // Stage 1 of the exam pipeline (#225, design §5): one planner call designs the
