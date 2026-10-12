@@ -3,7 +3,8 @@
  * manages combo streaks, and scores answers.
  */
 
-import { getLocale } from './i18n.js';
+import { t } from './i18n.js';
+import { usesJapanesePrompt, outputLanguageDirective } from './localeContent.js';
 
 // ─── Quiz Parsing ───────────────────────────────────────────
 
@@ -379,7 +380,7 @@ export function getSessionSummary(session) {
  * Build a system prompt that asks the AI for JSON-formatted quiz output.
  */
 export function buildQuizSystemPrompt(examCode, examShortLabel) {
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     return (
       `You are an AWS certification exam expert. Create 1 multiple-choice question at the ${examCode} (${examShortLabel}) level.\n\n` +
       `[Reliability Rules]\n` +
@@ -395,7 +396,8 @@ export function buildQuizSystemPrompt(examCode, examShortLabel) {
       '  "explanation": "Brief explanation of why the answer is correct and why others are incorrect. End with Reference: an AWS official documentation URL"\n' +
       '}\n' +
       '```\n' +
-      'Create a practical scenario-based question. Cover a different AWS service or topic each time — do not repeat the same service.'
+      'Create a practical scenario-based question. Cover a different AWS service or topic each time — do not repeat the same service.' +
+      outputLanguageDirective()
     );
   }
   return (
@@ -421,7 +423,7 @@ export function buildQuizSystemPrompt(examCode, examShortLabel) {
  * Build the user prompt for quiz generation.
  */
 export function buildQuizUserPrompt(taskTitle, taskContext) {
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     let prompt = `Task: Create 1 practical scenario-based multiple-choice question related to "${taskTitle}" in the specified JSON format.`;
     if (taskContext) {
       prompt += `\n\n[Task Context]\n${taskContext}`;
@@ -439,7 +441,7 @@ export function buildQuizUserPrompt(taskTitle, taskContext) {
  * Build a system prompt for speed-run mode (short 1Q1A format, answerable in ~30s).
  */
 export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     return (
       `You are an AWS certification exam expert. Create 1 short multiple-choice question at the ${examCode} (${examShortLabel}) level.\n\n` +
       `[IMPORTANT] This is a speed-run question:\n` +
@@ -456,7 +458,8 @@ export function buildSpeedQuizSystemPrompt(examCode, examShortLabel) {
       '  "correct": "B",\n' +
       '  "explanation": "Brief explanation (1-2 sentences)"\n' +
       '}\n' +
-      '```'
+      '```' +
+      outputLanguageDirective()
     );
   }
   return (
@@ -492,7 +495,7 @@ function taskStatementLines(task, isEn) {
  * names that task and its task statement instead of letting the model pick.
  */
 export function buildGeneralQuizUserPrompt(examCode, targetDomain, targetTask) {
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     if (targetDomain && targetTask) {
       const name = targetDomain.title || targetDomain.jpTitle;
       const taskName = targetTask.title || targetTask.jpTitle;
@@ -574,7 +577,7 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
 
   const guide = levelGuide[examLevel] || levelGuide['Associate'];
 
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     const enLevelGuide = {
       'Foundational': {
         questionDesc: 'Questions testing broad foundational AWS cloud knowledge',
@@ -630,7 +633,8 @@ export function buildMockQuizSystemPrompt(examCode, examShortLabel, examLevel) {
       '  "correct": "B",\n' +
       '  "explanation": "Detailed explanation (correct reason → each incorrect reason → best practices → AWS documentation URLs)"\n' +
       '}\n' +
-      '```'
+      '```' +
+      outputLanguageDirective()
     );
   }
 
@@ -764,7 +768,7 @@ export function assignAnswerLetters(questionCount, rng = Math.random) {
  */
 export function buildAnswerPositionHint(letter) {
   if (!/^[A-D]$/.test(String(letter || ''))) return '';
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     return `\n\n[Answer position] Place the correct answer at choice ${letter} (set "correct": "${letter}"), and make the explanation refer to the choices by these letters.`;
   }
   return `\n\n【正解の位置】正解は選択肢 ${letter} に配置してください（"correct": "${letter}"）。解説の選択肢記号もこの並びに合わせてください。`;
@@ -833,7 +837,7 @@ export function selectTaskResources(task, occurrence = 0, limit = 3) {
 export function buildResourceGroundingHint(resources) {
   if (!Array.isArray(resources) || resources.length === 0) return '';
   const lines = resources.map((r, i) => `${i + 1}. ${r.title} — ${r.url}${r.note ? ` (${r.note})` : ''}`).join('\n');
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     return `\n\n[Reference Resources]\n${lines}\nBase the question and explanation on what these official resources cover. Cite the URL(s) you relied on from this list in the explanation; do not invent other URLs.`;
   }
   return `\n\n【参照リソース】\n${lines}\nこれらの公式リソースが扱う内容に基づいて問題と解説を作成し、解説には根拠にした URL をこの一覧から引用してください（一覧にない URL を作らないこと）。`;
@@ -850,7 +854,7 @@ export function appendMissingResourceRefs(explanation, resources) {
   const text = String(explanation || '');
   if (!Array.isArray(resources) || resources.length === 0) return text;
   if (resources.some((r) => r.url && text.includes(r.url))) return text;
-  const heading = getLocale() === 'en' ? 'Recommended resources' : '参考リソース';
+  const heading = t('quiz.recommendedResources');
   const list = resources.map((r) => `- [${r.title}](${r.url})`).join('\n');
   return `${text}\n\n**${heading}**\n${list}`;
 }

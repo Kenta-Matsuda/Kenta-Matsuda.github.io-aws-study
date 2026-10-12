@@ -3,6 +3,7 @@ import { DEFAULT_EXAM_ID } from './config.js';
 import { initApp } from './ui.js';
 import { initI18n, setLocale, getLocale, translateStaticElements } from './i18n.js';
 import { getRegisteredLocaleCodes, nextLocale } from './localeRegistry.js';
+import { loadContentOverlays } from './localeContent.js';
 
 function handleBootError(e) {
   // index.html のフォールバックバナーで表示する
@@ -55,6 +56,9 @@ async function boot() {
   }
 
   const initialExamId = getInitialExamId();
+  // Content-overlay translations for the first render (no-op for ja / en and
+  // for locales / exams without overlay files; failures leave English).
+  await loadContentOverlays(getLocale(), ['common', initialExamId]).catch(() => false);
 
   const appApi = initApp({
     exams: getPublicExams(),

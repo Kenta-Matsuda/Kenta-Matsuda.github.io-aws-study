@@ -63,7 +63,7 @@ test.describe('Routing and Language switching', () => {
     // Switch to English
     await page.click('#settingsBtn');
     await page.waitForTimeout(300);
-    await page.click('#langSwitch button[data-lang="en"]');
+    await page.selectOption('#langSelect', 'en');
     await page.waitForTimeout(500);
     await page.click('[data-close-modal="settingsModal"]');
     await page.waitForTimeout(300);
@@ -105,7 +105,7 @@ test.describe('Routing and Language switching', () => {
     // Switch to Japanese
     await page.click('#settingsBtn');
     await page.waitForTimeout(300);
-    await page.click('#langSwitch button[data-lang="ja"]');
+    await page.selectOption('#langSelect', 'ja');
     await page.waitForTimeout(500);
     await page.click('[data-close-modal="settingsModal"]');
     await page.waitForTimeout(300);
@@ -186,7 +186,7 @@ test.describe('Routing and Language switching', () => {
 
     await page.click('#settingsBtn');
     await page.waitForTimeout(300);
-    await page.click('#langSwitch button[data-lang="en"]');
+    await page.selectOption('#langSelect', 'en');
     await page.waitForTimeout(500);
     await page.click('[data-close-modal="settingsModal"]');
     await page.waitForTimeout(300);

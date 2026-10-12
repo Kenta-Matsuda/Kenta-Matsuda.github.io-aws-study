@@ -62,3 +62,21 @@ export function isOnline() {
   if (typeof navigator === 'undefined' || typeof navigator.onLine !== 'boolean') return true;
   return navigator.onLine;
 }
+
+const LEGACY_STREAMING_UNSUPPORTED = 'ストリーミングに対応していない環境';
+
+/**
+ * Whether a provider response is the "streaming unsupported" error, so the
+ * caller can retry without streaming. `localizedMessage` is the current
+ * locale's `errors.streamingUnsupported` (the providers throw that string);
+ * the Japanese literal is kept for responses produced before i18n.
+ * @param {unknown} response
+ * @param {string} [localizedMessage]
+ * @returns {boolean}
+ */
+export function isStreamingUnsupportedResponse(response, localizedMessage = '') {
+  const text = String(response || '');
+  if (!text) return false;
+  const msg = String(localizedMessage || '').replace(/[.。]\s*$/, '');
+  return (msg !== '' && text.includes(msg)) || text.includes(LEGACY_STREAMING_UNSUPPORTED);
+}

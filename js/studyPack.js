@@ -11,9 +11,12 @@
  *  - CSV エスケープは js/quizCsv.js の escapeCsvField を再利用し、実装の分岐を避ける。
  *    CSV は RFC 4180 準拠・CRLF 改行・末尾改行あり（quizHistoryToCsv と同じ規約）。
  *    UTF-8 BOM は Excel 対策として呼び出し側（UI）が付与する。本モジュールは付けない。
- *  - locale オプション（'ja' | 'en'）を受け取り、'en' のときは *En フィールド
+ *  - locale オプションを受け取り、'ja' 以外では *En フィールド
  *    （titleEn / noteEn / urlEn / descriptionEn / knowledgeEn / labelEn）を優先し、
- *    無ければ日本語フィールドへフォールバックする。既定は 'ja'。
+ *    無ければ日本語フィールドへフォールバックする。ja / en 以外のロケールでは
+ *    コンテンツ・オーバーレイ（js/localeContent.js）の翻訳を最優先し、見出しなどの
+ *    固定ラベルは英語にする。URL は js/localeRegistry.js の resolveLocalizedUrl で
+ *    選ぶ（AWS ドキュメントはロケールのパスへ）。既定は 'ja'。
  *  - 各ビルダー（buildResourceLinksMarkdown / buildResourceLinksCsv /
  *    buildStudyRouteMarkdown / buildGlossaryCsv）は「単一の試験オブジェクト」でも
  *    「試験オブジェクトの配列（ALL_EXAMS）」でも受け付ける。配列を渡すと全試験を
@@ -44,36 +47,40 @@
  */
 
 import { escapeCsvField } from './quizCsv.js';
+import { pickLocalized, localizedField } from './localeContent.js';
+import { resolveLocalizedUrl } from './localeRegistry.js';
 
 /** 単一試験 or 試験配列を、null/undefined を除いた試験配列へ正規化する。 */
 function normalizeExams(exams) {
   return (Array.isArray(exams) ? exams : [exams]).filter(Boolean);
 }
 
-/** locale に応じて主フィールド / *En フィールドのどちらかを返す（無ければフォールバック）。 */
+/**
+ * locale に応じて主（日本語）フィールド / *En フィールドのどちらかを返す（無ければフォールバック）。
+ * ja / en 以外のロケールはコンテンツ・オーバーレイの翻訳 → 英語 → 日本語の順（js/localeContent.js）。
+ */
 function pick(locale, primary, en) {
-  if (locale === 'en') {
-    const v = en == null || en === '' ? primary : en;
-    return v == null ? '' : v;
-  }
-  const v = primary == null || primary === '' ? en : primary;
+  const v = pickLocalized({ ja: primary, en }, locale);
   return v == null ? '' : v;
 }
 
-/** ステップの表示タイトル（ja は jpTitle 優先、en は title 優先）。 */
+/** ステップの表示タイトル（ja は jpTitle 優先、それ以外は title / 翻訳優先）。 */
 function stepTitleOf(step, locale) {
   if (!step) return '';
-  if (locale === 'en') return step.title || step.jpTitle || step.id || '';
-  return step.jpTitle || step.title || step.id || '';
+  return localizedField(step, 'title', locale) || step.id || '';
 }
 
-/** ステップの説明文配列（en は descriptionEn 優先）。常に配列を返す。 */
+/** 文字列配列から空要素を除く。 */
+function nonEmptyLines(arr) {
+  return (Array.isArray(arr) ? arr : []).filter((s) => typeof s === 'string' && s.trim() !== '');
+}
+
+/** ステップの説明文配列（ja 以外は descriptionEn / 翻訳優先）。常に配列を返す。 */
 function stepDescriptionsOf(step, locale) {
   if (!step) return [];
   const primary = Array.isArray(step.description) ? step.description : [];
   const en = Array.isArray(step.descriptionEn) ? step.descriptionEn : [];
-  const chosen = locale === 'en' ? (en.length ? en : primary) : (primary.length ? primary : en);
-  return chosen.filter((s) => typeof s === 'string' && s.trim() !== '');
+  return nonEmptyLines(pickLocalized({ ja: primary, en }, locale));
 }
 
 /**
@@ -84,8 +91,7 @@ function stepKnowledgeOf(step, locale) {
   if (!step) return [];
   const primary = Array.isArray(step.knowledge) ? step.knowledge : [];
   const en = Array.isArray(step.knowledgeEn) ? step.knowledgeEn : [];
-  const chosen = locale === 'en' ? (en.length ? en : primary) : (primary.length ? primary : en);
-  const knowledge = chosen.filter((s) => typeof s === 'string' && s.trim() !== '');
+  const knowledge = nonEmptyLines(pickLocalized({ ja: primary, en }, locale));
   if (knowledge.length) return knowledge;
   return stepDescriptionsOf(step, locale);
 }
@@ -118,7 +124,7 @@ export function collectResourceItems(exam, { locale = 'ja' } = {}) {
       const groupLabel = pick(locale, group.label, group.labelEn);
       for (const item of Array.isArray(group.items) ? group.items : []) {
         if (!item) continue;
-        const url = String(pick(locale, item.url, item.urlEn) || '').trim();
+        const url = String(resolveLocalizedUrl(locale, item.url, item.urlEn) || '').trim();
         if (!url || seenUrls.has(url)) continue;
         seenUrls.add(url);
         out.push({
@@ -141,7 +147,7 @@ export function collectResourceItems(exam, { locale = 'ja' } = {}) {
 
 /** 1 試験分のリソースリンク Markdown 本文（見出しレベルは baseLevel 起点）。 */
 function resourceLinksMarkdownBody(exam, locale, baseLevel) {
-  const en = locale === 'en';
+  const en = locale !== 'ja'; // English labels for every non-Japanese locale
   const items = collectResourceItems(exam, { locale });
   const lines = [];
 
@@ -200,7 +206,7 @@ function resourceLinksMarkdownBody(exam, locale, baseLevel) {
  * @returns {string} Markdown 文書（末尾改行あり）。
  */
 export function buildResourceLinksMarkdown(exams, { locale = 'ja' } = {}) {
-  const en = locale === 'en';
+  const en = locale !== 'ja'; // English labels for every non-Japanese locale
   const list = normalizeExams(exams);
   const multi = Array.isArray(exams) && list.length > 1;
   const lines = [];
@@ -278,7 +284,7 @@ export function buildResourceLinksCsv(exams, { locale = 'ja' } = {}) {
 
 /** 1 試験分の学習ルート本文（ステップ見出しは stepLevel、既定 H2）。 */
 function studyRouteMarkdownBody(exam, locale, stepLevel) {
-  const en = locale === 'en';
+  const en = locale !== 'ja'; // English labels for every non-Japanese locale
   const lines = [];
   const steps = Array.isArray(exam?.steps) ? exam.steps : [];
   if (steps.length === 0) {
@@ -328,7 +334,7 @@ function studyRouteMarkdownBody(exam, locale, stepLevel) {
  * @returns {string} Markdown 文書（末尾改行あり）。
  */
 export function buildStudyRouteMarkdown(exams, { locale = 'ja' } = {}) {
-  const en = locale === 'en';
+  const en = locale !== 'ja'; // English labels for every non-Japanese locale
   const list = normalizeExams(exams);
   const multi = Array.isArray(exams) && list.length > 1;
   const lines = [];

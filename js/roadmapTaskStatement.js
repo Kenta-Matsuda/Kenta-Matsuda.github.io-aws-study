@@ -16,17 +16,18 @@
  * コピー内容がずれるため、両者を同期させて更新する。
  */
 
+import { localizedField } from './localeContent.js';
+
 /**
  * タスクオブジェクトから、指定ロケールの説明（description）配列を選択する。
  * ui.js の `localizedDescription` と同じ選択規則。
  * @param {object} task - ロードマップのタスクオブジェクト。
- * @param {string} locale - 'en' または 'ja'。
+ * @param {string} locale - ロケールコード（'ja' / 'en' / 'ko' など。js/localeContent.js の規則で選ぶ）。
  * @returns {string|Array<string>|undefined} 生の description（未正規化）。
  */
 function selectDescription(task, locale) {
   if (!task) return [];
-  if (locale === 'en' && task.descriptionEn) return task.descriptionEn;
-  return task.description || [];
+  return localizedField(task, 'description', locale) || [];
 }
 
 /**

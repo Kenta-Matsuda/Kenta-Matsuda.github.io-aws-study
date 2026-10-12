@@ -6,9 +6,13 @@
 import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
-import { getLocale, t } from './i18n.js';
+import { t } from './i18n.js';
+import { usesJapanesePrompt, promptLanguageName } from './localeContent.js';
 import { getExamCategoryLabel, getExamOfficialRefs, getExamServiceKeywords } from './exams.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
+import { isStreamingUnsupportedResponse } from './aiErrors.js';
+
+const isStreamingUnsupported = (response) => isStreamingUnsupportedResponse(response, t('errors.streamingUnsupported'));
 
 /**
  * Gemini built-in grounding tools used by the chat.
@@ -144,7 +148,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
       },
     });
 
-    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    if (isStreamingUnsupported(response)) {
       updateBubbleContent(aiBubble, t('chat.thinking'));
       response = await callAi({
         userPrompt: text,
@@ -171,7 +175,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
 }
 
 function buildChatSystemPrompt(exam) {
-  const isJa = getLocale() === 'ja';
+  const isJa = usesJapanesePrompt();
   // Authoritative identity sourced from the repository's own exam definitions (js/data/*.js).
   const category = getExamCategoryLabel(exam?.id);
   const categoryLabel = category ? (isJa ? category.labelJa : category.labelEn) : null;
@@ -182,7 +186,7 @@ function buildChatSystemPrompt(exam) {
   // injected so the model grounds on the exam guide's target-service list rather
   // than its training-cutoff memory (see issue #202 maintainer follow-up).
   const serviceKeywords = getExamServiceKeywords(exam?.id, { locale: isJa ? 'ja' : 'en' });
-  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords });
+  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords, responseLanguage: promptLanguageName() });
 }
 
 /**
@@ -194,10 +198,12 @@ function buildChatSystemPrompt(exam) {
  * category label and official refs, this function only assembles the text.
  *
  * @param {{ code?: string, shortLabel?: string, title?: string } | null} exam
- * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[] }} opts
+ * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[], responseLanguage?: string }} opts
+ *   `responseLanguage` (English scaffolding only) names the language to answer
+ *   in, e.g. 'Korean (한국어)'; defaults to English.
  * @returns {string}
  */
-export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [] } = {}) {
+export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [], responseLanguage = 'English' } = {}) {
   const code = exam?.code || 'AWS';
   const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
   const refs = Array.isArray(officialRefs) ? officialRefs : [];
@@ -237,7 +243,8 @@ export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = nu
     prompt +=
       `\nAnswer questions clearly and concisely, using concrete examples.\n` +
       `Use Markdown format with bullet points and code examples as appropriate.\n` +
-      `Respond in English.`;
+      `Respond in ${responseLanguage || 'English'}.` +
+      (responseLanguage && responseLanguage !== 'English' ? ' Keep AWS service and feature names in their official English form.' : '');
     return prompt;
   }
 
