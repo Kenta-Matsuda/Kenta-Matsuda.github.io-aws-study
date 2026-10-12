@@ -1,9 +1,10 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  AWS Study Navigator feedback collector (issues #162, #167).
-  Lambda Function URL + DynamoDB + S3/CloudFront. Files account-free feedback
-  (with optional screenshots) as GitHub issues and stores Good/Bad votes.
+  AWS Study Navigator feedback collector (issues #162, #167) and opt-in global
+  XP leaderboard (issue #32). Lambda Function URL + DynamoDB + S3/CloudFront.
+  Files account-free feedback (with optional screenshots) as GitHub issues,
+  stores Good/Bad votes and aggregates leaderboard XP per period.
 
 Parameters:
   AllowedOrigins:
@@ -76,7 +77,16 @@ Resources:
       Policies:
         - Statement:
             - Effect: Allow
-              Action: [dynamodb:PutItem, dynamodb:UpdateItem, dynamodb:BatchWriteItem]
+              # Query/GetItem/DeleteItem/ConditionCheckItem: leaderboard (#32). Its
+              # TransactWriteItems call is authorized per item as PutItem/UpdateItem.
+              Action:
+                - dynamodb:PutItem
+                - dynamodb:UpdateItem
+                - dynamodb:BatchWriteItem
+                - dynamodb:DeleteItem
+                - dynamodb:ConditionCheckItem
+                - dynamodb:GetItem
+                - dynamodb:Query
               Resource: !GetAtt FeedbackTable.Arn
             - Effect: Allow
               Action: s3:PutObject
