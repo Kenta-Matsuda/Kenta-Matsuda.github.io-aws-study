@@ -281,8 +281,8 @@ export const EXAM_MOCK_CONFIG = {
   'scs-c03':  { questionCount: 65, timeLimitMin: 170, level: 'Specialty' },
   'mla-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Associate' },
   'dea-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Associate' },
-  'aif-c01':  { questionCount: 65, timeLimitMin: 120, level: 'Foundational' },
-  'aip-c01':  { questionCount: 65, timeLimitMin: 120, level: 'Associate' },
+  'aif-c01':  { questionCount: 65, timeLimitMin: 90,  level: 'Foundational' },
+  'aip-c01':  { questionCount: 75, timeLimitMin: 180, level: 'Professional' },
   'aib-c01':  { questionCount: 65, timeLimitMin: 130, level: 'Business' },
 };
 

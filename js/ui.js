@@ -90,6 +90,7 @@ import {
   correctChoiceText,
 } from './examPipeline.js';
 import { listUnits, indexUnitsByTask } from './cards.js';
+import { getExamLifecycleNotice } from './examLifecycle.js';
 import { generateExamQuestions } from './examGenerator.js';
 import {
   SET_STATUS,
@@ -2058,6 +2059,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     const exam = getExamById(state.examId);
     renderExamMeta({ els, exam });
+    renderExamLifecycleNotice({ els, exam });
     renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
     renderXpDashboard({ els, exam, state });
     renderLearningStatus({ els, exam, state });
@@ -2083,9 +2085,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
       if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
 
-      // Hide left aside (chart), learning status, XP dashboard, domain tabs
+      // Hide left aside (chart), exam notice, learning status, XP dashboard, domain tabs
       const chartAside = els.examWeightChart?.closest('aside');
       if (chartAside) chartAside.classList.add('hidden');
+      renderExamLifecycleNotice({ els, exam: null });
       if (els.learningStatusPanel) els.learningStatusPanel.classList.add('hidden');
       if (els.xpDashboard) els.xpDashboard.classList.add('hidden');
       if (els.domainTabs) els.domainTabs.innerHTML = '';
@@ -2117,6 +2120,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.xpDashboard) els.xpDashboard.classList.remove('hidden');
 
     renderExamMeta({ els, exam });
+    renderExamLifecycleNotice({ els, exam });
     renderExamSwitcher({ els, exams, state, onSelect: setExam });
     renderChart({ els, exam, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderXpDashboard({ els, exam, state });
@@ -2325,6 +2329,15 @@ function renderExamSidebar({ els, exams, state, onSelect }) {
       item.className = 'exam-sidebar-item' + (exam.id === state.examId ? ' active' : '');
       item.dataset.examId = exam.id;
       item.innerHTML = `<span class="exam-code">${exam.code}</span><span class="truncate">${exam.shortLabel}</span>`;
+      // Version update / retirement badge (js/data/exam-lifecycle.js)
+      const lifecycle = getExamLifecycleNotice(exam.id, { locale });
+      if (lifecycle) {
+        const badge = document.createElement('span');
+        badge.className = 'exam-lifecycle-badge';
+        badge.dataset.lifecycleStatus = lifecycle.status;
+        badge.textContent = t(`examLifecycle.badge.${lifecycle.status}`);
+        item.appendChild(badge);
+      }
       item.addEventListener('click', () => {
         onSelect(exam.id);
         // Close sidebar
@@ -2450,6 +2463,13 @@ function getElements() {
 
     // XP Dashboard
     xpDashboard: document.getElementById('xpDashboard'),
+
+    // Exam version update / retirement notice
+    examLifecycleNotice: document.getElementById('examLifecycleNotice'),
+    examLifecycleNoticeIcon: document.getElementById('examLifecycleNoticeIcon'),
+    examLifecycleNoticeTitle: document.getElementById('examLifecycleNoticeTitle'),
+    examLifecycleNoticeText: document.getElementById('examLifecycleNoticeText'),
+    examLifecycleNoticeSources: document.getElementById('examLifecycleNoticeSources'),
 
     // Learning Status Panel
     learningStatusPanel: document.getElementById('learningStatusPanel'),
@@ -4222,6 +4242,60 @@ function renderExamMeta({ els, exam }) {
   els.siteTitle.textContent = exam.title;
   els.siteSubtitle.textContent = localizedSubtitle(exam);
   els.examCodeBadge.textContent = exam.code;
+}
+
+const LIFECYCLE_ICONS = {
+  updating: 'fa-arrows-rotate',
+  superseded: 'fa-circle-exclamation',
+  retiring: 'fa-hourglass-half',
+  retired: 'fa-ban',
+};
+
+/**
+ * Show the selected exam's version update / retirement notice (js/examLifecycle.js),
+ * or hide the banner when AWS has announced no change for it. Pass `exam: null`
+ * to hide it (e.g. on the beginner guide).
+ */
+function renderExamLifecycleNotice({ els, exam }) {
+  const box = els.examLifecycleNotice;
+  if (!box) return;
+  const notice = exam ? getExamLifecycleNotice(exam.id, { locale: getLocale() }) : null;
+  if (!notice) {
+    box.classList.add('hidden');
+    return;
+  }
+
+  box.dataset.lifecycleStatus = notice.status;
+  if (els.examLifecycleNoticeIcon) {
+    // Font Awesome's JS replaces <i> with <svg>, so rebuild the icon each render.
+    const icon = document.createElement('i');
+    icon.className = `fas ${LIFECYCLE_ICONS[notice.status] || 'fa-circle-info'}`;
+    els.examLifecycleNoticeIcon.replaceChildren(icon);
+  }
+  if (els.examLifecycleNoticeTitle) {
+    els.examLifecycleNoticeTitle.textContent = t(`examLifecycle.title.${notice.status}`, {
+      exam: exam.code,
+      successor: notice.successorCode || '',
+    });
+  }
+  if (els.examLifecycleNoticeText) els.examLifecycleNoticeText.textContent = notice.message;
+  if (els.examLifecycleNoticeSources) {
+    const label = document.createElement('span');
+    label.className = 'font-bold';
+    label.textContent = t('examLifecycle.sources');
+    const links = notice.sources.map((source) => {
+      const a = document.createElement('a');
+      a.href = source.url;
+      a.target = '_blank';
+      a.rel = 'noopener noreferrer';
+      a.className = 'underline hover:no-underline';
+      a.textContent = source.title || source.url;
+      return a;
+    });
+    els.examLifecycleNoticeSources.replaceChildren(label, ...links);
+    els.examLifecycleNoticeSources.classList.toggle('hidden', links.length === 0);
+  }
+  box.classList.remove('hidden');
 }
 
 function renderExamSwitcher({ els, exams, state, onSelect }) {
