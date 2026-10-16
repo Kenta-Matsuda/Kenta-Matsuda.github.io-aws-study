@@ -488,5 +488,20 @@
       "partial": "一部のみ",
       "failed": "失敗"
     }
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{successor}} への改定のお知らせ",
+      "superseded": "{{successor}} へ改定されました",
+      "retiring": "{{exam}} 廃止のお知らせ",
+      "retired": "{{exam}} は廃止されました"
+    },
+    "badge": {
+      "updating": "改定予定",
+      "superseded": "旧版",
+      "retiring": "廃止予定",
+      "retired": "廃止"
+    },
+    "sources": "出典（AWS 公式）:"
   }
 }

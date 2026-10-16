@@ -488,5 +488,20 @@
       "partial": "Partial",
       "failed": "Failed"
     }
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} is being updated to {{successor}}",
+      "superseded": "{{exam}} has been replaced by {{successor}}",
+      "retiring": "{{exam}} is being retired",
+      "retired": "{{exam}} has been retired"
+    },
+    "badge": {
+      "updating": "Updating",
+      "superseded": "Old version",
+      "retiring": "Retiring",
+      "retired": "Retired"
+    },
+    "sources": "Sources (AWS):"
   }
 }
