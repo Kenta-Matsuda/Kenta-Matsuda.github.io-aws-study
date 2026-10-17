@@ -212,7 +212,7 @@ export function getExamOfficialRefs(examId, { locale = 'ja' } = {}) {
  * The trailing group greedily captures multi-word service names
  * (proper-cased words or ALL-CAPS acronyms) that follow the "Amazon"/"AWS" prefix.
  */
-const AWS_SERVICE_NAME_RE = /\b(?:Amazon|AWS)(?:\s+(?:[A-Z][A-Za-z0-9]*|[A-Z]{2,}))+/g;
+const AWS_SERVICE_NAME_RE = /\b(?:Amazon|AWS)(?:\s+(?:[A-Z][A-Za-z0-9]*(?:-[A-Z][A-Za-z0-9]*)*|[A-Z]{2,}))+/g;
 
 /** Name prefixes that are programs/frameworks/marketing, not AWS services, filtered out. */
 const NON_SERVICE_FRAGMENTS = [
@@ -221,17 +221,72 @@ const NON_SERVICE_FRAGMENTS = [
   'AWS Training',
   'AWS Skill Builder',
   'AWS Cloud Adoption Framework',
+  'AWS CAF',
   'AWS Well',
+  'AWS Well-Architected',
   'AWS Blog',
   'AWS Black Belt',
-  'AWS Decision Guide',
-  'AWS Executive Insights',
+  'AWS Decision',
+  'AWS Executive',
+  'AWS Enterprise',
+  'AWS Partner',
+  'AWS Partners',
   'AWS Security Best Practices',
+  'AWS Security Reference Architecture',
+  'AWS SRA',
   'AWS Compliance Programs',
   'AWS Global Infrastructure',
   'AWS Cloud Practitioner',
+  'AWS Cloud Economics',
   'AWS Pricing Works',
+  'AWS Environment',
+  'AWS Generative AI',
+  'AWS Database Services',
+  'AWS Network Infrastructure',
+  'AWS AI Practitioner',
+  'AWS AI Service Card',
+  'AWS AI Service Cards',
+  'AWS Service Terms',
+  'AWS Chief',
+  'Amazon Builders',
 ];
+
+/**
+ * Last words that mark a blog, guidance series, programme or document rather
+ * than a service ("AWS Machine Learning Blog", "AWS Prescriptive Guidance",
+ * "AWS Generative AI Model Agility Solution"), filtered out.
+ */
+const NON_SERVICE_LAST_WORDS = new Set([
+  'Blog', 'Blogs', 'Guidance', 'Solution', 'Solutions', 'Library', 'Insights', 'Lens',
+  'Framework', 'Podcast', 'Report', 'Seminar', 'Workshop', 'Workshops', 'Whitepaper', 'Strategists',
+  'Essentials', 'Options',
+]);
+
+/**
+ * Trailing words that name a document about a service rather than the service
+ * itself ("AWS Lambda Developer Guide", "Amazon Bedrock API Reference",
+ * "Amazon Cognito Basics"). They are stripped so these collapse into the
+ * service name instead of using up keyword slots.
+ */
+const DOC_SUFFIX_WORDS = new Set([
+  'Guide', 'Guides', 'Guidelines', 'Reference', 'User', 'Developer', 'Administration', 'Administrator',
+  'API', 'Basics', 'Basic', 'Advanced', 'Fundamentals', 'Introduction', 'Overview', 'Part', 'Session',
+  'Sessions', 'Best', 'Practices', 'Tutorial', 'Tutorials', 'Documentation', 'Pricing', 'Deep', 'Dive',
+  'Layer', 'Strategies', 'Strategy', 'Pattern', 'Patterns', 'Design', 'Observability', 'Blue', 'Caching',
+  'Implementation', 'DeepDive', 'Development', 'LLMs',
+  // Title-case connectives left at the end when a heading continues past the name.
+  'Using', 'With', 'And', 'Or', 'For', 'From', 'On', 'In', 'To', 'Via', 'At', 'By', 'Into', 'Across',
+  'Through', 'Without',
+]);
+
+/** Names the matcher cuts short at a digit or hyphen, mapped to the full service name. */
+const SERVICE_NAME_ALIASES = new Map([
+  ['Amazon Route', 'Amazon Route 53'],
+  ['AWS Route', 'Amazon Route 53'],
+  ['AWS Site', 'AWS Site-to-Site VPN'],
+  ['AWS Step', 'AWS Step Functions'],
+  ['Amazon Redshift Database', 'Amazon Redshift'],
+]);
 
 /** Exact names that are too generic to be a specific service, filtered out. */
 const NON_SERVICE_EXACT = new Set([
@@ -242,7 +297,33 @@ const NON_SERVICE_EXACT = new Set([
   'AWS Compliance',
   'AWS Responsible AI',
   'AWS Responsible AI Resources',
+  'AWS Identity',
+  'AWS Regions',
+  'AWS SDKs',
+  'AWS Solutions',
+  'AWS Overview',
+  'AWS Account',
+  'AWS Accounts',
+  'AWS Documentation',
+  'AWS AI',
+  'Amazon AI',
+  'AWS RAG',
+  'Amazon Managed Service',
 ]);
+
+const isNonServiceName = (name) =>
+  NON_SERVICE_EXACT.has(name) ||
+  NON_SERVICE_LAST_WORDS.has(name.split(' ').pop()) ||
+  NON_SERVICE_FRAGMENTS.some((frag) => name === frag || name.startsWith(`${frag} `));
+
+/** Strip trailing document words, keeping at least the prefix and one word. */
+function toServiceName(name) {
+  const words = name.split(' ');
+  const isSuffix = (w) => DOC_SUFFIX_WORDS.has(w) || /^Part\d+$/.test(w);
+  while (words.length > 2 && isSuffix(words[words.length - 1])) words.pop();
+  const joined = words.join(' ');
+  return SERVICE_NAME_ALIASES.get(joined) || joined;
+}
 
 /** Upper bound on injected keywords so the system prompt stays compact. */
 const MAX_SERVICE_KEYWORDS = 25;
@@ -284,12 +365,14 @@ export function getExamServiceKeywords(examId, { locale = 'ja' } = {}) {
     if (typeof value !== 'string' || keywords.length >= MAX_SERVICE_KEYWORDS) return;
     const matches = value.match(AWS_SERVICE_NAME_RE);
     if (!matches) return;
-    for (const raw of matches) {
-      const name = raw.trim();
-      if (NON_SERVICE_EXACT.has(name)) continue;
-      if (NON_SERVICE_FRAGMENTS.some((frag) => name === frag || name.startsWith(`${frag} `))) continue;
-      if (seen.has(name)) continue;
-      seen.add(name);
+    // A heading like "Amazon ECS Using AWS CloudFormation" holds two names.
+    const parts = matches.flatMap((m) => m.trim().split(/\s+(?=(?:Amazon|AWS)\s)/));
+    for (const raw of parts) {
+      if (isNonServiceName(raw)) continue;
+      const name = toServiceName(raw);
+      if (isNonServiceName(name)) continue;
+      if (seen.has(name.toLowerCase())) continue;
+      seen.add(name.toLowerCase());
       keywords.push(name);
       if (keywords.length >= MAX_SERVICE_KEYWORDS) return;
     }
