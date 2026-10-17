@@ -66,10 +66,10 @@ export const ANS_C01 = {
       title: 'Understand the exam overview',
       jpTitle: '試験の概要を把握する',
       description: [
-        '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
+        '試験ガイド（AWS ドキュメントの HTML 版）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
       descriptionEn: [
-        'Read the Exam Guide (PDF) to understand the exam scope, scoring weights, and question formats. Grasp the big picture before diving into each domain.',
+        'Read the exam guide (HTML version on AWS Documentation) to understand the exam scope, scoring weights, and question formats. Grasp the big picture before diving into each domain.',
       ],
       resources: [
         {
@@ -80,12 +80,12 @@ export const ANS_C01 = {
           iconColorClass: 'text-orange-500',
           items: [
             {
-              title: 'AWS Certified Advanced Networking - Specialty 試験ガイド (PDF)',
-              titleEn: 'AWS Certified Advanced Networking - Specialty Exam Guide (PDF)',
-              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf',
-              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-advnetworking-spec/AWS-Certified-Advanced-Networking-Specialty_Exam-Guide.pdf',
-              note: '試験範囲・出題比率・サンプル問題を確認',
-              noteEn: 'Review exam scope, scoring weights, and sample questions',
+              title: 'AWS Certified Advanced Networking - Specialty (ANS-C01) 試験ガイド',
+              titleEn: 'AWS Certified Advanced Networking - Specialty (ANS-C01) Exam Guide',
+              url: 'https://docs.aws.amazon.com/ja_jp/aws-certification/latest/advanced-networking-specialty-01/advanced-networking-specialty-01.html',
+              urlEn: 'https://docs.aws.amazon.com/aws-certification/latest/advanced-networking-specialty-01/advanced-networking-specialty-01.html',
+              note: '出題範囲・配点比率・タスクステートメント・スコープ内のサービスを確認（AWS ドキュメントの HTML 版。ドメインごとのページに分かれている）',
+              noteEn: 'Review the exam scope, domain weightings, task statements, and in-scope services (HTML version on AWS Documentation, split into per-domain pages)',
               recommend: true,
             },
           ],

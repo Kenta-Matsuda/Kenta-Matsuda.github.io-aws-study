@@ -59,10 +59,10 @@ export const DEA_C01 = {
       title: 'Understand the exam overview',
       jpTitle: '試験の概要を把握する',
       description: [
-        '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
+        '試験ガイド（AWS ドキュメントの HTML 版）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
       descriptionEn: [
-        'Read the exam guide (PDF) to understand the content outline, scoring weights, and question format. Grasp the overall picture before diving into each domain.',
+        'Read the exam guide (HTML version on AWS Documentation) to understand the content outline, scoring weights, and question format. Grasp the overall picture before diving into each domain.',
       ],
       resources: [
         {
@@ -73,12 +73,12 @@ export const DEA_C01 = {
           iconColorClass: 'text-orange-500',
           items: [
             {
-              title: 'AWS Certified Data Engineer - Associate 試験ガイド (PDF)',
-              titleEn: 'AWS Certified Data Engineer - Associate Exam Guide (PDF)',
-              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-data-engineer-associate/AWS-Certified-Data-Engineer-Associate_Exam-Guide.pdf',
-              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-data-engineer-associate/AWS-Certified-Data-Engineer-Associate_Exam-Guide.pdf',
-              note: '試験範囲・出題比率・サンプル問題を確認',
-              noteEn: 'Review content outline, scoring weights, and sample questions',
+              title: 'AWS Certified Data Engineer - Associate (DEA-C01) 試験ガイド',
+              titleEn: 'AWS Certified Data Engineer - Associate (DEA-C01) Exam Guide',
+              url: 'https://docs.aws.amazon.com/ja_jp/aws-certification/latest/data-engineer-associate-01/data-engineer-associate-01.html',
+              urlEn: 'https://docs.aws.amazon.com/aws-certification/latest/data-engineer-associate-01/data-engineer-associate-01.html',
+              note: '出題範囲・配点比率・タスクステートメント・スコープ内のサービスを確認（AWS ドキュメントの HTML 版。ドメインごとのページに分かれている）',
+              noteEn: 'Review the exam scope, domain weightings, task statements, and in-scope services (HTML version on AWS Documentation, split into per-domain pages)',
               recommend: true,
             },
           ],

@@ -64,33 +64,35 @@ PR #195（issue #190）に対するメンテナ指摘（2026-09-12）で、次�
 3. `env -u NODE_OPTIONS node --check js/data/dva-c02.js` で構文健全性を確認（PASS）。
 4. **試験ガイド Web ページの取得は INTEGRATIONS_ONLY のため不可**。したがって全試験横断のステートメント再検証（下表）は本環境では完遂できないと判断した。
 
-## 全試験の試験ガイド Web 版ステータス（要ネットワーク確認）
+## 全試験の試験ガイド Web 版ステータス
 
 下記 URL パターン（メンテナ提示例に準拠）で各試験ガイドの Web 版有無を確認し、Web 版があればそれを正としてタスクステートメント文言を突き合わせる。`要確認` はネットワーク越しの実確認が必要な項目。
+
+**2026-10-17 更新**: 全 13 試験の HTML 版試験ガイドの存在は `docs/wiki/aws-resource-discovery.md` の slug 一覧（2026-09-06 に日英とも HTTP 200 を実測）で確認済みのため、「Web ガイド化」列はすべて「あり」に更新した。あわせて、ステップ 2「試験の概要を把握する」の試験ガイドリンクを全試験で PDF（`d1.awsstatic.com`）から HTML 版（`docs.aws.amazon.com/(ja_jp/)aws-certification/latest/<slug>/<slug>.html`）へ差し替えた。タスクステートメント文言の突き合わせ（右列）は、この作業環境から `docs.aws.amazon.com` を取得できなかったため未実施のまま残っている。
 
 URL パターン（例）: `https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>-domain<N>.html#<slug>-domain<N>-task<M>`
 
 | 試験コード | データファイル | Web ガイド化 | ステートメント再検証 |
 | --- | --- | --- | --- |
-| CLF-C02 | `js/data/clf-c02.js` | 要確認 | 要確認 |
-| AIF-C01 | `js/data/aif-c01.js` | 要確認 | 要確認 |
-| AIP-C01 | `js/data/aip-c01.js` | 要確認 | 要確認 |
-| AIB-C01 | `js/data/aib-c01.js` | 要確認 | 要確認（#190 でタスク 1.1 は対応済み） |
-| SAA-C03 | `js/data/saa-c03.js` | 要確認 | 要確認 |
-| DVA-C02 | `js/data/dva-c02.js` | あり（メンテナが Web URL を提示） | 一部対応（ドメイン 3・タスク 4 を修正）／残りは要確認 |
-| SOA-C03 | `js/data/soa-c03.js` | 要確認 | 要確認 |
-| DEA-C01 | `js/data/dea-c01.js` | 要確認 | 要確認 |
-| MLA-C01 | `js/data/mla-c01.js` | 要確認 | 要確認（3.3 は完全展開済み） |
-| SAP-C02 | `js/data/sap-c02.js` | 要確認 | 要確認 |
-| DOP-C02 | `js/data/dop-c02.js` | 要確認 | 要確認 |
-| ANS-C01 | `js/data/ans-c01.js` | 要確認 | 要確認 |
-| SCS-C03 | `js/data/scs-c03.js` | 要確認 | 要確認 |
+| CLF-C02 | `js/data/clf-c02.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| AIF-C01 | `js/data/aif-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| AIP-C01 | `js/data/aip-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| AIB-C01 | `js/data/aib-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認（#190 でタスク 1.1 は対応済み） |
+| SAA-C03 | `js/data/saa-c03.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| DVA-C02 | `js/data/dva-c02.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 一部対応（ドメイン 3・タスク 4 を修正）／残りは要確認 |
+| SOA-C03 | `js/data/soa-c03.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| DEA-C01 | `js/data/dea-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| MLA-C01 | `js/data/mla-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認（3.3 は完全展開済み） |
+| SAP-C02 | `js/data/sap-c02.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| DOP-C02 | `js/data/dop-c02.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| ANS-C01 | `js/data/ans-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| SCS-C03 | `js/data/scs-c03.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
 
 ## 要人間対応事項
 
 ネットワークが使える環境（人間または OPEN_INTERNET のエージェント実行）で、次を行ってください。
 
-1. **Web ガイドの有無判定**: 上表の各試験について、`https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/` 配下にドメイン別 Web ページ（`-domain<N>.html`）が存在するかを確認し、`Web ガイド化` 列を更新する。
+1. ~~**Web ガイドの有無判定**~~（2026-10-17 完了: 全試験に HTML 版あり。学習リンクも差し替え済み）。
 2. **今後の典拠を Web ガイドに切り替え**: Web 版がある試験は、以後 Web ガイドを**唯一の正典**とする（PDF は参照しない）。
 3. **タスクステートメント再検証**: Web 版がある試験について、`js/data/<code>.js` の各ドメイン・タスクの `jpTitle` / `title` / `description[0]` / `descriptionEn[0]` を Web ガイドの正式表記と突き合わせ、略記や旧表記（例: 「AWS CI/CD サービス」→「AWS の継続的インテグレーションおよび継続的デリバリー (CI/CD) サービス」）を正式表記へ揃える。DVA-C02 の他タスクも同様に確認する。
 4. **反映と索引更新**: 修正は PR #195（または後続 PR）で反映し、対応が済んだ試験を上表から消し込む。全試験の消し込みが完了したら本ファイルを削除し、`docs/action-required/README.md` と `docs/index.md` の索引を同じ PR で更新する。

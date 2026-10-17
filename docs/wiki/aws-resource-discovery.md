@@ -1,6 +1,6 @@
 # AWS 公式リソース探索ノウハウ
 
-- 最終更新日: 2026-10-16
+- 最終更新日: 2026-10-17
 - 対象範囲: `js/data/` 配下の学習リソース（`resources[].items[].url` / `urlEn`）を、より良い最新の AWS 公式ドキュメントへ差し替え・追加するための探索ノウハウ
 - 出典/参照: issue #69 / issue #137 / `.kiro/agents/exam-content-maintainer.md` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / AWS 公式ドメイン
 
@@ -261,6 +261,8 @@ issue #138 / PR #139 の調査で、**AWS 認定試験ガイドは全試験が `
 - **日本語版がある**: `docs.aws.amazon.com/ja_jp/...` で日本語版が提供されるため、`url`（日本語）/ `urlEn`（英語）を対で保守しやすい。
 - **AI のグラウンディングに向く**: HTML はテキスト抽出が安定し、Gemini の `url_context` などで読ませたときのトークン効率も PDF より良い。
 
+**2026-10-17 時点で全 13 試験の試験ガイドリンク（ステップ 2「試験の概要を把握する」の `guide` グループ）を HTML 版へ差し替え済み**です。`d1.awsstatic.com` の試験ガイド PDF への参照はデータ（`js/data/*.js`）にも URL 対応表（`js/locales/urls.json`）にも残っていません。タイトルは「<試験名> (<試験コード>) 試験ガイド」、`note` は「出題範囲・配点比率・タスクステートメント・スコープ内のサービスを確認（AWS ドキュメントの HTML 版。ドメインごとのページに分かれている）」に統一しています。
+
 ### URL の型
 
 ```
@@ -309,6 +311,7 @@ https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html   
 
 ## 更新履歴
 
+- 2026-10-17: 全 13 試験の試験ガイドリンクを PDF から HTML 版へ差し替えたことを「試験ガイドは PDF ではなく AWS ドキュメント（HTML）を優先する」節に追記（slug は同節の一覧を使用。SAP-C03 / DVA-C03 のガイドは 2026-10-27 公開予定のため未掲載）。
 - 2026-10-16: 試験ガイド slug 節に、改定・廃止の予定を `js/data/exam-lifecycle.js` へ集約したことと、SAP-C03 / DVA-C03 の slug が未確認であることを追記（出典: [AWS Training and Certification Blog — September 2026](https://aws.amazon.com/blogs/training-and-certification/september-2026-new-offerings/)）。
 - 2026-09-06: リポジトリオーナーの選定方針を反映し、「試験ガイド文言ドリブンの探索手順（リソース選定の基本方針）」節を新設。試験ガイドのタスクステートメント / 箇条書きを 1 行ずつ分解して語ごとに検索する手順、「良いものが無い」で終わらせないための 9 段のフォールバック順序、カバレッジ目標（1 件以上必須 / 原則 3 件以上 / 2 種別以上）、`scripts/analyze-resource-coverage.mjs` による機械的な確認手順と全 13 試験の実測ベースラインを追記。
 - 2026-09-06: 初のネットワーク接続下での全試験棚卸しを実施し、実測に基づいて大幅に更新。(1) 死活チェックを `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` によるスクリプト実行を必須の第一手とする手順へ変更。(2)「HTTP ステータスだけでは判定できない落とし穴」（ロケールリダイレクト / ソフト 404 / テキストフラグメント陳腐化 / SPA ドメイン / `d1.awsstatic.com` の 403）を追記。(3)「既知の URL 移転パターン」表と「新規顧客の受付を終了したサービスの扱い」節を新設。(4) **従来「本サンドボックス（INTEGRATIONS_ONLY）では外部アクセスができない」と断定していた記述を訂正**し、環境によってネットワークが利用可能である前提に改めた（実行環境に応じて判断し、未検証点を PR に明記する方針へ統一）。

@@ -59,10 +59,10 @@ export const SAP_C02 = {
       title: 'Understand the exam overview',
       jpTitle: '試験の概要を把握する',
       description: [
-        '試験ガイド（PDF）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
+        '試験ガイド（AWS ドキュメントの HTML 版）を読み、出題範囲・配点比率・問題形式を理解します。学習の全体像を掴んでから各ドメインに進みましょう。',
       ],
       descriptionEn: [
-        'Read the exam guide (PDF) to understand the scope, scoring breakdown, and question format. Grasp the overall picture before proceeding to each domain.',
+        'Read the exam guide (HTML version on AWS Documentation) to understand the scope, scoring breakdown, and question format. Grasp the overall picture before proceeding to each domain.',
       ],
       resources: [
         {
@@ -73,12 +73,12 @@ export const SAP_C02 = {
           iconColorClass: 'text-orange-500',
           items: [
             {
-              title: 'AWS Certified Solutions Architect - Professional 試験ガイド (PDF)',
-              titleEn: 'AWS Certified Solutions Architect - Professional Exam Guide (PDF)',
-              url: 'https://d1.awsstatic.com/ja_JP/training-and-certification/docs-sa-pro/AWS-Certified-Solutions-Architect-Professional_Exam-Guide.pdf',
-              urlEn: 'https://d1.awsstatic.com/training-and-certification/docs-sa-pro/AWS-Certified-Solutions-Architect-Professional_Exam-Guide.pdf',
-              note: '試験範囲・出題比率・サンプル問題を確認',
-              noteEn: 'Review exam scope, question distribution, and sample questions',
+              title: 'AWS Certified Solutions Architect - Professional (SAP-C02) 試験ガイド',
+              titleEn: 'AWS Certified Solutions Architect - Professional (SAP-C02) Exam Guide',
+              url: 'https://docs.aws.amazon.com/ja_jp/aws-certification/latest/solutions-architect-professional-02/solutions-architect-professional-02.html',
+              urlEn: 'https://docs.aws.amazon.com/aws-certification/latest/solutions-architect-professional-02/solutions-architect-professional-02.html',
+              note: '出題範囲・配点比率・タスクステートメント・スコープ内のサービスを確認（AWS ドキュメントの HTML 版。ドメインごとのページに分かれている）',
+              noteEn: 'Review the exam scope, domain weightings, task statements, and in-scope services (HTML version on AWS Documentation, split into per-domain pages)',
               recommend: true,
             },
           ],
