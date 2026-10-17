@@ -75,7 +75,7 @@ URL パターン（例）: `https://docs.aws.amazon.com/ja_jp/aws-certification/
 | 試験コード | データファイル | Web ガイド化 | ステートメント再検証 |
 | --- | --- | --- | --- |
 | CLF-C02 | `js/data/clf-c02.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
-| AIF-C01 | `js/data/aif-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+| AIF-C01 | `js/data/aif-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認（改訂あり。下の注記を参照） |
 | AIP-C01 | `js/data/aip-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
 | AIB-C01 | `js/data/aib-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認（#190 でタスク 1.1 は対応済み） |
 | SAA-C03 | `js/data/saa-c03.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
@@ -87,6 +87,8 @@ URL パターン（例）: `https://docs.aws.amazon.com/ja_jp/aws-certification/
 | DOP-C02 | `js/data/dop-c02.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
 | ANS-C01 | `js/data/ans-c01.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
 | SCS-C03 | `js/data/scs-c03.js` | あり（2026-10-17 に学習リンクを HTML 版へ差し替え済み） | 要確認 |
+
+> **AIF-C01 の改訂（2026-10-17 の検索で判明）**: AIF-C01 の試験ガイドには改訂履歴のページ（`https://docs.aws.amazon.com/aws-certification/latest/ai-practitioner-01/aif-01-revisions.html`）があります。検索結果の抜粋によると、最新の改訂でタスク 3.4 の 2 番目の箇条書き（FM の評価メトリクス）に LLM-as-a-judge（LLM による評価）が加わりました。`js/data/aif-c01.js` のタスク 3.4 は ROUGE / BLEU / BERTScore までで、この改訂は反映されていません。ページ本文は取得できていないので、改訂の正確な文言は上の手順 3 で確かめてください。
 
 ## 要人間対応事項
 

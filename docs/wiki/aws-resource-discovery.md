@@ -218,11 +218,12 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 | --- | --- | --- | --- |
 | AI/ML 系プロダクトページの `ai/` 配下への再編 | `aws.amazon.com/machine-learning/`<br>`aws.amazon.com/machine-learning/ai-services/`<br>`aws.amazon.com/machine-learning/responsible-ai/`<br>`aws.amazon.com/generative-ai/use-cases/` | `aws.amazon.com/ai/machine-learning/`<br>`aws.amazon.com/ai/services/`<br>`aws.amazon.com/ai/responsible-ai/`<br>`aws.amazon.com/ai/generative-ai/use-cases/` | 恒久リダイレクトあり |
 | SageMaker プロダクトページの `sagemaker/ai/` 配下への再編 | `aws.amazon.com/sagemaker/clarify/`<br>`aws.amazon.com/sagemaker/ml-governance/` | `aws.amazon.com/sagemaker/ai/clarify/`<br>`aws.amazon.com/sagemaker/ai/ml-governance/` | `sagemaker-ai/...` ではなく `sagemaker/ai/...` |
-| 意思決定ガイドのフラット化 | `docs.aws.amazon.com/decision-guides/latest/<slug>/<slug>.html` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/<slug>.html` | 例: `waf-or-shield.html` / `genai-guide.html`。日本語版は無く `ja_jp/` を付けても英語ページへ寄せられる |
+| 意思決定ガイドのフラット化 | `docs.aws.amazon.com/decision-guides/latest/<slug>/<slug>.html` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/<slug>.html` | 2026-10-17 の検索ではストレージの選択が新形式（`decision-guides/choosing-aws-storage-service.html`）、分析と IoT の選択は旧形式で出た。ガイドごとに検索で確かめる。例: `waf-or-shield.html` / `genai-guide.html`。日本語版は無く `ja_jp/` を付けても英語ページへ寄せられる |
 | 意思決定ガイドの `aws.amazon.com/getting-started/` からの移設 | `aws.amazon.com/getting-started/decision-guides/...` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/...` | 旧 URL は **404** |
 | ElastiCache ドキュメントのガイド統合 | `.../AmazonElastiCache/latest/red-ug/*`<br>`.../AmazonElastiCache/latest/UserGuide/*` | `.../AmazonElastiCache/latest/dg/*` | Redis/Memcached 別ガイドが `dg` に統合 |
 | Skill Builder の移転 | `explore.skillbuilder.aws/learn/course/internal/view/elearning/<id>/<slug>` | （個別コース URL は未確定） | 旧 URL は `skillbuilder.aws/search?searchText=<slug>&showRedirectNotFoundBanner=true` へ飛ぶ。**`showRedirectNotFoundBanner=true` は AWS 自身が「移行先を見つけられなかった」と示すフラグ**であり、旧コース ID が失効した確定的な証拠。SPA なのでステータスでは検証できない |
 | Amazon Quick（旧 Quick Suite） | `aws.amazon.com/quicksuite/` | `aws.amazon.com/quick/` | AIB-C01 試験ガイドの表記も「Amazon Quick」 |
+| Lambda 開発者ガイドのページ題（URL は不変） | 「Lambda functions」 | 「Lambda Event Functions」（例: `Best practices for working with AWS Lambda Event Functions`） | 2026-10-17 の検索結果で、`lambda/latest/dg/` の多くのページ題がこの表記になっていることを確認。`titleEn` は実際のページ題に合わせる（誤記と見なして「Lambda functions」に戻さない） |
 
 ## 「新規顧客の受付を終了」したサービスの扱い（重要）
 
@@ -241,6 +242,8 @@ AWS は一部サービスを**廃止せずに新規受付のみ終了**します
 2026-10-17 の全試験見直しで追加・訂正したもの:
 
 - **AWS Systems Manager Incident Manager** — 2025-11-07 から新規顧客の受付終了（新機能の追加も無し）。出典: [AWS Systems Manager Incident Manager availability change](https://docs.aws.amazon.com/incident-manager/latest/userguide/incident-manager-availability-change.html)。AWS は代替として Systems Manager OpsCenter と AWS パートナーのソリューションを案内している。
+- **Amazon SageMaker Role Manager** — 新規顧客の受付終了（効力日 2026-07-30。既存顧客は継続利用可）。出典: Role Manager availability change（`https://docs.aws.amazon.com/sagemaker/latest/dg/role-manager-availability-change.html`。2026-10-17 は AWS 中国リージョン版・EU 版の同ページで内容を確認）。AWS は代替として IAM のロール作成・IAM Identity Center の権限セット・IAM Access Analyzer を案内している。
+- **Amazon Augmented AI (Amazon A2I)** — 新規顧客の受付終了（効力日 2026-07-30。既存顧客は継続利用可、新機能の追加は無し）。出典: SageMaker AI 開発者ガイドの A2I のページ（`https://docs.aws.amazon.com/sagemaker/latest/dg/a2i-use-augmented-ai-a2i-human-review-loops.html`。2026-10-17 は AWS 中国リージョン版・EU 版の同ページで内容を確認）。
 - **AWS CodeCommit は受付終了ではなくなった（訂正）** — 2024 年 7 月に新規受付を終了したが、2025-11-24 に一般提供へ復帰し、新規顧客もリポジトリを作成できる。出典: [AWS CodeCommit returns to general availability](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability)（AWS DevOps & Developer Productivity Blog）。以前の棚卸しで「CodeCommit は新規受付終了」として扱った記述（台帳の DOP-C02 / DVA-C02 行など）は当時の事実であり、今後は CodeCommit の資料を通常どおり採用してよい。
 - そのほか既存データの棚卸しで受付終了を確認済みのもの: Amazon Bedrock Agents（現 Agents Classic。後継は Amazon Bedrock AgentCore）/ Amazon Q Business（後継は Amazon Quick）/ AWS Migration Hub / AWS Audit Manager / Amazon SageMaker Ground Truth / Amazon SageMaker Debugger。
 
@@ -248,7 +251,8 @@ AWS は一部サービスを**廃止せずに新規受付のみ終了**します
 
 - リンクが生きていても **`recommend: true` は外す**（新規に使えないサービスを「おすすめ」として提示しない）。
 - 試験範囲の概念理解に必要なら**リンクは残し、`note` / `noteEn` に受付終了の事実を明記**する。削除は、より適切な現行リソースに置き換えられる場合に限る。
-- **試験ガイドで名指しされているものは例外として掲載を続ける**（recommend なし・注記付き）。2026-10-17 時点の例外: AWS Migration Hub（CLF-C02 / SAP-C02）、AWS Audit Manager（SCS-C03 / CLF-C02 2.2 / AIF-C01 5.2）、MLA-C01 の SageMaker Ground Truth（1.2）・Clarify（1.3 / 2.3 / 4.1）・Debugger（2.3）・Model Monitor（4.1）。MLA-C01 のこれらはタスクステートメントに名前が出るため、削除すると出題範囲の機能が無資料になる。
+- **試験ガイドで名指しされているものは例外として掲載を続ける**（recommend なし・注記付き）。2026-10-17 時点の例外: AWS Migration Hub（CLF-C02 / SAP-C02）、AWS Audit Manager（SCS-C03 / CLF-C02 2.2 / AIF-C01 5.2）、Amazon A2I（AIF-C01 4.1）、MLA-C01 の SageMaker Ground Truth（1.2）・Clarify（1.3 / 2.3 / 4.1）・Debugger（2.3）・Model Monitor（4.1）・Role Manager（4.3）。MLA-C01 のこれらはタスクステートメントに名前が出るため、削除すると出題範囲の機能が無資料になる。
+- **試験ガイドに名前が無い受付終了サービスの資料を新しく足さない**。2026-10-17 の見直しでは、第 1 弾で AIP-C01 3.3 に足した Audit Manager を Bedrock の CloudTrail ログ・ガードレールの機密情報フィルターに置き換え、AIB-C01 1.2 に残っていた Amazon Bedrock Agents（Agents Classic）を後継の AgentCore に差し替えた。
 
 ## ブログの技術レベル判定基準 (Level 100/200/300/400)
 
@@ -385,7 +389,7 @@ https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html   
 
 ## 更新履歴
 
-- 2026-10-17: 「新規顧客の受付を終了」したサービスの節に、Incident Manager の受付終了（2025-11-07）と、CodeCommit の一般提供への復帰（2025-11-24、受付終了の扱いを訂正）を追記。試験ガイドで名指しされている受付終了サービスの例外掲載の一覧（MLA-C01 の SageMaker 4 機能、CLF-C02 / AIF-C01 の Audit Manager を追加）を明記。
+- 2026-10-17: 「新規顧客の受付を終了」したサービスの節に、Incident Manager の受付終了（2025-11-07）、SageMaker Role Manager の受付終了（2026-07-30）と、CodeCommit の一般提供への復帰（2025-11-24、受付終了の扱いを訂正）を追記。試験ガイドで名指しされている受付終了サービスの例外掲載の一覧（MLA-C01 の SageMaker 4 機能、CLF-C02 / AIF-C01 の Audit Manager を追加）を明記。続けて Amazon A2I の受付終了（2026-07-30）と例外掲載（AIF-C01 4.1）を追記し、「試験ガイドに名前が無い受付終了サービスの資料を新しく足さない」方針を追加（AIP-C01 3.3 の Audit Manager と AIB-C01 1.2 の Bedrock Agents を差し替え）。「既知の URL 移転パターン」表に、Lambda 開発者ガイドのページ題が「Lambda Event Functions」になったことと、意思決定ガイドが旧形式・新形式の両方で出ることを追記。
 - 2026-10-17: 「ANS-C01 基準のリソースレビュー（技術的な学び / recommend の判定基準）」節を新設（リポジトリオーナーの指示: ANS-C01 を基準に全試験のリソースと recommend を見直す。AIB-C01 は技術的な学びを重視しない）。ANS-C01 の実測プロファイル、残す / 外すの基準、密度の目安、recommend の基準、AIB の例外、書式、ネットワーク制限下での URL の確かめ方を記載。
 - 2026-10-17: 全 13 試験の試験ガイドリンクを PDF から HTML 版へ差し替えたことを「試験ガイドは PDF ではなく AWS ドキュメント（HTML）を優先する」節に追記（slug は同節の一覧を使用。SAP-C03 / DVA-C03 のガイドは 2026-10-27 公開予定のため未掲載）。
 - 2026-10-16: 試験ガイド slug 節に、改定・廃止の予定を `js/data/exam-lifecycle.js` へ集約したことと、SAP-C03 / DVA-C03 の slug が未確認であることを追記（出典: [AWS Training and Certification Blog — September 2026](https://aws.amazon.com/blogs/training-and-certification/september-2026-new-offerings/)）。

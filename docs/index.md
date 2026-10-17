@@ -74,4 +74,5 @@ AWS 操作など、人間しか実施できない**未対応（要対応）**の
 - [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](action-required/issue-165-notebooklm-pack-and-apis.md) — 🟡 一部対応 / 関連: #165 / PR #180 ※ クライアント側の学習パック生成（リソースリンク集 Markdown・CSV / 学習ルート Markdown / リソース用語集 CSV。`js/studyPack.js`）は実装済み。検索 API・分析 API・継続収集パイプラインは 🔴 未対応（要対応）
 - [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](action-required/issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 関連: #197 ※ AWS 操作は不要。対象言語の確定・翻訳ソース / 品質基準・コンテンツ翻訳の保守体制はプロダクト判断（要人間）
 - [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](action-required/issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 関連: #190 / PR #195
+- [ANS-C01 基準のリソース見直し（2026-10-17）で追加した URL の HTTP 確認と内容確認](action-required/exam-resource-review-2026-10-verification.md) — 🔴 未対応（要対応） / 関連: #69 / #190 ※ 新しい URL 621 本（日英を 1 本と数える）が HTTP 未確認。判断が必要な事項と ANS-C01 で気づいた点も記載
 - [推奨リソースに基づく模擬試験の生成（エージェント型パイプラインの検討）](action-required/issue-225-resource-grounded-exam-generation.md) — 🔴 未対応（要対応） / 関連: #225 ※ 現状監査と段階導入案。Step A/B はコスト・外部依存なしでエージェント対応可
