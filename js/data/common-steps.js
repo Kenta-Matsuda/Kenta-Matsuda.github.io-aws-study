@@ -59,7 +59,6 @@ export const COMMON_STEPS = [
             urlEn: 'https://www.youtube.com/results?search_query=AWS+certification+exam+registration+guide',
             note: 'YouTube で申し込み手順を動画で確認できます',
             noteEn: 'Watch registration steps on YouTube',
-            recommend: true,
           },
           {
             title: 'AWS認定試験の予約方法（公式ポリシーページ）',
@@ -68,6 +67,7 @@ export const COMMON_STEPS = [
             urlEn: 'https://aws.amazon.com/certification/policies/before-testing/',
             note: 'アカウント作成から予約完了までの手順を公式が解説',
             noteEn: 'Official guide from account creation to booking completion',
+            recommend: true,
           },
         ],
       },
