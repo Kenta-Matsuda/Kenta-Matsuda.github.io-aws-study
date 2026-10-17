@@ -519,5 +519,20 @@
     "periodLabel": "期間 {{key}}（UTC）",
     "resetsAt": "次のリセット: {{time}}",
     "note": "ランキングは毎日 0:00 UTC（日本時間 9:00）に切り替わり、週は月曜始まりです。参加後に獲得した XP のみ集計され、1 日あたり最大 {{cap}} XP までです。"
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{successor}} への改定のお知らせ",
+      "superseded": "{{successor}} へ改定されました",
+      "retiring": "{{exam}} 廃止のお知らせ",
+      "retired": "{{exam}} は廃止されました"
+    },
+    "badge": {
+      "updating": "改定予定",
+      "superseded": "旧版",
+      "retiring": "廃止予定",
+      "retired": "廃止"
+    },
+    "sources": "出典（AWS 公式）:"
   }
 }

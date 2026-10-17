@@ -67,9 +67,9 @@ Issue #124 のメンテナー確認（issue #124 コメント + PR #130）で、
 ## スコープ（収録範囲）— 正直な記載
 - **フル 65 問（本番形式）を組める試験**:
   - Foundational: `clf-c02`, `aif-c01`（Foundational プールは 65 問超）。
-  - Associate: `saa-c03` ほか同レベル試験（`dva-c02`, `soa-c03`, `mla-c01`, `dea-c01`, `aip-c01`）。Associate プールは 65 問超。
+  - Associate: `saa-c03` ほか同レベル試験（`dva-c02`, `soa-c03`, `mla-c01`, `dea-c01`）。Associate プールは 65 問超。
 - **「取得可能な最大数」を組む試験（65 問に満たない場合あり）**:
-  - Professional（`sap-c02`, `dop-c02`）、Specialty（`ans-c01`, `scs-c03`）、Business（`aib-c01`）は、
+  - Professional（`sap-c02`, `dop-c02`, `aip-c01`）、Specialty（`ans-c01`, `scs-c03`）、Business（`aib-c01`）は、
     共有レベルプールの現状の問題数（65 問未満）を出題する。UI ラベルには実際の出題数を表示する。
 - **完全な AI 生成模擬試験は引き続き API キーが必要**。本バンクはあくまで補完であり、置き換えではない。
 - プールは後から問題を追加して拡張できる（同じバイリンガル規約 + AWS 公式出典 URL 必須）。
