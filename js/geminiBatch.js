@@ -10,6 +10,7 @@
  */
 
 import { getApiKey } from './storage.js';
+import { t } from './i18n.js';
 
 function buildBatchCreateUrl({ model, apiKey }) {
   const m = encodeURIComponent(String(model));
@@ -148,7 +149,7 @@ export async function callGeminiBatch({
     const detail = await readErrorMessage(createRes);
     // eslint-disable-next-line no-console
     console.error('[geminiBatch] create failed', createRes.status, detail);
-    const err = new Error(detail || `バッチ作成に失敗しました: ${createRes.status}`);
+    const err = new Error(detail || t('batch.errors.createFailed', { status: createRes.status }));
     err.status = createRes.status;
     throw err;
   }
@@ -174,7 +175,7 @@ export async function callGeminiBatch({
   if (!batchName) {
     // eslint-disable-next-line no-console
     console.error('[geminiBatch] could not extract batch name from response:', createData);
-    throw new Error('バッチジョブのリソース名を取得できませんでした。');
+    throw new Error(t('batch.errors.noJobName'));
   }
   // eslint-disable-next-line no-console
   console.log('[geminiBatch] polling resource:', batchName);
@@ -216,9 +217,9 @@ function defaultPollIntervalMs() {
  */
 export async function pollGeminiBatch({ name, total, onProgress, pollIntervalMs, shouldAbort }) {
   const apiKey = getApiKey();
-  if (!apiKey) throw new Error('API キーが設定されていません。');
+  if (!apiKey) throw new Error(t('batch.errors.noApiKey'));
   const batchName = String(name || '');
-  if (!batchName) throw new Error('バッチジョブ名が指定されていません。');
+  if (!batchName) throw new Error(t('batch.errors.noBatchName'));
   const requestCount = Math.max(0, Number(total) || 0);
   const interval = pollIntervalMs || defaultPollIntervalMs();
 
@@ -239,7 +240,7 @@ export async function pollGeminiBatch({ name, total, onProgress, pollIntervalMs,
       } catch {
         /* ignore */
       }
-      const err = new Error('バッチ処理がキャンセルされました。');
+      const err = new Error(t('batch.errors.cancelled'));
       err.cancelled = true;
       throw err;
     }
@@ -261,7 +262,7 @@ export async function pollGeminiBatch({ name, total, onProgress, pollIntervalMs,
       consecutiveErrors += 1;
       if (consecutiveErrors >= 5) {
         const detail = await readErrorMessage(getRes);
-        throw new Error(detail || `バッチ状態取得に失敗しました: ${getRes.status}`);
+        throw new Error(detail || t('batch.errors.statusFailed', { status: getRes.status }));
       }
       continue;
     }
@@ -295,7 +296,7 @@ export async function pollGeminiBatch({ name, total, onProgress, pollIntervalMs,
 
     if (COMPLETED_STATES.has(state)) {
       if (!SUCCEEDED_STATES.has(state)) {
-        const errMsg = data?.error?.message || batchObj?.error?.message || `バッチが ${state} で終了しました。`;
+        const errMsg = data?.error?.message || batchObj?.error?.message || t('batch.errors.endedWith', { state });
         throw new Error(errMsg);
       }
 

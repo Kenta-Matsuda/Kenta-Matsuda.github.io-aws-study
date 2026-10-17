@@ -6,10 +6,14 @@
 import { callAiStream, callAi, getActiveProviderLabel } from './ai.js';
 import { getApiKey, getOpenAiApiKey } from './storage.js';
 import { escapeHtml } from './utils.js';
-import { getLocale, t } from './i18n.js';
+import { t } from './i18n.js';
+import { usesJapanesePrompt, promptLanguageName } from './localeContent.js';
 import { getExamCategoryLabel, getExamOfficialRefs, getExamServiceKeywords } from './exams.js';
 import { getExamLifecycleNotice } from './examLifecycle.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
+import { isStreamingUnsupportedResponse } from './aiErrors.js';
+
+const isStreamingUnsupported = (response) => isStreamingUnsupportedResponse(response, t('errors.streamingUnsupported'));
 
 /**
  * Gemini built-in grounding tools used by the chat.
@@ -145,7 +149,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
       },
     });
 
-    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    if (isStreamingUnsupported(response)) {
       updateBubbleContent(aiBubble, t('chat.thinking'));
       response = await callAi({
         userPrompt: text,
@@ -172,7 +176,7 @@ async function sendMessage({ els, getExamById, getState, openSettingsModal }) {
 }
 
 function buildChatSystemPrompt(exam) {
-  const isJa = getLocale() === 'ja';
+  const isJa = usesJapanesePrompt();
   // Authoritative identity sourced from the repository's own exam definitions (js/data/*.js).
   const category = getExamCategoryLabel(exam?.id);
   const categoryLabel = category ? (isJa ? category.labelJa : category.labelEn) : null;
@@ -186,7 +190,7 @@ function buildChatSystemPrompt(exam) {
   // AWS-announced version update / retirement for this exam (js/data/exam-lifecycle.js).
   // Successor versions such as SAP-C03 may be newer than the model's training data.
   const lifecycleNotice = getExamLifecycleNotice(exam?.id, { locale: isJa ? 'ja' : 'en' });
-  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords, lifecycleNotice });
+  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords, lifecycleNotice, responseLanguage: promptLanguageName() });
 }
 
 /**
@@ -198,10 +202,12 @@ function buildChatSystemPrompt(exam) {
  * category label and official refs, this function only assembles the text.
  *
  * @param {{ code?: string, shortLabel?: string, title?: string } | null} exam
- * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[], lifecycleNotice?: { message: string, successorCode?: string | null, sources?: Array<{ title: string, url: string }> } | null }} opts
+ * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[], lifecycleNotice?: { message: string, successorCode?: string | null, sources?: Array<{ title: string, url: string }> } | null, responseLanguage?: string }} opts
+ *   `responseLanguage` (English scaffolding only) names the language to answer
+ *   in, e.g. 'Korean (한국어)'; defaults to English.
  * @returns {string}
  */
-export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [], lifecycleNotice = null } = {}) {
+export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [], lifecycleNotice = null, responseLanguage = 'English' } = {}) {
   const code = exam?.code || 'AWS';
   const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
   const refs = Array.isArray(officialRefs) ? officialRefs : [];
@@ -255,7 +261,8 @@ export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = nu
     prompt +=
       `\nAnswer questions clearly and concisely, using concrete examples.\n` +
       `Use Markdown format with bullet points and code examples as appropriate.\n` +
-      `Respond in English.`;
+      `Respond in ${responseLanguage || 'English'}.` +
+      (responseLanguage && responseLanguage !== 'English' ? ' Keep AWS service and feature names in their official English form.' : '');
     return prompt;
   }
 

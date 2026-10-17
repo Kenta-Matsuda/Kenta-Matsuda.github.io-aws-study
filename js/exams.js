@@ -190,7 +190,7 @@ export function getExamOfficialRefs(examId, { locale = 'ja' } = {}) {
     // Prefer the explicitly recommended entry, otherwise the first one.
     const preferred = items.find((i) => i.recommend === true) || items[0];
     const url =
-      locale === 'en'
+      locale !== 'ja'
         ? preferred.urlEn || preferred.url
         : preferred.url || preferred.urlEn;
     if (!url || seenUrls.has(url) || !isAwsPrimarySourceUrl(url)) continue;
@@ -198,7 +198,7 @@ export function getExamOfficialRefs(examId, { locale = 'ja' } = {}) {
     seenUrls.add(url);
     refs.push({
       key,
-      title: (locale === 'en' ? preferred.titleEn || preferred.title : preferred.title) || url,
+      title: (locale !== 'ja' ? preferred.titleEn || preferred.title : preferred.title) || url,
       url,
     });
   }
@@ -276,7 +276,7 @@ export function getExamServiceKeywords(examId, { locale = 'ja' } = {}) {
     return [];
   }
 
-  const preferEn = locale === 'en';
+  const preferEn = locale !== 'ja';
   const seen = new Set();
   const keywords = [];
 

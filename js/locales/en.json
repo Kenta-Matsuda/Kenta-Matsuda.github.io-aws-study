@@ -21,7 +21,9 @@
     "exportMarkdown": "Export as Markdown",
     "exportCsv": "Export as CSV",
     "send": "Send",
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "anonymous": "Anonymous",
+    "delete": "Delete"
   },
   "studyPack": {
     "resourceLinksMd": "Resource Links (Markdown)",
@@ -68,10 +70,10 @@
       "reviewBtn": "Review Past Questions",
       "dailyChallengeBtn": "Daily Challenge",
       "dailyChallengeBadge": "No API key",
-      "dailyChallengeHint": "Solve questions without an API key \u00b7 5 a day, no setup",
+      "dailyChallengeHint": "Solve questions without an API key · 5 a day, no setup",
       "offlineExamBtn": "Practice Exam (no API key)",
       "offlineExamBadge": "No API key",
-      "offlineExamHint": "Full-length, production-format exam (up to 65 timed questions) from a built-in question bank \u00b7 no API key"
+      "offlineExamHint": "Full-length, production-format exam (up to 65 timed questions) from a built-in question bank · no API key"
     },
     "xpCarousel": {
       "totalXp": "Total XP",
@@ -105,7 +107,9 @@
     },
     "skillRadar": {
       "title": "Skills by Domain",
-      "placeholder": "Answer quizzes to see your skill chart"
+      "placeholder": "Answer quizzes to see your skill chart",
+      "accuracyLabel": "Accuracy (%)",
+      "tooltip": "Accuracy: {{pct}}% ({{count}} answered)"
     },
     "missions": {
       "title": "Missions",
@@ -135,7 +139,8 @@
         "past": "Your exam date has passed. Record your result or set a new date."
       }
     },
-    "bootError": "Failed to load page data. Please reload the page. If opening locally, you need to open via a local server."
+    "bootError": "Failed to load page data. Please reload the page. If opening locally, you need to open via a local server.",
+    "slideLabel": "Slide {{n}}"
   },
   "quiz": {
     "modeSelect": "Select Quiz Mode",
@@ -184,7 +189,34 @@
     "generateBtn": "Generate Quiz",
     "explainBtn": "Explain",
     "smartReview": "Smart Review",
-    "smartReviewDesc": "Auto-generated from weak areas and past mistakes. Efficiently overcome weaknesses!"
+    "smartReviewDesc": "Auto-generated from weak areas and past mistakes. Efficiently overcome weaknesses!",
+    "smartReviewEmpty": "No questions to review yet. Try a quiz first!",
+    "smartReviewTitle": "Smart Review",
+    "smartReviewModalTitle": "Smart Review ({{count}} questions)",
+    "allDomainsTaskTitle": "{{code}} All Domains",
+    "crossDomainQuizLabel": "{{code}} ({{label}}) Cross-Domain Quiz",
+    "smartReviewCount": "📊 {{count}} questions to review",
+    "smartReviewNone": "📊 No questions to review (try a quiz first!)",
+    "offlineExamTitle": "Practice Exam (no API key)",
+    "offlineExamModalTitle": "Practice Exam (no API key): {{code}} ({{count}} questions)",
+    "pregenProgress": "{{done}} / {{total}}",
+    "pipelinePlanning": "Designing the exam plan…",
+    "pipelineJudging": "Reviewing… {{done}} / {{total}}",
+    "pipelineFixing": "Fixing… {{done}} / {{total}}",
+    "readyNotificationTitle": "Questions are ready!",
+    "readyNotificationBody": "{{count}} quiz questions ready to start",
+    "dailyChallengeTitle": "Daily Challenge",
+    "dailyChallengeModalTitle": "Daily Challenge ({{count}} questions)",
+    "retryIncorrectTitle": "Retry incorrect questions",
+    "retryIncorrectModalTitle": "Retry Incorrect Questions ({{count}})",
+    "reviewScheduled": "Added to review schedule",
+    "reviewScheduledCount": "{{count}} questions scheduled for tomorrow's review",
+    "quizTitlePrefix": "Quiz",
+    "readyNotificationPartial": "{{count}} of {{total}} quiz questions ready to start",
+    "viewResults": "View results",
+    "oneMore": "One more",
+    "recommendedResources": "Recommended resources",
+    "scheduleReview": "Review incorrect questions tomorrow"
   },
   "quizHistory": {
     "title": "Review Past Questions",
@@ -200,7 +232,10 @@
     "yourAnswer": "Your answer:",
     "correctAnswer": "Correct:",
     "retryWrong": "Retry incorrect questions ({{count}})",
-    "correct": "Correct"
+    "correct": "Correct",
+    "elapsedSec": "{{s}}s",
+    "elapsedMinSec": "{{m}}m {{s}}s",
+    "sessionScore": "{{correct}}/{{total}} correct"
   },
   "settings": {
     "title": "Settings",
@@ -302,7 +337,8 @@
     "inputPlaceholder": "Enter a question...",
     "fabTitle": "Ask AI Tutor",
     "noResponse": "Could not generate a response.",
-    "thinking": "Thinking..."
+    "thinking": "Thinking...",
+    "clear": "Clear conversation"
   },
   "milestones": {
     "beginner": "Beginner",
@@ -323,7 +359,8 @@
     "quiz": "AI Quiz",
     "mission": "Mission Complete",
     "xp": "XP",
-    "noHistory": "No XP history yet"
+    "noHistory": "No XP history yet",
+    "firstBonus": "First +{{bonus}}"
   },
   "missions": {
     "period": {
@@ -364,7 +401,9 @@
       "Building knowledge step by step.",
       "You can do it!",
       "Keep going, you'll get there."
-    ]
+    ],
+    "withName": "{{greeting}}, {{name}}!",
+    "you": "there"
   },
   "days": {
     "mon": "Mon",
@@ -394,7 +433,30 @@
     "startQuiz": "Start Quiz",
     "stateWaiting": "Waiting",
     "stateGenerating": "Generating",
-    "stateComplete": "Complete"
+    "stateComplete": "Complete",
+    "stateRunning": "Running",
+    "progress": "{{state}}… {{done}} / {{total}}",
+    "progressFailed": " (failed: {{failed}})",
+    "resumeFailed": "Generation failed",
+    "noResults": "Generation failed",
+    "modelSuffix": " (model: {{model}})",
+    "questionsReady": "{{count}} questions ready",
+    "requestingProgress": "Sending request to Batch API… (0 / {{total}})",
+    "parseFailed": "Could not parse the generated questions",
+    "parseFailedBody": "Could not parse the Practice Exam response",
+    "fallbackFailed": "Generation in normal mode also failed: {{msg}}",
+    "batchFailed": "Generation with the Batch API failed: {{msg}}",
+    "batchFailedBody": "An error occurred while generating the Practice Exam in batch",
+    "confirmClose": "Batch generation is in progress. Closing keeps it running but hides this notification.\nClose anyway?",
+    "errors": {
+      "createFailed": "Failed to create the batch: {{status}}",
+      "noJobName": "Could not get the batch job resource name.",
+      "noApiKey": "No API key is set.",
+      "noBatchName": "No batch job name was given.",
+      "cancelled": "The batch was cancelled.",
+      "statusFailed": "Failed to get the batch status: {{status}}",
+      "endedWith": "The batch ended with {{state}}."
+    }
   },
   "errors": {
     "cannotGenerate": "Error: Could not generate questions. Please try again.",
@@ -410,7 +472,9 @@
     "chartLoadFailed": "Could not load chart library (Chart.js).",
     "examDataNotFound": "Data for this exam is not registered yet.",
     "domainTaskNotFound": "No tasks found for this domain.",
-    "stepsNotFound": "Study steps for this exam are not registered yet."
+    "stepsNotFound": "Study steps for this exam are not registered yet.",
+    "partialGenerateStarting": "{{partial}} Starting the quiz with the questions that were created.",
+    "unknown": "Unknown error"
   },
   "storage": {
     "apiKeyEmpty": "Please enter an API key.",
@@ -460,7 +524,8 @@
     "aiSearching": "Asking AI...",
     "aiAnswerHeading": "AI Recommendations",
     "aiNeedsKey": "AI search needs an API key. Open Settings to add one. Keyword results are shown below.",
-    "aiError": "AI search failed. Keyword results are shown below."
+    "aiError": "AI search failed. Keyword results are shown below.",
+    "recommendBadge": "Recommended"
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
@@ -488,6 +553,64 @@
       "partial": "Partial",
       "failed": "Failed"
     }
+  },
+  "beginner": {
+    "title": "First-time AWS Certification",
+    "subtitle": "Basic information and common learning resources for AWS certifications"
+  },
+  "nextAction": {
+    "start": "Let's start studying for {{code}}",
+    "onARoll": "You're on a roll! Try a new domain",
+    "focusWeak": "Focus on your weak area: \"{{name}}\"",
+    "startToday": "Start today's study session!",
+    "aim20": "Aim for 20 questions to build a foundation",
+    "deepen": "Deepen your understanding of \"{{name}}\"",
+    "allDomains": "Challenge yourself across all domains"
+  },
+  "highlight": {
+    "streak7": "{{days}}-day study streak! Your consistency is paving the way to success.",
+    "streak3": "{{days}} days in a row! You're steadily building your skills.",
+    "bestDomain": "{{pct}}% accuracy in \"{{name}}\" — great understanding!",
+    "worstDomain": "Focus on \"{{name}}\" to improve your pass chances. Almost there!",
+    "accuracy80": "{{pct}}% overall accuracy! You're in the passing zone. Be confident!",
+    "accuracy60": "You've reached {{pct}}% accuracy. One more step to the passing line!",
+    "total100": "{{count}} questions answered! This practice will boost your exam confidence.",
+    "total50": "You've completed {{count}} questions. Knowledge is building up steadily.",
+    "xp500": "{{xp}} XP earned! Your growth as a learner is showing in the numbers.",
+    "activeToday": "Thanks for showing up today. Keep moving forward, one step at a time!",
+    "default": "Invest in your future self with today's study. Small steps lead to big results."
+  },
+  "ai": {
+    "explainTitle": "Explain"
+  },
+  "historyExport": {
+    "title": "AWS Certification Study History",
+    "exportedAt": "Exported: {{date}}",
+    "exam": "Exam: {{exam}}",
+    "totals": "Questions: {{total}} / Correct: {{correct}} / Accuracy: {{pct}}%",
+    "modes": {
+      "single": "Quiz",
+      "quick5": "5 Questions",
+      "speed": "Speed Run",
+      "mock": "Practice Exam"
+    },
+    "session": "Session {{n}}: {{mode}} ({{date}})",
+    "result": "Result: {{correct}}/{{total}} correct",
+    "question": "Question {{n}}",
+    "answerLine": "Your answer: {{user}} / Correct: {{correct}} / {{verdict}}",
+    "verdictCorrect": "✅ Correct",
+    "verdictIncorrect": "❌ Incorrect",
+    "elapsed": "Time taken: {{s}}s",
+    "explanation": "Explanation: {{text}}"
+  },
+  "pwa": {
+    "install": "Add app"
+  },
+  "i18nNotice": {
+    "machineTranslated": "This language was translated by AI and may contain mistakes.",
+    "report": "Report a translation issue",
+    "settingsNote": "Languages other than Japanese and English (UI text and study content) are machine-translated by AI. Please report mistakes through the feedback form.",
+    "feedbackPrefix": "[Translation issue] "
   },
   "examLifecycle": {
     "title": {

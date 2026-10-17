@@ -142,7 +142,7 @@ function lines(label, arr) {
 
 /**
  * The card material for one unit, rendered for the writer prompt. Japanese
- * unless `locale` is 'en'. Rejected alternatives / misconceptions are listed
+ * labels for `locale` 'ja', English labels otherwise. Rejected alternatives / misconceptions are listed
  * explicitly so the writer builds distractors from them.
  * @param {object} unit  from listUnits
  * @param {{ locale?: string }} [opts]
@@ -150,7 +150,8 @@ function lines(label, arr) {
  */
 export function renderUnitForPrompt(unit, { locale = 'ja' } = {}) {
   if (!unit) return '';
-  const en = locale === 'en';
+  // English labels for every non-Japanese locale (prompt scaffolding).
+  const en = locale !== 'ja';
   const out = [];
   const card = unit.card;
   const d = unit.detail;

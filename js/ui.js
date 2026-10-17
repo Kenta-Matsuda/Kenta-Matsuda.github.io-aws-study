@@ -76,8 +76,10 @@ import {
 import { initChat, resetChat } from './chat.js';
 import { getDailyChallengeQuestions } from './data/daily-challenge.js';
 import { getOfflineExamQuestions, getOfflineExamPoolSize } from './data/offline-exam-bank.js';
-import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl } from './i18n.js';
-import { getRegisteredLocaleCodes, getLocaleLabel } from './localeRegistry.js';
+import { t, getLocale, setLocale, onLocaleChange, translateStaticElements, getLocalizedUrl, formatDate, formatNumber } from './i18n.js';
+import { localizedField, pickLocalized, loadContentOverlays, usesJapanesePrompt, outputLanguageDirective, promptLanguageName } from './localeContent.js';
+import { isStreamingUnsupportedResponse } from './aiErrors.js';
+import { getRegisteredLocaleCodes, getLocaleLabel, isMachineTranslatedLocale } from './localeRegistry.js';
 import { recordLearningEvent } from './learningEvents.js';
 import {
   PLANNER_MIN_QUESTIONS,
@@ -117,99 +119,73 @@ import {
 import { buildResourceIndex, searchResources, searchResourcesMulti, selectAiCandidates, buildExamKeywordCatalog, augmentTermsWithCatalog, buildAugmentedScoringQuery } from './resourceSearch.js';
 import { AI_RELIABILITY_CONFIG } from './config.js';
 
-/**
- * Return locale-aware title: jpTitle for 'ja', title (English) for 'en'.
- * Falls back to whichever is available.
- */
+const isStreamingUnsupported = (response) => isStreamingUnsupportedResponse(response, t('errors.streamingUnsupported'));
+
+// Locale-aware accessors for js/data/*.js fields. All of them go through
+// localizedField (js/localeContent.js): ja -> Japanese, en -> English, other
+// locales -> content overlay translation, else English, else Japanese.
+
 function localizedTitle(obj) {
-  if (!obj) return '';
-  if (getLocale() === 'ja') return obj.jpTitle || obj.title || '';
-  return obj.title || obj.jpTitle || '';
+  return localizedField(obj, 'title') || '';
 }
 
-/**
- * Return locale-aware description lines.
- * Uses descriptionEn (if available) for 'en', description for 'ja'.
- */
 function localizedDescription(obj) {
-  if (!obj) return [];
-  if (getLocale() === 'en' && obj.descriptionEn) return obj.descriptionEn;
-  return obj.description || [];
+  return localizedField(obj, 'description') || [];
 }
 
-/**
- * Return locale-aware knowledge array.
- * Uses knowledgeEn (if available) for 'en', knowledge for 'ja'.
- */
 function localizedKnowledge(obj) {
-  if (!obj) return [];
-  if (getLocale() === 'en' && obj.knowledgeEn) return obj.knowledgeEn;
-  return obj.knowledge || [];
+  return localizedField(obj, 'knowledge') || [];
 }
 
-/**
- * Return locale-aware subtitle.
- */
 function localizedSubtitle(exam) {
   if (!exam) return '';
-  if (getLocale() === 'en') return exam.subtitleEn || t('header.subtitle');
-  return exam.subtitle || '';
+  if (getLocale() !== 'ja' && !exam.subtitleEn) return t('header.subtitle');
+  return localizedField(exam, 'subtitle') || '';
 }
 
 /**
- * Return locale-aware resource label.
+ * Whether to show the official English title under a localized task / step
+ * heading: for every non-English locale whose heading differs from it.
  */
+function showOfficialEnglishTitle(obj) {
+  if (!obj || !obj.title || getLocale() === 'en') return false;
+  return localizedTitle(obj) !== obj.title;
+}
+
 function localizedResourceLabel(section) {
-  if (!section) return '';
-  if (getLocale() === 'en' && section.labelEn) return section.labelEn;
-  return section.label || '';
+  return localizedField(section, 'label') || '';
 }
 
-/**
- * Return locale-aware resource item title.
- */
 function localizedResourceTitle(item) {
-  if (!item) return '';
-  if (getLocale() === 'en' && item.titleEn) return item.titleEn;
-  return item.title || '';
+  return localizedField(item, 'title') || '';
 }
 
-/**
- * Return locale-aware resource item note.
- */
 function localizedResourceNote(item) {
-  if (!item) return '';
-  if (getLocale() === 'en' && item.noteEn) return item.noteEn;
-  return item.note || '';
+  return localizedField(item, 'note') || '';
 }
 
 /**
- * Return locale-aware resource item technical level (issue #137).
- * AWS numeric levels (e.g. 'Level 200') are language-neutral, so most items
- * only set `level`; `levelEn` is optional for cases needing different phrasing.
+ * Technical level (issue #137). AWS numeric levels (e.g. 'Level 200') are
+ * language-neutral, so most items only set `level`.
  */
 function localizedResourceLevel(item) {
-  if (!item) return '';
-  if (getLocale() === 'en' && item.levelEn) return item.levelEn;
-  return item.level || '';
+  return localizedField(item, 'level') || '';
 }
 
-/**
- * Return locale-aware domain description.
- */
 function localizedDomainDescription(domain) {
-  if (!domain) return '';
-  if (getLocale() === 'en' && domain.descriptionEn) return domain.descriptionEn;
-  return domain.description || '';
+  return localizedField(domain, 'description') || '';
 }
 
-/**
- * Return locale-aware quiz mode label from config.
- */
 function localizedModeLabel(config) {
   if (!config) return '';
-  if (getLocale() === 'en' && config.labelEn) return config.labelEn;
-  return config.label || '';
+  // ja / en keep the labels in js/quiz.js; other locales use the translated
+  // quiz.<mode>.label dictionary entry.
+  if (getLocale() !== 'ja' && getLocale() !== 'en') {
+    const mode = Object.keys(QUIZ_MODE_CONFIG).find((k) => QUIZ_MODE_CONFIG[k]?.labelEn === config.labelEn);
+    const key = mode ? `quiz.${mode}.label` : '';
+    if (key && t(key) !== key) return t(key);
+  }
+  return localizedField(config, 'label') || '';
 }
 
 let chartInstance = null;
@@ -491,7 +467,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }[statusKey] || 'bg-indigo-100 text-indigo-700';
       const taken = attemptsBySet.get(set.id) || 0;
       const date = new Date(set.createdAt);
-      const dateLabel = Number.isNaN(date.getTime()) ? '' : date.toLocaleString(getLocale() === 'ja' ? 'ja-JP' : 'en-US');
+      const dateLabel = Number.isNaN(date.getTime()) ? '' : formatDate(date);
       return `
         <div class="rounded-lg border border-gray-200 bg-white p-3 flex flex-col sm:flex-row sm:items-center gap-3" data-set-id="${escapeHtml(set.id)}" data-set-status="${escapeHtml(statusKey)}">
           <div class="flex-1 min-w-0">
@@ -645,9 +621,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (mode === 'smartReview') {
       const reviewQuestions = getSmartReviewCombined(lastAiRequest.examId);
       if (reviewQuestions.length === 0) {
-        alert(getLocale() === 'ja'
-          ? '復習対象の問題がまだありません。まずはクイズに挑戦しましょう！'
-          : 'No questions to review yet. Try a quiz first!');
+        alert(t('quiz.smartReviewEmpty'));
         return;
       }
       closeModal(els.quizModeModal);
@@ -665,10 +639,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       quizSession.preGenerate = true;
       quizSession.startedAt = Date.now();
       quizSession._isSmartReview = true;
-      attachExamSet(quizSession, { source: 'smartReview', title: getLocale() === 'ja' ? 'スマート復習' : 'Smart Review', questions: quizSession.questions });
+      attachExamSet(quizSession, { source: 'smartReview', title: t('quiz.smartReviewTitle'), questions: quizSession.questions });
 
       const exam = getExamById(lastAiRequest.examId);
-      showAiModal(els, getLocale() === 'ja' ? `スマート復習（${reviewQuestions.length}問）` : `Smart Review (${reviewQuestions.length} questions)`, true);
+      showAiModal(els, t('quiz.smartReviewModalTitle', { count: reviewQuestions.length }), true);
       if (els.modalContent) els.modalContent.innerHTML = '';
       if (els.modalLoading) els.modalLoading.classList.add('hidden');
       resetQuizUi(els);
@@ -688,21 +662,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (mode === 'mock' && isAiBatchEligible()) {
       // 進行中のバッチがあれば二重起動を防ぐ
       if (batchInProgress) {
-        alert(getLocale() === 'ja'
-          ? '既にバッチ生成が進行中です。完了するまでお待ちください。'
-          : t('batch.alreadyInProgress'));
+        alert(t('batch.alreadyInProgress'));
         return;
       }
-      const ok = window.confirm(
-        getLocale() === 'ja'
-          ? '本番模擬試験を「Gemini Batch API」で生成します。\n\n' +
-            'ℹ️ ご案内\n' +
-            '・完了まで数分〜最大数十分かかる場合があります\n' +
-            '・タブやブラウザを閉じても生成は続きます。次に開いたときに結果を受け取ります\n' +
-            '・完了したら画面右下に通知が表示されます\n\n' +
-            '続行しますか？'
-          : t('batch.confirmStart')
-      );
+      const ok = window.confirm(t('batch.confirmStart'));
       if (!ok) return;
       closeModal(els.quizModeModal);
 
@@ -739,20 +702,18 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       type: 'quiz',
       examId: state.examId,
       taskId: '',
-      taskTitle: getLocale() === 'ja' ? `${exam.code} 全ドメイン横断` : `${exam.code} All Domains`,
+      taskTitle: t('quiz.allDomainsTaskTitle', { code: exam.code }),
       taskContext: '',
       isDashboardQuiz: true,
     };
     reflectAiVoteUi();
-    if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = getLocale() === 'ja'
-      ? `${exam.code}（${exam.shortLabel}）全ドメイン横断クイズ`
-      : `${exam.code} (${exam.shortLabel}) Cross-Domain Quiz`;
+    if (els.quizModeTaskLabel) els.quizModeTaskLabel.textContent = t('quiz.crossDomainQuizLabel', { code: exam.code, label: exam.shortLabel });
     // Update smart review count
     if (els.smartReviewCount) {
       const reviewQ = getSmartReviewCombined(state.examId);
       els.smartReviewCount.textContent = reviewQ.length > 0
-        ? (getLocale() === 'ja' ? `📊 ${reviewQ.length}問の復習対象あり` : `📊 ${reviewQ.length} questions to review`)
-        : (getLocale() === 'ja' ? '📊 復習対象なし（まずクイズに挑戦！）' : '📊 No questions to review (try a quiz first!)');
+        ? t('quiz.smartReviewCount', { count: reviewQ.length })
+        : t('quiz.smartReviewNone');
     }
     openModal(els.quizModeModal);
   }
@@ -763,7 +724,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // --- Daily Challenge Button (API-key-free, issue #34) ---
   // 事前用意した静的問題プールから、その日の5問を決定的に出題する。
   // AIプロバイダー/APIキーは一切使わないため、キー未設定でも遊べる。
-  els.dailyChallengeBtn?.addEventListener('click', () => {
+  els.dailyChallengeBtn?.addEventListener('click', async () => {
+    // Content-overlay translations of the question pool (no-op for ja / en).
+    await loadContentOverlays(getLocale(), ['daily-challenge']).catch(() => false);
     // Fall back to a real exam id whenever the current selection is not a real
     // exam (e.g. the '__beginner__' pseudo-mode, which is truthy so a plain
     // `|| 'clf-c02'` would never fire). Tagging results/XP to a non-exam id
@@ -785,17 +748,15 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
     quizSession._isDailyChallenge = true;
-    attachExamSet(quizSession, { source: 'daily', title: getLocale() === 'ja' ? 'デイリーチャレンジ' : 'Daily Challenge', questions: quizSession.questions });
+    attachExamSet(quizSession, { source: 'daily', title: t('quiz.dailyChallengeTitle'), questions: quizSession.questions });
 
-    const dailyTitle = getLocale() === 'ja'
-      ? `デイリーチャレンジ（${questions.length}問）`
-      : `Daily Challenge (${questions.length} questions)`;
+    const dailyTitle = t('quiz.dailyChallengeModalTitle', { count: questions.length });
 
     lastAiRequest = {
       type: 'quiz',
       examId: dailyExamId,
       taskId: '',
-      taskTitle: getLocale() === 'ja' ? 'デイリーチャレンジ' : 'Daily Challenge',
+      taskTitle: t('quiz.dailyChallengeTitle'),
       taskContext: '',
       isDashboardQuiz: true,
     };
@@ -821,7 +782,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   //
   // 注意: この経路は getApiKey/getOpenAiApiKey/callAi/callAiStream/onRequireApiKey を
   // 一切呼ばない。AI生成の模擬試験（quizModeStartBtn の mock 経路）は従来どおりキーが必要。
-  els.offlineExamBtn?.addEventListener('click', () => {
+  els.offlineExamBtn?.addEventListener('click', async () => {
+    // Content-overlay translations of the question bank (no-op for ja / en).
+    await loadContentOverlays(getLocale(), ['offline-exam-bank']).catch(() => false);
     // 実在の試験IDにフォールバック（'__beginner__' などの擬似モード対策）。
     const offlineExamId = isRealExamId(state.examId) ? state.examId : 'clf-c02';
     const poolSize = getOfflineExamPoolSize(offlineExamId);
@@ -844,18 +807,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
     quizSession._isOfflineExam = true;
-    attachExamSet(quizSession, { source: 'offline', title: getLocale() === 'ja' ? '本番形式（APIキー不要）' : 'Practice Exam (no API key)', questions: quizSession.questions });
+    attachExamSet(quizSession, { source: 'offline', title: t('quiz.offlineExamTitle'), questions: quizSession.questions });
 
     const exam = getExamById(offlineExamId);
-    const offlineTitle = getLocale() === 'ja'
-      ? `本番形式（APIキー不要）: ${exam?.code || offlineExamId}（${questions.length}問）`
-      : `Practice Exam (no API key): ${exam?.code || offlineExamId} (${questions.length} questions)`;
+    const offlineTitle = t('quiz.offlineExamModalTitle', { code: exam?.code || offlineExamId, count: questions.length });
 
     lastAiRequest = {
       type: 'quiz',
       examId: offlineExamId,
       taskId: '',
-      taskTitle: getLocale() === 'ja' ? '本番形式（APIキー不要）' : 'Practice Exam (no API key)',
+      taskTitle: t('quiz.offlineExamTitle'),
       taskContext: '',
       isDashboardQuiz: true,
     };
@@ -951,10 +912,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }));
     quizSession.preGenerate = true;
     quizSession.startedAt = Date.now();
-    attachExamSet(quizSession, { source: 'smartReview', title: getLocale() === 'ja' ? '間違えた問題の解き直し' : 'Retry incorrect questions', questions: quizSession.questions });
+    attachExamSet(quizSession, { source: 'smartReview', title: t('quiz.retryIncorrectTitle'), questions: quizSession.questions });
 
     const exam = getExamById(retryExamId);
-    showAiModal(els, getLocale() === 'ja' ? `間違えた問題の解き直し（${unique.length}問）` : `Retry Incorrect Questions (${unique.length})`, true);
+    showAiModal(els, t('quiz.retryIncorrectModalTitle', { count: unique.length }), true);
     if (els.modalContent) els.modalContent.innerHTML = '';
     if (els.modalLoading) els.modalLoading.classList.add('hidden');
     resetQuizUi(els);
@@ -964,7 +925,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       type: 'quiz',
       examId: retryExamId,
       taskId: '',
-      taskTitle: getLocale() === 'ja' ? '間違えた問題の解き直し' : 'Retry incorrect questions',
+      taskTitle: t('quiz.retryIncorrectTitle'),
       taskContext: '',
       isDashboardQuiz: true,
     };
@@ -1076,14 +1037,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.scheduleReviewBtn) {
       els.scheduleReviewBtn.disabled = true;
       els.scheduleReviewBtn.classList.add('opacity-60', 'cursor-not-allowed');
-      els.scheduleReviewBtn.innerHTML = getLocale() === 'ja'
-        ? '<i class="fas fa-check"></i> 復習スケジュールに登録しました'
-        : '<i class="fas fa-check"></i> Added to review schedule';
+      els.scheduleReviewBtn.innerHTML = `<i class="fas fa-check"></i> ${escapeHtml(t('quiz.reviewScheduled'))}`;
     }
     if (els.scheduleReviewMsg) {
-      els.scheduleReviewMsg.textContent = getLocale() === 'ja'
-        ? `${wrongQuestions.length}問を明日の復習に登録しました`
-        : `${wrongQuestions.length} questions scheduled for tomorrow's review`;
+      els.scheduleReviewMsg.textContent = t('quiz.reviewScheduledCount', { count: wrongQuestions.length });
       els.scheduleReviewMsg.classList.remove('hidden');
     }
   });
@@ -1095,7 +1052,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (!quizSession) return;
     const summary = getSessionSummary(quizSession);
     const exam = getExamById(quizSession.examId);
-    const name = getUserName() || (getLocale() === 'ja' ? '名無し' : 'Anonymous');
+    const name = getUserName() || t('common.anonymous');
     const text = buildTweetScoreText({
       userName: name,
       examCode: exam ? exam.code : quizSession.examId,
@@ -1200,7 +1157,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     resetQuizUi(els);
     if (els.quizArea) els.quizArea.classList.remove('hidden');
     if (els.quizPregenOverlay) els.quizPregenOverlay.classList.remove('hidden');
-    if (els.quizPregenStatus) els.quizPregenStatus.textContent = getLocale() === 'ja' ? `0 / ${total} 問` : `0 / ${total}`;
+    if (els.quizPregenStatus) els.quizPregenStatus.textContent = t('quiz.pregenProgress', { done: 0, total });
     if (els.quizPregenFill) els.quizPregenFill.style.width = '0%';
 
     // Hide other quiz elements during pre-gen
@@ -1224,12 +1181,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // planner → writer → deterministic checks → solver/judge → editor. The UI
     // only supplies prompts, resources, the model call and persistence hooks.
     const statusText = ({ stage, done }) => {
-      const ja = getLocale() === 'ja';
       switch (stage) {
-        case 'planning': return ja ? '出題計画を作成中…' : 'Designing the exam plan…';
-        case 'judging': return ja ? `査読中… ${done} / ${total} 問` : `Reviewing… ${done} / ${total}`;
-        case 'fixing': return ja ? `修正中… ${done} / ${total} 問` : `Fixing… ${done} / ${total}`;
-        default: return ja ? `${done} / ${total} 問` : `${done} / ${total}`;
+        case 'planning': return t('quiz.pipelinePlanning');
+        case 'judging': return t('quiz.pipelineJudging', { done, total });
+        case 'fixing': return t('quiz.pipelineFixing', { done, total });
+        default: return t('quiz.pregenProgress', { done, total });
       }
     };
     const result = await generateExamQuestions({
@@ -1293,10 +1249,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // quiz area (not inside the pregen overlay, which is hidden above), so the user
     // actually sees how many of the requested questions were produced.
     if (isPartial && els.quizPartialNotice && els.quizPartialNoticeText) {
-      const startingNote = getLocale() === 'ja'
-        ? '生成できた問題でクイズを開始します。'
-        : 'Starting the quiz with the questions that were created.';
-      els.quizPartialNoticeText.textContent = `${t('errors.partialGenerate', { count: generated.length, total })}${getLocale() === 'ja' ? '' : ' '}${startingNote}`;
+      els.quizPartialNoticeText.textContent = t('errors.partialGenerateStarting', { partial: t('errors.partialGenerate', { count: generated.length, total }) });
       els.quizPartialNotice.classList.remove('hidden');
     } else if (els.quizPartialNotice) {
       els.quizPartialNotice.classList.add('hidden');
@@ -1305,14 +1258,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     // Browser notification
     if (Notification.permission === 'granted') {
       new Notification(
-        getLocale() === 'ja' ? '問題の準備ができました！' : 'Questions are ready!',
-        { body: getLocale() === 'ja' ? `${generated.length}問のクイズを開始できます` : `${generated.length} quiz questions ready to start`, icon: 'assets/og/favicon.ico' }
+        t('quiz.readyNotificationTitle'),
+        { body: t('quiz.readyNotificationBody', { count: generated.length }), icon: 'assets/og/favicon.ico' }
       );
     } else if (Notification.permission !== 'denied') {
       Notification.requestPermission().then(p => {
         if (p === 'granted') new Notification(
-          getLocale() === 'ja' ? '問題の準備ができました！' : 'Questions are ready!',
-          { body: getLocale() === 'ja' ? `${generated.length}問のクイズを開始できます` : `${generated.length} quiz questions ready to start`, icon: 'assets/og/favicon.ico' }
+          t('quiz.readyNotificationTitle'),
+          { body: t('quiz.readyNotificationBody', { count: generated.length }), icon: 'assets/og/favicon.ico' }
         );
       });
     }
@@ -1341,7 +1294,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     if (els.batchProgressStatus && message) els.batchProgressStatus.textContent = message;
 
     if (state === 'ready') {
-      if (els.batchProgressTitle) els.batchProgressTitle.textContent = getLocale() === 'ja' ? '本番模擬試験の準備ができました' : t('batch.ready');
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = t('batch.ready');
       if (els.batchProgressIcon) {
         els.batchProgressIcon.className =
           'w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0';
@@ -1350,7 +1303,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.batchProgressNote) els.batchProgressNote.classList.add('hidden');
       if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.remove('hidden');
     } else if (state === 'error') {
-      if (els.batchProgressTitle) els.batchProgressTitle.textContent = getLocale() === 'ja' ? '生成に失敗しました' : t('batch.failed');
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = t('batch.failed');
       if (els.batchProgressIcon) {
         els.batchProgressIcon.className =
           'w-9 h-9 rounded-full bg-rose-100 text-rose-700 flex items-center justify-center flex-shrink-0';
@@ -1360,7 +1313,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       if (els.batchProgressStartBtn) els.batchProgressStartBtn.classList.add('hidden');
     } else {
       // running
-      if (els.batchProgressTitle) els.batchProgressTitle.textContent = getLocale() === 'ja' ? '本番模擬試験を生成中' : t('batch.generating');
+      if (els.batchProgressTitle) els.batchProgressTitle.textContent = t('batch.generating');
       if (els.batchProgressIcon) {
         els.batchProgressIcon.className =
           'w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0';
@@ -1389,30 +1342,28 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   }
 
   function batchStateLabel(s) {
-    const isJa = getLocale() === 'ja';
     switch (s) {
       case 'JOB_STATE_PENDING':
       case 'BATCH_STATE_PENDING':
-        return isJa ? '待機中' : t('batch.stateWaiting');
+        return t('batch.stateWaiting');
       case 'JOB_STATE_RUNNING':
       case 'BATCH_STATE_RUNNING':
-        return isJa ? '生成中' : t('batch.stateGenerating');
+        return t('batch.stateGenerating');
       case 'JOB_STATE_SUCCEEDED':
       case 'BATCH_STATE_SUCCEEDED':
-        return isJa ? '完了' : t('batch.stateComplete');
+        return t('batch.stateComplete');
       default:
-        return s || (isJa ? '実行中' : 'Running');
+        return s || t('batch.stateRunning');
     }
   }
 
   function showBatchProgress(total) {
-    return ({ state, done, total: t, failed }) => {
-      const denom = t || total;
+    return ({ state, done, total: reportedTotal, failed }) => {
+      const denom = reportedTotal || total;
       setBatchToastState(
         'running',
-        getLocale() === 'ja'
-          ? `${batchStateLabel(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
-          : `${batchStateLabel(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
+        t('batch.progress', { state: batchStateLabel(state), done, total: denom })
+          + (failed ? t('batch.progressFailed', { failed }) : '')
       );
     };
   }
@@ -1451,7 +1402,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const total = set.requested || session.questionCount;
 
     batchInProgress = true;
-    setBatchToastState('running', getLocale() === 'ja' ? '前回のバッチ生成を再開しています…' : t('batch.resuming'));
+    setBatchToastState('running', t('batch.resuming'));
     let result = null;
     try {
       result = await resumeAiBatch({
@@ -1464,13 +1415,13 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       console.warn('[batch] resume failed:', err);
       batchInProgress = false;
       await markBatchSetFailed(session);
-      setBatchToastState('error', `${getLocale() === 'ja' ? 'バッチ生成の再開に失敗しました' : t('batch.failed')}: ${err?.message || ''}`);
+      setBatchToastState('error', `${t('batch.resumeFailed')}: ${err?.message || ''}`);
       return;
     }
     batchInProgress = false;
     if (!result || !Array.isArray(result.texts)) {
       await markBatchSetFailed(session);
-      setBatchToastState('error', getLocale() === 'ja' ? 'バッチAPIから結果を取得できませんでした' : t('batch.failed'));
+      setBatchToastState('error', t('batch.noResults'));
       return;
     }
     await completeBatchSet({ session, request, result, slots: set.pipeline.slots || [] });
@@ -1493,8 +1444,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
     if (generated.length === 0) {
       await markBatchSetFailed(session);
-      setBatchToastState('error', '生成された問題を解析できませんでした');
-      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
+      setBatchToastState('error', t('batch.parseFailed'));
+      notifyBrowser(t('batch.failed'), t('batch.parseFailedBody'));
       return;
     }
 
@@ -1509,23 +1460,16 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     const requested = result.texts.length;
     const isPartial = generated.length < requested;
     const modelLabel = result.model || 'gemini-3';
-    const isJa = getLocale() === 'ja';
-    const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
+    const modelSuffix = t('batch.modelSuffix', { model: modelLabel });
     const readyMessage = isPartial
       ? `${t('errors.partialGenerate', { count: generated.length, total: requested })}${modelSuffix}`
-      : (isJa
-        ? `${generated.length} 問の準備が完了しました${modelSuffix}`
-        : `${generated.length} questions ready${modelSuffix}`);
+      : `${t('batch.questionsReady', { count: generated.length })}${modelSuffix}`;
     setBatchToastState('ready', readyMessage);
     notifyBrowser(
-      isJa ? '問題の準備ができました！' : 'Questions are ready!',
+      t('quiz.readyNotificationTitle'),
       isPartial
-        ? (isJa
-          ? `${requested}問中${generated.length}問のクイズを開始できます`
-          : `${generated.length} of ${requested} quiz questions ready to start`)
-        : (isJa
-          ? `${generated.length} 問のクイズを開始できます`
-          : `${generated.length} quiz questions ready to start`)
+        ? t('quiz.readyNotificationPartial', { count: generated.length, total: requested })
+        : t('quiz.readyNotificationBody', { count: generated.length })
     );
   }
 
@@ -1540,7 +1484,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
     } catch { /* ignore */ }
 
-    setBatchToastState('running', getLocale() === 'ja' ? `バッチAPIにリクエスト中… (0 / ${total} 問)` : `${t('batch.requesting')} (0 / ${total})`);
+    setBatchToastState('running', t('batch.requestingProgress', { total }));
     batchInProgress = true;
     pendingBatchSession = null;
     pendingBatchRequest = null;
@@ -1559,7 +1503,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     await attachExamSet(session, { source: 'batch', title: request.taskTitle });
     let planRows = Array(total).fill(null);
     if (total >= PLANNER_MIN_QUESTIONS) {
-      setBatchToastState('running', getLocale() === 'ja' ? '出題計画を作成中…' : 'Designing the exam plan…');
+      setBatchToastState('running', t('quiz.pipelinePlanning'));
       if (session.setId) await updateExamSet(session.setId, { pipeline: { stage: 'planning' } }).catch(() => {});
       planRows = (await planExam({ els, exam, blueprint })).rows;
     }
@@ -1632,7 +1576,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         } catch (e2) {
           // eslint-disable-next-line no-console
           console.error('[batch->fallback] also failed:', e2);
-          setBatchToastState('error', `通常モードでの生成も失敗しました: ${e2?.message || '不明なエラー'}`);
+          setBatchToastState('error', t('batch.fallbackFailed', { msg: e2?.message || t('errors.unknown') }));
         }
         return;
       }
@@ -1640,9 +1584,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       await markBatchSetFailed(session);
       setBatchToastState(
         'error',
-        `バッチAPIでの生成に失敗しました: ${msg || '不明なエラー'}`
+        t('batch.batchFailed', { msg: msg || t('errors.unknown') })
       );
-      notifyBrowser('生成に失敗しました', '本番模擬試験のバッチ生成でエラーが発生しました');
+      notifyBrowser(t('batch.failed'), t('batch.batchFailedBody'));
       return;
     }
 
@@ -1650,7 +1594,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
     if (!result || !Array.isArray(result.texts)) {
       await markBatchSetFailed(session);
-      setBatchToastState('error', 'バッチAPIから結果を取得できませんでした');
+      setBatchToastState('error', t('batch.noResults'));
       return;
     }
 
@@ -1706,9 +1650,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   });
   els.batchProgressCloseBtn?.addEventListener('click', () => {
     if (batchInProgress) {
-      const ok = window.confirm(
-        'バッチ生成中です。閉じても生成は続行されますが、通知トーストは非表示になります。\n本当に閉じますか？'
-      );
+      const ok = window.confirm(t('batch.confirmClose'));
       if (!ok) return;
     }
     hideBatchToast();
@@ -1945,14 +1887,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       quizSession.finishedAt = Date.now();
       stopQuizTimer();
       if (els.quizNextBtn) {
-        els.quizNextBtn.innerHTML = '<i class="fas fa-chart-bar"></i> 結果を見る';
+        els.quizNextBtn.innerHTML = `<i class="fas fa-chart-bar"></i> ${escapeHtml(t('quiz.viewResults'))}`;
         els.quizNextBtn.classList.remove('hidden');
       }
       if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
     } else if (quizSession.preGenerate) {
       // Pre-generated mode (speed/mock): show "次の問題" button
       if (els.quizNextBtn) {
-        els.quizNextBtn.innerHTML = '<i class="fas fa-arrow-right"></i> 次の問題';
+        els.quizNextBtn.innerHTML = `<i class="fas fa-arrow-right"></i> ${escapeHtml(t('quiz.nextQuestion'))}`;
         els.quizNextBtn.classList.remove('hidden');
       }
       if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
@@ -1960,8 +1902,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       // Sequential mode (single/quick5): show "次の問題" button
       if (els.quizNextBtn) {
         els.quizNextBtn.innerHTML = quizSession.mode === 'single'
-          ? '<i class="fas fa-redo"></i> もう1問'
-          : '<i class="fas fa-arrow-right"></i> 次の問題';
+          ? `<i class="fas fa-redo"></i> ${escapeHtml(t('quiz.oneMore'))}`
+          : `<i class="fas fa-arrow-right"></i> ${escapeHtml(t('quiz.nextQuestion'))}`;
         els.quizNextBtn.classList.remove('hidden');
       }
       if (els.aiRetryBtn) els.aiRetryBtn.classList.add('hidden');
@@ -2031,6 +1973,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // ── Settings Modal: Language & Theme Switches ──
   wireSettingsModalSwitches({ els });
 
+  // ── Machine-translation notice for LLM-translated locales (#197) ──
+  wireMachineTranslationNotice(els);
+
   // ── Settings Modal: opt-in local study reminder ──
   wireStudyReminder(els);
 
@@ -2043,16 +1988,32 @@ export function initApp({ exams, getExamById, defaultExamId }) {
   // Boot marker for non-JS/module failure detection
   window.__APP_READY__ = true;
 
-  // Re-render dashboard when locale changes
+  // Re-render dashboard when locale changes; also fetch the new locale's
+  // content overlay for the current exam (re-rendering again once it lands).
   onLocaleChange(() => {
+    rerenderForLocale();
+    refreshContentOverlays(state.examId);
+  });
+
+  // Load content-overlay translations (js/localeContent.js) for the active
+  // locale and exam; ja / en and locales without overlay files are no-ops.
+  function refreshContentOverlays(examId) {
+    const ids = ['common'];
+    if (examId && examId !== '__beginner__') ids.push(examId);
+    loadContentOverlays(getLocale(), ids)
+      .then((changed) => { if (changed) rerenderForLocale(); })
+      .catch(() => { /* content stays English */ });
+  }
+
+  function rerenderForLocale() {
     translateStaticElements();
 
     // Special: if on beginner guide, just re-render that
     if (state.examId === '__beginner__') {
       renderExamSidebar({ els, exams, state, onSelect: (id) => setExam(id) });
       // Re-apply beginner title in new locale
-      if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
-      if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
+      if (els.siteTitle) els.siteTitle.textContent = t('beginner.title');
+      if (els.siteSubtitle) els.siteSubtitle.textContent = t('beginner.subtitle');
       renderContent({ els, exam: { domains: [], steps: [] }, state });
       return;
     }
@@ -2067,9 +2028,10 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     renderChart({ els, exam, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderTabs({ els, exam, state, onDomainSelect: (domainId) => switchDomain(domainId) });
     renderContent({ els, exam, state });
-  });
+  }
 
   function setExam(examId) {
+    refreshContentOverlays(examId);
     // Special: Beginner guide (not a real exam)
     if (examId === '__beginner__') {
       state.examId = '__beginner__';
@@ -2082,8 +2044,8 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       }
 
       // Update header
-      if (els.siteTitle) els.siteTitle.textContent = getLocale() === 'ja' ? '初めてAWS認定を受験する' : 'First-time AWS Certification';
-      if (els.siteSubtitle) els.siteSubtitle.textContent = getLocale() === 'ja' ? 'AWS認定試験の基本情報と共通の学習リソース' : 'Basic information and common learning resources for AWS certifications';
+      if (els.siteTitle) els.siteTitle.textContent = t('beginner.title');
+      if (els.siteSubtitle) els.siteSubtitle.textContent = t('beginner.subtitle');
 
       // Hide left aside (chart), exam notice, learning status, XP dashboard, domain tabs
       const chartAside = els.examWeightChart?.closest('aside');
@@ -2290,7 +2252,6 @@ function renderExamSidebar({ els, exams, state, onSelect }) {
   const container = els.examSidebarContent;
   if (!container) return;
 
-  const locale = getLocale();
   container.innerHTML = '';
 
   // Special: Beginner guide item
@@ -2321,7 +2282,7 @@ function renderExamSidebar({ els, exams, state, onSelect }) {
 
     const label = document.createElement('div');
     label.className = 'exam-sidebar-category-label';
-    label.innerHTML = `<i class="${category.icon} text-xs"></i> ${locale === 'ja' ? category.labelJa : category.labelEn}`;
+    label.innerHTML = `<i class="${category.icon} text-xs"></i> ${escapeHtml(localizedField(category, 'label') || '')}`;
     section.appendChild(label);
 
     for (const exam of categoryExams) {
@@ -2330,7 +2291,7 @@ function renderExamSidebar({ els, exams, state, onSelect }) {
       item.dataset.examId = exam.id;
       item.innerHTML = `<span class="exam-code">${exam.code}</span><span class="truncate">${exam.shortLabel}</span>`;
       // Version update / retirement badge (js/data/exam-lifecycle.js)
-      const lifecycle = getExamLifecycleNotice(exam.id, { locale });
+      const lifecycle = getExamLifecycleNotice(exam.id, { locale: getLocale() });
       if (lifecycle) {
         const badge = document.createElement('span');
         badge.className = 'exam-lifecycle-badge';
@@ -2359,44 +2320,79 @@ function updateSidebarActiveState({ els, examId }) {
   });
 }
 
-// Build the settings-modal language buttons from js/localeRegistry.js so the
-// switcher always matches the locales actually loaded (issue #197).
-function renderLangSwitchButtons(container) {
-  const codes = getRegisteredLocaleCodes();
-  container.replaceChildren(...codes.map((code, i) => {
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.dataset.lang = code;
-    btn.className = 'flex-1 px-4 py-2 text-sm font-medium transition-colors text-center';
-    if (i < codes.length - 1) btn.classList.add('border-r', 'border-gray-200');
-    btn.textContent = getLocaleLabel(code);
-    return btn;
+// Build the settings-modal language <select> from js/localeRegistry.js so the
+// switcher always matches the locales actually loaded (issue #197). A select
+// (native labels, each tagged with its own lang) stays usable on phone width
+// with 11 languages, where a button row would overflow.
+function renderLangSelectOptions(select) {
+  select.replaceChildren(...getRegisteredLocaleCodes().map((code) => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.lang = code;
+    opt.textContent = getLocaleLabel(code);
+    return opt;
   }));
+}
+
+const MT_NOTICE_DISMISSED_KEY = 'asn_mt_notice_dismissed';
+
+function readDismissedMtLocales() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(MT_NOTICE_DISMISSED_KEY) || '[]');
+    return Array.isArray(raw) ? raw : [];
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Show a small notice for machine-translated locales that invites corrections
+ * through the feedback form. Dismissal is remembered per locale.
+ */
+function wireMachineTranslationNotice(els) {
+  if (!els.mtNotice) return;
+  const update = () => {
+    const locale = getLocale();
+    const show = isMachineTranslatedLocale(locale) && !readDismissedMtLocales().includes(locale);
+    els.mtNotice.classList.toggle('hidden', !show);
+  };
+  els.mtNoticeCloseBtn?.addEventListener('click', () => {
+    const dismissed = new Set(readDismissedMtLocales());
+    dismissed.add(getLocale());
+    try { localStorage.setItem(MT_NOTICE_DISMISSED_KEY, JSON.stringify([...dismissed])); } catch { /* ignore */ }
+    update();
+  });
+  els.mtNoticeFeedbackBtn?.addEventListener('click', () => {
+    openFeedbackModal(els);
+    if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'ui_ux';
+    if (els.feedbackTextarea) {
+      els.feedbackTextarea.value = `${t('i18nNotice.feedbackPrefix')}(${getLocale()}) `;
+      updateFeedbackCharCount(els);
+    }
+  });
+  update();
+  onLocaleChange(update);
 }
 
 function wireSettingsModalSwitches({ els }) {
   // Language switch
-  if (els.langSwitch) {
-    renderLangSwitchButtons(els.langSwitch);
-    const updateLangBtns = () => {
+  if (els.langSelect) {
+    renderLangSelectOptions(els.langSelect);
+    const updateLangSelect = () => {
       const current = getLocale();
-      els.langSwitch.querySelectorAll('button[data-lang]').forEach(btn => {
-        btn.classList.toggle('settings-switch-btn', true);
-        btn.classList.toggle('active', btn.dataset.lang === current);
-      });
+      els.langSelect.value = current;
+      els.langMachineNote?.classList.toggle('hidden', !isMachineTranslatedLocale(current));
     };
-    updateLangBtns();
-    els.langSwitch.addEventListener('click', (e) => {
-      const btn = e.target.closest('button[data-lang]');
-      if (!btn) return;
-      const lang = btn.dataset.lang;
+    updateLangSelect();
+    els.langSelect.addEventListener('change', () => {
+      const lang = els.langSelect.value;
       if (lang && lang !== getLocale()) {
         setLocale(lang);
       }
-      updateLangBtns();
+      updateLangSelect();
     });
     // Listen for locale changes from other sources
-    onLocaleChange(() => updateLangBtns());
+    onLocaleChange(() => updateLangSelect());
   }
 
   // Theme switch
@@ -2591,6 +2587,12 @@ function getElements() {
 
     // Settings modal: language & theme switches
     langSwitch: document.getElementById('langSwitch'),
+    langSelect: document.getElementById('langSelect'),
+    langMachineNote: document.getElementById('langMachineNote'),
+    // Machine-translation notice (#197)
+    mtNotice: document.getElementById('mtNotice'),
+    mtNoticeFeedbackBtn: document.getElementById('mtNoticeFeedbackBtn'),
+    mtNoticeCloseBtn: document.getElementById('mtNoticeCloseBtn'),
     themeSwitch: document.getElementById('themeSwitch'),
 
     // Quiz interactive
@@ -2949,7 +2951,7 @@ function wireProfileHandlers({ els, state, getExamById }) {
   els.tweetBtn?.addEventListener('click', () => {
     const exam = getExamById(state.examId);
     const summary = getXpSummary();
-    const name = getUserName() || '名無し';
+    const name = getUserName() || t('common.anonymous');
     const text = buildTweetText({
       userName: name,
       examCode: exam.code,
@@ -3058,7 +3060,7 @@ function showInlineMessage(messageEl, text, colorClass) {
 }
 
 function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
-  const name = String(userName || (getLocale() === 'ja' ? '名無し' : 'Anonymous'));
+  const name = String(userName || t('common.anonymous'));
   const code = String(examCode || '');
   const total = Number(totalXp || 0);
   const week = Number(weekXp || 0);
@@ -3071,7 +3073,7 @@ function buildTweetText({ userName, examCode, totalXp, weekXp, title }) {
 // user-uploadable avatars/character icons are intentionally NOT handled here —
 // they require a backend/DB and are 要人間対応 (out of scope for this static client).
 function buildTweetScoreText({ userName, examCode, accuracy, correct, total }) {
-  const name = String(userName || (getLocale() === 'ja' ? '名無し' : 'Anonymous'));
+  const name = String(userName || t('common.anonymous'));
   const code = String(examCode || '');
   const pct = Math.round(Number(accuracy || 0) * 100);
   const tpl = t('tweet.scoreTemplate', {
@@ -3132,8 +3134,7 @@ function hideMilestoneToast({ els }) {
 
 function computeNextAction({ exam, analytics, streakInfo }) {
   if (!analytics || analytics.total === 0) {
-    if (getLocale() === 'ja') return `${exam.code} の学習を始めましょう`;
-    return `Let's start studying for ${exam.code}`;
+    return t('nextAction.start', { code: exam.code });
   }
 
   // Find weakest domain
@@ -3154,34 +3155,28 @@ function computeNextAction({ exam, analytics, streakInfo }) {
   const recentAccuracy = recent10.length > 0 ? recentCorrect / recent10.length : 0;
 
   if (recentAccuracy >= 0.8 && analytics.accuracy >= 0.7) {
-    if (getLocale() === 'ja') return '好調です！新しいドメインに挑戦しましょう';
-    return 'You\'re on a roll! Try a new domain';
+    return t('nextAction.onARoll');
   }
 
   if (weakestDomain && weakestAccuracy < 0.5) {
     const name = localizedTitle(weakestDomain) || weakestDomain.shortName || `Domain ${weakestDomain.id}`;
-    if (getLocale() === 'ja') return `苦手な「${name}」を重点復習しましょう`;
-    return `Focus on your weak area: "${name}"`;
+    return t('nextAction.focusWeak', { name });
   }
 
   if (!streakInfo.hadActivityToday) {
-    if (getLocale() === 'ja') return '今日の学習をスタートしましょう！';
-    return 'Start today\'s study session!';
+    return t('nextAction.startToday');
   }
 
   if (analytics.total < 20) {
-    if (getLocale() === 'ja') return 'まずは20問を目標に挑戦しましょう';
-    return 'Aim for 20 questions to build a foundation';
+    return t('nextAction.aim20');
   }
 
   if (weakestDomain) {
     const name = localizedTitle(weakestDomain) || weakestDomain.shortName || `Domain ${weakestDomain.id}`;
-    if (getLocale() === 'ja') return `「${name}」の理解を深めましょう`;
-    return `Deepen your understanding of "${name}"`;
+    return t('nextAction.deepen', { name });
   }
 
-  if (getLocale() === 'ja') return '全ドメイン横断でチャレンジしましょう';
-  return 'Challenge yourself across all domains';
+  return t('nextAction.allDomains');
 }
 
 function renderLearningStatus({ els, exam, state }) {
@@ -3342,7 +3337,7 @@ function renderXpDashboard({ els, exam, state }) {
     els.xpUserLine.textContent = buildDashboardHeadline({ userName: name });
   }
 
-  if (els.xpTotal) els.xpTotal.textContent = String(summary.totalXp);
+  if (els.xpTotal) els.xpTotal.textContent = formatNumber(summary.totalXp);
   if (els.xpRecentActions) {
     els.xpRecentActions.innerHTML = renderRecentXpActionsHtml(summary.recentActions);
   }
@@ -3427,7 +3422,7 @@ function initDashboardCarousel(els) {
     for (let i = 0; i <= maxIdx; i++) {
       const dot = document.createElement('button');
       dot.className = 'dashboard-carousel-dot' + (i === currentIndex ? ' active' : '');
-      dot.setAttribute('aria-label', `スライド ${i + 1}`);
+      dot.setAttribute('aria-label', t('dashboard.slideLabel', { n: i + 1 }));
       dot.addEventListener('click', () => { currentIndex = i; update(); resetAutoSlide(); });
       dotsContainer.appendChild(dot);
     }
@@ -3772,17 +3767,12 @@ function wireStudyReminder(els) {
 
 function generateDailyHighlight({ exam, analytics, streakInfo, xpSummary }) {
   const highlights = [];
-  const isJa = getLocale() === 'ja';
 
   // Check streak milestones
   if (streakInfo.current >= 7) {
-    highlights.push({ emoji: '🔥', text: isJa
-      ? `${streakInfo.current}日連続学習中！素晴らしい継続力です。この習慣があなたの合格を支えています。`
-      : `${streakInfo.current}-day study streak! Your consistency is paving the way to success.` });
+    highlights.push({ emoji: '🔥', text: t('highlight.streak7', { days: streakInfo.current }) });
   } else if (streakInfo.current >= 3) {
-    highlights.push({ emoji: '💪', text: isJa
-      ? `${streakInfo.current}日連続で学習を続けています。着実に力がついてきています！`
-      : `${streakInfo.current} days in a row! You're steadily building your skills.` });
+    highlights.push({ emoji: '💪', text: t('highlight.streak3', { days: streakInfo.current }) });
   }
 
   // Check if there are good domains
@@ -3802,63 +3792,41 @@ function generateDailyHighlight({ exam, analytics, streakInfo, xpSummary }) {
 
     if (bestDomain && bestAcc >= 0.8) {
       const name = localizedTitle(bestDomain) || bestDomain.shortName || '';
-      if (isJa) {
-        highlights.push({ emoji: '🌟', text: `「${name}」の正答率は${Math.round(bestAcc * 100)}%！しっかり理解できていますね。` });
-      } else {
-        highlights.push({ emoji: '🌟', text: `${Math.round(bestAcc * 100)}% accuracy in "${name}" — great understanding!` });
-      }
+      highlights.push({ emoji: '🌟', text: t('highlight.bestDomain', { name, pct: Math.round(bestAcc * 100) }) });
     }
 
     if (worstDomain && worstAcc < 0.5 && bestDomain) {
       const name = localizedTitle(worstDomain) || worstDomain.shortName || '';
-      if (isJa) {
-        highlights.push({ emoji: '📈', text: `「${name}」を重点復習すれば、合格がぐっと近づきます。あと少しです！` });
-      } else {
-        highlights.push({ emoji: '📈', text: `Focus on "${name}" to improve your pass chances. Almost there!` });
-      }
+      highlights.push({ emoji: '📈', text: t('highlight.worstDomain', { name }) });
     }
 
     // Overall progress
     const accuracy = analytics.accuracy;
     if (accuracy >= 0.8) {
-      highlights.push({ emoji: '🏆', text: isJa
-        ? `全体正答率${Math.round(accuracy * 100)}%！合格圏内の実力です。自信を持ってください！`
-        : `${Math.round(accuracy * 100)}% overall accuracy! You're in the passing zone. Be confident!` });
+      highlights.push({ emoji: '🏆', text: t('highlight.accuracy80', { pct: Math.round(accuracy * 100) }) });
     } else if (accuracy >= 0.6) {
-      highlights.push({ emoji: '✨', text: isJa
-        ? `正答率${Math.round(accuracy * 100)}%まで到達。合格ラインまであと一歩です！`
-        : `You've reached ${Math.round(accuracy * 100)}% accuracy. One more step to the passing line!` });
+      highlights.push({ emoji: '✨', text: t('highlight.accuracy60', { pct: Math.round(accuracy * 100) }) });
     }
 
     // Total questions milestone
     if (analytics.total >= 100) {
-      highlights.push({ emoji: '🎯', text: isJa
-        ? `累計${analytics.total}問に回答！膨大な演習量が本番での自信になります。`
-        : `${analytics.total} questions answered! This practice will boost your exam confidence.` });
+      highlights.push({ emoji: '🎯', text: t('highlight.total100', { count: analytics.total }) });
     } else if (analytics.total >= 50) {
-      highlights.push({ emoji: '📚', text: isJa
-        ? `もう${analytics.total}問もこなしました。着実に知識が積み上がっています。`
-        : `You've completed ${analytics.total} questions. Knowledge is building up steadily.` });
+      highlights.push({ emoji: '📚', text: t('highlight.total50', { count: analytics.total }) });
     }
   }
 
   // XP milestone
   if (xpSummary.totalXp >= 500) {
-    highlights.push({ emoji: '⭐', text: isJa
-      ? `累計${xpSummary.totalXp} XPを獲得！学習者としての成長が数字に表れています。`
-      : `${xpSummary.totalXp} XP earned! Your growth as a learner is showing in the numbers.` });
+    highlights.push({ emoji: '⭐', text: t('highlight.xp500', { xp: xpSummary.totalXp }) });
   }
 
   // Default if nothing to highlight
   if (highlights.length === 0) {
     if (streakInfo.hadActivityToday) {
-      return { emoji: '👍', text: isJa
-        ? '今日もアクセスありがとうございます。一歩ずつ前進していきましょう！'
-        : 'Thanks for showing up today. Keep moving forward, one step at a time!' };
+      return { emoji: '👍', text: t('highlight.activeToday') };
     }
-    return { emoji: '🌅', text: isJa
-      ? '今日の学習で、未来の自分に投資しましょう。小さな一歩が大きな成果につながります。'
-      : 'Invest in your future self with today\'s study. Small steps lead to big results.' };
+    return { emoji: '🌅', text: t('highlight.default') };
   }
 
   // Pick the most relevant one (random from top highlights for variety)
@@ -3986,7 +3954,7 @@ function renderSkillRadarChart({ els, exam, state }) {
     labels,
     datasets: [
       {
-        label: '正答率 (%)',
+        label: t('dashboard.skillRadar.accuracyLabel'),
         data: dataValues,
         backgroundColor: 'rgba(99, 102, 241, 0.15)',
         borderColor: '#6366f1',
@@ -4014,7 +3982,7 @@ function renderSkillRadarChart({ els, exam, state }) {
           label: (ctx) => {
             const idx = ctx.dataIndex;
             const count = totalCounts[idx] || 0;
-            return `正答率: ${ctx.raw}%（${count}問回答）`;
+            return t('dashboard.skillRadar.tooltip', { pct: ctx.raw, count });
           },
         },
       },
@@ -4102,7 +4070,7 @@ function renderRecentXpActionsHtml(actions) {
         // ignore
       }
 
-      const bonusBadge = bonus > 0 ? `<span class="ml-1 text-[11px] font-bold text-orange-700">初回+${bonus}</span>` : '';
+      const bonusBadge = bonus > 0 ? `<span class="ml-1 text-[11px] font-bold text-orange-700">${escapeHtml(t('xpActions.firstBonus', { bonus }))}</span>` : '';
 
       return `
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
@@ -4165,14 +4133,15 @@ function buildDashboardHeadline({ userName }) {
           : t('greeting.evening');
   }
 
-  const you = name ? (getLocale() === 'ja' ? `${name}さん` : name) : (getLocale() === 'ja' ? 'あなた' : 'there');
   let line1;
   if (getLocale() === 'ja') {
+    const you = name ? `${name}さん` : 'あなた';
     line1 = `${greet} ${you}`.trim();
   } else {
-    // English: "Good morning, kenta!" - strip trailing period from greeting and combine
-    const greetBase = greet.replace(/\.\s*$/, '');
-    line1 = `${greetBase}, ${you}!`;
+    // e.g. "Good morning, kenta!" - strip the trailing period from the greeting
+    // and combine through the locale's template.
+    const greetBase = greet.replace(/[.。!！]\s*$/, '');
+    line1 = t('greeting.withName', { greeting: greetBase, name: name || t('greeting.you') });
   }
   const line2 = buildDashboardOneLiner({ userName: name });
   return [line1, line2].filter(Boolean).join('\n').trim();
@@ -4185,7 +4154,7 @@ function buildDashboardOneLiner({ userName, title } = {}) {
   const daySeed = now.toISOString().slice(0, 10);
   const baseSeed = `${daySeed}|${name || 'anon'}|${String(title || '')}`;
 
-  if (getLocale() === 'en') {
+  if (getLocale() !== 'ja') {
     // Use localized motivations from JSON
     const motivations = [];
     for (let i = 0; i < 10; i++) {
@@ -4562,7 +4531,7 @@ function renderContent({ els, exam, state }) {
           <div>
             <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">${t('roadmap.taskStatement', { id: escapeHtml(task.id) })}</div>
             <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(task))}</h3>
-            ${getLocale() === 'ja' ? `<p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>` : ''}
+            ${showOfficialEnglishTitle(task) ? `<p class="text-sm text-gray-500 mt-1">${escapeHtml(task.title)}</p>` : ''}
             ${descriptionHtml}
           </div>
           <div class="flex justify-end">
@@ -4797,7 +4766,7 @@ function renderStepCard({ els, step, stepIndex, state, term, exam }) {
       <div class="flex-1 min-w-0">
         <div class="text-xs font-bold text-gray-500 uppercase tracking-wide mb-1">Step ${escapeHtml(stepIndex)}</div>
         <h3 class="text-lg font-bold text-gray-900">${escapeHtml(localizedTitle(step))}</h3>
-        ${getLocale() === 'ja' ? `<p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>` : ''}
+        ${showOfficialEnglishTitle(step) ? `<p class="text-sm text-gray-500 mt-0.5">${escapeHtml(step.title)}</p>` : ''}
       </div>
     </div>
     ${stepDescHtml}
@@ -4929,11 +4898,10 @@ function findExamTask(exam, taskId) {
 // to { title, url, note } for the prompt and explanation (#225 Step B).
 function pickQuizResources(task, occurrence) {
   if (!task) return [];
-  const en = getLocale() === 'en';
   return selectTaskResources(task, occurrence).map((item) => ({
-    title: en ? (item.titleEn || item.title) : (item.title || item.titleEn),
+    title: localizedResourceTitle(item),
     url: getLocalizedUrl(item.url, item.urlEn),
-    note: en ? (item.noteEn || item.note || '') : (item.note || item.noteEn || ''),
+    note: localizedResourceNote(item),
   }));
 }
 
@@ -4963,7 +4931,7 @@ async function callModelForPipeline({ els, systemPrompt, userPrompt, kind }) {
   if (kind && kind !== 'writer') return callAi({ userPrompt, systemPrompt, onRequireApiKey });
   try {
     const response = await callAiStream({ userPrompt, systemPrompt, onRequireApiKey, onTextDelta: () => {} });
-    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    if (isStreamingUnsupported(response)) {
       return callAi({ userPrompt, systemPrompt, onRequireApiKey });
     }
     return response;
@@ -5098,10 +5066,10 @@ function renderBlogCard({ blog, term, context }) {
         </a>
         <div class="flex items-center gap-2">
           <div data-vote-group class="flex items-center gap-1">
-            <button type="button" data-action="vote" data-vote="good" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${goodClass}" aria-pressed="${goodSelected ? 'true' : 'false'}" title="${getLocale() === 'ja' ? '役に立った' : 'Helpful'}">
+            <button type="button" data-action="vote" data-vote="good" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${goodClass}" aria-pressed="${goodSelected ? 'true' : 'false'}" title="${escapeHtml(t('common.helpful'))}">
               <i class="fa-regular fa-thumbs-up"></i>
             </button>
-            <button type="button" data-action="vote" data-vote="bad" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${badClass}" aria-pressed="${badSelected ? 'true' : 'false'}" title="${getLocale() === 'ja' ? '微妙 / 改善してほしい' : 'Not helpful'}">
+            <button type="button" data-action="vote" data-vote="bad" data-vote-target-type="resource" data-vote-target-id="${escapeHtml(voteTargetId)}" data-exam-id="${escapeHtml(context?.examId || '')}" data-domain-id="${escapeHtml(context?.domainId || '')}" data-task-id="${escapeHtml(context?.taskId || '')}" data-task-title="${escapeHtml(context?.taskTitle || '')}" data-resource-section="${escapeHtml(context?.resourceSection || '')}" data-resource-title="${titleSafe}" data-resource-url="${urlSafe}" class="px-2 py-1 border rounded text-xs font-medium transition-colors flex items-center gap-1 ${badClass}" aria-pressed="${badSelected ? 'true' : 'false'}" title="${escapeHtml(t('common.notHelpful'))}">
               <i class="fa-regular fa-thumbs-down"></i>
             </button>
           </div>
@@ -5698,8 +5666,11 @@ function getExamKeywordCatalog() {
  * @returns {string}
  */
 function localizedRecordText(plain, jp) {
-  if (getLocale() === 'ja') return jp || plain || '';
-  return plain || jp || '';
+  return pickLocalizedText({ ja: jp, en: plain });
+}
+
+function pickLocalizedText(pair) {
+  return pickLocalized(pair) || '';
 }
 
 /** Build the "examCode › section [› task]" breadcrumb for a search record. */
@@ -5717,9 +5688,9 @@ function buildResourceBreadcrumb(record) {
 
 /** Render a single search-hit card in the existing resource-card style. */
 function renderResourceSearchCard(record) {
-  const title = getLocale() === 'en' && record.titleEn ? record.titleEn : record.title;
-  const note = getLocale() === 'en' && record.noteEn ? record.noteEn : record.note;
-  const url = getLocale() === 'en' && record.urlEn ? record.urlEn : record.url;
+  const title = localizedResourceTitle(record);
+  const note = localizedResourceNote(record);
+  const url = getLocalizedUrl(record.url, record.urlEn);
 
   const titleSafe = escapeHtml(title);
   const urlSafe = escapeHtml(url);
@@ -5728,7 +5699,7 @@ function renderResourceSearchCard(record) {
     ? `<i class="${escapeHtml(record.iconClass)} ${escapeHtml(record.iconColorClass || '')}"></i>`
     : '';
   const recommendBadge = record.recommend
-    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"><i class="fas fa-star mr-1"></i>${escapeHtml(getLocale() === 'ja' ? 'おすすめ' : 'Recommended')}</span>`
+    ? `<span class="ml-2 inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300"><i class="fas fa-star mr-1"></i>${escapeHtml(t('search.recommendBadge'))}</span>`
     : '';
   const noteHtml = note
     ? `<div class="text-xs text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1"><i class="fas fa-info-circle text-gray-400"></i><span>${escapeHtml(note)}</span></div>`
@@ -5986,12 +5957,12 @@ function wireResourceSearchHandlers({ els, exams }) {
     // being evicted past the cap (#209 v1 review item 4).
     const scoringQuery = buildAugmentedScoringQuery(augmentedTerms);
     const grounding = selectAiCandidates(candidates, scoringQuery, AI_CANDIDATE_CAP).map((r, i) => {
-      const title = getLocale() === 'en' && r.titleEn ? r.titleEn : r.title;
-      const url = getLocale() === 'en' && r.urlEn ? r.urlEn : r.url;
+      const title = localizedResourceTitle(r);
+      const url = getLocalizedUrl(r.url, r.urlEn);
       return `${i + 1}. ${title} | ${buildResourceBreadcrumb(r)} | ${url}`;
     }).join('\n');
 
-    const localeName = getLocale() === 'ja' ? 'Japanese' : 'English';
+    const localeName = getLocale() === 'ja' ? 'Japanese' : promptLanguageName();
     const trusted = (AI_RELIABILITY_CONFIG?.trustedSourceDomains || []).join(', ');
     const systemPrompt = [
       'You help learners find the most relevant AWS certification study resources.',
@@ -6012,7 +5983,7 @@ function wireResourceSearchHandlers({ els, exams }) {
         onRequireApiKey: () => { setStatus(t('search.aiNeedsKey')); },
         onTextDelta: () => {},
       });
-      if (String(answer || '').includes('ストリーミングに対応していない環境')) {
+      if (isStreamingUnsupported(answer)) {
         answer = await callAi({
           userPrompt,
           systemPrompt,
@@ -6320,9 +6291,9 @@ async function explainTerm({ els, exam, term, taskContext }) {
   }
 
   const providerLabel = getActiveProviderLabel();
-  showAiModal(els, `${getLocale() === 'ja' ? '用語解説' : 'Explain'}: ${term}`, true);
+  showAiModal(els, `${t('ai.explainTitle')}: ${term}`, true);
 
-  if (getLocale() === 'en') {
+  if (!usesJapanesePrompt()) {
     const systemPrompt =
       `You are explaining an AWS/technical term to a beginner studying for ${exam.code} (${exam.shortLabel}). ` +
       `Do not just give a dictionary definition — use concrete examples and analogies so the concept truly clicks for a newcomer. ` +
@@ -6332,7 +6303,8 @@ async function explainTerm({ els, exam, term, taskContext }) {
       `[Reliability rules]\n` +
       `- Base your explanation only on information found in AWS official documentation.\n` +
       `- Do not include speculation or uncertain information. If you are unsure, say "Please refer to the official documentation".\n` +
-      `- End your explanation with a "📚 References" section listing 1–3 relevant official AWS documentation URLs.`;
+      `- End your explanation with a "📚 References" section listing 1–3 relevant official AWS documentation URLs.` +
+      outputLanguageDirective();
 
     const contextPrompt = taskContext
       ? `\n\n[Task context]\n${taskContext}`
@@ -6348,7 +6320,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
     });
 
     // Fallback to non-streaming when the runtime doesn't support streams/SSE.
-    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    if (isStreamingUnsupported(response)) {
       response = await callAi({
         userPrompt,
         systemPrompt: systemPrompt + contextPrompt,
@@ -6386,7 +6358,7 @@ async function explainTerm({ els, exam, term, taskContext }) {
   });
 
   // Fallback to non-streaming when the runtime doesn't support streams/SSE.
-  if (String(response || '').includes('ストリーミングに対応していない環境')) {
+  if (isStreamingUnsupported(response)) {
     response = await callAi({
       userPrompt,
       systemPrompt: systemPrompt + contextPrompt,
@@ -6407,7 +6379,7 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
   const config = session ? QUIZ_MODE_CONFIG[session.mode] || QUIZ_MODE_CONFIG.single : null;
   const modalTitle = config && session && session.questionCount > 1
     ? `${localizedModeLabel(config)}: ${taskTitle}`
-    : `${getLocale() === 'ja' ? '模擬問題' : 'Quiz'}: ${taskTitle}`;
+    : `${t('quiz.quizTitlePrefix')}: ${taskTitle}`;
 
   showAiModal(els, modalTitle, true);
 
@@ -6444,7 +6416,7 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
       },
     });
 
-    if (String(response || '').includes('ストリーミングに対応していない環境')) {
+    if (isStreamingUnsupported(response)) {
       response = await callAi({
         userPrompt,
         systemPrompt,
@@ -6452,7 +6424,7 @@ async function generateQuiz({ els, exam, taskTitle, taskId, taskContext, session
       });
     }
   } catch (err) {
-    updateAiModalContent(els, `エラーが発生しました: ${err.message || err}`);
+    updateAiModalContent(els, t('errors.generic', { msg: err.message || err }));
     return false;
   }
 
@@ -6529,7 +6501,7 @@ function showQuizSummary({ els, session }) {
   if (els.quizSumCorrect) els.quizSumCorrect.textContent = String(summary.correct);
   if (els.quizSumTotal) els.quizSumTotal.textContent = String(summary.total);
   if (els.quizSumAccuracy) els.quizSumAccuracy.textContent = `${Math.round(summary.accuracy * 100)}%`;
-  if (els.quizSumXp) els.quizSumXp.textContent = String(summary.totalXp);
+  if (els.quizSumXp) els.quizSumXp.textContent = formatNumber(summary.totalXp);
   if (els.quizSumCombo) els.quizSumCombo.textContent = String(summary.maxCombo);
 
   // Time display
@@ -6554,7 +6526,7 @@ function showQuizSummary({ els, session }) {
         const userAnswer = session.answers[i];
         const isCorrect = userAnswer === q.correctIndex;
         const icon = userAnswer === -1 ? '⏭️' : isCorrect ? '✅' : '❌';
-        const userLetter = userAnswer >= 0 ? indexToLetter(userAnswer) : '未回答';
+        const userLetter = userAnswer >= 0 ? indexToLetter(userAnswer) : t('quizHistory.unanswered');
         const correctLetter = indexToLetter(q.correctIndex);
         return `
           <div class="rounded-lg border ${isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'} p-3">
@@ -6566,8 +6538,8 @@ function showQuizSummary({ els, session }) {
               </div>
             </div>
             <div class="text-xs text-gray-600 ml-6 mb-1">
-              あなたの回答: <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${userLetter}</span>
-              ${!isCorrect ? ` / 正解: <span class="font-bold text-green-700">${correctLetter}</span>` : ''}
+              ${escapeHtml(t('quizHistory.yourAnswer'))} <span class="font-bold ${isCorrect ? 'text-green-700' : 'text-red-700'}">${escapeHtml(userLetter)}</span>
+              ${!isCorrect ? ` / ${escapeHtml(t('quizHistory.correctAnswer'))} <span class="font-bold text-green-700">${correctLetter}</span>` : ''}
             </div>
             ${q.explanation ? `<div class="text-xs text-gray-700 ml-6 mt-2 p-2 bg-white bg-opacity-60 rounded">${escapeHtml(q.explanation)}</div>` : ''}
           </div>
@@ -6672,7 +6644,7 @@ function renderInteractiveQuiz({ els, quiz }) {
 
   // Set copy text
   if (els.modalContent?.dataset) {
-    els.modalContent.dataset.aiCopyText = `${quiz.question}\n\n${quiz.choices.join('\n')}\n\n正解: ${indexToLetter(quiz.correctIndex)}\n${quiz.explanation}`;
+    els.modalContent.dataset.aiCopyText = `${quiz.question}\n\n${quiz.choices.join('\n')}\n\n${t('quizHistory.correctAnswer')} ${indexToLetter(quiz.correctIndex)}\n${quiz.explanation}`;
   }
   setAiCopyButtonEnabled(els, true);
 }
@@ -6695,14 +6667,18 @@ function isSuccessfulAiResponse(response) {
 
 // ─── Quiz History Review ────────────────────────────────────
 
-const REVIEW_MODE_LABELS = { single: t('quizHistory.reviewModeLabels.single'), quick5: t('quizHistory.reviewModeLabels.quick5'), speed: t('quizHistory.reviewModeLabels.speed'), mock: t('quizHistory.reviewModeLabels.mock') };
+// Resolved at call time (not module load) so labels follow the current locale.
+function reviewModeLabel(modeKey) {
+  if (!['single', 'quick5', 'speed', 'mock'].includes(modeKey)) return modeKey || t('quizHistory.reviewModeLabels.single');
+  return t(`quizHistory.reviewModeLabels.${modeKey}`);
+}
 const REVIEW_MODE_ICONS = { single: '📝', quick5: '⚡', speed: '⏱️', mock: '📋' };
 
 function formatElapsedMs(ms) {
   if (ms == null) return '';
   const sec = Math.round(ms / 1000);
-  if (sec < 60) return `${sec}秒`;
-  return `${Math.floor(sec / 60)}分${sec % 60}秒`;
+  if (sec < 60) return t('quizHistory.elapsedSec', { s: sec });
+  return t('quizHistory.elapsedMinSec', { m: Math.floor(sec / 60), s: sec % 60 });
 }
 
 function groupHistoryBySessions(history) {
@@ -6724,7 +6700,7 @@ function groupHistoryBySessions(history) {
       sessionId,
       examId: first.examId,
       mode: modeKey,
-      modeLabel: REVIEW_MODE_LABELS[modeKey] || modeKey || '模擬問題',
+      modeLabel: reviewModeLabel(modeKey),
       modeIcon: REVIEW_MODE_ICONS[modeKey] || '📝',
       date: first.answeredAt,
       total: entries.length,
@@ -6739,7 +6715,7 @@ function groupHistoryBySessions(history) {
 function renderQuizHistoryModal({ els, examId, exams, getExamById }) {
   // Render tabs
   if (els.quizHistoryTabs) {
-    const allTab = `<button data-exam-tab="" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${!examId ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">すべて</button>`;
+    const allTab = `<button data-exam-tab="" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${!examId ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">${escapeHtml(t('common.all'))}</button>`;
     const examTabs = exams.map(e =>
       `<button data-exam-tab="${escapeHtml(e.id)}" class="px-3 py-1.5 rounded-full text-xs font-bold transition ${e.id === examId ? 'bg-indigo-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'}">${escapeHtml(e.code)}</button>`
     ).join('');
@@ -6788,9 +6764,9 @@ function renderQuizHistoryContent({ els, exams, getExamById }) {
     if (els.quizHistoryActions) els.quizHistoryActions.innerHTML = '';
     if (els.quizHistoryBreadcrumb) {
       els.quizHistoryBreadcrumb.classList.remove('hidden');
-      const dateStr = session.date ? new Date(session.date).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      const dateStr = session.date ? formatDate(session.date, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
       els.quizHistoryBreadcrumb.innerHTML = `
-        <button data-action="back-to-sessions" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"><i class="fas fa-arrow-left text-xs"></i> 戻る</button>
+        <button data-action="back-to-sessions" class="text-indigo-600 hover:text-indigo-800 font-bold flex items-center gap-1"><i class="fas fa-arrow-left text-xs"></i> ${escapeHtml(t('common.back'))}</button>
         <span class="text-gray-400">/</span>
         <span class="text-gray-700 font-medium">${session.modeIcon} ${escapeHtml(session.modeLabel)} (${escapeHtml(dateStr)})</span>
       `;
@@ -6799,7 +6775,7 @@ function renderQuizHistoryContent({ els, exams, getExamById }) {
     els.quizHistoryList.innerHTML = session.entries.map((h, idx) => {
       const isCorrect = h.isCorrect;
       const icon = isCorrect ? '✅' : '❌';
-      const userLetter = h.userAnswer != null ? indexToLetter(h.userAnswer) : '未回答';
+      const userLetter = h.userAnswer != null ? indexToLetter(h.userAnswer) : t('quizHistory.unanswered');
       const correctLetter = h.correctIndex != null ? indexToLetter(h.correctIndex) : '?';
       const elapsed = formatElapsedMs(h.elapsedMs);
 
@@ -6818,8 +6794,8 @@ function renderQuizHistoryContent({ els, exams, getExamById }) {
 
       // Bottom summary line with color
       const answerSummary = `<div class="text-xs mt-2 px-2 py-1.5 rounded ${isCorrect ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}">` +
-        `あなたの回答: <span class="font-bold">${escapeHtml(userLetter)}</span>` +
-        ` / 正解: <span class="font-bold">${escapeHtml(correctLetter)}</span>` +
+        `${escapeHtml(t('quizHistory.yourAnswer'))} <span class="font-bold">${escapeHtml(userLetter)}</span>` +
+        ` / ${escapeHtml(t('quizHistory.correctAnswer'))} <span class="font-bold">${escapeHtml(correctLetter)}</span>` +
         (elapsed ? ` / <i class="fas fa-stopwatch text-[10px]"></i> ${escapeHtml(elapsed)}` : '') +
         (h.xpEarned ? ` / +${h.xpEarned} XP` : '') +
         `</div>`;
@@ -6850,12 +6826,12 @@ function renderQuizHistoryContent({ els, exams, getExamById }) {
     const wrongCount = reviewable.filter(h => !h.isCorrect).length;
     if (els.quizHistoryActions) {
       els.quizHistoryActions.innerHTML = wrongCount > 0
-        ? `<button data-action="retry-wrong" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5"><i class="fas fa-redo"></i> 間違えた問題を解き直す（${wrongCount}問）</button>`
+        ? `<button data-action="retry-wrong" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 border border-red-200 rounded-lg text-xs font-bold transition flex items-center gap-1.5"><i class="fas fa-redo"></i> ${escapeHtml(t('quizHistory.retryWrong', { count: wrongCount }))}</button>`
         : '';
     }
 
     els.quizHistoryList.innerHTML = sessions.map(s => {
-      const dateStr = s.date ? new Date(s.date).toLocaleString('ja-JP', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
+      const dateStr = s.date ? formatDate(s.date, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '';
       let examLabel = '';
       try { examLabel = getExamById(s.examId).code; } catch { examLabel = s.examId; }
 
@@ -6875,7 +6851,7 @@ function renderQuizHistoryContent({ els, exams, getExamById }) {
             <div class="flex items-center gap-3 flex-shrink-0">
               <div class="text-right">
                 <div class="text-sm font-bold ${accuracyColor}">${s.accuracy}%</div>
-                <div class="text-[10px] text-gray-400">${s.correct}/${s.total} 正解</div>
+                <div class="text-[10px] text-gray-400">${escapeHtml(t('quizHistory.sessionScore', { correct: s.correct, total: s.total }))}</div>
               </div>
               <i class="fas fa-chevron-right text-gray-300 group-hover:text-indigo-400 transition text-xs"></i>
             </div>

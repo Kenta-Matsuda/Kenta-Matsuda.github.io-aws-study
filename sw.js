@@ -13,7 +13,7 @@
  *  - CACHE_VERSION を上げると activate で旧キャッシュが削除され、更新が反映される。
  */
 
-const CACHE_VERSION = 'v12';
+const CACHE_VERSION = 'v13';
 const CACHE_NAME = `aws-study-nav-${CACHE_VERSION}`;
 
 // スコープ (登録元ディレクトリ) を基準にした相対パス。
@@ -47,6 +47,7 @@ const APP_SHELL = [
   './js/geminiBatch.js',
   './js/i18n.js',
   './js/learningEvents.js',
+  './js/localeContent.js',
   './js/localeRegistry.js',
   './js/milestones.js',
   './js/missions.js',
@@ -59,7 +60,19 @@ const APP_SHELL = [
   './js/votes.js',
   './js/locales/en.json',
   './js/locales/ja.json',
+  './js/locales/ko.json',
+  './js/locales/zh-CN.json',
+  './js/locales/zh-TW.json',
+  './js/locales/fr.json',
+  './js/locales/de.json',
+  './js/locales/es.json',
+  './js/locales/it.json',
+  './js/locales/pt-BR.json',
+  './js/locales/id.json',
   './js/locales/urls.json',
+  // Content-overlay manifest (#197). The overlay files themselves are cached on
+  // first use by stale-while-revalidate (only the active locale's are fetched).
+  './js/data/i18n/index.json',
   './assets/vendor/marked.min.js',
   './assets/vendor/purify.min.js',
   './assets/icon.svg',

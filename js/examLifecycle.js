@@ -77,7 +77,8 @@ export function getExamLifecycleNotice(examId, { now = new Date(), locale = 'ja'
   const phase = getActiveLifecyclePhase(entry, now);
   if (!phase) return null;
 
-  const isEn = locale === 'en';
+  // ja は日本語、それ以外（en と AI 翻訳の 9 言語）は英語の文言・出典を使う。
+  const isEn = locale !== 'ja';
   const sources = (Array.isArray(entry.sources) ? entry.sources : [])
     .map((source) => ({
       title: pickLocalized(source, 'title', 'titleEn', isEn),

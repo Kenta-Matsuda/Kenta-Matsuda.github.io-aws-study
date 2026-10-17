@@ -30,6 +30,14 @@
  */
 
 import { getExamLevel } from '../quiz.js';
+import { localizedField, localizedValue } from '../localeContent.js';
+import { localizeAwsDocsUrl } from '../localeRegistry.js';
+
+/** 解説末尾の出典ラベル（ロケール別。未定義のロケールは英語）。 */
+const REFERENCE_LABEL = Object.freeze({
+  ja: '出典', en: 'Reference', ko: '출처', 'zh-CN': '来源', 'zh-TW': '來源', fr: 'Référence',
+  de: 'Quelle', es: 'Referencia', it: 'Riferimento', 'pt-BR': 'Referência', id: 'Referensi',
+});
 
 const D = 'https://docs.aws.amazon.com';
 
@@ -2988,16 +2996,18 @@ function mulberry32(seed) {
  * en フィールドが欠落している場合は ja フィールドにフォールバックする。
  * 出典 URL は解説末尾に追記して、buildMockQuizSystemPrompt の出典可視化と整合させる。
  * @param {object} q
- * @param {'ja'|'en'} locale
+ * @param {string} locale
  * @returns {{ question: string, choices: string[], correctIndex: number, explanation: string }}
  */
 function localizeQuestion(q, locale) {
-  const useEn = locale === 'en';
-  const baseExplanation = (useEn && q.explanationEn) ? q.explanationEn : q.explanation;
-  const ref = q.reference ? `\n\n${useEn ? 'Reference' : '出典'}: ${q.reference}` : '';
+  // ja: 日本語 / en: 英語 / その他: コンテンツ・オーバーレイ翻訳 → 英語（js/localeContent.js）
+  const baseExplanation = localizedField(q, 'explanation', locale);
+  // ja / en は従来どおりの URL、その他のロケールは AWS ドキュメントのロケールパスへ。
+  const refUrl = locale === 'ja' || locale === 'en' ? q.reference : localizeAwsDocsUrl(q.reference, locale);
+  const ref = q.reference ? `\n\n${localizedValue(REFERENCE_LABEL, locale)}: ${refUrl}` : '';
   return {
-    question: (useEn && q.questionEn) ? q.questionEn : q.question,
-    choices: (useEn && Array.isArray(q.choicesEn)) ? q.choicesEn.slice() : q.choices.slice(),
+    question: localizedField(q, 'question', locale),
+    choices: (localizedField(q, 'choices', locale) || []).slice(),
     correctIndex: q.correctIndex,
     explanation: `${baseExplanation}${ref}`,
   };
@@ -3021,11 +3031,11 @@ export function getPoolForLevel(level) {
  *
  * @param {string} examId 対象の試験ID（例: 'clf-c02', 'saa-c03'）
  * @param {number} [count=65] 返す問題数（プールサイズ上限でクランプ）
- * @param {{ locale?: 'ja'|'en', seed?: string|number }} [opts]
+ * @param {{ locale?: string, seed?: string|number }} [opts]
  * @returns {Array<{ question: string, choices: string[], correctIndex: number, explanation: string }>}
  */
 export function getOfflineExamQuestions(examId, count = 65, opts = {}) {
-  const locale = opts.locale === 'en' ? 'en' : 'ja';
+  const locale = opts.locale || 'ja';
   const level = getExamLevel(examId);
   const pool = getPoolForLevel(level);
   const total = pool.length;

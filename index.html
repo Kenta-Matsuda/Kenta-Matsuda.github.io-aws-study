@@ -1298,7 +1298,7 @@
     <!-- PWA: install prompt (hidden until beforeinstallprompt fires) -->
     <button id="pwaInstallBtn" type="button" class="hidden fixed z-50 items-center gap-2 rounded-full bg-orange-500 px-4 py-2 text-sm font-semibold text-white shadow-lg hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-300 flex" aria-label="ホーム画面に追加">
         <i class="fas fa-download"></i>
-        <span>アプリを追加</span>
+        <span data-i18n="pwa.install">アプリを追加</span>
     </button>
 
     <!-- SEO: Static content for crawlers and AI indexers that may not fully execute JavaScript -->
@@ -1401,6 +1401,20 @@
     </aside>
     <!-- Sidebar backdrop -->
     <div id="sidebarBackdrop" class="fixed inset-0 bg-black bg-opacity-50 z-30 hidden"></div>
+
+    <!-- Machine-translation notice (#197): shown for LLM-translated locales only -->
+    <div id="mtNotice" class="hidden container mx-auto px-4 pt-3" role="note">
+        <div class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+            <i class="fas fa-language mt-0.5" aria-hidden="true"></i>
+            <p class="flex-1 min-w-0">
+                <span data-i18n="i18nNotice.machineTranslated">This language was translated by AI and may contain mistakes.</span>
+                <button id="mtNoticeFeedbackBtn" type="button" class="ml-1 underline font-semibold hover:text-amber-900" data-i18n="i18nNotice.report">Report a translation issue</button>
+            </p>
+            <button id="mtNoticeCloseBtn" type="button" class="text-amber-500 hover:text-amber-700 px-1" aria-label="Close" data-i18n-aria="common.close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    </div>
 
     <!-- Main Content Grid -->
     <main class="flex-grow container mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -1917,7 +1931,7 @@
                         <!-- Schedule Review Button -->
                         <div id="quizSumScheduleReview" class="hidden mt-4">
                             <button id="scheduleReviewBtn" type="button" class="w-full flex items-center justify-center gap-2 px-4 py-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-lg text-sm font-bold transition-colors">
-                                <i class="fas fa-calendar-plus"></i> 間違えた問題を明日復習する
+                                <i class="fas fa-calendar-plus"></i> <span data-i18n="quiz.scheduleReview">間違えた問題を明日復習する</span>
                             </button>
                             <p id="scheduleReviewMsg" class="hidden text-xs text-emerald-600 mt-2 text-center"></p>
                         </div>
@@ -1970,14 +1984,13 @@
                 <!-- Language Setting -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.language">Language</label>
-                    <!-- Buttons are re-rendered from js/localeRegistry.js at runtime (#197); the static pair is the pre-JS fallback. -->
-                    <div id="langSwitch" class="flex rounded-lg border border-gray-200 overflow-hidden">
-                        <button type="button" data-lang="ja" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center border-r border-gray-200">
-                            日本語
-                        </button>
-                        <button type="button" data-lang="en" class="flex-1 px-4 py-2 text-sm font-medium transition-colors text-center">
-                            English
-                        </button>
+                    <!-- Options are re-rendered from js/localeRegistry.js at runtime (#197); the static pair is the pre-JS fallback. -->
+                    <div id="langSwitch">
+                        <select id="langSelect" class="w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-400" aria-label="Language" data-i18n-aria="settings.language">
+                            <option value="ja" lang="ja">日本語</option>
+                            <option value="en" lang="en">English</option>
+                        </select>
+                        <p id="langMachineNote" class="hidden mt-2 text-xs text-gray-500" data-i18n="i18nNotice.settingsNote">Translations other than Japanese and English are machine-generated.</p>
                     </div>
                 </div>
 
@@ -2039,7 +2052,7 @@
                     </label>
                     <div class="flex gap-2">
                         <input class="shadow appearance-none border rounded flex-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="apiKeyInput" type="password" placeholder="AIzaSy...">
-                        <button id="apiKeyClearBtn" type="button" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors border border-red-200" title="削除">
+                        <button id="apiKeyClearBtn" type="button" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors border border-red-200" title="削除" data-i18n-title="common.delete">
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -2055,7 +2068,7 @@
                     </label>
                     <div class="flex gap-2">
                         <input class="shadow appearance-none border rounded flex-1 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" id="openaiKeyInput" type="password" placeholder="sk-...">
-                        <button id="openaiKeyClearBtn" type="button" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors border border-red-200" title="削除">
+                        <button id="openaiKeyClearBtn" type="button" class="px-3 py-2 text-red-500 hover:bg-red-50 rounded-lg text-sm font-medium transition-colors border border-red-200" title="削除" data-i18n-title="common.delete">
                             <i class="fas fa-trash-can"></i>
                         </button>
                     </div>
@@ -2356,7 +2369,7 @@
                         <button id="feedbackNudgeDismissBtn" type="button" class="text-xs font-medium text-gray-500 hover:text-gray-700 px-2 py-1.5" data-i18n="feedbackNudge.dismiss">Not now</button>
                     </div>
                 </div>
-                <button id="feedbackNudgeCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
+                <button id="feedbackNudgeCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる" data-i18n-aria="common.close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -2407,7 +2420,7 @@
                     <div class="text-sm font-bold text-gray-900" data-i18n="examDate.passToastTitle">Congratulations!</div>
                     <div id="examPassToastText" class="text-sm text-gray-700 mt-1">-</div>
                 </div>
-                <button id="examPassToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
+                <button id="examPassToastCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる" data-i18n-aria="common.close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -2431,7 +2444,7 @@
                         Start Quiz
                     </button>
                 </div>
-                <button id="batchProgressCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる">
+                <button id="batchProgressCloseBtn" type="button" class="text-gray-400 hover:text-gray-600" aria-label="閉じる" data-i18n-aria="common.close">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
@@ -2447,7 +2460,7 @@
                     <span id="chatExamBadge" class="text-[10px] bg-white/20 px-2 py-0.5 rounded-full"></span>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button id="chatClearBtn" type="button" class="text-white/70 hover:text-white" title="会話をクリア"><i class="fas fa-trash-alt text-xs"></i></button>
+                    <button id="chatClearBtn" type="button" class="text-white/70 hover:text-white" title="会話をクリア" data-i18n-title="chat.clear"><i class="fas fa-trash-alt text-xs"></i></button>
                     <button id="chatCloseBtn" type="button" class="text-white/70 hover:text-white"><i class="fas fa-times"></i></button>
                 </div>
             </div>
@@ -2487,7 +2500,7 @@
                 if (err) {
                     const msg = err && (err.stack || err.message || String(err));
                     el.innerHTML = `<i class="fas fa-triangle-exclamation mr-1"></i>
-                        画面データの読み込みに失敗しました。ページを再読み込みしてください。<br>
+                        画面データの読み込みに失敗しました。ページを再読み込みしてください。 / Failed to load the page data. Please reload the page.<br>
                         <span class="font-mono">${String(msg).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')}</span>`;
                 }
                 el.classList.remove('hidden');

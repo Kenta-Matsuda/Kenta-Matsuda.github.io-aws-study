@@ -21,7 +21,9 @@
     "exportMarkdown": "Markdownで書き出し",
     "exportCsv": "CSVで書き出し",
     "send": "送信",
-    "loading": "読み込み中..."
+    "loading": "読み込み中...",
+    "anonymous": "名無し",
+    "delete": "削除"
   },
   "studyPack": {
     "resourceLinksMd": "リソースリンク集（Markdown）",
@@ -105,7 +107,9 @@
     },
     "skillRadar": {
       "title": "ドメイン別スキル",
-      "placeholder": "クイズに回答するとスキルチャートが表示されます"
+      "placeholder": "クイズに回答するとスキルチャートが表示されます",
+      "accuracyLabel": "正答率 (%)",
+      "tooltip": "正答率: {{pct}}%（{{count}}問回答）"
     },
     "missions": {
       "title": "ミッション",
@@ -135,7 +139,8 @@
         "past": "受験予定日を過ぎました。結果を登録するか、新しい日程を設定しましょう。"
       }
     },
-    "bootError": "画面データの読み込みに失敗しました。ページを再読み込みしてください。ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。"
+    "bootError": "画面データの読み込みに失敗しました。ページを再読み込みしてください。ローカルで直接開いている場合は、簡易サーバー経由で開く必要があります。",
+    "slideLabel": "スライド {{n}}"
   },
   "quiz": {
     "modeSelect": "クイズモード選択",
@@ -184,7 +189,34 @@
     "generateBtn": "模擬問題を作成",
     "explainBtn": "解説",
     "smartReview": "スマート復習",
-    "smartReviewDesc": "苦手問題・過去の間違いから自動出題。効率的に弱点を克服！"
+    "smartReviewDesc": "苦手問題・過去の間違いから自動出題。効率的に弱点を克服！",
+    "smartReviewEmpty": "復習対象の問題がまだありません。まずはクイズに挑戦しましょう！",
+    "smartReviewTitle": "スマート復習",
+    "smartReviewModalTitle": "スマート復習（{{count}}問）",
+    "allDomainsTaskTitle": "{{code}} 全ドメイン横断",
+    "crossDomainQuizLabel": "{{code}}（{{label}}）全ドメイン横断クイズ",
+    "smartReviewCount": "📊 {{count}}問の復習対象あり",
+    "smartReviewNone": "📊 復習対象なし（まずクイズに挑戦！）",
+    "offlineExamTitle": "本番形式（APIキー不要）",
+    "offlineExamModalTitle": "本番形式（APIキー不要）: {{code}}（{{count}}問）",
+    "pregenProgress": "{{done}} / {{total}} 問",
+    "pipelinePlanning": "出題計画を作成中…",
+    "pipelineJudging": "査読中… {{done}} / {{total}} 問",
+    "pipelineFixing": "修正中… {{done}} / {{total}} 問",
+    "readyNotificationTitle": "問題の準備ができました！",
+    "readyNotificationBody": "{{count}}問のクイズを開始できます",
+    "dailyChallengeTitle": "デイリーチャレンジ",
+    "dailyChallengeModalTitle": "デイリーチャレンジ（{{count}}問）",
+    "retryIncorrectTitle": "間違えた問題の解き直し",
+    "retryIncorrectModalTitle": "間違えた問題の解き直し（{{count}}問）",
+    "reviewScheduled": "復習スケジュールに登録しました",
+    "reviewScheduledCount": "{{count}}問を明日の復習に登録しました",
+    "quizTitlePrefix": "模擬問題",
+    "readyNotificationPartial": "{{total}}問中{{count}}問のクイズを開始できます",
+    "viewResults": "結果を見る",
+    "oneMore": "もう1問",
+    "recommendedResources": "参考リソース",
+    "scheduleReview": "間違えた問題を明日復習する"
   },
   "quizHistory": {
     "title": "過去の問題を見直す",
@@ -200,7 +232,10 @@
     "yourAnswer": "あなたの回答:",
     "correctAnswer": "正解:",
     "retryWrong": "間違えた問題を解き直す（{{count}}問）",
-    "correct": "正解"
+    "correct": "正解",
+    "elapsedSec": "{{s}}秒",
+    "elapsedMinSec": "{{m}}分{{s}}秒",
+    "sessionScore": "{{correct}}/{{total}} 正解"
   },
   "settings": {
     "title": "設定",
@@ -302,7 +337,8 @@
     "inputPlaceholder": "質問を入力...",
     "fabTitle": "AI チューターに質問",
     "noResponse": "回答を生成できませんでした。",
-    "thinking": "考え中..."
+    "thinking": "考え中...",
+    "clear": "会話をクリア"
   },
   "milestones": {
     "beginner": "ビギナー",
@@ -323,7 +359,8 @@
     "quiz": "AI作問",
     "mission": "ミッション達成",
     "xp": "XP",
-    "noHistory": "まだ獲得履歴がありません"
+    "noHistory": "まだ獲得履歴がありません",
+    "firstBonus": "初回+{{bonus}}"
   },
   "missions": {
     "period": {
@@ -364,7 +401,9 @@
       "知識の積み上げ、着実に。",
       "あなたなら大丈夫。",
       "この調子で頑張りましょう。"
-    ]
+    ],
+    "withName": "{{greeting}} {{name}}",
+    "you": "あなた"
   },
   "days": {
     "mon": "月",
@@ -384,7 +423,7 @@
   },
   "batch": {
     "alreadyInProgress": "既にバッチ生成が進行中です。完了するまでお待ちください。",
-    "confirmStart": "本番模擬試験を「Gemini Batch API」で生成します。\n\n完了まで数分〜数十分かかる場合があります。タブやブラウザを閉じても生成は続き、次に開いたときに結果を受け取ります。\n\n続行しますか？",
+    "confirmStart": "本番模擬試験を「Gemini Batch API」で生成します。\n\nℹ️ ご案内\n・完了まで数分〜最大数十分かかる場合があります\n・タブやブラウザを閉じても生成は続きます。次に開いたときに結果を受け取ります\n・完了したら画面右下に通知が表示されます\n\n続行しますか？",
     "ready": "本番模擬試験の準備ができました",
     "failed": "生成に失敗しました",
     "generating": "本番模擬試験を生成中",
@@ -394,7 +433,30 @@
     "startQuiz": "クイズを開始する",
     "stateWaiting": "待機中",
     "stateGenerating": "生成中",
-    "stateComplete": "完了"
+    "stateComplete": "完了",
+    "stateRunning": "実行中",
+    "progress": "{{state}}… {{done}} / {{total}} 問",
+    "progressFailed": "（失敗 {{failed}}）",
+    "resumeFailed": "バッチ生成の再開に失敗しました",
+    "noResults": "バッチAPIから結果を取得できませんでした",
+    "modelSuffix": "（モデル: {{model}}）",
+    "questionsReady": "{{count}} 問の準備が完了しました",
+    "requestingProgress": "バッチAPIにリクエスト中… (0 / {{total}} 問)",
+    "parseFailed": "生成された問題を解析できませんでした",
+    "parseFailedBody": "本番模擬試験のレスポンスを解析できませんでした",
+    "fallbackFailed": "通常モードでの生成も失敗しました: {{msg}}",
+    "batchFailed": "バッチAPIでの生成に失敗しました: {{msg}}",
+    "batchFailedBody": "本番模擬試験のバッチ生成でエラーが発生しました",
+    "confirmClose": "バッチ生成中です。閉じても生成は続行されますが、通知トーストは非表示になります。\n本当に閉じますか？",
+    "errors": {
+      "createFailed": "バッチ作成に失敗しました: {{status}}",
+      "noJobName": "バッチジョブのリソース名を取得できませんでした。",
+      "noApiKey": "API キーが設定されていません。",
+      "noBatchName": "バッチジョブ名が指定されていません。",
+      "cancelled": "バッチ処理がキャンセルされました。",
+      "statusFailed": "バッチ状態取得に失敗しました: {{status}}",
+      "endedWith": "バッチが {{state}} で終了しました。"
+    }
   },
   "errors": {
     "cannotGenerate": "エラー: 問題を生成できませんでした。もう一度お試しください。",
@@ -410,7 +472,9 @@
     "chartLoadFailed": "チャートライブラリを読み込めませんでした（Chart.js）。",
     "examDataNotFound": "この試験のデータは未登録です。",
     "domainTaskNotFound": "このドメインのタスクが見つかりませんでした。",
-    "stepsNotFound": "この試験の学習ステップはまだ登録されていません。"
+    "stepsNotFound": "この試験の学習ステップはまだ登録されていません。",
+    "partialGenerateStarting": "{{partial}}生成できた問題でクイズを開始します。",
+    "unknown": "不明なエラー"
   },
   "storage": {
     "apiKeyEmpty": "APIキーを入力してください。",
@@ -460,7 +524,8 @@
     "aiSearching": "AIに問い合わせ中...",
     "aiAnswerHeading": "AIのおすすめ",
     "aiNeedsKey": "AI検索にはAPIキーが必要です。設定から登録してください。下にキーワード検索の結果を表示しています。",
-    "aiError": "AI検索に失敗しました。下にキーワード検索の結果を表示しています。"
+    "aiError": "AI検索に失敗しました。下にキーワード検索の結果を表示しています。",
+    "recommendBadge": "おすすめ"
   },
   "footer": {
     "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
@@ -488,6 +553,64 @@
       "partial": "一部のみ",
       "failed": "失敗"
     }
+  },
+  "beginner": {
+    "title": "初めてAWS認定を受験する",
+    "subtitle": "AWS認定試験の基本情報と共通の学習リソース"
+  },
+  "nextAction": {
+    "start": "{{code}} の学習を始めましょう",
+    "onARoll": "好調です！新しいドメインに挑戦しましょう",
+    "focusWeak": "苦手な「{{name}}」を重点復習しましょう",
+    "startToday": "今日の学習をスタートしましょう！",
+    "aim20": "まずは20問を目標に挑戦しましょう",
+    "deepen": "「{{name}}」の理解を深めましょう",
+    "allDomains": "全ドメイン横断でチャレンジしましょう"
+  },
+  "highlight": {
+    "streak7": "{{days}}日連続学習中！素晴らしい継続力です。この習慣があなたの合格を支えています。",
+    "streak3": "{{days}}日連続で学習を続けています。着実に力がついてきています！",
+    "bestDomain": "「{{name}}」の正答率は{{pct}}%！しっかり理解できていますね。",
+    "worstDomain": "「{{name}}」を重点復習すれば、合格がぐっと近づきます。あと少しです！",
+    "accuracy80": "全体正答率{{pct}}%！合格圏内の実力です。自信を持ってください！",
+    "accuracy60": "正答率{{pct}}%まで到達。合格ラインまであと一歩です！",
+    "total100": "累計{{count}}問に回答！膨大な演習量が本番での自信になります。",
+    "total50": "もう{{count}}問もこなしました。着実に知識が積み上がっています。",
+    "xp500": "累計{{xp}} XPを獲得！学習者としての成長が数字に表れています。",
+    "activeToday": "今日もアクセスありがとうございます。一歩ずつ前進していきましょう！",
+    "default": "今日の学習で、未来の自分に投資しましょう。小さな一歩が大きな成果につながります。"
+  },
+  "ai": {
+    "explainTitle": "用語解説"
+  },
+  "historyExport": {
+    "title": "AWS認定試験 学習履歴",
+    "exportedAt": "エクスポート日時: {{date}}",
+    "exam": "試験: {{exam}}",
+    "totals": "総問題数: {{total}} / 正答数: {{correct}} / 正答率: {{pct}}%",
+    "modes": {
+      "single": "模擬問題",
+      "quick5": "5問連続",
+      "speed": "スピードラン",
+      "mock": "本番模擬試験"
+    },
+    "session": "セッション {{n}}: {{mode}} ({{date}})",
+    "result": "結果: {{correct}}/{{total}} 正解",
+    "question": "問題 {{n}}",
+    "answerLine": "あなたの回答: {{user}} / 正解: {{correct}} / {{verdict}}",
+    "verdictCorrect": "✅ 正解",
+    "verdictIncorrect": "❌ 不正解",
+    "elapsed": "所要時間: {{s}}秒",
+    "explanation": "解説: {{text}}"
+  },
+  "pwa": {
+    "install": "アプリを追加"
+  },
+  "i18nNotice": {
+    "machineTranslated": "この言語の表示は AI による機械翻訳です。誤りを含む場合があります。",
+    "report": "翻訳の問題を報告",
+    "settingsNote": "日本語・英語以外の表示（画面の文言と学習コンテンツ）は AI による機械翻訳です。誤りはフィードバックからお知らせください。",
+    "feedbackPrefix": "[翻訳の問題] "
   },
   "examLifecycle": {
     "title": {

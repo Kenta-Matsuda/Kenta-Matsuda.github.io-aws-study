@@ -3,18 +3,19 @@
  *
  * N-locale-capable core. The engine itself is locale-agnostic: the set of
  * supported locales is derived at runtime from the locale dictionaries passed
- * to `initI18n`, so adding a language only requires a locale dictionary (plus,
- * for content, human-verified translations) rather than changes to this file.
+ * to `initI18n` (js/app.js loads every locale in js/localeRegistry.js).
  *
- * The site currently ships Japanese (`ja`) and English (`en`). All observable
- * ja/en behavior (default `en`, `navigator.language === 'ja'` detection,
- * ja↔en URL localization and English fallback) is preserved byte-for-byte.
+ * - `t()` falls back to English for keys missing in the current locale.
+ * - Browser detection maps regional / script variants onto the supported set
+ *   (matchBrowserLocale in js/localeRegistry.js).
+ * - `getLocalizedUrl` keeps Japanese URLs for `ja`, uses the English URL for
+ *   every other locale and points AWS docs URLs at the locale's docs path.
+ * - Data-file (js/data/*.js) fields are localized by js/localeContent.js.
  *
- * See issue #197 and docs/action-required/issue-197-multilanguage-support.md
- * ("i18n コアが 2 言語をハードコードしている" — layer 1) for the scope of this
- * generalization. Adding real languages further requires locale dictionaries
- * and human-verified content translation, which remain out of scope here.
+ * See issue #197 and docs/action-required/issue-197-multilanguage-support.md.
  */
+
+import { matchBrowserLocale, resolveLocalizedUrl, getIntlLocale } from './localeRegistry.js';
 
 const LOCALE_STORAGE_KEY = 'asn_locale';
 // Locales assumed when no locale data is supplied (legacy default shape).
@@ -28,8 +29,8 @@ let currentLocale = DEFAULT_LOCALE;
 // Supported locales are derived from the locale data passed to initI18n and
 // default to ['ja', 'en'] when none is supplied (legacy shape).
 let supportedLocales = DEFAULT_SUPPORTED_LOCALES.slice();
-let locales = {}; // { <lang>: {...}, ... } (currently { ja, en })
-let urlMap = {}; // Japanese (base) URL → alternate-locale URL mapping (currently ja → en)
+let locales = {}; // { <lang>: {...}, ... }
+let urlMap = {}; // Japanese (base) URL → English URL mapping (js/locales/urls.json)
 let listeners = [];
 
 /**
@@ -51,18 +52,20 @@ export function initI18n(localeData, urlMapping) {
   if (saved && supportedLocales.includes(saved)) {
     currentLocale = saved;
   } else {
-    // Detect browser language: use the 2-letter navigator.language when it is
-    // a supported locale, otherwise the default locale. For the current ja/en
-    // set this keeps 'ja' -> 'ja' and everything-else -> 'en' unchanged.
-    const browserLang = (navigator.language || '').slice(0, 2);
-    currentLocale = supportedLocales.includes(browserLang) ? browserLang : DEFAULT_LOCALE;
+    // Detect the browser language from navigator.languages (then
+    // navigator.language), mapping regional / script variants onto the
+    // supported set (zh-Hant / zh-HK -> zh-TW, pt -> pt-BR, fr-CA -> fr ...),
+    // otherwise the default locale.
+    const nav = typeof navigator !== 'undefined' ? navigator : {};
+    const tags = [...(Array.isArray(nav.languages) ? nav.languages : []), nav.language].filter(Boolean);
+    currentLocale = matchBrowserLocale(tags, supportedLocales) || DEFAULT_LOCALE;
   }
   applyLocaleToDocument();
 }
 
 /**
  * Get the current locale.
- * @returns {string} e.g. 'ja' | 'en'
+ * @returns {string} e.g. 'ja', 'en', 'ko', 'zh-TW'
  */
 export function getLocale() {
   return currentLocale;
@@ -108,37 +111,44 @@ export function t(key, params) {
   return value;
 }
 
-// The base locale whose URL is the default (unmapped) argument to
-// getLocalizedUrl. Japanese is the base: getLocalizedUrl(jaUrl, enUrl) returns
-// jaUrl unless a non-base locale has an explicit or mapped alternate.
-const BASE_URL_LOCALE = 'ja';
-
 /**
- * Get a locale-aware URL.
+ * Get a locale-aware URL for a data item with a base (Japanese) URL and an
+ * optional explicit English URL.
  *
- * The first argument is the base (Japanese) URL and the second is the explicit
- * alternate-locale (English) URL. When the current locale is the base locale
- * (`ja`) the base URL is returned unchanged. For any non-base locale the
- * explicit alternate is preferred, then the `urlMap` lookup, then the base URL
- * as a final fallback.
- *
- * For the current ja/en locale set this is identical to the previous
- * ja↔en behavior (base `ja` -> jaUrl; `en` -> enUrl, else urlMap[jaUrl], else
- * jaUrl). Per-locale URL maps (keyed by locale) are a future extension point;
- * the current `urlMap` remains the ja→en map.
+ * - `ja`: the base URL unchanged.
+ * - any other locale: the explicit English URL, else the `urls.json` mapping
+ *   (ja -> en), else the base URL; an AWS docs URL (docs.aws.amazon.com) is
+ *   then pointed at the current locale's documentation path (/ko_kr/ ...).
+ *   Other hosts are never rewritten.
  *
  * @param {string} jaUrl - base (Japanese) URL (default)
- * @param {string} [enUrl] - alternate-locale (English) URL (optional, explicit override)
+ * @param {string} [enUrl] - English URL (optional, explicit override)
  * @returns {string}
  */
 export function getLocalizedUrl(jaUrl, enUrl) {
-  if (currentLocale !== BASE_URL_LOCALE) {
-    if (enUrl) return enUrl;
-    // Check URL mapping (currently the ja → en map)
-    const mapped = urlMap[jaUrl];
-    if (mapped) return mapped;
-  }
-  return jaUrl;
+  return resolveLocalizedUrl(currentLocale, jaUrl, enUrl, urlMap);
+}
+
+/**
+ * Format a date with Intl for the current locale.
+ * @param {Date|number|string} date
+ * @param {Intl.DateTimeFormatOptions} [options]
+ * @returns {string} '' for an invalid date
+ */
+export function formatDate(date, options) {
+  const d = date instanceof Date ? date : new Date(date);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString(getIntlLocale(currentLocale), options);
+}
+
+/**
+ * Format a number with Intl for the current locale.
+ * @param {number} value
+ * @param {Intl.NumberFormatOptions} [options]
+ * @returns {string}
+ */
+export function formatNumber(value, options) {
+  return new Intl.NumberFormat(getIntlLocale(currentLocale), options).format(value);
 }
 
 /**
@@ -166,12 +176,9 @@ function resolveKey(dict, key) {
 }
 
 function applyLocaleToDocument() {
-  // Set documentElement.lang to the current locale when it is a supported
-  // 2-letter code, otherwise the default locale. For the ja/en set this keeps
-  // 'ja' -> 'ja' and 'en' -> 'en' unchanged.
-  const isTwoLetter = /^[a-z]{2}$/.test(currentLocale);
-  document.documentElement.lang =
-    isTwoLetter && supportedLocales.includes(currentLocale) ? currentLocale : DEFAULT_LOCALE;
+  // documentElement.lang is the current locale's BCP 47 code (e.g. 'ja',
+  // 'zh-TW', 'pt-BR'), or the default locale if it is somehow unsupported.
+  document.documentElement.lang = supportedLocales.includes(currentLocale) ? currentLocale : DEFAULT_LOCALE;
 }
 
 /**

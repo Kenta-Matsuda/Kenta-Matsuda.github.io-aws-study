@@ -1,0 +1,630 @@
+{
+  "common": {
+    "save": "Salva",
+    "cancel": "Annulla",
+    "close": "Chiudi",
+    "start": "Inizia",
+    "copy": "Copia",
+    "copied": "Copiato",
+    "copyFailed": "Copia non riuscita",
+    "good": "Utile",
+    "bad": "Non utile",
+    "helpful": "Utile",
+    "notHelpful": "Non utile / da migliorare",
+    "retry": "Riprova",
+    "next": "Avanti",
+    "prev": "Indietro",
+    "back": "Indietro",
+    "all": "Tutti",
+    "error": "Errore",
+    "export": "Esporta",
+    "exportMarkdown": "Esporta in Markdown",
+    "exportCsv": "Esporta in CSV",
+    "send": "Invia",
+    "loading": "Caricamento...",
+    "anonymous": "Anonimo",
+    "delete": "Elimina"
+  },
+  "studyPack": {
+    "resourceLinksMd": "Link alle risorse (Markdown)",
+    "resourceLinksCsv": "Link alle risorse (CSV)",
+    "studyRouteMd": "Percorso di studio (Markdown)",
+    "glossaryCsv": "Glossario delle risorse (CSV)"
+  },
+  "header": {
+    "subtitle": "Navigatore di risorse di studio basato sulla guida all'esame",
+    "switchExam": "Cambia esame",
+    "examLabel": "Esame",
+    "themeToggle": "Cambia tema",
+    "apiKeySettings": "Impostazioni chiave API",
+    "selectExam": "Seleziona un esame",
+    "langToggle": "Lingua"
+  },
+  "sidebar": {
+    "title": "Seleziona esame",
+    "beginnerGuide": "Prima certificazione AWS"
+  },
+  "dashboard": {
+    "title": "Dashboard di studio",
+    "dailyHighlight": "In evidenza oggi",
+    "domainRatio": "Percentuale di domande per dominio",
+    "feedback": "Invia feedback",
+    "defaultGreeting": "Facciamo crescere i tuoi progressi di studio.",
+    "changeUsername": "Cambia nome utente",
+    "tweetBtn": "Pubblica su X",
+    "mainCta": {
+      "start": "Inizia lo studio di oggi",
+      "resume": "Riprendi lo studio di oggi"
+    },
+    "searchCta": "Cerca risorse di studio in tutti gli esami",
+    "bookPromo": {
+      "onSale": "In vendita",
+      "title": "Certificazioni AWS",
+      "subtitle": "Guida a tutte le certificazioni (ed. giapponese)",
+      "description": "Il know-how per ottenere tutte le certificazioni AWS in un unico libro (in giapponese)!"
+    },
+    "quizCarousel": {
+      "title": "Sfida quiz",
+      "subtitle": "Metti alla prova le tue competenze in tutti i domini",
+      "startBtn": "Inizia la sfida",
+      "reviewBtn": "Rivedi le domande passate",
+      "dailyChallengeBtn": "Sfida giornaliera",
+      "dailyChallengeBadge": "Senza chiave API",
+      "dailyChallengeHint": "Risolvi domande senza chiave API · 5 al giorno, nessuna configurazione",
+      "offlineExamBtn": "Esame di prova (senza chiave API)",
+      "offlineExamBadge": "Senza chiave API",
+      "offlineExamHint": "Esame completo in formato reale (fino a 65 domande a tempo) da una banca di domande integrata · senza chiave API"
+    },
+    "xpCarousel": {
+      "totalXp": "XP totali",
+      "weekXp": "Ultimi 7 giorni",
+      "recent": "Recenti"
+    },
+    "streak": {
+      "title": "Serie di studio",
+      "days": "giorni di fila",
+      "keepGoing": "Studia anche oggi per allungare la tua serie!",
+      "weekAchieved": "Fantastico! Serie di 1 settimana raggiunta 🎉",
+      "ongoing": "{{count}} giorni di fila! Continua così 💪",
+      "todayActive": "Ottimo lavoro oggi!",
+      "atRisk": "Studia oggi per mantenere la tua serie!",
+      "startNew": "Inizia oggi una nuova serie di studio!",
+      "milestoneToast": "🔥 Serie di {{days}} giorni raggiunta! Continua così!",
+      "milestoneToastTitle": "Traguardo della serie raggiunto!",
+      "reminderTitle": "AWS Study Navigator",
+      "reminderBody": "La tua serie di {{count}} giorni sta per interrompersi. Studia oggi per mantenerla!",
+      "reminderUnsupported": "Questo browser non supporta le notifiche, quindi i promemoria vengono mostrati solo mentre l'app è aperta.",
+      "reminderOff": "Il promemoria è disattivato.",
+      "reminderOn": "Il promemoria è attivo (notifiche consentite).",
+      "reminderInApp": "Il promemoria è attivo (notifiche non consentite, quindi ti avviseremo all'interno dell'app).",
+      "reminderDenied": "Le notifiche sono bloccate. Consentile nelle impostazioni del browser per riceverle (ti avviseremo comunque nell'app)."
+    },
+    "milestone": {
+      "title": "Titolo",
+      "nextTitle": "Prossimo titolo:",
+      "remaining": "Mancano:",
+      "zeroXp": "0 XP"
+    },
+    "skillRadar": {
+      "title": "Competenze per dominio",
+      "placeholder": "Rispondi ai quiz per vedere il grafico delle tue competenze",
+      "accuracyLabel": "Precisione (%)",
+      "tooltip": "Precisione: {{pct}}% ({{count}} risposte)"
+    },
+    "missions": {
+      "title": "Missioni",
+      "badge": "Senza chiave API",
+      "subtitle": "Completa le missioni per guadagnare XP",
+      "toastTitle": "Missione completata!"
+    },
+    "examDate": {
+      "titleShort": "Data dell'esame",
+      "title": "Data dell'esame {{exam}}",
+      "empty": "Registra la data prevista dell'esame per vedere un conto alla rovescia e messaggi di incoraggiamento.",
+      "inputLabel": "Data prevista dell'esame",
+      "save": "Salva",
+      "clear": "Cancella",
+      "markPassed": "Ho superato l'esame! 🎉",
+      "daysShort": "Mancano {{days}} giorni",
+      "todayShort": "Oggi",
+      "pastShort": "Terminato",
+      "passedStatus": "Congratulazioni per aver superato l'esame! 🎉",
+      "passToastTitle": "Congratulazioni!",
+      "passToast": "🏆 Congratulazioni per aver superato {{exam}}! Il tuo impegno è stato ripagato.",
+      "stage": {
+        "far": "Mancano {{days}} giorni all'esame. Prenditi il tempo per costruire basi solide.",
+        "soon": "Mancano {{days}} giorni all'esame. È ora di iniziare il ripasso finale!",
+        "imminent": "Mancano solo {{days}} giorni! Ricontrolla un'ultima volta i tuoi punti deboli 🔥",
+        "today": "Oggi è il giorno dell'esame. Mantieni la calma e dai il massimo! 💪",
+        "past": "La data dell'esame è passata. Registra il risultato o imposta una nuova data."
+      }
+    },
+    "bootError": "Impossibile caricare i dati della pagina. Ricarica la pagina. Se la apri in locale, devi aprirla tramite un server locale.",
+    "slideLabel": "Diapositiva {{n}}"
+  },
+  "quiz": {
+    "modeSelect": "Seleziona la modalità quiz",
+    "quick5": {
+      "label": "5 domande",
+      "description": "5 domande consecutive. Crea combo per guadagnare più XP!"
+    },
+    "speed": {
+      "label": "Prova a tempo",
+      "description": "10 domande rapide. 30 secondi per domanda!",
+      "timeNote": "⏰ 30 secondi per domanda"
+    },
+    "mock": {
+      "label": "Esame di prova",
+      "description": "Numero di domande, limite di tempo e difficoltà equivalenti all'esame reale. Spiegazioni con citazioni dalla documentazione AWS.",
+      "formatNote": "📋 Formato dell'esame reale per ogni certificazione"
+    },
+    "single": {
+      "label": "Domanda singola"
+    },
+    "generating": "Generazione delle domande...",
+    "generatingProgress": "Generazione delle domande... ({{chars}} caratteri ricevuti)",
+    "generateFailed": "Impossibile creare la domanda: la risposta dell'IA non era nel formato previsto. Riprova.",
+    "generatingSubtext": "Il quiz inizierà quando tutte le domande saranno state generate",
+    "thinking": "Gemini sta pensando...",
+    "combo": "Combo",
+    "complete": "Quiz completato!",
+    "correct": "Corretta",
+    "incorrect": "Errata",
+    "questionCount": "Domande",
+    "accuracy": "Precisione",
+    "earnedXp": "XP guadagnati",
+    "maxCombo": "Combo massima",
+    "elapsed": "Tempo impiegato",
+    "explanationList": "Spiegazioni",
+    "nextQuestion": "Domanda successiva",
+    "sourcesLabel": "Fonti (documentazione ufficiale AWS)",
+    "correctFeedback": "Corretto! {{combo}}",
+    "incorrectFeedback": "Errato — La risposta è {{letter}}",
+    "summaryExcellent": "Eccellente!",
+    "summaryGood": "Ben fatto!",
+    "summaryOkay": "Niente male!",
+    "summaryReview": "Ripassiamo!",
+    "summarySubtitle": "{{label}} — {{total}} domande completate",
+    "timerOvertime": " oltre il tempo",
+    "generateBtn": "Genera quiz",
+    "explainBtn": "Spiega",
+    "smartReview": "Ripasso intelligente",
+    "smartReviewDesc": "Generato automaticamente dai punti deboli e dagli errori passati. Supera i tuoi punti deboli in modo efficiente!",
+    "smartReviewEmpty": "Ancora nessuna domanda da ripassare. Prova prima un quiz!",
+    "smartReviewTitle": "Ripasso intelligente",
+    "smartReviewModalTitle": "Ripasso intelligente ({{count}} domande)",
+    "allDomainsTaskTitle": "{{code}} Tutti i domini",
+    "crossDomainQuizLabel": "Quiz su tutti i domini {{code}} ({{label}})",
+    "smartReviewCount": "📊 {{count}} domande da ripassare",
+    "smartReviewNone": "📊 Nessuna domanda da ripassare (prova prima un quiz!)",
+    "offlineExamTitle": "Esame di prova (senza chiave API)",
+    "offlineExamModalTitle": "Esame di prova (senza chiave API): {{code}} ({{count}} domande)",
+    "pregenProgress": "{{done}} / {{total}}",
+    "pipelinePlanning": "Progettazione del piano d'esame…",
+    "pipelineJudging": "Revisione… {{done}} / {{total}}",
+    "pipelineFixing": "Correzione… {{done}} / {{total}}",
+    "readyNotificationTitle": "Le domande sono pronte!",
+    "readyNotificationBody": "{{count}} domande del quiz pronte per iniziare",
+    "dailyChallengeTitle": "Sfida giornaliera",
+    "dailyChallengeModalTitle": "Sfida giornaliera ({{count}} domande)",
+    "retryIncorrectTitle": "Riprova le domande errate",
+    "retryIncorrectModalTitle": "Riprova le domande errate ({{count}})",
+    "reviewScheduled": "Aggiunto al programma di ripasso",
+    "reviewScheduledCount": "{{count}} domande programmate per il ripasso di domani",
+    "quizTitlePrefix": "Quiz",
+    "readyNotificationPartial": "{{count}} di {{total}} domande del quiz pronte per iniziare",
+    "viewResults": "Visualizza i risultati",
+    "oneMore": "Ancora una",
+    "recommendedResources": "Risorse consigliate",
+    "scheduleReview": "Ripassa domani le domande errate"
+  },
+  "quizHistory": {
+    "title": "Rivedi le domande passate",
+    "empty": "Ancora nessuno storico delle risposte.",
+    "emptyHint": "Prova un quiz: domande e risposte verranno registrate qui.",
+    "reviewModeLabels": {
+      "single": "Quiz",
+      "quick5": "5 domande",
+      "speed": "Prova a tempo",
+      "mock": "Esame di prova"
+    },
+    "unanswered": "Senza risposta",
+    "yourAnswer": "La tua risposta:",
+    "correctAnswer": "Corretta:",
+    "retryWrong": "Riprova le domande errate ({{count}})",
+    "correct": "Corretta",
+    "elapsedSec": "{{s}} s",
+    "elapsedMinSec": "{{m}} min {{s}} s",
+    "sessionScore": "{{correct}}/{{total}} corrette"
+  },
+  "settings": {
+    "title": "Impostazioni",
+    "language": "Lingua",
+    "theme": "Tema",
+    "themeLight": "Chiaro",
+    "themeDark": "Scuro",
+    "themeSystem": "Sistema",
+    "reminderLabel": "Promemoria di studio",
+    "reminderToggle": "Ricordami di mantenere la mia serie",
+    "reminderNote": "Questo è un promemoria locale mostrato mentre l'app è aperta. Le notifiche push ad app chiusa richiedono un server e non sono disponibili su questo sito statico.",
+    "aiProvider": "Provider IA",
+    "gemini": "Gemini",
+    "openai": "OpenAI",
+    "providerNote": "Normalmente usa Gemini (gratuito). Se hai tra 13 e 17 anni, usa OpenAI (richiede il consenso dei genitori, a pagamento).",
+    "geminiApiKey": "Chiave API di Google Gemini",
+    "openaiApiKey": "Chiave API di OpenAI",
+    "geminiKeyHelp": "Se non hai una chiave, ottienine una gratuita da {{link}} (solo maggiorenni).",
+    "openaiKeyHelp": "Ottieni una chiave da {{link}}.",
+    "openaiWarning": "Nota: l'API di OpenAI è a pagamento (addebito in base all'utilizzo). Consulta i prezzi per i dettagli.",
+    "openaiWarningLabel": "Nota:",
+    "openaiWarningText": "L'API di OpenAI è a pagamento (addebito in base all'utilizzo). Gli utenti minorenni devono usarla con il consenso e la supervisione dei genitori.",
+    "openaiWarningLinkText": "Termini di utilizzo di OpenAI",
+    "keyPrivacy": "Le chiavi API sono memorizzate solo nello storage locale del browser e non vengono mai inviate a server esterni.",
+    "resetData": "Reimposta dati",
+    "resetConfirm": "Verranno reimpostati tutti i dati di studio memorizzati su questo dispositivo (XP, storico dei quiz, chiavi API, ecc.). Continuare?"
+  },
+  "userModal": {
+    "title": "Registra nome utente",
+    "description": "Registra un nome utente per salvare i tuoi progressi di studio. Il nome verrà mostrato nella dashboard e nei post.",
+    "placeholder": "es. matsu",
+    "note": "Puoi cambiarlo in qualsiasi momento.",
+    "label": "Nome utente",
+    "validationEmpty": "Inserisci un nome utente.",
+    "validationLength": "Il nome utente deve contenere al massimo 30 caratteri."
+  },
+  "feedbackModal": {
+    "title": "Feedback",
+    "description": "Condividi opinioni e richieste per migliorare questa app. All'invio, si apre in una nuova scheda una pagina di GitHub Issue già compilata con il tuo feedback (il testo viene anche copiato negli appunti come backup).",
+    "categories": {
+      "general": "Generale",
+      "resources": "Aggiungi risorse di studio (Black Belt, documentazione ufficiale, ecc.)",
+      "feature": "Richiesta di funzionalità",
+      "bug": "Segnalazione di bug",
+      "aiQuality": "Qualità dell'IA",
+      "ui": "Interfaccia / Usabilità",
+      "other": "Altro"
+    },
+    "contentLabel": "Feedback",
+    "contentPlaceholder": "Descrivi i miglioramenti o le funzionalità desiderate in massimo 1000 caratteri.",
+    "imageLabel": "Immagini (facoltative)",
+    "imageAdd": "Aggiungi immagini (fai clic oppure incolla / trascina qui)",
+    "imageHelp": "Le immagini allegate non possono essere inviate tramite il modulo GitHub precompilato. Dopo l'apertura della pagina dell'issue, incolla le immagini direttamente nel corpo dell'issue per caricarle.",
+    "imageRemove": "Rimuovi immagine",
+    "noAccountLead": "Per pubblicare su GitHub è necessario accedere",
+    "noAccountNote": "Premendo \"Invia\" si apre la pagina dell'issue di GitHub precompilata, dove devi accedere a un account GitHub per pubblicarla. Se non hai o non vuoi un account GitHub, premi \"Copia testo\" qui sotto e invialo come preferisci (ad esempio allo sviluppatore). Puoi anche consultare i feedback esistenti senza accedere.",
+    "browseIssues": "Consulta le issue esistenti (nessun accesso necessario per visualizzarle)",
+    "copyText": "Copia testo",
+    "copied": "Il tuo feedback è stato copiato negli appunti. Invialo come preferisci.",
+    "copyFailed": "Copia non riuscita. Seleziona e copia il testo manualmente.",
+    "submitToIssue": "Invia come GitHub Issue",
+    "issueTitle": "[Feedback] {{category}}",
+    "issueBody": "**Categoria:** {{category}}\n\n{{text}}\n\n---\nInviato dal modulo di feedback dell'app AWS Study Navigator.",
+    "issueImageMarker": "<!-- Incolla qui le tue {{count}} immagini -->",
+    "sent": "La pagina dell'issue si è aperta in una nuova scheda. Controlla e invia.",
+    "sentWithImages": "La pagina dell'issue si è aperta in una nuova scheda. Incolla le immagini nel corpo dell'issue, poi invia.",
+    "validationEmpty": "Inserisci il contenuto del feedback.",
+    "validationLength": "Non superare i 1000 caratteri.",
+    "directDescription": "Condividi opinioni e richieste per migliorare questa app. Premi \"Invia\" e il messaggio arriva direttamente allo sviluppatore, senza bisogno di un account GitHub (viene registrato come GitHub Issue pubblica).",
+    "directLead": "Nessun account necessario",
+    "directNote": "Gli invii vengono pubblicati come GitHub Issue pubbliche (anche le immagini allegate sono pubbliche). Assicurati che non siano visibili informazioni personali o chiavi API. Per pubblicare con il tuo account GitHub, usa \"Pubblica su GitHub\".",
+    "directImageHelp": "Fino a 3 immagini vengono inviate insieme al feedback (prima vengono ridimensionate sul tuo dispositivo e vengono rimossi metadati come la posizione).",
+    "sendDirect": "Invia",
+    "postOnGithub": "Pubblica su GitHub",
+    "sending": "Invio in corso…",
+    "sentDirect": "Inviato. Grazie per il tuo feedback!",
+    "sentDirectImagesSkipped": "Inviato (non è stato possibile includere {{count}} immagini). Grazie per il tuo feedback!",
+    "viewIssue": "Visualizza l'issue registrata",
+    "sendFailed": "Impossibile inviare. Riprova più tardi oppure usa \"Pubblica su GitHub\" o \"Copia testo\".",
+    "sendRateLimited": "Troppi invii in poco tempo. Attendi circa 10 minuti e riprova."
+  },
+  "feedbackNudge": {
+    "title": "Hai un momento per un feedback?",
+    "body": "Il tuo feedback aiuta a migliorare un servizio usato da oltre 4.000 persone. Anche una sola riga è benvenuta.",
+    "open": "Lascia un feedback",
+    "dismiss": "Più tardi"
+  },
+  "chat": {
+    "title": "Tutor IA",
+    "greeting": "Ciao! Chiedimi qualsiasi cosa sullo studio di AWS. Risponderò alle domande sull'esame selezionato 💡",
+    "suggestions": {
+      "keyPoints": "Punti chiave",
+      "keyPointsQuery": "Quali sono i punti chiave di questo esame?",
+      "frequentServices": "Servizi frequenti",
+      "frequentServicesQuery": "Indicami i servizi più frequenti all'esame",
+      "studyTips": "Consigli di studio",
+      "studyTipsQuery": "Dammi qualche consiglio di studio"
+    },
+    "inputPlaceholder": "Inserisci una domanda...",
+    "fabTitle": "Chiedi al tutor IA",
+    "noResponse": "Impossibile generare una risposta.",
+    "thinking": "Sto pensando...",
+    "clear": "Cancella conversazione"
+  },
+  "milestones": {
+    "beginner": "Principiante",
+    "rookie": "Novellino",
+    "architect": "Architetto apprendista",
+    "solution_architect": "Solution Architect",
+    "senior_architect": "Senior Architect",
+    "specialist": "Specialista AWS",
+    "master": "Maestro AWS",
+    "king": "Re di AWS",
+    "sage": "Saggio di AWS",
+    "unlocked": "Titolo sbloccato!",
+    "toastText": "Hai sbloccato \"{{title}}\" ({{xp}} XP)"
+  },
+  "xpActions": {
+    "link": "Visita link",
+    "explain": "Spiegazione IA",
+    "quiz": "Quiz IA",
+    "mission": "Missione completata",
+    "xp": "XP",
+    "noHistory": "Ancora nessuno storico XP",
+    "firstBonus": "Prima volta +{{bonus}}"
+  },
+  "missions": {
+    "period": {
+      "daily": "Giornaliera",
+      "weekly": "Settimanale",
+      "monthly": "Mensile"
+    },
+    "metric": {
+      "quiz": "Risposte ai quiz",
+      "correct": "Risposte corrette",
+      "link": "Visite alle risorse",
+      "xp": "XP guadagnati"
+    },
+    "reward": "+{{xp}} XP",
+    "toast": "Completata \"{{mission}}\" (+{{xp}} XP)",
+    "items": {
+      "daily_quiz_3": "Rispondi a 3 domande del quiz",
+      "daily_correct_1": "Rispondi correttamente a 1 domanda del quiz",
+      "daily_link_1": "Apri 1 risorsa di studio",
+      "weekly_quiz_20": "Rispondi a 20 domande del quiz questa settimana",
+      "weekly_correct_10": "Rispondi correttamente a 10 domande del quiz questa settimana",
+      "monthly_xp_500": "Guadagna 500 XP questo mese"
+    }
+  },
+  "greeting": {
+    "morning": "Buongiorno.",
+    "afternoon": "Buon pomeriggio.",
+    "evening": "Buonasera.",
+    "night": "Studio notturno? Non esagerare.",
+    "motivations": [
+      "Felice di vederti oggi.",
+      "La costanza è la chiave.",
+      "Procedi al tuo ritmo.",
+      "Anche un piccolo progresso conta.",
+      "Ottimo lavoro, continua così!",
+      "Darà sicuramente i suoi frutti.",
+      "Impariamo una cosa nuova oggi.",
+      "Costruiamo le conoscenze passo dopo passo.",
+      "Ce la puoi fare!",
+      "Continua, ci arriverai."
+    ],
+    "withName": "{{greeting}}, {{name}}!",
+    "you": "studente"
+  },
+  "days": {
+    "mon": "Lun",
+    "tue": "Mar",
+    "wed": "Mer",
+    "thu": "Gio",
+    "fri": "Ven",
+    "sat": "Sab",
+    "sun": "Dom"
+  },
+  "tweet": {
+    "template": "Diario di studio AWS di {{name}} (in preparazione per {{code}})\nTitolo: {{title}}\nXP totali: {{total}} (questa settimana +{{week}})",
+    "scoreTemplate": "{{name}} ha ottenuto il {{accuracy}}% ({{correct}}/{{total}} corrette) nell'esame di prova {{code}}! 🎉",
+    "hashtag": "#AWS #AWSStudyNavigator",
+    "cta": "Studia in modo efficiente con il gratuito \"AWS Study Navigator\"!",
+    "shareScore": "Condividi questo punteggio su X"
+  },
+  "batch": {
+    "alreadyInProgress": "È già in corso una generazione batch. Attendi che venga completata.",
+    "confirmStart": "Genera un esame di prova usando la Gemini Batch API.\n\nPotrebbero essere necessari da alcuni minuti a decine di minuti. Puoi chiudere questa scheda o il browser; i risultati verranno recuperati alla successiva apertura dell'app.\n\nProcedere?",
+    "ready": "L'esame di prova è pronto!",
+    "failed": "Generazione non riuscita",
+    "generating": "Generazione dell'esame di prova",
+    "requesting": "Invio della richiesta alla Batch API…",
+    "warning": "ℹ️ Potrebbero essere necessari da alcuni minuti a decine di minuti. Puoi chiudere questa scheda o il browser; i risultati verranno recuperati alla successiva apertura dell'app.",
+    "resuming": "Ripresa della generazione batch precedente…",
+    "startQuiz": "Inizia quiz",
+    "stateWaiting": "In attesa",
+    "stateGenerating": "Generazione",
+    "stateComplete": "Completato",
+    "stateRunning": "In esecuzione",
+    "progress": "{{state}}… {{done}} / {{total}}",
+    "progressFailed": " (non riuscite: {{failed}})",
+    "resumeFailed": "Generazione non riuscita",
+    "noResults": "Generazione non riuscita",
+    "modelSuffix": " (modello: {{model}})",
+    "questionsReady": "{{count}} domande pronte",
+    "requestingProgress": "Invio della richiesta alla Batch API… (0 / {{total}})",
+    "parseFailed": "Impossibile analizzare le domande generate",
+    "parseFailedBody": "Impossibile analizzare la risposta dell'esame di prova",
+    "fallbackFailed": "Anche la generazione in modalità normale non è riuscita: {{msg}}",
+    "batchFailed": "Generazione con la Batch API non riuscita: {{msg}}",
+    "batchFailedBody": "Si è verificato un errore durante la generazione batch dell'esame di prova",
+    "confirmClose": "La generazione batch è in corso. Chiudendo, continuerà in background ma questa notifica verrà nascosta.\nChiudere comunque?",
+    "errors": {
+      "createFailed": "Impossibile creare il batch: {{status}}",
+      "noJobName": "Impossibile ottenere il nome della risorsa del processo batch.",
+      "noApiKey": "Nessuna chiave API impostata.",
+      "noBatchName": "Non è stato fornito alcun nome di processo batch.",
+      "cancelled": "Il batch è stato annullato.",
+      "statusFailed": "Impossibile ottenere lo stato del batch: {{status}}",
+      "endedWith": "Il batch è terminato con {{state}}."
+    }
+  },
+  "errors": {
+    "cannotGenerate": "Errore: impossibile generare le domande. Riprova.",
+    "partialGenerate": "Generate {{count}} domande su {{total}}.",
+    "noResponse": "Impossibile generare una risposta.",
+    "invalidApiKey": "La chiave API non è valida o le autorizzazioni sono insufficienti. Controlla le impostazioni.",
+    "rateLimited": "Il server è occupato (429). Attendi e riprova.",
+    "generic": "Si è verificato un errore: {{msg}}",
+    "networkInterrupted": "La connessione si è interrotta. Succede quando la rete cambia (ad esempio passando dal Wi-Fi ai dati mobili) o il segnale cade durante la generazione. Controlla la connessione e riprova.",
+    "offline": "Sembra che tu sia offline. Riconnettiti alla rete e riprova.",
+    "aborted": "La richiesta è stata annullata. Riprova.",
+    "streamingUnsupported": "Lo streaming non è supportato in questo ambiente.",
+    "chartLoadFailed": "Impossibile caricare la libreria dei grafici (Chart.js).",
+    "examDataNotFound": "I dati per questo esame non sono ancora registrati.",
+    "domainTaskNotFound": "Nessuna attività trovata per questo dominio.",
+    "stepsNotFound": "Le fasi di studio per questo esame non sono ancora registrate.",
+    "partialGenerateStarting": "{{partial}} Il quiz inizia con le domande create.",
+    "unknown": "Errore sconosciuto"
+  },
+  "storage": {
+    "apiKeyEmpty": "Inserisci una chiave API.",
+    "apiKeySaved": "Chiave API salvata.",
+    "apiKeyDeleted": "Chiave API eliminata.",
+    "openaiKeyEmpty": "Inserisci una chiave API di OpenAI.",
+    "openaiKeySaved": "Chiave API di OpenAI salvata.",
+    "openaiKeyDeleted": "Chiave API di OpenAI eliminata."
+  },
+  "roadmap": {
+    "title": "Roadmap di studio",
+    "description": "Segui dall'alto verso il basso le fasi di studio per l'esame {{code}}.",
+    "examWide": "Percorso di apprendimento",
+    "domainShortcutsTitle": "Vai a un dominio",
+    "domainShortcutsHint": "Le risorse dettagliate di ogni dominio si trovano nelle schede dei domini. Scegli il dominio che vuoi studiare.",
+    "aiQuizShortcutTitle": "Verifica le tue competenze con le domande IA di questo sito",
+    "aiQuizShortcutHint": "Oltre al set di domande ufficiale, puoi metterti alla prova con domande generate dall'IA su tutti i domini.",
+    "aiQuizShortcutBtn": "Inizia le domande IA",
+    "commonTitle": "Risorse di apprendimento comuni",
+    "commonDescription": "Fasi e risorse di apprendimento comuni a tutti gli esami di certificazione AWS.",
+    "taskStatement": "Enunciato dell'attività {{id}}",
+    "taskStatementToggle": "Enunciato dell'attività",
+    "knowledge": "Conoscenze e competenze richieste",
+    "keyPoints": "Punti chiave",
+    "recommend": "Consigliato",
+    "level": "Livello tecnico"
+  },
+  "learningStatus": {
+    "selected": "Selezionato",
+    "progress": "Progressi:",
+    "accuracy": "Precisione:",
+    "nextAction": "Prossimo passo"
+  },
+  "aiDisclaimer": "Nota: i risultati generati dall'IA potrebbero non essere sempre accurati (possono contenere errori). Per decisioni importanti, verifica con fonti primarie come la documentazione ufficiale AWS.",
+  "search": {
+    "title": "Cerca risorse",
+    "heading": "Ricerca tra le risorse",
+    "description": "Cerca tra le risorse di apprendimento elencate per tutti gli esami. Puoi limitare la ricerca a un singolo esame o cercare per parola chiave in tutti gli esami.",
+    "examFilterLabel": "Esame",
+    "allExams": "Tutti gli esami",
+    "placeholder": "es. QuickSight, S3, sicurezza",
+    "keywordButton": "Cerca",
+    "aiButton": "Ricerca IA",
+    "resultsCount": "{{count}} risultati",
+    "noResults": "Nessuna risorsa corrispondente trovata. Prova con parole chiave diverse.",
+    "emptyQuery": "Inserisci una parola chiave da cercare.",
+    "aiSearching": "Interrogazione dell'IA...",
+    "aiAnswerHeading": "Consigli dell'IA",
+    "aiNeedsKey": "La ricerca IA richiede una chiave API. Apri le Impostazioni per aggiungerne una. Di seguito sono mostrati i risultati per parola chiave.",
+    "aiError": "Ricerca IA non riuscita. Di seguito sono mostrati i risultati per parola chiave.",
+    "recommendBadge": "Consigliato"
+  },
+  "footer": {
+    "copyright": "© 2024 AWS Study Navigator. Basato su Gemini / OpenAI."
+  },
+  "examSets": {
+    "metrics": {
+      "judge": "Revisionate {{passed}}/{{judged}} approvate",
+      "cluster": "Massima sovrapposizione di risposte {{n}}"
+    },
+    "title": "Set di domande",
+    "open": "Set di domande",
+    "hint": "Le domande vengono salvate appena generate, quindi è possibile avviare anche i set interrotti durante la generazione.",
+    "empty": "Ancora nessun set di domande salvato.",
+    "emptyHint": "Genera un quiz e apparirà qui.",
+    "start": "Inizia",
+    "retry": "Riprova",
+    "confirmDelete": "Eliminare questo set di domande e i relativi tentativi?",
+    "progress": "{{done}} / {{requested}} domande",
+    "attempts": "{{count}} tentativi",
+    "status": {
+      "planning": "Pianificazione",
+      "generating": "Generazione",
+      "judging": "Revisione",
+      "ready": "Pronto",
+      "partial": "Parziale",
+      "failed": "Non riuscito"
+    }
+  },
+  "beginner": {
+    "title": "Prima certificazione AWS",
+    "subtitle": "Informazioni di base e risorse di apprendimento comuni per le certificazioni AWS"
+  },
+  "nextAction": {
+    "start": "Iniziamo a studiare per {{code}}",
+    "onARoll": "Stai andando alla grande! Prova un nuovo dominio",
+    "focusWeak": "Concentrati sul tuo punto debole: \"{{name}}\"",
+    "startToday": "Inizia la sessione di studio di oggi!",
+    "aim20": "Punta a 20 domande per costruire una base",
+    "deepen": "Approfondisci la comprensione di \"{{name}}\"",
+    "allDomains": "Mettiti alla prova su tutti i domini"
+  },
+  "highlight": {
+    "streak7": "Serie di studio di {{days}} giorni! La tua costanza ti sta aprendo la strada verso il successo.",
+    "streak3": "{{days}} giorni di fila! Stai costruendo le tue competenze con costanza.",
+    "bestDomain": "Precisione del {{pct}}% in \"{{name}}\": ottima comprensione!",
+    "worstDomain": "Concentrati su \"{{name}}\" per aumentare le probabilità di superare l'esame. Ci sei quasi!",
+    "accuracy80": "Precisione complessiva del {{pct}}%! Sei nella zona di superamento. Abbi fiducia!",
+    "accuracy60": "Hai raggiunto il {{pct}}% di precisione. Ancora un passo verso la soglia di superamento!",
+    "total100": "{{count}} domande risposte! Questa pratica aumenterà la tua sicurezza all'esame.",
+    "total50": "Hai completato {{count}} domande. Le conoscenze crescono costantemente.",
+    "xp500": "{{xp}} XP guadagnati! I numeri mostrano la tua crescita.",
+    "activeToday": "Grazie per esserci anche oggi. Continua ad andare avanti, un passo alla volta!",
+    "default": "Investi nel tuo futuro con lo studio di oggi. Piccoli passi portano a grandi risultati."
+  },
+  "ai": {
+    "explainTitle": "Spiegazione"
+  },
+  "historyExport": {
+    "title": "Storico di studio per le certificazioni AWS",
+    "exportedAt": "Esportato: {{date}}",
+    "exam": "Esame: {{exam}}",
+    "totals": "Domande: {{total}} / Corrette: {{correct}} / Precisione: {{pct}}%",
+    "modes": {
+      "single": "Quiz",
+      "quick5": "5 domande",
+      "speed": "Prova a tempo",
+      "mock": "Esame di prova"
+    },
+    "session": "Sessione {{n}}: {{mode}} ({{date}})",
+    "result": "Risultato: {{correct}}/{{total}} corrette",
+    "question": "Domanda {{n}}",
+    "answerLine": "La tua risposta: {{user}} / Corretta: {{correct}} / {{verdict}}",
+    "verdictCorrect": "✅ Corretta",
+    "verdictIncorrect": "❌ Errata",
+    "elapsed": "Tempo impiegato: {{s}} s",
+    "explanation": "Spiegazione: {{text}}"
+  },
+  "pwa": {
+    "install": "Aggiungi app"
+  },
+  "i18nNotice": {
+    "machineTranslated": "Questa lingua è stata tradotta dall'IA e potrebbe contenere errori.",
+    "report": "Segnala un problema di traduzione",
+    "settingsNote": "Le lingue diverse dal giapponese e dall'inglese (testi dell'interfaccia e contenuti di studio) sono tradotte automaticamente dall'IA. Segnala gli errori tramite il modulo di feedback.",
+    "feedbackPrefix": "[Problema di traduzione] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} verrà aggiornato a {{successor}}",
+      "superseded": "{{exam}} è stato sostituito da {{successor}}",
+      "retiring": "{{exam}} verrà ritirato",
+      "retired": "{{exam}} è stato ritirato"
+    },
+    "badge": {
+      "updating": "In aggiornamento",
+      "superseded": "Versione precedente",
+      "retiring": "In ritiro",
+      "retired": "Ritirato"
+    },
+    "sources": "Fonti (AWS):"
+  }
+}
