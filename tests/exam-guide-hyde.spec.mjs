@@ -265,8 +265,10 @@ test.describe('real-data smoke + end-to-end (#209 litmus test)', () => {
     const index = buildResourceIndex();
     const catalog = buildExamKeywordCatalog();
     // Model omits the clean service token; the raw verbose phrase AND-matches nothing.
+    // ('Amazon Q Developer とは' no longer works here: the resources now include pages
+    // titled exactly that, and many "〜とは" pages with "Developer Guide" notes.)
     const expandedTerms = [];
-    const baseTerms = ['Amazon Q Developer とは', ...expandedTerms];
+    const baseTerms = ['Amazon Q Developer の使い方', ...expandedTerms];
 
     const baselineResults = searchResourcesMulti(index, baseTerms); // == reverted behavior
     const augmentedTerms = augmentTermsWithCatalog(baseTerms, catalog);
