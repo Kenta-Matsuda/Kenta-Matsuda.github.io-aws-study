@@ -48,7 +48,7 @@
 | SAA-C03 | 3.3 | `amazondynamodb/latest/developerguide/DAX.html` | 同上 |
 | SAA-C03 | 4.1 | `AmazonS3/latest/userguide/RequesterPaysBuckets.html` | 同上 |
 | SAA-C03 | 3.1 | `efs/latest/ug/performance.html` | 同上 |
-| SAA-C03 | 3.1 | `https://aws.amazon.com/fsx/when-to-choose-fsx/` | 製品サイトのページ。下の「判断が必要な事項」も参照 |
+| SAA-C03 | 3.1 | `https://aws.amazon.com/fsx/when-to-choose-fsx/` | 製品サイトのページ（具体的な学びがあるため残すと決定済み） |
 | SAA-C03 | 3.2 | `batch/latest/userguide/best-practices.html` | ロケールや拡張子を外して使用 |
 | SAA-C03 | 4.2 | `outposts/latest/userguide/what-is-outposts.html` | 英語版を日本語版から推定 |
 | SAA-C03 | 4.4 | `apigateway/latest/developerguide/api-gateway-request-throttling.html` | ロケールや拡張子を外して使用 |
@@ -65,6 +65,28 @@
 | DEA-C01 | 1.2 / 2.1 / 3.2 | `decision-guides/latest/analytics-on-aws-how-to-choose/analytics-on-aws-how-to-choose.html` | 意思決定ガイドの旧形式のパス（2026-10-17 の検索ではこの形で出た） |
 | AIB-C01 | 4.2 / 4.1 | `whitepapers/latest/aws-caf-for-ai/platform-perspective-infrastructure-for-and-applications-of-aiml.html` / `foundational-ai-capabilities.html` | 英語版をロケール付きの版から推定 |
 | AIB-C01 | 3.3 | `ai/responsible-ai/nova-2-lite/overview.html`（`docs.aws.amazon.com`） | 日本語版の有無が不明 |
+
+### 同じ日の 2 回目の対応で足した URL
+
+オーナーの追加の指示（CodeCommit 前提の資料を戻す・具体的な学びの無い資料を外す・試験ガイドの改訂を反映する）で、次の URL を足しました。どれも英語版の URL が検索結果に出たものです。日本語版はドキュメントは `/ja_jp`、`aws.amazon.com` のページは `/jp/` を挿入して作っています。
+
+- CodeCommit（DOP-C02 1.1 / DVA-C02 3.4）: `codepipeline/latest/userguide/tutorials-simple-codecommit.html`、`codepipeline/latest/userguide/tutorials-codecommit-gitclone.html`、`codecommit/latest/userguide/approval-rule-templates.html`、`codecommit/latest/userguide/getting-started.html`
+- 差し替え先: `pricing-calculator/latest/userguide/what-is-pricing-calculator.html`（AIB-C01 2.2 / CLF-C02 4.2）、`https://repost.aws/knowledge-center/get-aws-technical-support`（CLF-C02 4.3）、`prescriptive-guidance/latest/agentic-ai-frameworks/strands-agents.html`（AIP-C01 2.1）、ML Blog `using-strands-agents-to-create-a-multi-agent-solution-with-metas-llama-4-and-amazon-bedrock`（AIP-C01 2.5）
+- CLF-C02 1.1: `https://aws.amazon.com/what-is-cloud-computing/`（日本語版 `/jp/` は推定）、Migration & Modernization Blog の Cloud Value Framework（ビジネスの俊敏性）の記事
+- 試験ガイドの改訂で増えた項目: `bedrock/latest/userguide/evaluation-judge.html`・`bedrock-agentcore/latest/devguide/common-use-cases.html`（AIF-C01）、`verifiedpermissions/latest/userguide/terminology.html`・`amazondynamodb/latest/developerguide/specifying-conditions.html`（DVA-C02）、`devopsagent/latest/userguide/devops-agent-incident-response.html`・`devopsagent/latest/userguide/devops-agent-incident-response-starting-investigations.html`・`securityagent/latest/userguide/how-it-works.html`（SOA-C03。AWS Security Agent は検索結果の題名で「now part of AWS Continuum」と表示）
+- 元の DevOps Blog「Complete CI/CD with AWS CodeCommit, AWS CodeBuild, AWS CodeDeploy, and AWS CodePipeline」（`/blogs/devops/complete-ci-cd-with-aws-codecommit-aws-codebuild-aws-codedeploy-and-aws-codepipeline/`）は、2026-09-06 の実測で撤回されて一覧ページへ転送されていたため戻していません。2026-10-17 の検索ではこの URL が「AWS DevOps & Developer Productivity Blog」という題で出ました。記事が再公開されていれば DOP-C02 1.1 / DVA-C02 3.4 に戻してください。
+
+### ディレクトリ形式の URL（meta refresh のスタブの可能性）
+
+2026-09-06 の棚卸しで、ガイドのディレクトリ URL が中身の無いスタブ（クライアント側で 1 ページ目へ転送）になっている例が見つかっています。次の URL がスタブなら、1 ページ目の実体ページへ直リンクにしてください。
+
+- `whitepapers/latest/how-aws-pricing-works/`（CLF-C02 1.4・4.1、SAP-C02 2.6）
+- `prescriptive-guidance/latest/strategy-database-disaster-recovery/`（DOP-C02 3.1、SOA-C03 2.3）
+- `prescriptive-guidance/latest/aws-multi-region-fundamentals/`
+- `whitepapers/latest/aws-security-incident-response-guide/`（DOP-C02 6.3）
+- `prescriptive-guidance/latest/strategy-migration/`、`prescriptive-guidance/latest/large-migration-guide/`（SAP-C02 4.1）
+- `prescriptive-guidance/latest/retrieval-augmented-generation-options/`（AIF-C01 3.1）
+- `prescriptive-guidance/latest/security-reference-architecture/`（SAP-C02 1.2。2026-09-06 に welcome.html がディレクトリルートへ移ったことを確認済み）
 
 ### 本文で確かめてほしい note
 
@@ -87,10 +109,8 @@
 1. **リンクの検証と修正**: 上の切り分け手順 1〜4 を実行し、壊れたリンク・題名と合わないリンク・本文と食い違う note を直します。結果は [試験リソース棚卸し台帳](../wiki/exam-resource-inventory.md) の各試験の行（最終棚卸し日・状態・備考）に反映します。
 2. **判断が必要な事項**（メンテナの判断を待っています）:
    - **Security Hub と Security Hub CSPM**: `securityhub/latest/userguide/` 配下のページは、検索結果の題名で「Security Hub CSPM」の内容になっています。SCS-C03 / SOA-C03 / SAP-C02 / CLF-C02 / DOP-C02 で、どちらの Security Hub のページを載せるかを決めてください。
-   - **FSx の選び方のページ**（SAA-C03 3.1）: 製品サイトの `when-to-choose-fsx` を残すか、ストレージの意思決定ガイドに寄せるか。
-   - **ISO/IEC 23053**（AIB-C01 1.1）: AWS のドメインに解説が見つかりませんでした。AWS 以外の出典を認めるか、無資料のままにするか。
-   - **CodeCommit の一般提供への復帰**（2025-11-24）: 以前「受付終了」として差し替えた CodeCommit 前提の CI/CD 資料（DOP-C02 / DVA-C02）を戻すかどうか。
    - **RDS Performance Insights**（SOA-C03）: CloudWatch Database Insights への移行の扱い（未確認）。
+   - 決定済み（2026-10-17 のオーナーの指示）: FSx の選び方のページは、具体的な学びのあるプロダクトページなので残す。ISO/IEC 23053 は、資料を AWS 公式に限るため無資料のままにする。CodeCommit 前提の CI/CD 資料は戻す（上の「同じ日の 2 回目の対応で足した URL」）。
 3. **ANS-C01 で気づいた点**（メンテナが全件確認済みの試験のため、データは変えていません。直すかどうかの判断をお願いします）:
    - 3.2 に同じブログ（`automating-connectivity-assessments-with-vpc-reachability-analyzer`）が 2 回載っています。
    - 4.2 は 4 件ですべて同じ種別で、`recommend` がありません。

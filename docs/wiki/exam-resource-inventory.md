@@ -88,27 +88,43 @@
 | SCS-C03 | Verified Permissions / S3 の CORS / CloudFront の地理的制限 / JA3・JA4 / IoT のポリシー / Inspector の Lambda・ECR スキャン / Network Access Analyzer / Identity Center のトラブルシューティング / Glacier の Vault Lock / DLM / SNS のデータ保護 / ルートアクセスの一元管理 / cfn-guard・cfn-lint / Service Catalog |
 | SOA-C03 | 1.3 プレイスメントグループと FSx / 2.1 予測スケーリング・ウォームプールと RDS のリードレプリカ / 2.3 RDS のポイントインタイム復元 / 4.1 パスワードポリシー / 5.1 Egress-Only インターネットゲートウェイ / 5.3 CloudFront とコンテナのログ |
 
+### 追加対応（2026-10-17、オーナーの指示による 2 回目）
+
+1. **CodeCommit 前提の CI/CD 資料を戻した**（CodeCommit は 2025-11-24 に一般提供へ復帰）。#150 / #151 で外した DevOps Blog「Complete CI/CD with AWS CodeCommit, AWS CodeBuild, AWS CodeDeploy, and AWS CodePipeline」は、2026-09-06 の実測で記事自体が撤回され一覧ページへ転送されていたため、同じ流れを扱う公式ドキュメントで戻した。
+   - DOP-C02 1.1: CodePipeline の「シンプルなパイプラインを作成する (CodeCommit リポジトリ)」「CodeCommit パイプラインソースで完全クローンを使用する」、CodeCommit の「承認ルールテンプレートの操作」を追加。
+   - DVA-C02 3.4: 上のパイプラインのチュートリアルと「Git と AWS CodeCommit の開始方法」（ブランチ・タグ）を追加。DVA-C02 3.3: CodeCommit 前提の可能性を理由に外していた「Step Functions のテストと CI/CD パイプラインの作成」の recommend を戻した。
+2. **具体的な学びの無い資料を外した**（判定基準は Wiki の判定 1 の大前提）。
+   - 外した: YouTube の検索結果ページ（AIF-C01 / CLF-C02 のステップ 1、共通ステップ）、CLF-C02 1.1 の「AWS とは」（マーケティングページ）と「Amazon Web Services の概要（はじめに）」（同じタスクに具体的な節がある）、SAA-C03 ステップ 4 の Well-Architected Labs のトップ、SAP-C02 ステップ 3 の研修カタログ（題名は Advanced Architecting on AWS）、AIB-C01 3.1 の責任ある AI の資料集のトップ、AIB-C01 4.3 の AWS Training for Teams、共通ステップの AWS ドキュメントのトップと Black Belt のアーカイブ一覧。
+   - 差し替えた: `calculator.aws`（AIB-C01 2.2 / CLF-C02 4.2）→ Pricing Calculator ユーザーガイドの「AWS Pricing Calculator とは」、AWS re:Post のトップ（CLF-C02 4.3）→ ナレッジセンター「AWS のテクニカルサポートを受ける」、`strandsagents.com`（AIP-C01 2.1 / 2.5）→ Prescriptive Guidance「Strands Agents」と ML Blog のマルチエージェントの記事。
+   - 足した: CLF-C02 1.1 に AWS の用語解説「クラウドコンピューティングとは」と、Cloud Value Framework のビジネスの俊敏性の記事。
+   - 残した（中身のあるプロダクトページ）: FSx の選び方、Bedrock / EC2 の料金とデータ転送料金、`aws.amazon.com/compare/` の比較、`aws.amazon.com/what-is/` の用語解説、責任共有モデル、サポートプランの比較、リージョンとアベイラビリティーゾーン。AIB-C01 の Amazon Quick・責任ある AI・SageMaker の ML ガバナンス・Executive Insights はビジネスの具体的な学びとして残した。
+3. **試験ガイドの改訂をタスクステートメントに反映した**（詳細と要照合の項目は [issue-190 の要対応ファイル](../action-required/issue-190-exam-guide-web-verification.md)）。改訂履歴のページが見つかった AIF-C01（v1.1、2026-04-30）・DVA-C02（v2.1、2024-12-12。知識とスキルを 1 つのスキルのリストに統合）・SOA-C03（v1.1、2026-06-01）を反映し、DEA-C01（v1.1）は反映済み、SCS-C03 は v1.0 のみと確認した。文言は検索結果の要約から復元し、変更した項目の日本語は訳なので、公式の試験ガイドとの照合が必要。
+   - 新しい項目に資料を足した: AIF-C01（トークンベースの料金・AI エージェント・AgentCore Memory・LLM-as-a-judge・ビジネス目標との整合のメトリクス・AgentCore Identity・ガードレールとコンテキストグラウンディングチェック・モデル蒸留・Strands Agents・AgentCore）、DVA-C02（Amazon Q Developer・サーキットブレーカー・OpenSearch Service・Verified Permissions・DynamoDB のきめ細かなアクセスコントロール・CloudWatch Logs Insights）、SOA-C03（Bedrock のモニタリング・AWS DevOps Agent・AWS Security Agent・コンフォーマンスパック）。
+   - 試験ガイドから消えた例に対応する資料を外した: AIF-C01 2.3 の PartyRock と Bedrock Data Automation の記事。Amazon Q Developer は 2.3 から 1.3 へ移した。
+   - 2 回目の対応後のタスク別リソースは全 13 試験で 2,103 件。
+
+
 ## カバレッジ台帳（タスクステートメント単位）
 
 - 集計日: 2026-10-17（前回 2026-09-06）
 - 集計方法: `node scripts/analyze-resource-coverage.mjs`（`domains[].tasks[]` の `resources[].items[]` を集計。ネットワーク不要）
 - 目標値（`docs/wiki/aws-resource-discovery.md`「試験ガイド文言ドリブンの探索手順」参照）: 全タスクで items **1 件以上（必須）** / **3 件以上（原則）** / **2 種別以上（多角性）**。2026-10-17 の見直しでは ANS-C01 に合わせて **1 タスク 6〜12 件程度**を目安にした。
-- 全体: 13 試験 / 206 タスク / items 合計 2,079。**0 件のタスクと薄い（3 件未満）タスクは無し**。単一種別のみは 1 タスク（ANS-C01 4.2。基準の試験のため変更していない）。
+- 全体: 13 試験 / 206 タスク / items 合計 2,103（同日 2 回目の対応後）。**0 件のタスクと薄い（3 件未満）タスクは無し**。単一種別のみは 1 タスク（ANS-C01 4.2。基準の試験のため変更していない）。
 
 | 試験 | タスク数 | items 合計 | 中央値 | 最小 | 最大 | 薄い（<3） | 単一種別 | 補強優先度 |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | ANS-C01 | 16 | 140 | 8 | 4 | 14 | 0 | 1 | 基準（メンテナが全件確認済み。4.2 は 4 件・単一種別・recommend なし） |
 | CLF-C02 | 19 | 157 | 8 | 6 | 13 | 0 | 0 | 中（箇条書き単位の穴が多い。上の「残っている穴」） |
-| AIB-C01 | 13 | 108 | 9 | 6 | 10 | 0 | 0 | 低 |
-| AIF-C01 | 14 | 139 | 10 | 7 | 12 | 0 | 0 | 低 |
+| AIB-C01 | 13 | 106 | 8 | 6 | 10 | 0 | 0 | 低 |
+| AIF-C01 | 14 | 149 | 11 | 7 | 14 | 0 | 0 | 低 |
 | AIP-C01 | 20 | 196 | 10 | 6 | 13 | 0 | 0 | 低 |
-| DOP-C02 | 19 | 191 | 10 | 8 | 12 | 0 | 0 | 低 |
+| DOP-C02 | 19 | 194 | 10 | 8 | 12 | 0 | 0 | 低 |
 | MLA-C01 | 12 | 126 | 10 | 9 | 13 | 0 | 0 | 低 |
 | DEA-C01 | 17 | 179 | 11 | 6 | 14 | 0 | 0 | 低 |
-| DVA-C02 | 13 | 147 | 11 | 9 | 13 | 0 | 0 | 低 |
+| DVA-C02 | 13 | 155 | 11 | 9 | 14 | 0 | 0 | 低 |
 | SAA-C03 | 14 | 159 | 11 | 10 | 14 | 0 | 0 | 低 |
 | SAP-C02 | 20 | 209 | 11 | 8 | 12 | 0 | 0 | 低 |
-| SOA-C03 | 13 | 147 | 11 | 10 | 14 | 0 | 0 | 低 |
+| SOA-C03 | 13 | 152 | 12 | 10 | 14 | 0 | 0 | 低 |
 | SCS-C03 | 16 | 181 | 12 | 8 | 13 | 0 | 0 | 中（箇条書き単位の穴が多い。上の「残っている穴」） |
 
 件数の面ではすべての試験が ANS-C01 の水準（中央値 8）に達しました。今後の補強は件数ではなく、上の「残っている穴」にある**箇条書き単位で資料が無いもの**を埋めることが中心になります。2026-09-06 時点の数値（items 979、薄い 16 タスク、単一種別 15 タスク。SAP-C02 と AIB-C01 が最優先）は更新履歴を参照してください。
@@ -193,6 +209,7 @@
 
 ## 更新履歴
 
+- 2026-10-17: 同日 2 回目の対応（オーナーの指示: CodeCommit 前提の資料を戻す・試験ガイドの更新を反映する・具体的な学びの無い資料は含めない）を「追加対応」節に記録し、カバレッジ台帳を再集計（items 2,103）。
 - 2026-10-17: 「2026-10-17 ANS-C01 基準の見直し」節を新設（試験別の before/after、主な変更、残っている穴）。カバレッジ台帳とリソース規模の統計を再集計（items 979 → 2,079、薄いタスク 16 → 0、単一種別 15 → 1。ユニーク文書 656 → 1,168）。見直しでリソースを入れ替えた 12 試験の台帳の状態を「要対応（新 URL は HTTP 未確認）」にし、URL 数を更新。DOP-C02 / DVA-C02 行の「CodeCommit は新規受付終了」を訂正（2025-11-24 に一般提供へ復帰）。HTTP 確認は `docs/action-required/exam-resource-review-2026-10-verification.md` に切り出した。
 - 2026-09-06: 初のネットワーク接続下での全件棚卸しを実施し、**全 13 試験を「未棚卸し」から「棚卸し済み」へ更新**。台帳に URL 数・修正 PR・保留事項の列を追加し、`common-steps.js` の検証結果（問題なし・変更不要）と全体サマリ（`broken` 15 / `soft-404` 24 / `redirect` 67 / `fragment-miss` 5 / `forbidden` 4）、横断的な要注意事項を追記。Skill Builder のコース URL 失効は `docs/action-required/skillbuilder-course-urls.md` に切り出した。
 - 2026-09-04: 試験略称コードを AIBS-C01 から AIB-C01 に訂正（正しい略称コードは AIB-C01。データファイルも js/data/aibs-c01.js -> js/data/aib-c01.js にリネーム）。
