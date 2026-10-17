@@ -163,13 +163,6 @@ export const SAA_C03 = {
               noteEn: 'Whitepaper: Detailed explanation of the six pillars',
               recommend: true,
             },
-            {
-              title: 'AWS Well-Architected Labs',
-              titleEn: 'AWS Well-Architected Labs',
-              url: 'https://www.wellarchitectedlabs.com/',
-              note: 'ハンズオンラボで実践的に学ぶ',
-              noteEn: 'Learn hands-on with practical labs',
-            },
           ],
         },
       ],

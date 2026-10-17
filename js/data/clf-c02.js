@@ -74,14 +74,6 @@ export const CLF_C02 = {
           iconColorClass: 'text-pink-500',
           items: [
             {
-              title: '【YouTube】AWS認定試験の申し込み手順（日本語解説）',
-              titleEn: 'AWS Certification Exam Registration Steps (Video)',
-              url: 'https://www.youtube.com/results?search_query=AWS%E8%AA%8D%E5%AE%9A%E8%A9%A6%E9%A8%93+%E7%94%B3%E3%81%97%E8%BE%BC%E3%81%BF+%E6%89%8B%E9%A0%86',
-              urlEn: 'https://www.youtube.com/results?search_query=AWS+certification+exam+registration+guide',
-              note: 'YouTube で申し込み手順を動画で確認できます',
-              noteEn: 'Watch registration steps on YouTube',
-            },
-            {
               title: 'AWS認定試験の予約方法（公式ポリシーページ）',
               titleEn: 'How to Schedule an AWS Certification Exam (Official Policy)',
               url: 'https://aws.amazon.com/jp/certification/policies/before-testing/',
@@ -302,6 +294,22 @@ export const CLF_C02 = {
           ],
           resources: [
             {
+              key: 'blogs',
+              label: 'AWS Blogs',
+              labelEn: 'AWS Blog',
+              iconClass: 'fas fa-book',
+              iconColorClass: 'text-orange-500',
+              items: [
+                {
+                  title: 'AWS Cloud Value Framework (CVF) でクラウドの力を引き出す: ビジネスの俊敏性',
+                  titleEn: 'Unleashing the Power of the Cloud with the AWS Cloud Value Framework (CVF): Business Agility',
+                  url: 'https://aws.amazon.com/blogs/migration-and-modernization/unleashing-the-power-of-the-cloud-with-the-aws-cloud-value-framework-cvf-business-agility-5-7/',
+                  note: 'AWS Migration & Modernization Blog: クラウドの価値を評価する AWS Cloud Value Framework のうち、ビジネスの俊敏性（リソースの用意が数週間から数分になるなど）の考え方',
+                  noteEn: 'AWS Migration & Modernization Blog: The business agility part of the AWS Cloud Value Framework for assessing cloud value (for example, provisioning time falling from weeks to minutes)',
+                },
+              ],
+            },
+            {
               key: 'whitepapers',
               label: 'AWS Whitepapers',
               labelEn: 'AWS Whitepapers',
@@ -326,14 +334,6 @@ export const CLF_C02 = {
                   noteEn: 'Overview of Amazon Web Services: how Regions and multiple Availability Zones with independent power and networking make up the infrastructure, and why this gives higher availability and fault tolerance than a single data center',
                 },
                 {
-                  title: 'Amazon Web Services の概要（はじめに）',
-                  titleEn: 'Overview of Amazon Web Services: Introduction',
-                  url: 'https://docs.aws.amazon.com/ja_jp/whitepapers/latest/aws-overview/introduction.html',
-                  urlEn: 'https://docs.aws.amazon.com/whitepapers/latest/aws-overview/introduction.html',
-                  note: 'Overview of Amazon Web Services: 幅広いクラウドサービスをオンデマンドかつ従量課金で利用できるという AWS の価値提案の全体像',
-                  noteEn: 'Overview of Amazon Web Services: the AWS value proposition of a broad set of cloud services available on demand with pay-as-you-go pricing',
-                },
-                {
                   title: '設計原則 - 信頼性の柱',
                   titleEn: 'Design principles - Reliability Pillar',
                   url: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/reliability-pillar/design-principles.html',
@@ -351,12 +351,12 @@ export const CLF_C02 = {
               iconColorClass: 'text-blue-600',
               items: [
                 {
-                  title: 'AWS とは',
-                  titleEn: 'What is AWS?',
-                  url: 'https://aws.amazon.com/jp/what-is-aws/',
-                  urlEn: 'https://aws.amazon.com/what-is-aws/',
-                  note: 'AWS の用語解説: AWS クラウドの全体像と、AWS が示す価値提案（AWS が選ばれる理由）',
-                  noteEn: 'AWS explainer: an overview of the AWS Cloud and the value proposition AWS presents (why customers choose AWS)',
+                  title: 'クラウドコンピューティングとは',
+                  titleEn: 'What is cloud computing?',
+                  url: 'https://aws.amazon.com/jp/what-is-cloud-computing/',
+                  urlEn: 'https://aws.amazon.com/what-is-cloud-computing/',
+                  note: 'AWS の用語解説: オンデマンド・従量課金で IT リソースを使うクラウドコンピューティングの定義と、俊敏性・伸縮性（必要な分だけ確保して増減）・コスト削減・数クリックでのグローバル展開といった利点',
+                  noteEn: 'AWS explainer: The definition of cloud computing as on-demand, pay-as-you-go IT resources, and its benefits such as agility, elasticity (provision only what you need and scale up or down), cost savings, and deploying globally in a few clicks',
                 },
                 {
                   title: 'リージョンとアベイラビリティーゾーン',
@@ -2574,11 +2574,12 @@ export const CLF_C02 = {
                   noteEn: 'AWS Billing User Guide: an overview of the billing, payment, and cost management features of AWS',
                 },
                 {
-                  title: 'AWS Pricing Calculator',
-                  titleEn: 'AWS Pricing Calculator',
-                  url: 'https://calculator.aws/',
-                  note: 'AWS Pricing Calculator: 利用予定のサービスと構成を入力して、AWS の利用料金を見積もるツール',
-                  noteEn: 'AWS Pricing Calculator: a tool that estimates AWS costs from the services and configurations you plan to use',
+                  title: 'AWS Pricing Calculator とは',
+                  titleEn: 'What is AWS Pricing Calculator?',
+                  url: 'https://docs.aws.amazon.com/ja_jp/pricing-calculator/latest/userguide/what-is-pricing-calculator.html',
+                  urlEn: 'https://docs.aws.amazon.com/pricing-calculator/latest/userguide/what-is-pricing-calculator.html',
+                  note: 'AWS Pricing Calculator ユーザーガイド: 利用予定のサービスと構成から AWS の利用料金を見積もる無料のツール。料金は AWS Price List API から取得され、税金は見積もりに含まれない',
+                  noteEn: 'AWS Pricing Calculator User Guide: A free tool that estimates AWS charges from the services and configurations you plan to use. Prices come from the AWS Price List API, and estimates do not include taxes',
                 },
                 {
                   title: 'AWS Organizations とは',
@@ -2730,27 +2731,18 @@ export const CLF_C02 = {
               iconColorClass: 'text-yellow-500',
               items: [
                 {
+                  title: 'AWS のテクニカルサポートを受ける（AWS ナレッジセンター）',
+                  titleEn: 'Get AWS technical support',
+                  url: 'https://repost.aws/knowledge-center/get-aws-technical-support',
+                  note: 'AWS ナレッジセンター: ベーシックサポートで使えるリソース（ドキュメント・AWS 規範ガイダンス・AWS re:Post・アカウントと請求のサポートなど）と、技術的なサポートケースには有料のサポートプランが必要なこと',
+                  noteEn: 'AWS Knowledge Center: The resources available with Basic Support (documentation, AWS Prescriptive Guidance, AWS re:Post, account and billing help, and more), and the need for a paid support plan to open technical support cases',
+                },
+                {
                   title: 'AWS リソースの不正使用を報告する',
                   titleEn: 'Report abuse of AWS resources',
                   url: 'https://repost.aws/knowledge-center/report-aws-abuse',
                   note: 'AWS ナレッジセンター: AWS のリソースの不正使用が疑われるときに、報告フォームまたはメールで AWS Trust & Safety チームへ報告する方法と、報告に含める情報（URL や IP アドレス、タイムゾーン付きのタイムスタンプ、ログなど）',
                   noteEn: 'AWS Knowledge Center: how to report suspected abuse of AWS resources to the AWS Trust & Safety team through the abuse form or by email, and what to include (URLs or IP addresses, timestamps with time zone, logs, and more)',
-                },
-              ],
-            },
-            {
-              key: 're:post',
-              label: 'AWS re:Post',
-              labelEn: 'AWS re:Post',
-              iconClass: 'fas fa-comments',
-              iconColorClass: 'text-purple-500',
-              items: [
-                {
-                  title: 'AWS re:Post',
-                  titleEn: 'AWS re:Post',
-                  url: 'https://repost.aws/',
-                  note: 'AWS re:Post: AWS が運営する Q&A コミュニティ。AWS ナレッジセンターの記事もここから検索できる',
-                  noteEn: 'AWS re:Post: the AWS-managed Q&A community, where AWS Knowledge Center articles can also be searched',
                 },
               ],
             },

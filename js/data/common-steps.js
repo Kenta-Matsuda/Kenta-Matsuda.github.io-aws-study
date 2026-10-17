@@ -53,14 +53,6 @@ export const COMMON_STEPS = [
         iconColorClass: 'text-pink-500',
         items: [
           {
-            title: '【YouTube】AWS認定試験の申し込み手順（日本語解説）',
-            titleEn: 'AWS Certification Exam Registration Steps (Video)',
-            url: 'https://www.youtube.com/results?search_query=AWS%E8%AA%8D%E5%AE%9A%E8%A9%A6%E9%A8%93+%E7%94%B3%E3%81%97%E8%BE%BC%E3%81%BF+%E6%89%8B%E9%A0%86',
-            urlEn: 'https://www.youtube.com/results?search_query=AWS+certification+exam+registration+guide',
-            note: 'YouTube で申し込み手順を動画で確認できます',
-            noteEn: 'Watch registration steps on YouTube',
-          },
-          {
             title: 'AWS認定試験の予約方法（公式ポリシーページ）',
             titleEn: 'How to Schedule an AWS Certification Exam (Official Policy)',
             url: 'https://aws.amazon.com/jp/certification/policies/before-testing/',
@@ -103,22 +95,6 @@ export const COMMON_STEPS = [
         iconClass: 'fas fa-book-open',
         iconColorClass: 'text-blue-500',
         items: [
-          {
-            title: 'AWS ドキュメント',
-            titleEn: 'AWS Documentation',
-            url: 'https://docs.aws.amazon.com/',
-            note: 'サービスごとの公式ドキュメント',
-            noteEn: 'Official documentation for each service',
-            recommend: true,
-          },
-          {
-            title: 'AWS Black Belt Online Seminar',
-            titleEn: 'AWS Black Belt Online Seminar',
-            url: 'https://aws.amazon.com/jp/events/aws-event-resource/archive/?cards.sort-by=item.additionalFields.startDateTime&cards.sort-order=desc&awsf.tech-category=*all',
-            note: 'AWS サービスを深掘りするセミナー資料集',
-            noteEn: 'Deep-dive seminar materials for AWS services',
-            recommend: true,
-          },
           {
             title: 'AWS Well-Architected Framework',
             titleEn: 'AWS Well-Architected Framework',
