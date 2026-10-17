@@ -238,10 +238,17 @@ AWS は一部サービスを**廃止せずに新規受付のみ終了**します
 - **Amazon SageMaker Clarify** — 新規顧客の受付終了。出典: [Clarify availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/clarify-availability-change.html)。AWS は代替として SageMaker AI の監視リファレンス実装 / SHAP / SageMaker AI MLflow / Amazon CloudWatch / **Amazon Bedrock Evaluations**・**Amazon Bedrock Guardrails** を案内している。
 - **Amazon SageMaker Model Monitor** — 新規顧客の受付終了。出典: [Amazon SageMaker Model Monitor availability change](https://docs.aws.amazon.com/sagemaker/latest/dg/model-monitor-availability-change.html)。
 
+2026-10-17 の全試験見直しで追加・訂正したもの:
+
+- **AWS Systems Manager Incident Manager** — 2025-11-07 から新規顧客の受付終了（新機能の追加も無し）。出典: [AWS Systems Manager Incident Manager availability change](https://docs.aws.amazon.com/incident-manager/latest/userguide/incident-manager-availability-change.html)。AWS は代替として Systems Manager OpsCenter と AWS パートナーのソリューションを案内している。
+- **AWS CodeCommit は受付終了ではなくなった（訂正）** — 2024 年 7 月に新規受付を終了したが、2025-11-24 に一般提供へ復帰し、新規顧客もリポジトリを作成できる。出典: [AWS CodeCommit returns to general availability](https://aws.amazon.com/blogs/devops/aws-codecommit-returns-to-general-availability)（AWS DevOps & Developer Productivity Blog）。以前の棚卸しで「CodeCommit は新規受付終了」として扱った記述（台帳の DOP-C02 / DVA-C02 行など）は当時の事実であり、今後は CodeCommit の資料を通常どおり採用してよい。
+- そのほか既存データの棚卸しで受付終了を確認済みのもの: Amazon Bedrock Agents（現 Agents Classic。後継は Amazon Bedrock AgentCore）/ Amazon Q Business（後継は Amazon Quick）/ AWS Migration Hub / AWS Audit Manager / Amazon SageMaker Ground Truth / Amazon SageMaker Debugger。
+
 取り扱い方針:
 
 - リンクが生きていても **`recommend: true` は外す**（新規に使えないサービスを「おすすめ」として提示しない）。
 - 試験範囲の概念理解に必要なら**リンクは残し、`note` / `noteEn` に受付終了の事実を明記**する。削除は、より適切な現行リソースに置き換えられる場合に限る。
+- **試験ガイドで名指しされているものは例外として掲載を続ける**（recommend なし・注記付き）。2026-10-17 時点の例外: AWS Migration Hub（CLF-C02 / SAP-C02）、AWS Audit Manager（SCS-C03 / CLF-C02 2.2 / AIF-C01 5.2）、MLA-C01 の SageMaker Ground Truth（1.2）・Clarify（1.3 / 2.3 / 4.1）・Debugger（2.3）・Model Monitor（4.1）。MLA-C01 のこれらはタスクステートメントに名前が出るため、削除すると出題範囲の機能が無資料になる。
 
 ## ブログの技術レベル判定基準 (Level 100/200/300/400)
 
@@ -378,6 +385,7 @@ https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html   
 
 ## 更新履歴
 
+- 2026-10-17: 「新規顧客の受付を終了」したサービスの節に、Incident Manager の受付終了（2025-11-07）と、CodeCommit の一般提供への復帰（2025-11-24、受付終了の扱いを訂正）を追記。試験ガイドで名指しされている受付終了サービスの例外掲載の一覧（MLA-C01 の SageMaker 4 機能、CLF-C02 / AIF-C01 の Audit Manager を追加）を明記。
 - 2026-10-17: 「ANS-C01 基準のリソースレビュー（技術的な学び / recommend の判定基準）」節を新設（リポジトリオーナーの指示: ANS-C01 を基準に全試験のリソースと recommend を見直す。AIB-C01 は技術的な学びを重視しない）。ANS-C01 の実測プロファイル、残す / 外すの基準、密度の目安、recommend の基準、AIB の例外、書式、ネットワーク制限下での URL の確かめ方を記載。
 - 2026-10-17: 全 13 試験の試験ガイドリンクを PDF から HTML 版へ差し替えたことを「試験ガイドは PDF ではなく AWS ドキュメント（HTML）を優先する」節に追記（slug は同節の一覧を使用。SAP-C03 / DVA-C03 のガイドは 2026-10-27 公開予定のため未掲載）。
 - 2026-10-16: 試験ガイド slug 節に、改定・廃止の予定を `js/data/exam-lifecycle.js` へ集約したことと、SAP-C03 / DVA-C03 の slug が未確認であることを追記（出典: [AWS Training and Certification Blog — September 2026](https://aws.amazon.com/blogs/training-and-certification/september-2026-new-offerings/)）。

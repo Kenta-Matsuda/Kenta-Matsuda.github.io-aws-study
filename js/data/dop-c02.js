@@ -698,7 +698,7 @@ export const DOP_C02 = {
                 {
                   title: 'AWS CloudFormation と AWS CodeDeploy を使った Amazon ECS へのブルー/グリーンデプロイ',
                   titleEn: 'Blue/Green Deployments to Amazon ECS Using AWS CloudFormation and AWS CodeDeploy',
-                  url: 'https://aws.amazon.com/it/blogs/devops/blue-green-deployments-to-amazon-ecs-using-aws-cloudformation-and-aws-codedeploy/',
+                  url: 'https://aws.amazon.com/blogs/devops/blue-green-deployments-to-amazon-ecs-using-aws-cloudformation-and-aws-codedeploy/',
                   note: 'DevOps Blog: Advanced (Level 300)',
                   noteEn: 'DevOps Blog: Advanced (Level 300)',
                   level: 'Level 300',
