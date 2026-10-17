@@ -4,6 +4,7 @@ import {
   getExamById,
   getExamCategoryLabel,
   getExamServiceKeywords,
+  getPublicExams,
 } from '../js/exams.js';
 import { buildExamGroundingPrompt } from '../js/chat.js';
 
@@ -77,6 +78,28 @@ test.describe('AIB-C01 chat grounding (#202)', () => {
     // Null-safe on unknown/empty IDs.
     expect(getExamServiceKeywords('does-not-exist')).toEqual([]);
     expect(getExamServiceKeywords('')).toEqual([]);
+  });
+
+  // The resource notes cite blogs and guides ("AWS Machine Learning Blog",
+  // "AWS Prescriptive Guidance", "AWS Lambda Developer Guide"). Those must not
+  // use up the 25 keyword slots and push real services out of the prompt.
+  test('service keywords skip blog / guidance / document names in every exam', () => {
+    for (const exam of getPublicExams()) {
+      for (const locale of ['ja', 'en']) {
+        const keywords = getExamServiceKeywords(exam.id, { locale });
+        expect(keywords.length).toBeGreaterThan(0);
+        for (const name of keywords) {
+          expect(name).not.toMatch(/ (Blog|Blogs|Guidance|Guide|Guides|Reference|Basics|Session|Solution|Lens)$/);
+          expect(['AWS Documentation', 'AWS Prescriptive Guidance', 'AWS Decision Guides']).not.toContain(name);
+        }
+        const lower = keywords.map((k) => k.toLowerCase());
+        expect(new Set(lower).size).toBe(lower.length);
+      }
+    }
+    expect(getExamServiceKeywords('aib-c01', { locale: 'ja' })).toContain('Amazon Bedrock Guardrails');
+    const ans = getExamServiceKeywords('ans-c01', { locale: 'ja' });
+    expect(ans).toContain('Amazon Route 53');
+    expect(ans).toContain('AWS Site-to-Site VPN');
   });
 
   test('Japanese system prompt embeds the guide URL, service list and newest-service rule', () => {
