@@ -1,8 +1,8 @@
 // Client for the feedback collector backend (infra/feedback, issues #162 / #167).
 //
 // When FEEDBACK_API_URL (js/config.js) is empty the backend is treated as not
-// deployed: isFeedbackApiEnabled() returns false, feedback falls back to the
-// GitHub prefilled-issue flow and votes stay local-only, exactly as before.
+// deployed: isFeedbackApiEnabled() returns false, the feedback form shows an
+// "unavailable" error with a copy-text fallback (#247) and votes stay local-only.
 //
 // Requests use Content-Type text/plain so the browser sends them as CORS
 // "simple" requests (no preflight); the Lambda parses the body as JSON anyway.
@@ -85,7 +85,8 @@ export async function encodeFeedbackImage(file) {
   }
 }
 
-// POST the user's feedback. Resolves to { ok: true, issueUrl } or
+// POST the user's feedback. The backend stores it and files the GitHub issue
+// itself, in the same request. Resolves to { ok: true, issueUrl } or
 // { ok: false, error } — never rejects, so callers can branch on `ok`.
 // `images` is a list of base64 strings from encodeFeedbackImage().
 export async function sendFeedback({ category, text, lang, appVersion, page, elapsedMs, website = '', images = [] }) {

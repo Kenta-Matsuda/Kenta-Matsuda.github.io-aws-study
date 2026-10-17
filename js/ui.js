@@ -2566,7 +2566,6 @@ function getElements() {
     feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
     feedbackImagePreview: document.getElementById('feedbackImagePreview'),
     feedbackCopyBtn: document.getElementById('feedbackCopyBtn'),
-    feedbackGithubBtn: document.getElementById('feedbackGithubBtn'),
     feedbackWebsite: document.getElementById('feedbackWebsite'),
     // Feedback nudge (issue #100)
     feedbackNudge: document.getElementById('feedbackNudge'),
@@ -3090,22 +3089,6 @@ function buildTweetIntentUrl({ text, url }) {
   const params = new URLSearchParams();
   params.set('text', String(text || '').slice(0, 800));
   if (url) params.set('url', String(url));
-  return `${base}?${params.toString()}`;
-}
-
-// Build GitHub's tokenless prefilled new-issue URL. URLSearchParams url-encodes
-// the values, so title/body/labels are safely escaped. `labels` may be an array
-// or comma-separated string; empty entries are dropped.
-function buildGitHubIssueUrl({ title, body, labels }) {
-  const base = 'https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues/new';
-  const params = new URLSearchParams();
-  params.set('title', String(title || ''));
-  params.set('body', String(body || ''));
-  const labelList = Array.isArray(labels)
-    ? labels
-    : String(labels || '').split(',');
-  const cleaned = labelList.map((l) => String(l || '').trim()).filter(Boolean);
-  if (cleaned.length) params.set('labels', cleaned.join(','));
   return `${base}?${params.toString()}`;
 }
 
@@ -3702,15 +3685,11 @@ function maybeFireStudyReminder(els) {
   showStreakNudge(els, body);
 
   // Local OS notification (best effort, feature-detected).
-  // NOTE: we intentionally reference the SVG icon here. Some platforms ignore
-  // SVG notification icons (falling back to a default glyph), but the raster
-  // PNG app icons only exist on the #97 branch and are not present on this
-  // branch, so pointing at a PNG now would be a dead asset reference. Once #97
-  // merges to main, switch this to a raster PNG (e.g. assets/icon-192.png).
+  // Raster PNG: some platforms ignore SVG notification icons.
   try {
     if (typeof Notification === 'undefined') return;
     if (Notification.permission === 'granted') {
-      new Notification(title, { body, icon: 'assets/icon.svg' });
+      new Notification(title, { body, icon: 'assets/icon-192.png' });
     }
   } catch { /* ignore: notifications are optional */ }
 }
@@ -5229,48 +5208,10 @@ let feedbackOpenedAt = 0;
 // Guards against double submission while a direct-send request is in flight.
 let feedbackSending = false;
 
-// #162: when the feedback backend is deployed (FEEDBACK_API_URL set), the
-// primary button sends directly without a GitHub account, and the GitHub
-// prefilled-issue flow moves to a secondary "Post on GitHub" button (useful for
-// image attachments). Swapping the data-i18n keys keeps later locale switches
-// consistent because translateStaticElements() re-reads them.
-const FEEDBACK_DIRECT_I18N = {
-  'feedbackModal.description': 'feedbackModal.directDescription',
-  'feedbackModal.noAccountLead': 'feedbackModal.directLead',
-  'feedbackModal.noAccountNote': 'feedbackModal.directNote',
-  'feedbackModal.imageHelp': 'feedbackModal.directImageHelp',
-  'feedbackModal.submitToIssue': 'feedbackModal.sendDirect',
-};
-
-function applyFeedbackDirectMode(els) {
-  if (!isFeedbackApiEnabled()) return;
-  Object.entries(FEEDBACK_DIRECT_I18N).forEach(([from, to]) => {
-    els.feedbackModal.querySelectorAll(`[data-i18n="${from}"]`).forEach((el) => {
-      el.setAttribute('data-i18n', to);
-      el.textContent = t(to);
-    });
-  });
-  // Font Awesome may already have swapped the <i> for an <svg>; replace either.
-  const icon = els.feedbackSubmitBtn?.querySelector('i, svg');
-  if (icon) {
-    const sendIcon = document.createElement('i');
-    sendIcon.className = 'fas fa-paper-plane';
-    icon.replaceWith(sendIcon);
-  }
-  els.feedbackCopyBtn?.classList.add('hidden');
-  els.feedbackGithubBtn?.classList.remove('hidden');
-}
-
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
 
-  applyFeedbackDirectMode(els);
-
   els.feedbackBtn.addEventListener('click', () => openFeedbackModal(els));
-
-  els.feedbackGithubBtn?.addEventListener('click', () => {
-    submitFeedbackViaGithub(els);
-  });
 
   els.feedbackTextarea?.addEventListener('input', () => {
     updateFeedbackCharCount(els);
@@ -5280,8 +5221,8 @@ function wireFeedbackHandlers({ els }) {
     submitFeedback(els);
   });
 
-  // #101: copy-only path so users WITHOUT a GitHub account can still send
-  // feedback (they copy the composed text and share it however they like).
+  // Fallback shown only when sending fails or the backend is unavailable, so
+  // the draft can still be kept and shared another way (#101 / #247).
   els.feedbackCopyBtn?.addEventListener('click', () => {
     copyFeedbackText(els);
   });
@@ -5295,8 +5236,8 @@ function wireFeedbackHandlers({ els }) {
     }
   });
 
-  // Image attach affordances (#81). Files are kept in memory only for preview;
-  // they are never uploaded (static site, no backend / AWS out of bounds).
+  // Image attach affordances (#81). Images are re-encoded on-device and sent
+  // with the feedback to the backend (#162).
   els.feedbackImageTrigger?.addEventListener('click', () => {
     els.feedbackImageInput?.click();
   });
@@ -5401,6 +5342,7 @@ function openFeedbackModal(els) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
   els.feedbackMessage?.classList?.add('hidden');
+  els.feedbackCopyBtn?.classList.add('hidden');
   if (els.feedbackWebsite) els.feedbackWebsite.value = '';
   feedbackOpenedAt = Date.now();
   // Start every session with a clean image list (revokes any stale URLs).
@@ -5418,38 +5360,20 @@ function updateFeedbackCharCount(els) {
   els.feedbackCharCount.classList.toggle('text-gray-400', len <= FEEDBACK_MAX_LENGTH * 0.95);
 }
 
-// Compose the issue title/body from the user's feedback text + category.
-// Shared by the GitHub-issue submit path and the account-free copy path (#101)
-// so both produce identical, correctly-escaped content.
-function composeFeedbackIssue({ text, category }) {
+// Compose the plain-text copy of the draft (category + text) for the copy
+// fallback. The category is interpolated before the user-controlled text so a
+// literal `{{...}}` inside the feedback is never re-scanned by t().
+function composeFeedbackCopyText({ text, category }) {
   const feedbackText = String(text).slice(0, FEEDBACK_MAX_LENGTH);
   const categoryLabel = t(`feedbackModal.categories.${feedbackCategoryI18nKey(category)}`);
-  const issueTitle = t('feedbackModal.issueTitle', { category: categoryLabel });
-  // Interpolate the user-controlled `text` LAST (category first) so that any
-  // literal `{{...}}` sequence inside the user's feedback is never re-scanned
-  // by a subsequent replacement pass. t() substitutes params in object-key
-  // order, so key order here is load-bearing.
-  let issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
-  // When images are attached (#81), append a marker line so the user knows
-  // where to paste them in the opened GitHub issue. The bytes are never
-  // uploaded — GitHub's tokenless prefilled URL cannot carry attachments, so
-  // GitHub itself auto-uploads images when the user pastes/drops them.
-  if (feedbackImages.length > 0) {
-    issueBody += `\n\n${t('feedbackModal.issueImageMarker', { count: feedbackImages.length })}`;
-  }
-  return { issueBody, categoryLabel, issueTitle };
+  return t('feedbackModal.copyBody', { category: categoryLabel, text: feedbackText });
 }
 
-// #101: account-free path. Copy the composed feedback text to the clipboard so
-// a user who does not have (or does not want to use) a GitHub account can send
-// it by any channel they prefer, without ever opening the GitHub issue screen.
+// Copy the composed draft to the clipboard (fallback when sending fails).
 function copyFeedbackText(els) {
   const draft = readFeedbackDraft(els);
   if (!draft) return;
-  const { text, category } = draft;
-
-  const { issueBody } = composeFeedbackIssue({ text, category });
-  copyTextToClipboard(issueBody)
+  copyTextToClipboard(composeFeedbackCopyText(draft))
     .then((ok) => {
       showInlineMessage(
         els.feedbackMessage,
@@ -5479,49 +5403,20 @@ function readFeedbackDraft(els) {
   return { text, category };
 }
 
-function submitFeedback(els) {
-  if (isFeedbackApiEnabled()) {
-    submitFeedbackDirect(els);
-  } else {
-    submitFeedbackViaGithub(els);
-  }
-}
-
-function submitFeedbackViaGithub(els) {
-  const draft = readFeedbackDraft(els);
-  if (!draft) return;
-  const { text, category } = draft;
-
-  // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
-  // user click (static site => no token => tokenless prefilled URL pattern,
-  // same as the X/tweet share). Never auto-popup.
-  const { issueBody, categoryLabel, issueTitle } = composeFeedbackIssue({ text, category });
-  const hasImages = feedbackImages.length > 0;
-  const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
-  const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
-
-  // #79: the prefilled issue URL already carries the composed body, so the
-  // primary hand-off is the opened GitHub page below. We also copy the body to
-  // the clipboard as a backup so the user can re-paste it if GitHub truncates
-  // an over-long prefilled URL. Best-effort: a copy failure must never block
-  // opening the issue. Fire-and-forget so the window.open below stays inside
-  // the user-gesture call stack and popup blockers don't trip.
-  copyTextToClipboard(issueBody).catch(() => {});
-
-  window.open(issueUrl, '_blank', 'noopener,noreferrer');
-
-  const sentKey = hasImages ? 'feedbackModal.sentWithImages' : 'feedbackModal.sent';
-  showInlineMessage(els.feedbackMessage, t(sentKey), 'text-teal-600');
-  finishFeedbackSubmission(els, 1500);
-}
-
-// #162: send straight to the feedback backend — no GitHub account needed. The
-// backend files the GitHub issue on the user's behalf and returns its URL.
-async function submitFeedbackDirect(els) {
+// #162 / #247: one submit always goes to the feedback backend, which stores the
+// feedback in DynamoDB and files the GitHub issue itself. Nothing opens a new
+// window or leaves the page; without a configured backend we show an error and
+// offer the copy fallback instead.
+async function submitFeedback(els) {
   if (feedbackSending) return;
   const draft = readFeedbackDraft(els);
   if (!draft) return;
   const { text, category } = draft;
+
+  if (!isFeedbackApiEnabled()) {
+    showFeedbackSendError(els, 'disabled');
+    return;
+  }
 
   feedbackSending = true;
   if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = true;
@@ -5550,29 +5445,26 @@ async function submitFeedbackDirect(els) {
   if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = false;
 
   if (!result.ok) {
-    const key = result.error === 'rate_limited' ? 'feedbackModal.sendRateLimited' : 'feedbackModal.sendFailed';
-    showInlineMessage(els.feedbackMessage, t(key), 'text-red-600');
-    // Offer the account-free copy path as a fallback when sending failed.
-    els.feedbackCopyBtn?.classList.remove('hidden');
+    showFeedbackSendError(els, result.error);
     return;
   }
 
   showInlineMessage(
     els.feedbackMessage,
-    t(skippedImages > 0 ? 'feedbackModal.sentDirectImagesSkipped' : 'feedbackModal.sentDirect', { count: skippedImages }),
+    t(skippedImages > 0 ? 'feedbackModal.sentImagesSkipped' : 'feedbackModal.sent', { count: skippedImages }),
     'text-teal-600',
   );
-  if (result.issueUrl && /^https:\/\/github\.com\//.test(result.issueUrl) && els.feedbackMessage) {
-    const link = document.createElement('a');
-    link.href = result.issueUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.className = 'underline font-medium ml-1';
-    link.textContent = t('feedbackModal.viewIssue');
-    els.feedbackMessage.appendChild(link);
-  }
-  // Keep the modal open a little longer so the issue link can be clicked.
-  finishFeedbackSubmission(els, result.issueUrl ? 4000 : 2000);
+  finishFeedbackSubmission(els, 2000);
+}
+
+// Show why sending failed and reveal the copy fallback. The draft is kept so
+// the user can retry or copy it.
+function showFeedbackSendError(els, error) {
+  let key = 'feedbackModal.sendFailed';
+  if (error === 'rate_limited') key = 'feedbackModal.sendRateLimited';
+  else if (error === 'disabled' || error === 'paused') key = 'feedbackModal.unavailable';
+  showInlineMessage(els.feedbackMessage, t(key), 'text-red-600');
+  els.feedbackCopyBtn?.classList.remove('hidden');
 }
 
 // Shared tail of a successful submission: reset the draft, award the daily XP
@@ -5612,7 +5504,7 @@ function finishFeedbackSubmission(els, closeDelayMs) {
   setTimeout(() => {
     closeModal(els.feedbackModal);
     els.feedbackMessage?.classList?.add('hidden');
-    if (isFeedbackApiEnabled()) els.feedbackCopyBtn?.classList.add('hidden');
+    els.feedbackCopyBtn?.classList.add('hidden');
   }, closeDelayMs);
 }
 
@@ -5629,20 +5521,6 @@ function feedbackCategoryI18nKey(category) {
     other: 'other',
   };
   return map[String(category || '')] || 'general';
-}
-
-// Map a feedback category to an extra GitHub Issue label. Bug reports use `bug`,
-// feature requests use `enhancement`; everything else has no extra label (the
-// `feedback` label is always applied by the caller).
-function categoryToIssueLabel(category) {
-  switch (String(category || '')) {
-    case 'bug_report':
-      return 'bug';
-    case 'feature_request':
-      return 'enhancement';
-    default:
-      return '';
-  }
 }
 
 // --- Modals + AI actions ---

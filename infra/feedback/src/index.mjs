@@ -4,8 +4,10 @@
 // stays inside the AWS always-free tier at this site's traffic level.
 //
 //   POST /feedback  { category, text, lang, appVersion, page, elapsedMs, website, images? }
-//     -> stores the feedback in DynamoDB and, when a GitHub token is configured
-//        in SSM, files it as a GitHub issue on the user's behalf (no account).
+//     -> every submission is stored in DynamoDB AND filed as a GitHub issue in
+//        the same request (#247). Issue filing needs the GitHub token in SSM;
+//        when it is missing or GitHub fails/times out, the feedback is still
+//        stored and the failure is logged (github_issue_skipped / _failed).
 //        Optional screenshots (base64) go to a private S3 bucket and are
 //        embedded in the issue through CloudFront.
 //   POST /votes     { events: [{ targetType, targetId, action, value, at, meta }] }
@@ -33,6 +35,9 @@ export const MAX_IMAGES = 3;
 export const MAX_IMAGE_BYTES = 1.5 * 1024 * 1024;
 // Function URLs accept up to 6 MB; 3 base64 images of 1.5 MB fit under this.
 export const MAX_BODY_BYTES = 5.5 * 1024 * 1024;
+// Keep the GitHub call well inside the 10 s Lambda timeout so the browser
+// always gets a quick answer and the DynamoDB write still happens.
+export const GITHUB_TIMEOUT_MS = 5000;
 
 // The client re-encodes screenshots before upload, but never trust the
 // declared type: detect it from the file signature instead.
@@ -236,7 +241,7 @@ export function buildIssue({ category, text, lang, appVersion, page, imageUrls =
     '',
     ...imageUrls.flatMap((url, i) => [`![screenshot ${i + 1}](${url})`, '']),
     '---',
-    'AWS Study Navigator アプリのフィードバックフォームから、GitHub アカウント無しで送信されました（Lambda 経由の代理投稿）。',
+    'AWS Study Navigator のフィードバックフォームから送信されました。',
     context ? `<sub>${context.replace(/[<>]/g, '')}</sub>` : '',
   ].filter((line, i, arr) => !(line === '' && i === arr.length - 1)).join('\n');
   const labels = ['feedback', 'from-app', cat.label].filter(Boolean);
@@ -247,6 +252,7 @@ export function createHandler(deps) {
   const {
     ddb, // { updateItem(params), putItem(params), batchWrite(items) }
     getGithubToken, // async () => string | null
+    invalidateGithubToken = () => {}, // drop a cached token (e.g. after 401)
     putImage, // async (key, bytes, contentType) => void
     fetchImpl = fetch,
     now = () => new Date(),
@@ -283,19 +289,32 @@ export function createHandler(deps) {
 
   async function createGithubIssue(issue) {
     const token = await getGithubToken();
-    if (!token || !repo) return null;
-    const res = await fetchImpl(`https://api.github.com/repos/${repo}/issues`, {
-      method: 'POST',
-      headers: {
-        authorization: `Bearer ${token}`,
-        accept: 'application/vnd.github+json',
-        'x-github-api-version': '2022-11-28',
-        'user-agent': 'aws-study-feedback-lambda',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify(issue),
-    });
+    if (!token || !repo) {
+      console.warn('github_issue_skipped', !repo ? 'no_repo' : 'no_token');
+      return null;
+    }
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), GITHUB_TIMEOUT_MS);
+    let res;
+    try {
+      res = await fetchImpl(`https://api.github.com/repos/${repo}/issues`, {
+        method: 'POST',
+        signal: controller.signal,
+        headers: {
+          authorization: `Bearer ${token}`,
+          accept: 'application/vnd.github+json',
+          'x-github-api-version': '2022-11-28',
+          'user-agent': 'aws-study-feedback-lambda',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify(issue),
+      });
+    } finally {
+      clearTimeout(timer);
+    }
     if (!res.ok) {
+      // A revoked/rotated token: re-read SSM on the next submission.
+      if (res.status === 401) invalidateGithubToken();
       console.error('github_issue_failed', res.status, await res.text().catch(() => ''));
       return null;
     }
@@ -322,8 +341,9 @@ export function createHandler(deps) {
     }
     const imageUrls = imageKeys.map((key) => `${imagesBaseUrl}/${key}`);
 
-    // Issue creation is best-effort: the submission is never lost because it is
-    // persisted below even when GitHub is down or the token is not configured.
+    // Every submission attempts the GitHub issue. It is still best-effort: the
+    // submission is never lost because it is persisted below even when GitHub
+    // is down, times out or the token is not configured.
     let issue = null;
     try {
       issue = await createGithubIssue(buildIssue({ ...fb, imageUrls }));
@@ -490,7 +510,9 @@ async function buildAwsHandler() {
     },
   };
 
-  return createHandler({ ddb, getGithubToken, putImage });
+  const invalidateGithubToken = () => { tokenPromise = null; };
+
+  return createHandler({ ddb, getGithubToken, invalidateGithubToken, putImage });
 }
 
 export async function handler(event) {

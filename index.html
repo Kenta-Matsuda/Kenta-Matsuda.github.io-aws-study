@@ -1354,6 +1354,7 @@
                     <button id="sidebarToggleBtn" type="button" class="bg-gray-700 bg-opacity-50 hover:bg-gray-600 rounded-lg p-2 transition" aria-label="Toggle sidebar">
                         <i class="fas fa-bars text-lg"></i>
                     </button>
+                    <img src="./assets/icon.svg" alt="" width="36" height="36" class="hidden sm:block w-9 h-9 rounded-lg flex-shrink-0" aria-hidden="true">
                     <div>
                         <h1 id="siteTitle" class="text-xl md:text-2xl font-bold tracking-tight">AWS Study Navigator</h1>
                         <p id="siteSubtitle" class="text-gray-300 mt-1 text-xs md:text-sm" data-i18n="header.subtitle">
@@ -2184,20 +2185,11 @@
                 </button>
             </div>
             <div class="p-6">
-                <p class="text-sm text-gray-600 mb-3" data-i18n="feedbackModal.description">
-                    Please share your opinions and requests for improving this app. When you submit, a prefilled GitHub Issue page opens in a new tab so you can review and post it.
+                <p class="text-sm text-gray-600 mb-4" data-i18n="feedbackModal.description">
+                    Please share your opinions and requests for improving this app. Submissions (including images) are made public, so please don't include personal information or API keys.
                 </p>
-                <div class="mb-4 p-2.5 bg-teal-50 text-teal-800 text-xs rounded border border-teal-200 leading-snug">
-                    <span class="inline-flex items-center gap-1 font-bold mr-1">
-                        <i class="fas fa-circle-info"></i><span data-i18n="feedbackModal.noAccountLead">Posting to GitHub requires sign-in</span>
-                    </span>
-                    <span data-i18n="feedbackModal.noAccountNote">Pressing "Submit" opens GitHub's prefilled issue page, and you must sign in to a GitHub account to post it there. If you don't have or don't want a GitHub account, press "Copy text" below and send it any way you like (e.g. to the developer). You can also browse existing feedback without signing in.</span>
-                    <a href="https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues" target="_blank" rel="noopener" class="inline-flex items-center gap-1 underline font-medium hover:text-teal-900">
-                        <i class="fas fa-arrow-up-right-from-square"></i><span data-i18n="feedbackModal.browseIssues">Browse existing issues (no sign-in needed to view)</span>
-                    </a>
-                </div>
                 <div class="mb-4">
-                    <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect">Category</label>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" for="feedbackCategorySelect" data-i18n="feedbackModal.categoryLabel">Category</label>
                     <select id="feedbackCategorySelect" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline bg-white">
                         <option value="general" data-i18n="feedbackModal.categories.general">General</option>
                         <option value="resource_request" data-i18n="feedbackModal.categories.resources">Add study resources (BlackBelt, official docs, etc.)</option>
@@ -2222,7 +2214,7 @@
                         <i class="fas fa-image"></i> <span data-i18n="feedbackModal.imageAdd">Add images (click, or paste / drop here)</span>
                     </button>
                     <div id="feedbackImagePreview" class="flex flex-wrap gap-2 mt-2"></div>
-                    <p class="text-xs text-gray-500 mt-2" data-i18n="feedbackModal.imageHelp">Attached images cannot be sent through the prefilled GitHub form. After the issue page opens, paste the image(s) directly into the issue body to upload them.</p>
+                    <p class="text-xs text-gray-500 mt-2" data-i18n="feedbackModal.imageHelp">Up to 3 images are sent along with your feedback (they are resized on your device first, and metadata such as location is removed).</p>
                 </div>
                 <!-- Honeypot for the feedback backend (#162): hidden from people, filled by naive bots. -->
                 <input type="text" id="feedbackWebsite" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="hidden">
@@ -2232,14 +2224,11 @@
                 <button type="button" data-close-modal="feedbackModal" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm font-medium transition-colors mr-auto" data-i18n="common.cancel">
                     Cancel
                 </button>
-                <button id="feedbackCopyBtn" type="button" class="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
+                <button id="feedbackCopyBtn" type="button" class="hidden px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
                     <i class="fas fa-copy"></i> <span data-i18n="feedbackModal.copyText">Copy text</span>
                 </button>
-                <button id="feedbackGithubBtn" type="button" class="hidden px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fab fa-github"></i> <span data-i18n="feedbackModal.postOnGithub">Post on GitHub</span>
-                </button>
                 <button id="feedbackSubmitBtn" type="button" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                    <i class="fab fa-github"></i> <span data-i18n="feedbackModal.submitToIssue">Submit as GitHub Issue</span>
+                    <i class="fas fa-paper-plane"></i> <span data-i18n="feedbackModal.submit">Send</span>
                 </button>
             </div>
         </div>

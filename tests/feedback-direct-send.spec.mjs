@@ -1,10 +1,11 @@
 import { test, expect } from '@playwright/test';
 
-// Feedback backend wiring (issues #162 / #167). With FEEDBACK_API_URL empty
-// (e.g. while the backend is paused or torn down) the modal must behave
-// exactly as before; with a URL configured — both overridden here through
-// window.__ASN_FEEDBACK_API_URL__ so tests never hit the real backend — "Send" posts directly with no GitHub account
-// and Good/Bad votes are mirrored to /votes.
+// Feedback backend wiring (issues #162 / #167 / #247). One "Send" always posts
+// to the backend (which stores the feedback and files the GitHub issue itself);
+// there is no separate GitHub path and nothing opens a new window. With
+// FEEDBACK_API_URL empty the modal shows an error and offers "Copy text".
+// The URL is overridden through window.__ASN_FEEDBACK_API_URL__ so tests never
+// hit the real backend. Good/Bad votes are mirrored to /votes.
 
 const API = 'https://feedback-api.example.test';
 
@@ -31,17 +32,28 @@ async function openFeedback(page) {
 }
 
 test.describe('feedback modal without backend (URL empty)', () => {
-  test('keeps the GitHub prefilled-issue flow and copy button', async ({ page }) => {
+  test('shows an error, keeps the draft and offers copy without leaving the page', async ({ page, context }) => {
     await seedState(page);
     await openFeedback(page);
+    await expect(page.locator('#feedbackGithubBtn')).toHaveCount(0);
+    await expect(page.locator('#feedbackCopyBtn')).toBeHidden();
+    await expect(page.locator('#feedbackModal .fa-github')).toHaveCount(0);
+
+    let popups = 0;
+    context.on('page', () => { popups += 1; });
+    await page.fill('#feedbackTextarea', 'バックエンド無し');
+    await page.click('#feedbackSubmitBtn');
+
+    await expect(page.locator('#feedbackMessage')).toHaveClass(/text-red-600/);
+    await expect(page.locator('#feedbackMessage')).toContainText('現在フィードバックを送信できません');
     await expect(page.locator('#feedbackCopyBtn')).toBeVisible();
-    await expect(page.locator('#feedbackGithubBtn')).toBeHidden();
-    await expect(page.locator('#feedbackSubmitBtn .fa-github')).toHaveCount(1);
+    await expect(page.locator('#feedbackTextarea')).toHaveValue('バックエンド無し');
+    expect(popups).toBe(0);
   });
 });
 
 test.describe('feedback modal with backend (#162)', () => {
-  test('sends directly and links the filed issue', async ({ page }) => {
+  test('one Send posts to the backend in the background (no GitHub path)', async ({ page, context }) => {
     let posted = null;
     await page.route(`${API}/feedback`, async (route) => {
       posted = { body: JSON.parse(route.request().postData()), contentType: route.request().headers()['content-type'] };
@@ -55,17 +67,23 @@ test.describe('feedback modal with backend (#162)', () => {
     await seedState(page, { apiUrl: API });
     await openFeedback(page);
 
-    await expect(page.locator('#feedbackGithubBtn')).toBeVisible();
+    await expect(page.locator('#feedbackGithubBtn')).toHaveCount(0);
     await expect(page.locator('#feedbackCopyBtn')).toBeHidden();
+    await expect(page.locator('#feedbackModal')).not.toContainText('GitHub');
     await expect(page.locator('#feedbackSubmitBtn .fa-paper-plane')).toHaveCount(1);
     await expect(page.locator('#feedbackSubmitBtn')).toContainText('送信');
 
     await page.selectOption('#feedbackCategorySelect', 'bug_report');
     await page.fill('#feedbackTextarea', 'テスト送信です');
+    let popups = 0;
+    context.on('page', () => { popups += 1; });
     await page.click('#feedbackSubmitBtn');
 
-    const link = page.locator('#feedbackMessage a[href="https://github.com/o/r/issues/7"]');
-    await expect(link).toBeVisible();
+    await expect(page.locator('#feedbackMessage')).toHaveClass(/text-teal-600/);
+    await expect(page.locator('#feedbackMessage')).toContainText('送信しました');
+    // No link out to GitHub and no new window: filing happens server-side.
+    await expect(page.locator('#feedbackMessage a')).toHaveCount(0);
+    expect(popups).toBe(0);
     expect(posted.contentType).toMatch(/^text\/plain/);
     expect(posted.body).toMatchObject({ category: 'bug_report', text: 'テスト送信です', lang: 'ja', website: '' });
     expect(posted.body.elapsedMs).toBeGreaterThan(0);
