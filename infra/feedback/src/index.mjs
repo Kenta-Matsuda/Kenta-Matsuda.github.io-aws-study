@@ -488,7 +488,10 @@ async function buildAwsHandler() {
         .then((r) => r.Parameter?.Value || null)
         .catch((err) => {
           // Missing parameter = "issue filing not set up yet"; feedback is still stored.
-          console.warn('github_token_unavailable', err?.name);
+          // Anything else (e.g. AccessDenied because GITHUB_TOKEN_PARAM points at a
+          // different name than the stored token) is a misconfiguration.
+          const log = err?.name === 'ParameterNotFound' ? console.warn : console.error;
+          log('github_token_unavailable', err?.name, process.env.GITHUB_TOKEN_PARAM);
           tokenPromise = null;
           return null;
         });
