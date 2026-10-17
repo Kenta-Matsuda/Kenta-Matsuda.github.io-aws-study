@@ -39,6 +39,7 @@ import {
   markExamCelebrated,
 } from './storage.js';
 import { clearVote, getExistingVote, submitVote } from './votes.js';
+import { initLeaderboardUi } from './leaderboardUi.js';
 import { encodeFeedbackImage, isFeedbackApiEnabled, MAX_FEEDBACK_IMAGES, sendFeedback } from './feedbackApi.js';
 import { quizHistoryToCsv } from './quizCsv.js';
 import { taskStatementLines, taskStatementCopyText } from './roadmapTaskStatement.js';
@@ -2033,6 +2034,9 @@ export function initApp({ exams, getExamById, defaultExamId }) {
 
   // ── Settings Modal: opt-in local study reminder ──
   wireStudyReminder(els);
+
+  // ── Global XP leaderboard (issue #32, opt-in) ──
+  initLeaderboardUi();
 
   // ── Dashboard: planned exam date countdown (issue #200) ──
   wireExamDateControls(els);

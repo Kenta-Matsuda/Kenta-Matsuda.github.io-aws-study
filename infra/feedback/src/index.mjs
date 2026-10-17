@@ -13,6 +13,8 @@
 //   POST /events    { events: [{ type, at, examId, mode, setId, questionId, taskId, unitId, ... }] }
 //     -> appends per-question learning events (issue #225 design §9) for
 //        aggregation by exam + unit/task. Ids only; no question text.
+//   POST /leaderboard/xp, POST /leaderboard/leave, GET /leaderboard?period=...
+//     -> opt-in global XP leaderboard (issue #32), see leaderboard.mjs.
 //   GET  /health
 //
 // CORS is handled by the Function URL config (template.yaml); this handler
@@ -23,6 +25,8 @@
 // so tests can inject fakes for DynamoDB / SSM / fetch / clock.
 
 import { createHash, randomBytes } from 'node:crypto';
+import { HttpError, json } from './http.mjs';
+import { createLeaderboard } from './leaderboard.mjs';
 
 export const FEEDBACK_MAX_LENGTH = 1000;
 export const MAX_URLS_IN_FEEDBACK = 3;
@@ -51,6 +55,8 @@ const RATE_LIMITS = {
   feedback: [600, 3],
   votes: [60, 30],
   events: [60, 60],
+  leaderboard: [60, 20],
+  leaderboard_leave: [600, 5],
 };
 
 const CATEGORIES = {
@@ -67,22 +73,6 @@ const VOTE_META_KEYS = [
   'exam_id', 'ai_kind', 'ai_term', 'ai_task_id', 'ai_task_title', 'domain_id',
   'task_id', 'task_title', 'resource_section', 'resource_title', 'resource_url',
 ];
-
-class HttpError extends Error {
-  constructor(status, code) {
-    super(code);
-    this.status = status;
-    this.code = code;
-  }
-}
-
-function json(status, body) {
-  return {
-    statusCode: status,
-    headers: { 'content-type': 'application/json; charset=utf-8' },
-    body: JSON.stringify(body),
-  };
-}
 
 function clip(value, max) {
   return String(value ?? '').slice(0, max);
@@ -245,7 +235,7 @@ export function buildIssue({ category, text, lang, appVersion, page, imageUrls =
 
 export function createHandler(deps) {
   const {
-    ddb, // { updateItem(params), putItem(params), batchWrite(items) }
+    ddb, // { updateItem, putItem, batchWrite(table, items), transactWrite(items), getItem, query, batchDelete(table, keys) }
     getGithubToken, // async () => string | null
     putImage, // async (key, bytes, contentType) => void
     fetchImpl = fetch,
@@ -280,6 +270,8 @@ export function createHandler(deps) {
       throw err;
     }
   }
+
+  const leaderboard = createLeaderboard({ ddb, table, now, enforceRateLimit });
 
   async function createGithubIssue(issue) {
     const token = await getGithubToken();
@@ -414,23 +406,29 @@ export function createHandler(deps) {
 
     try {
       if (method === 'GET' && path === '/health') return json(200, { ok: true });
-      if (method !== 'POST') throw new HttpError(404, 'not_found');
-
-      // Kill switch: flip ACCEPT_SUBMISSIONS to "false" to stop all writes.
-      if (env.ACCEPT_SUBMISSIONS !== 'true') throw new HttpError(503, 'paused');
+      if (method !== 'POST' && !(method === 'GET' && path === '/leaderboard')) throw new HttpError(404, 'not_found');
 
       // Function URL CORS stops browsers on other origins from reading the
       // response, but not from sending; reject foreign origins outright too.
       const origin = event?.headers?.origin || '';
       if (allowedOrigins.length && !allowedOrigins.includes(origin)) throw new HttpError(403, 'forbidden_origin');
 
+      // Reads (cached per container, no writes) and leaving the leaderboard
+      // (a privacy request) keep working while submissions are paused.
+      if (method === 'GET') return await leaderboard.handleRead(event?.queryStringParameters || {});
+
       const ip = event?.requestContext?.http?.sourceIp || 'unknown';
       const ipHash = hashIp(ip, env.HASH_SALT || '');
       const body = parseBody(event);
+      if (path === '/leaderboard/leave') return await leaderboard.handleLeave(body, ipHash);
+
+      // Kill switch: flip ACCEPT_SUBMISSIONS to "false" to stop all writes.
+      if (env.ACCEPT_SUBMISSIONS !== 'true') throw new HttpError(503, 'paused');
 
       if (path === '/feedback') return await handleFeedback(body, ipHash);
       if (path === '/votes') return await handleVotes(body, ipHash);
       if (path === '/events') return await handleLearningEvents(body, ipHash);
+      if (path === '/leaderboard/xp') return await leaderboard.handleXp(body, ipHash);
       throw new HttpError(404, 'not_found');
     } catch (err) {
       if (err instanceof HttpError) return json(err.status, { ok: false, error: err.code });
@@ -445,7 +443,10 @@ export function createHandler(deps) {
 let cachedHandler = null;
 
 async function buildAwsHandler() {
-  const { DynamoDBClient, UpdateItemCommand, PutItemCommand, BatchWriteItemCommand } = await import('@aws-sdk/client-dynamodb');
+  const {
+    DynamoDBClient, UpdateItemCommand, PutItemCommand, BatchWriteItemCommand,
+    TransactWriteItemsCommand, GetItemCommand, QueryCommand,
+  } = await import('@aws-sdk/client-dynamodb');
   const { SSMClient, GetParameterCommand } = await import('@aws-sdk/client-ssm');
   const { S3Client, PutObjectCommand } = await import('@aws-sdk/client-s3');
   const dynamo = new DynamoDBClient({});
@@ -476,18 +477,24 @@ async function buildAwsHandler() {
     return tokenPromise;
   };
 
+  async function batchWriteRequests(table, requests) {
+    for (let i = 0; i < requests.length; i += 25) {
+      let req = { [table]: requests.slice(i, i + 25) };
+      for (let attempt = 0; attempt < 3 && req && Object.keys(req).length; attempt += 1) {
+        const out = await dynamo.send(new BatchWriteItemCommand({ RequestItems: req }));
+        req = out.UnprocessedItems;
+      }
+    }
+  }
+
   const ddb = {
     updateItem: (p) => dynamo.send(new UpdateItemCommand(p)),
     putItem: (p) => dynamo.send(new PutItemCommand(p)),
-    async batchWrite(table, items) {
-      for (let i = 0; i < items.length; i += 25) {
-        let req = { [table]: items.slice(i, i + 25).map((Item) => ({ PutRequest: { Item } })) };
-        for (let attempt = 0; attempt < 3 && req && Object.keys(req).length; attempt += 1) {
-          const out = await dynamo.send(new BatchWriteItemCommand({ RequestItems: req }));
-          req = out.UnprocessedItems;
-        }
-      }
-    },
+    batchWrite: (table, items) => batchWriteRequests(table, items.map((Item) => ({ PutRequest: { Item } }))),
+    batchDelete: (table, keys) => batchWriteRequests(table, keys.map((Key) => ({ DeleteRequest: { Key } }))),
+    transactWrite: (items) => dynamo.send(new TransactWriteItemsCommand({ TransactItems: items })),
+    getItem: (p) => dynamo.send(new GetItemCommand(p)),
+    query: (p) => dynamo.send(new QueryCommand(p)),
   };
 
   return createHandler({ ddb, getGithubToken, putImage });

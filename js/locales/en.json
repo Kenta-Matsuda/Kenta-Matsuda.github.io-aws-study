@@ -489,6 +489,37 @@
       "failed": "Failed"
     }
   },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "open": "View leaderboard",
+    "periods": {
+      "daily": "Today",
+      "weekly": "This week",
+      "monthly": "This month",
+      "all": "All time"
+    },
+    "settingsLabel": "Global Leaderboard",
+    "optInToggle": "Join the leaderboard",
+    "optInNote": "When on, your username and the XP you earn from now on are sent to the ranking server and shown to everyone. You are identified by an anonymous random ID (no account). Turning it off stops sending and removes you from the current rankings.",
+    "statusOn": "Participating: XP you earn is added to the rankings.",
+    "statusOff": "Not participating. You can still view the rankings.",
+    "statusUnavailable": "The ranking server is not configured, so the leaderboard is unavailable.",
+    "leavePending": "Left the leaderboard. The server could not be reached, so your entry will be removed the next time you are online.",
+    "unavailable": "The leaderboard is not available right now (the ranking server is not configured).",
+    "loading": "Loading rankings...",
+    "error": "Could not load the leaderboard. Check your connection and try again.",
+    "retry": "Retry",
+    "empty": "No one has earned XP in this period yet.",
+    "anonymous": "Anonymous",
+    "you": "You",
+    "myRank": "Your rank: #{{rank}} of {{total}} ({{xp}} XP)",
+    "myRankNone": "You have no XP in this period yet.",
+    "joinCta": "Turn on \"Join the leaderboard\" below to appear in the rankings.",
+    "participants": "{{count}} participants",
+    "periodLabel": "Period {{key}} (UTC)",
+    "resetsAt": "Resets {{time}}",
+    "note": "Rankings reset at 00:00 UTC (09:00 JST); weeks start on Monday. Only XP earned after joining counts, up to {{cap}} XP per day."
+  },
   "examLifecycle": {
     "title": {
       "updating": "{{exam}} is being updated to {{successor}}",

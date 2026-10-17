@@ -1561,6 +1561,10 @@
                                 </div>
                                 <div class="mt-4 text-[11px] font-bold text-gray-500 uppercase tracking-wide" data-i18n="dashboard.xpCarousel.recent">Recent</div>
                                 <div id="xpRecentActions" class="mt-2 space-y-1.5 text-xs text-gray-600"></div>
+                                <!-- Global XP leaderboard (issue #32) -->
+                                <button id="openLeaderboardBtn" type="button" class="mt-4 px-4 py-2 bg-white hover:bg-gray-50 text-indigo-700 border border-indigo-200 rounded-lg text-xs font-bold transition flex items-center gap-2">
+                                    <i class="fas fa-ranking-star"></i> <span data-i18n="leaderboard.open">View leaderboard</span>
+                                </button>
                             </div>
                         </div>
                         <!-- Slide 3: Streak -->
@@ -2015,6 +2019,22 @@
 
                 <hr class="border-gray-200">
 
+                <!-- Global XP leaderboard participation (issue #32, opt-in) -->
+                <div>
+                    <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="leaderboard.settingsLabel">Global Leaderboard</label>
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input id="leaderboardOptInToggle" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
+                        <span class="text-sm text-gray-700" data-i18n="leaderboard.optInToggle">Join the leaderboard</span>
+                    </label>
+                    <p id="leaderboardOptInStatus" class="text-gray-500 text-xs mt-2">-</p>
+                    <p class="text-gray-400 text-xs mt-1">
+                        <i class="fas fa-info-circle mr-1"></i>
+                        <span data-i18n="leaderboard.optInNote">When on, your username and the XP you earn from now on are sent to the ranking server and shown to everyone.</span>
+                    </p>
+                </div>
+
+                <hr class="border-gray-200">
+
                 <!-- AI Provider Switch -->
                 <div>
                     <label class="block text-gray-700 text-sm font-bold mb-2" data-i18n="settings.aiProvider">AI Provider</label>
@@ -2084,6 +2104,40 @@
                 <button id="apiKeySaveBtn" type="button" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors" data-i18n="common.save">
                     Save
                 </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global XP Leaderboard Modal (issue #32) -->
+    <div id="leaderboardModal" class="modal" data-backdrop-close="true">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="flex justify-between items-center p-4 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 rounded-t-xl">
+                <h3 class="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2">
+                    <i class="fas fa-ranking-star text-amber-500"></i> <span data-i18n="leaderboard.title">Leaderboard</span>
+                </h3>
+                <button type="button" data-close-modal="leaderboardModal" class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none" aria-label="Close" data-i18n-aria="common.close">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-4 sm:p-6 space-y-4">
+                <div id="leaderboardTabs" role="tablist" class="grid grid-cols-4 gap-1 rounded-lg border border-gray-200 dark:border-gray-700 p-1">
+                    <button type="button" role="tab" data-lb-period="daily" class="px-2 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-colors" data-i18n="leaderboard.periods.daily">Today</button>
+                    <button type="button" role="tab" data-lb-period="weekly" class="px-2 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-colors" data-i18n="leaderboard.periods.weekly">This week</button>
+                    <button type="button" role="tab" data-lb-period="monthly" class="px-2 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-colors" data-i18n="leaderboard.periods.monthly">This month</button>
+                    <button type="button" role="tab" data-lb-period="all" class="px-2 py-1.5 rounded-md text-xs sm:text-sm font-bold transition-colors" data-i18n="leaderboard.periods.all">All time</button>
+                </div>
+                <p id="leaderboardMeta" class="text-xs text-gray-500 dark:text-gray-400 min-h-[1rem]"></p>
+                <ol id="leaderboardList" class="space-y-1 max-h-[45vh] overflow-y-auto"></ol>
+                <p id="leaderboardMe" class="hidden text-sm font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg px-3 py-2"></p>
+                <div class="rounded-lg border border-gray-200 dark:border-gray-700 p-3">
+                    <label class="flex items-center gap-3 cursor-pointer">
+                        <input id="leaderboardModalOptInToggle" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-indigo-600 focus:ring-indigo-400">
+                        <span class="text-sm text-gray-700 dark:text-gray-200" data-i18n="leaderboard.optInToggle">Join the leaderboard</span>
+                    </label>
+                    <p id="leaderboardModalOptInStatus" class="text-gray-500 dark:text-gray-400 text-xs mt-2">-</p>
+                    <p class="text-gray-400 text-xs mt-1" data-i18n="leaderboard.optInNote">When on, your username and the XP you earn from now on are sent to the ranking server and shown to everyone.</p>
+                </div>
+                <p id="leaderboardNote" class="text-gray-400 text-xs"></p>
             </div>
         </div>
     </div>
