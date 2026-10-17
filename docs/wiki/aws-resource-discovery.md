@@ -1,6 +1,6 @@
 # AWS 公式リソース探索ノウハウ
 
-- 最終更新日: 2026-09-06
+- 最終更新日: 2026-10-16
 - 対象範囲: `js/data/` 配下の学習リソース（`resources[].items[].url` / `urlEn`）を、より良い最新の AWS 公式ドキュメントへ差し替え・追加するための探索ノウハウ
 - 出典/参照: issue #69 / issue #137 / `.kiro/agents/exam-content-maintainer.md` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / AWS 公式ドメイン
 
@@ -291,6 +291,7 @@ https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html   
 
 - SOA-C03 の slug は `sysops-administrator-associate-03` のままですが、**AWS 側の試験名は「AWS Certified CloudOps Engineer - Associate」に変わっています**。`cloudops-engineer-associate-03` は 404 なので slug を推測で書き換えないこと。表示名（`js/data/soa-c03.js` の `title`）が旧称のままかどうかは別途棚卸しが必要です。
 - MLA-C01 は MLA-C02 への更新期間中です（英語版 MLA-C01 は 2026-09-28 まで。日本語・韓国語・簡体字は MLA-C02 の GA まで継続）。試験コードを差し替える前に索引ページで現況を確認すること。
+- 改定・廃止が発表された試験（2026-10-16 時点で MLA-C01 → MLA-C02、SAP-C02 → SAP-C03、DVA-C02 → DVA-C03、ANS-C01 廃止）の日程と出典は `js/data/exam-lifecycle.js` に集約し、サイト上では日付連動のお知らせとして表示しています。SAP-C03 / DVA-C03 の試験ガイドの slug は 2026-10-16 時点で未確認です（`solutions-architect-professional-03` / `developer-associate-03` を推測で書き込まないこと）。手順は [docs/issues/exam-version-lifecycle.md](../issues/exam-version-lifecycle.md)。
 
 ### リンク死活チェックの実行方法（ネットワーク可能な環境）
 
@@ -308,6 +309,7 @@ https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html   
 
 ## 更新履歴
 
+- 2026-10-16: 試験ガイド slug 節に、改定・廃止の予定を `js/data/exam-lifecycle.js` へ集約したことと、SAP-C03 / DVA-C03 の slug が未確認であることを追記（出典: [AWS Training and Certification Blog — September 2026](https://aws.amazon.com/blogs/training-and-certification/september-2026-new-offerings/)）。
 - 2026-09-06: リポジトリオーナーの選定方針を反映し、「試験ガイド文言ドリブンの探索手順（リソース選定の基本方針）」節を新設。試験ガイドのタスクステートメント / 箇条書きを 1 行ずつ分解して語ごとに検索する手順、「良いものが無い」で終わらせないための 9 段のフォールバック順序、カバレッジ目標（1 件以上必須 / 原則 3 件以上 / 2 種別以上）、`scripts/analyze-resource-coverage.mjs` による機械的な確認手順と全 13 試験の実測ベースラインを追記。
 - 2026-09-06: 初のネットワーク接続下での全試験棚卸しを実施し、実測に基づいて大幅に更新。(1) 死活チェックを `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` によるスクリプト実行を必須の第一手とする手順へ変更。(2)「HTTP ステータスだけでは判定できない落とし穴」（ロケールリダイレクト / ソフト 404 / テキストフラグメント陳腐化 / SPA ドメイン / `d1.awsstatic.com` の 403）を追記。(3)「既知の URL 移転パターン」表と「新規顧客の受付を終了したサービスの扱い」節を新設。(4) **従来「本サンドボックス（INTEGRATIONS_ONLY）では外部アクセスができない」と断定していた記述を訂正**し、環境によってネットワークが利用可能である前提に改めた（実行環境に応じて判断し、未検証点を PR に明記する方針へ統一）。
 - 2026-09-03: 初版作成（issue #69）。信頼ドメイン一覧・検索クエリの型・評価基準・死活/鮮度チェックの観点を整理。

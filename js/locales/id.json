@@ -611,5 +611,20 @@
     "report": "Laporkan masalah terjemahan",
     "settingsNote": "Bahasa selain Jepang dan Inggris (teks UI dan konten belajar) diterjemahkan secara otomatis oleh AI. Laporkan kesalahan melalui formulir masukan.",
     "feedbackPrefix": "[Masalah terjemahan] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} akan diperbarui menjadi {{successor}}",
+      "superseded": "{{exam}} telah digantikan oleh {{successor}}",
+      "retiring": "{{exam}} akan dihentikan",
+      "retired": "{{exam}} telah dihentikan"
+    },
+    "badge": {
+      "updating": "Akan diperbarui",
+      "superseded": "Versi lama",
+      "retiring": "Akan dihentikan",
+      "retired": "Dihentikan"
+    },
+    "sources": "Sumber (AWS):"
   }
 }

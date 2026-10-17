@@ -611,5 +611,20 @@
     "report": "Relatar um problema de tradução",
     "settingsNote": "Os idiomas além de japonês e inglês (textos da interface e conteúdo de estudo) são traduzidos automaticamente por IA. Relate erros pelo formulário de feedback.",
     "feedbackPrefix": "[Problema de tradução] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} será atualizado para {{successor}}",
+      "superseded": "{{exam}} foi substituído por {{successor}}",
+      "retiring": "{{exam}} será descontinuado",
+      "retired": "{{exam}} foi descontinuado"
+    },
+    "badge": {
+      "updating": "Em atualização",
+      "superseded": "Versão antiga",
+      "retiring": "Será descontinuado",
+      "retired": "Descontinuado"
+    },
+    "sources": "Fontes (AWS):"
   }
 }

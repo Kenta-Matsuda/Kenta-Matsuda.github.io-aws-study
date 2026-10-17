@@ -35,6 +35,7 @@
 - [カード: 問題生成が参照する「何を問うか」をデータ化する (#225 / PR 5)](issues/cards-225.md)
 - [生成した問題の品質評価: 決定的チェック・Solver・Judge・Editor と回帰評価 (#225 / PR 6)](issues/judge-225.md)
 - [問題単位の学習イベントの蓄積と送信（`/events`） (#225 / PR 7)](issues/learning-events-225.md)
+- [試験バージョンの改定・廃止のお知らせ（対応資格の最新化 2026-10）](issues/exam-version-lifecycle.md)
 
 ## 設計ドキュメント（docs/design/）
 

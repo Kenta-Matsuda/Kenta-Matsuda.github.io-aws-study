@@ -50,6 +50,16 @@ test.describe('locale registry – pure logic (#197)', () => {
         }
         expect(typeof value, `${code}:${key} type`).toBe('string');
         expect(value.trim().length, `${code}:${key} non-empty`).toBeGreaterThan(0);
+        if (code === 'ja') {
+          // ja is human-written alongside en and may phrase a message without some
+          // placeholders (e.g. examLifecycle.title.updating omits {{exam}}), but it
+          // must never use a placeholder en does not provide.
+          const allowed = new Set(placeholders(enValue));
+          for (const name of placeholders(value)) {
+            expect(allowed.has(name), `${code}:${key} placeholder {{${name}}}`).toBe(true);
+          }
+          continue;
+        }
         expect(placeholders(value), `${code}:${key} placeholders`).toEqual(placeholders(enValue));
       }
     }

@@ -9,6 +9,7 @@ import { escapeHtml } from './utils.js';
 import { t } from './i18n.js';
 import { usesJapanesePrompt, promptLanguageName } from './localeContent.js';
 import { getExamCategoryLabel, getExamOfficialRefs, getExamServiceKeywords } from './exams.js';
+import { getExamLifecycleNotice } from './examLifecycle.js';
 import { renderMarkdownToSafeHtml } from './markdown.js';
 import { isStreamingUnsupportedResponse } from './aiErrors.js';
 
@@ -186,7 +187,10 @@ function buildChatSystemPrompt(exam) {
   // injected so the model grounds on the exam guide's target-service list rather
   // than its training-cutoff memory (see issue #202 maintainer follow-up).
   const serviceKeywords = getExamServiceKeywords(exam?.id, { locale: isJa ? 'ja' : 'en' });
-  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords, responseLanguage: promptLanguageName() });
+  // AWS-announced version update / retirement for this exam (js/data/exam-lifecycle.js).
+  // Successor versions such as SAP-C03 may be newer than the model's training data.
+  const lifecycleNotice = getExamLifecycleNotice(exam?.id, { locale: isJa ? 'ja' : 'en' });
+  return buildExamGroundingPrompt(exam, { isJa, categoryLabel, officialRefs, serviceKeywords, lifecycleNotice, responseLanguage: promptLanguageName() });
 }
 
 /**
@@ -198,16 +202,19 @@ function buildChatSystemPrompt(exam) {
  * category label and official refs, this function only assembles the text.
  *
  * @param {{ code?: string, shortLabel?: string, title?: string } | null} exam
- * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[], responseLanguage?: string }} opts
+ * @param {{ isJa: boolean, categoryLabel?: string | null, officialRefs?: Array<{ title: string, url: string }>, serviceKeywords?: string[], lifecycleNotice?: { message: string, successorCode?: string | null, sources?: Array<{ title: string, url: string }> } | null, responseLanguage?: string }} opts
  *   `responseLanguage` (English scaffolding only) names the language to answer
  *   in, e.g. 'Korean (한국어)'; defaults to English.
  * @returns {string}
  */
-export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [], responseLanguage = 'English' } = {}) {
+export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = null, officialRefs = [], serviceKeywords = [], lifecycleNotice = null, responseLanguage = 'English' } = {}) {
   const code = exam?.code || 'AWS';
   const label = exam?.shortLabel || (isJa ? '認定試験' : 'Certification');
   const refs = Array.isArray(officialRefs) ? officialRefs : [];
   const services = Array.isArray(serviceKeywords) ? serviceKeywords.filter(Boolean) : [];
+  const lifecycle = lifecycleNotice && lifecycleNotice.message ? lifecycleNotice : null;
+  const lifecycleSources = Array.isArray(lifecycle?.sources) ? lifecycle.sources : [];
+  const successor = lifecycle?.successorCode || '';
 
   if (!isJa) {
     let prompt =
@@ -224,6 +231,17 @@ export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = nu
         `- Do NOT claim that this exam code or name does not exist, and do NOT deny or rename it, even if it conflicts with your internal knowledge.\n` +
         `- Do NOT substitute or redirect the answer to a different exam (for example, do not swap ${exam.code} for another exam code). If the user asks about this exam, answer about THIS exam only.\n` +
         `- Treat this repository-provided exam definition as more reliable than your own prior knowledge.\n`;
+    }
+    if (lifecycle) {
+      prompt +=
+        `\n[Exam version update / retirement — announced by AWS]\n` +
+        `- ${lifecycle.message}\n` +
+        lifecycleSources.map((source) => `- Source: ${source.title}: ${source.url}\n`).join('') +
+        `- This schedule comes from AWS's official announcements and is authoritative even if it is newer than your knowledge.\n` +
+        (successor
+          ? `- ${successor} is a real, announced exam version. Do NOT claim it does not exist. You may mention ${successor} when explaining this schedule, but keep answering about ${code} unless the user asks about ${successor}.\n`
+          : '') +
+        `- When the user asks which version to take or until when ${code} can be taken, answer from this schedule and its sources.\n`;
     }
     if (refs.length) {
       prompt +=
@@ -266,6 +284,17 @@ export function buildExamGroundingPrompt(exam, { isJa = true, categoryLabel = nu
       `- あなたの内部知識と食い違う場合でも、この試験コードや名称が「存在しない」と決めつけたり、否定・改名したりしないでください。\n` +
       `- 別の試験にすり替えたり誘導したりしないでください（例: ${exam.code} を別の試験コードに置き換えて回答しない）。ユーザーがこの試験について尋ねた場合は、この試験についてのみ回答してください。\n` +
       `- 試験の実在・正式名称・試験コード・区分については、あなたの内部知識よりも、このリポジトリが提供する上記の定義を優先してください。\n\n`;
+  }
+  if (lifecycle) {
+    prompt +=
+      `【試験バージョンの改定・廃止予定（AWS 公式発表）】\n` +
+      `- ${lifecycle.message}\n` +
+      lifecycleSources.map((source) => `- 出典: ${source.title}: ${source.url}\n`).join('') +
+      `- この予定は AWS の公式発表に基づく一次情報です。あなたの知識より新しい情報であっても、こちらを優先してください。\n` +
+      (successor
+        ? `- ${successor} は AWS が発表済みの実在する試験バージョンです。「存在しない」と否定しないでください。この予定を説明するときは ${successor} に触れてかまいませんが、ユーザーが ${successor} について尋ねない限り、回答は ${code} についてのものにしてください。\n`
+        : '') +
+      `- どのバージョンを受験すべきか、${code} をいつまで受験できるかを尋ねられたら、この予定と出典に基づいて回答してください。\n\n`;
   }
   if (refs.length) {
     prompt +=
