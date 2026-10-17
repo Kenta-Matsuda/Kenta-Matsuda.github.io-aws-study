@@ -128,6 +128,14 @@ planning ──(Planner: 通常呼び出し 1 回)──→ writing ──(Write
 
 - 既存 `js/geminiBatch.js` の作成・ポーリングを「ジョブ作成」と「ジョブ再開（名前からポーリング）」に分離する。
 - 現状の「タブを閉じると中断」の警告は、ジョブ名を永続化した時点で不要になる。
+- **実装（PR 6b / #241）**: `js/examBatchChain.js` の `runBatchChain` が `writing → judging → fixing → ready` を回す。作成は `submitGeminiBatch`（`js/geminiBatch.js`）/ `submitAiBatch`（`js/ai.js`）、ポーリングは既存の `pollGeminiBatch` / `resumeAiBatch`。
+  - Solver と Judge は **1 つのジョブ**（1 問あたり 2 リクエスト）。並列実行のため Judge は Solver の解答を見ない（前面経路では見る）。両者は `decideVerdict` で前面経路と同じ規則で統合する。
+  - Editor ジョブは verdict が `fix` の問題だけ。修正版は決定的チェックのみで再確認する（前面経路と同じ）。
+  - 永続化: 段の境界ごとに ExamSet の `questions`（`replaceExamSetQuestions`）と `pipeline` を保存し、ジョブ作成直後に `pipeline.jobName` と `pipeline.pending`（リクエスト番号 → 問題番号・役割の対応）を保存する。Judge / Editor に渡す素材（カード・リソースの要約、設計、正解位置、許可 URL）は `pipeline.slots` にプレーンデータで保存するので、別の訪問でも同じ要求を組み立て直せる。
+  - 再開: 起動時に `isResumableChain` を満たす進行中セット（ジョブ名あり、または `chain: true` で judging / fixing / ready 段）を拾い、保存済みジョブをポーリングするか、段の間で閉じられた場合はその段の要求を作り直して投入する。`markInterruptedExamSets` はこれらを中断扱いにしない。
+  - 失敗時: writer ジョブの失敗はセット失敗。judging / fixing ジョブの失敗はセットを失敗にせず、未査読（`metrics.judgeDegraded: true`）のまま提供する。
+  - 査読の有効・無効は前面経路と同じ `isJudgeEnabled('mock')`（Gemini の本番模擬試験は既定で有効、`asn_pipeline_judge` で上書き）。無効でも構造的に壊れた問題だけは Editor ジョブで直す。
+  - OpenAI は Batch 非対応のため従来どおり前面逐次モード（§6.2 / §6.3）。
 - Batch は現状 Gemini 3 系モデル限定（`isAiBatchEligible`）。料金が半額のため、査読段を足すコストを吸収しやすい。
 
 ### 6.2 前面逐次モード（Batch 非対応時）
@@ -184,7 +192,7 @@ JSON 形式、選択肢 4 つで重複なし、正解位置が指定どおり、
 - Judge は Writer と別プロンプト（可能なら別モデル）。**人間が採点した 30 問程度で Judge を校正**し、閾値を決める。
 - Solver は弱いモデルで足りる（Gemini Flash 系）。
 - 実装（PR 6）での具体化: Solver は **1 回（問題文 + 選択肢。正解・解説は非提示）**とし、「選択肢だけで解ける」手がかり漏れは決定的チェック（正解だけが長い等）で代替してコストを抑えた。合格条件は全軸 ≥ 3 かつ合計 ≥ 18、verdict ≠ reject、accuracy ≥ 3、構造的フラグなし。Solver の不一致は uniqueness ≤ 3 のときだけ fix の根拠。「fix」は Editor 1 回 → 決定的チェックのみで再確認し、直らない構造的不正は破棄、それ以外は指摘付きで提供。
-- 査読は 1 問あたりの呼び出しを 2〜3 倍にするため、**既定では Gemini の本番模擬試験のみ有効**（`localStorage.asn_pipeline_judge = 'on' | 'off'` で上書き）。Batch 経路の査読（Judge/Solver を 2 つ目のジョブとして連鎖）は PR 6b に分けた。
+- 査読は 1 問あたりの呼び出しを 2〜3 倍にするため、**既定では Gemini の本番模擬試験のみ有効**（`localStorage.asn_pipeline_judge = 'on' | 'off'` で上書き）。Batch 経路の査読（Judge/Solver を 2 つ目のジョブとして連鎖）は PR 6b（#241）で実装した（§6.1）。
 
 ### 8.3 実運用データ（事後）
 
@@ -193,6 +201,46 @@ JSON 形式、選択肢 4 つで重複なし、正解位置が指定どおり、
 ### 8.4 生成器の回帰評価
 
 `scripts/eval-exam-pipeline.mjs`（API キーは実行者のもの）: 対象試験で 1 セット生成し、**最大クラスタ ≤ 2、出題単位の網羅率 ≥ 90%、Judge 通過率 ≥ 85%** を満たすかを出力する。プロンプト・モデル・カードを変えたら必ず回す。
+
+### 8.5 Judge の較正（要人間: 採点 + 実 API キー）
+
+ルーブリックの合格閾値（`PASS_MIN_AXIS = 3` / `PASS_MIN_TOTAL = 18`、`js/examJudge.js`）は仮置きであり、人間の採点と突き合わせて決める。ツールは `scripts/judge-calibration.mjs`（統計は `scripts/lib/judge-calibration-stats.mjs`、テストは `tests/judge-calibration.spec.mjs`）。**スクリプトは結果を作らない**: 人間の採点表が空なら計算せずに終了する。出力物（生成問題・採点）はリポジトリ外に置く（例: `C:/Users/Public/asn-calib/`）。
+
+```bash
+# 1) 素材（Judge 有効・却下も残す。実キーが必要）
+GEMINI_API_KEY=... node scripts/eval-exam-pipeline.mjs --exam aib-c01 --count 20 --out C:/Users/Public/asn-calib/aib.json
+GEMINI_API_KEY=... node scripts/eval-exam-pipeline.mjs --exam saa-c03 --count 20 --out C:/Users/Public/asn-calib/saa.json
+
+# 2) 30 問を Judge の結論（pass / fix / reject / unjudged）で層化抽出（API 不要・seed で再現可能）
+node scripts/judge-calibration.mjs sample --from C:/Users/Public/asn-calib/aib.json,C:/Users/Public/asn-calib/saa.json --n 30 --seed 1 --out C:/Users/Public/asn-calib/calib
+#   → items.md（人間用の冊子。Judge のスコアは載せない）/ human-scores.csv（空の採点表, UTF-8 BOM）
+#     judge-scores.json（Judge 側のスコア）/ sample.json（抽出結果）
+
+# 2') Judge のスコアが無い問題（--no-judge の素材、Editor が修正した問題 = スコアが修正前のもの）だけ Judge を当て直す
+GEMINI_API_KEY=... node scripts/judge-calibration.mjs judge --dir C:/Users/Public/asn-calib/calib
+
+# 3) 人間が items.md を読み、human-scores.csv の各行に 5 軸（1〜5）と verdict（pass|fix|reject）を記入
+
+# 4) 一致度（API 不要）
+node scripts/judge-calibration.mjs agree --dir C:/Users/Public/asn-calib/calib --out C:/Users/Public/asn-calib/calib/agreement.json
+```
+
+`agree` の出力: 軸ごとの完全一致率・±1 一致率・重み付き κ（二次）・Spearman・Judge の甘さ（J−H の平均）、合計点の Spearman、verdict の一致率と混同行列、そして **閾値スイープ**（minAxis 2〜4 × minTotal 12〜25 で「Judge のスコアによる合格」と「人間の pass」の一致率・κ・合格の適合率・再現率、現行値と上位 5 候補）。
+
+判断基準の目安: 各軸の κ ≥ 0.6 を「十分に一致」とみなす。閾値は**合格の適合率**（Judge が通した問題を人間も pass とする割合）を優先して選ぶ（通過した問題が学習者に届くため）。候補が現行値を明確に上回るときだけ `PASS_MIN_*` を変更し、変更したら §8.6 の回帰評価を回す。結果は日付・モデル名・採点者数とともに本節の末尾に追記する。
+
+### 8.6 実 API でのベースライン計測（要人間: 実 API キー）
+
+```bash
+GEMINI_API_KEY=... node scripts/eval-exam-pipeline.mjs --exam aib-c01 --count 65 --mode mock --out C:/Users/Public/asn-calib/baseline-aib.json
+GEMINI_API_KEY=... node scripts/eval-exam-pipeline.mjs --exam saa-c03 --count 65 --mode mock --out C:/Users/Public/asn-calib/baseline-saa.json
+```
+
+記録する値（`--- metrics ---` の出力）: 日付・モデル名（`js/config.js` の候補のうち実際に使われたもの）・カード在庫（起動行の `cards=`）・`largestCluster`（目標 ≤ 2）・網羅率（目標 ≥ 90%）・`passRate`（目標 ≥ 85%）・`rejected` / `fixed`・`calls`・概算トークン・所要時間。値は本節末尾の表に追記する（JSON は大きいのでコミットしない）。Batch 経路（§6.1）は eval スクリプトでは通らない（前面経路で同じ Judge / Solver / Editor を使う）。
+
+| 日付 | 試験 | モデル | カード | largestCluster | 網羅率 | passRate | rejected / fixed | calls | 所要 |
+|---|---|---|---|---|---|---|---|---|---|
+| （未計測） | | | | | | | | | |
 
 ## 9. 集計イベントとバックエンド連携
 
@@ -218,11 +266,12 @@ JSON 形式、選択肢 4 つで重複なし、正解位置が指定どおり、
 | 4 | パイプライン本体（Blueprint / Planner / Writer / 決定的チェック）。カード無しでも動く | Planner 1 回 + Writer N 回の E2E、重複再生成の単体テスト |
 | 5 | カードのスキーマ・在庫検査・採掘モード・AIB と SAA の初回カード | `check-card-coverage` 合格、人間レビュー済み |
 | 6 | Judge / Solver / Editor、メトリクス表示、回帰評価スクリプト | AIB で最大クラスタ ≤ 2 を実測 |
+| 6b | Solver / Judge / Editor を Batch ジョブの連鎖に（#241）、Judge 較正ツール | 再読込をまたいで査読ジョブが再開する E2E（スタブ）、連鎖の単体テスト |
 | 7 | 集計イベントと sink、`/events` 連携、Amazon Quick 向け export | 別セッションのバックエンドとの疎通 |
 
 ## 11. 未決事項・リスク
 
-- Judge の校正用に人間が採点する 30 問の確保（いつ・どこで）。
+- Judge の校正用に人間が採点する 30 問の確保（いつ・どこで）。ツールと手順は §8.5 に用意済み（#241）。
 - Batch の対象モデルが Gemini 3 系に限られること。利用者のモデル設定次第で前面逐次モードに落ちる。
 - カード採掘の品質（ブログの構成を誤読する）。人間レビューを必須にして吸収する。
 - `js/ui.js` が巨大で、別セッション（フィードバック機能）と同時に触っている。本設計の実装は新モジュール中心にし、`ui.js` の変更を薄く保つ。

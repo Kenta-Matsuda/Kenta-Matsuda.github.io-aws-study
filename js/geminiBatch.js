@@ -101,6 +101,38 @@ export async function callGeminiBatch({
     return { texts: [], errors: [] };
   }
 
+  const batchName = await submitGeminiBatch({ model, requests, displayName });
+  onCreated?.({ name: batchName });
+
+  onProgress?.({
+    state: 'JOB_STATE_PENDING',
+    done: 0,
+    total: requests.length,
+    failed: 0,
+    pending: requests.length,
+  });
+
+  // 2) Poll for completion
+  const result = await pollGeminiBatch({ name: batchName, total: requests.length, onProgress, pollIntervalMs, shouldAbort });
+  return { ...result, name: batchName };
+}
+
+/**
+ * Create a batch job and return its resource name without waiting for it.
+ *
+ * Used by the job chain (js/examBatchChain.js, PR 6b) where each stage's job
+ * name is persisted first and polled separately — possibly on a later visit.
+ *
+ * @param {{ model: string, requests: BatchRequestItem[], displayName?: string }} opts
+ * @returns {Promise<string>} resource name ("batches/…")
+ * @throws {Error} with `status` when the create call fails (e.g. 400 FAILED_PRECONDITION
+ *   for keys without Batch access)
+ */
+export async function submitGeminiBatch({ model, requests, displayName }) {
+  const apiKey = getApiKey();
+  if (!apiKey) throw new Error('API キーが設定されていません。');
+  if (!Array.isArray(requests) || requests.length === 0) throw new Error('バッチに含めるリクエストがありません。');
+
   // Build inline requests payload
   const inlineRequests = requests.map((r, i) => {
     const contents = [];
@@ -177,20 +209,8 @@ export async function callGeminiBatch({
     throw new Error('バッチジョブのリソース名を取得できませんでした。');
   }
   // eslint-disable-next-line no-console
-  console.log('[geminiBatch] polling resource:', batchName);
-  onCreated?.({ name: batchName });
-
-  onProgress?.({
-    state: 'JOB_STATE_PENDING',
-    done: 0,
-    total: requests.length,
-    failed: 0,
-    pending: requests.length,
-  });
-
-  // 2) Poll for completion
-  const result = await pollGeminiBatch({ name: batchName, total: requests.length, onProgress, pollIntervalMs, shouldAbort });
-  return { ...result, name: batchName };
+  console.log('[geminiBatch] created resource:', batchName);
+  return batchName;
 }
 
 // Tests shorten the poll interval through this global; production uses 5 s.
