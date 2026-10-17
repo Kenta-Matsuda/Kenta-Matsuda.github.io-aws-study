@@ -5,11 +5,10 @@
 - 生成元: `scripts/list-action-required.mjs`（各ファイルの冒頭ステータス行・タイトル・種別・関連 issue を機械的に抽出）。`node scripts/list-action-required.mjs --write` で再生成できます。手で編集せず、元ファイルを直してから再生成してください。
 - 出典/参照: issue #184 / `docs/action-required/README.md`
 
-未対応: 15 件 / 完了: 0 件 / 合計: 15 件
+未対応: 13 件 / 完了: 0 件 / 合計: 13 件
 
 ## 未対応（要対応）
 
-- [ ] [ANS-C01 基準のリソース見直し（2026-10-17）で追加した URL の HTTP 確認と内容確認](exam-resource-review-2026-10-verification.md) — 🔴 未対応（要対応） / 種別: 手動確認（ネットワーク要 / リンクの死活チェックと本文の確認） — 関連: #69（棚卸し）/ #190（試験ガイドの Web 版）/ ブランチ `ccr-401565f2-65wnfo`（PR 未作成）
 - [ ] [グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）](global-leaderboard.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） — 関連: #32
 - [ ] [バックエンド実装計画（コマンドレベルの具体案 / 人間対応事項を含む）](issue-117-backend-implementation-plan.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ） — 関連: #117 と関連 #109 #119 #32 #107
 - [ ] [サイトを離れても続くバックグラウンド問題生成と、完了時のプッシュ通知](issue-119-background-generation-notifications.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / Web Push サービス） — 関連: #119（関連: #117 バックエンド化アンブレラ / #107 ストリーク用プッシュ通知）
@@ -18,7 +17,6 @@
 - [ ] [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ / GitHub App の資格情報管理） — 関連: #162（本件） / #101 #100（クライアント側で下げられる摩擦は対応済み: [フィードバックのハードルを下げる](../issues/feedback-nudge-and-account-free.md)） / #166（画像添付の自動化も同じ経路に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
 - [ ] [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / 検索基盤 / API 提供）。一部要素はクライアント側で個別提供可能。 — 関連: #165 / PR #180（関連 #117 #167）
 - [ ] [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ / データ保持方針） — 関連: #167（本件） / #162（同じ API 基盤に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
-- [ ] [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 種別: 手動確認（ネットワーク越しの AWS 試験ガイド Web ページ参照が必要） — 関連: #190 / PR #195
 - [ ] [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / 翻訳ソース・品質基準の決定 / 翻訳コンテンツのオーナーシップ） — 関連: #197
 - [ ] [推奨リソースに基づく模擬試験の生成（エージェント型パイプラインの検討）](issue-225-resource-grounded-exam-generation.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / LLM トークンコスト・プロバイダ方針の決定。AWS 操作は現段階では不要） — 関連: #225（関連 #109 #138 #124 / `mcp-grounding-llm-judge.md` / `issue-138-ai-chat-exam-grounding.md`）
 - [ ] [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンドプロキシ / LLM パイプライン） — 関連: #109

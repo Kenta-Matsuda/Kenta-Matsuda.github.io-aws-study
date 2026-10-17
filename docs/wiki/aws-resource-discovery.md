@@ -223,12 +223,27 @@ node scripts/list-aws-doc-pages.mjs <guide-url> --anchors
 | --- | --- | --- | --- |
 | AI/ML 系プロダクトページの `ai/` 配下への再編 | `aws.amazon.com/machine-learning/`<br>`aws.amazon.com/machine-learning/ai-services/`<br>`aws.amazon.com/machine-learning/responsible-ai/`<br>`aws.amazon.com/generative-ai/use-cases/` | `aws.amazon.com/ai/machine-learning/`<br>`aws.amazon.com/ai/services/`<br>`aws.amazon.com/ai/responsible-ai/`<br>`aws.amazon.com/ai/generative-ai/use-cases/` | 恒久リダイレクトあり |
 | SageMaker プロダクトページの `sagemaker/ai/` 配下への再編 | `aws.amazon.com/sagemaker/clarify/`<br>`aws.amazon.com/sagemaker/ml-governance/` | `aws.amazon.com/sagemaker/ai/clarify/`<br>`aws.amazon.com/sagemaker/ai/ml-governance/` | `sagemaker-ai/...` ではなく `sagemaker/ai/...` |
-| 意思決定ガイドのフラット化 | `docs.aws.amazon.com/decision-guides/latest/<slug>/<slug>.html` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/<slug>.html` | 2026-10-17 の検索ではストレージの選択が新形式（`decision-guides/choosing-aws-storage-service.html`）、分析と IoT の選択は旧形式で出た。ガイドごとに検索で確かめる。例: `waf-or-shield.html` / `genai-guide.html`。日本語版は無く `ja_jp/` を付けても英語ページへ寄せられる |
+| 意思決定ガイドのフラット化 | `docs.aws.amazon.com/decision-guides/latest/<slug>/<slug>.html` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/<slug>.html` | 2026-10-17 の検索ではストレージの選択が新形式（`decision-guides/choosing-aws-storage-service.html`）、分析と IoT の選択は旧形式で出た。ガイドごとに検索で確かめる。例: `waf-or-shield.html` / `genai-guide.html`。旧形式の URL は新形式へ転送される（2026-10-17 に分析の選択で実測）。**2026-10-17 の実測では `ja_jp/decision-guides/latest/decision-guides/...` に機械翻訳の日本語版がある**（以前の「日本語版は無い」は古い情報）。`url` は日本語版、題名は実際のページ題にする |
 | 意思決定ガイドの `aws.amazon.com/getting-started/` からの移設 | `aws.amazon.com/getting-started/decision-guides/...` | `docs.aws.amazon.com/decision-guides/latest/decision-guides/...` | 旧 URL は **404** |
 | ElastiCache ドキュメントのガイド統合 | `.../AmazonElastiCache/latest/red-ug/*`<br>`.../AmazonElastiCache/latest/UserGuide/*` | `.../AmazonElastiCache/latest/dg/*` | Redis/Memcached 別ガイドが `dg` に統合 |
 | Skill Builder の移転 | `explore.skillbuilder.aws/learn/course/internal/view/elearning/<id>/<slug>` | （個別コース URL は未確定） | 旧 URL は `skillbuilder.aws/search?searchText=<slug>&showRedirectNotFoundBanner=true` へ飛ぶ。**`showRedirectNotFoundBanner=true` は AWS 自身が「移行先を見つけられなかった」と示すフラグ**であり、旧コース ID が失効した確定的な証拠。SPA なのでステータスでは検証できない |
 | Amazon Quick（旧 Quick Suite） | `aws.amazon.com/quicksuite/` | `aws.amazon.com/quick/` | AIB-C01 試験ガイドの表記も「Amazon Quick」 |
 | Lambda 開発者ガイドのページ題（URL は不変） | 「Lambda functions」 | 「Lambda Event Functions」（例: `Best practices for working with AWS Lambda Event Functions`） | 2026-10-17 の検索結果で、`lambda/latest/dg/` の多くのページ題がこの表記になっていることを確認。`titleEn` は実際のページ題に合わせる（誤記と見なして「Lambda functions」に戻さない） |
+| Builders' Library の Builder Center への移転（2026-10-17 実測） | `aws.amazon.com/(jp/)builders-library/<slug>/` | `builder.aws.com/content/<id>/<slug>` | 英語の記事だけ。`/jp/` の旧 URL も英語の記事へ転送されるか、空のページになる。`url` に builder.aws.com の URL を入れ、`urlEn` は付けず note に「英語」と書く |
+| 英語版が廃止されたホワイトペーパー（2026-10-17 実測） | `whitepapers/latest/aws-security-incident-response-guide/*`<br>`whitepapers/latest/guidelines-for-implementing-aws-waf/*`<br>`whitepapers/latest/model-explainability-aws-ai-ml/*` | IR ガイド → `security-ir/latest/userguide/` のトップ<br>WAF ガイド → WAF 開発者ガイドのトップ<br>説明可能性 → 告知ページ 1 枚 | 英語版はページ単位でもトップへ転送される（ソフト 404）。日本語版だけ古いまま残っていることがある。代わりに Well-Architected のセキュリティの柱（SEC10 / 検出）や責任ある AI レンズの該当 BP を使う。`how-aws-pricing-works` は本文に「歴史的な参照のみ」と表示されるので `recommend` を付けない |
+| Serverless 開発者ガイドの廃止（2026-10-17 実測） | `serverless/latest/devguide/*` | 意思決定ガイド `choosing-aws-serverless-service.html` | ページ単位の後継は無い |
+| Bedrock の継続的事前トレーニングの終了（2026-10-17 実測） | `bedrock/latest/userguide/dataset-prep-continued-pretraining.html` | Amazon Nova の `nova/latest/userguide/nova-cpt.html` | Bedrock のカスタマイズは SFT / RFT / 蒸留だけになった |
+| Security Hub の新サービス化（2026-10-17 実測） | `securityhub/latest/userguide/what-is-securityhub.html`（題名が「AWS Security Hub CSPM の概要」に） | `securityhub/latest/userguide/what-is-securityhub-v2.html`（新しい AWS Security Hub） | オーナーの判断で新しい Security Hub に統一。CSPM のコントロール・標準の話だけ「Security Hub CSPM」と明記して残す |
+| Performance Insights の CloudWatch Database Insights への移行（2026-10-17 実測） | `AmazonRDS/latest/UserGuide/USER_PerfInsights.html` | `AmazonRDS/latest/UserGuide/USER_DatabaseInsights.html` | 旧ページの題名も Database Insights に変わっている。Database Insights を主にし、Performance Insights は移行の注記付き・`recommend` なし |
+| ガイドのディレクトリ URL | `prescriptive-guidance/latest/<guide>/`、`whitepapers/latest/<paper>/` | `introduction.html` / `welcome.html` / `abstract-and-introduction.html` など、ガイドごとに違う | ディレクトリ URL は中身の無い JS / meta refresh のスタブ。日本語版と英語版で 1 ページ目のファイル名が違うことがある（例: 大規模移行ガイドは日本語 `welcome.html`、英語 `introduction.html`） |
+| 試験ガイドの改訂履歴のページ | `<slug>/<slug>-revisions.html` | `<slug>/<略号>-revisions.html`（例: `soa-03-revisions.html`、`aif-01-revisions.html`） | 前者はスタブ。改訂履歴のページが無い試験もある |
+| MLA-C01 の英語の試験ガイド（2026-10-17 実測） | `aws-certification/latest/machine-learning-engineer-associate-01/...`（英語） | 英語は 404（MLA-C02 へ切り替え）。C01 の英語は `d1.awsstatic.com` の PDF だけ残っている | 日本語の HTML 版は残っている |
+
+### Black Belt 一覧ページの照合の注意（2026-10-17 実測）
+
+- 一覧の表は「日付 → 題名 → PDF / YouTube」の順に並ぶ。日付のセルは題名の**前**にあるので、題名の後ろの日付を読むと次の行の日付を拾ってしまう（Lambda Part1 を 2018/02 = Lambda@Edge の日付と誤った例がある）。
+- テキストフラグメントは**ページ上で最初に一致した文字列**へ飛ぶ。サービス名だけ（「Amazon Bedrock」「AWS DataSync」「Amazon GuardDuty」「AWS Control Tower」「Amazon QuickSight」）だと、前方一致する別の回（新しい回や Archived の回）に当たる。正式な題名全体にするか、`#:~:text=2024/09-,AWS%20DataSync,-PDF` のように日付と後ろの語を付けて特定する。
+- Archived の表記、PDF だけか YouTube もあるか、日付は、一覧の表から機械的に読み取って全試験で揃える（同じ資料が試験ごとに違う日付・表記になりやすい）。Archived の資料には `recommend` を付けない。
 
 ## 「新規顧客の受付を終了」したサービスの扱い（重要）
 
@@ -394,6 +409,7 @@ https://docs.aws.amazon.com/ja_jp/aws-certification/latest/<slug>/<slug>.html   
 
 ## 更新履歴
 
+- 2026-10-17: ネットワークが使える環境で PR #246 の未確認事項（全 URL の HTTP 確認、題名と note の本文確認、試験ガイドの文言照合、Black Belt の照合）を確認した結果から、「既知の URL 移転パターン」表に Builders' Library の移転、英語版が廃止されたホワイトペーパー、Serverless 開発者ガイドの廃止、Bedrock の継続的事前トレーニングの終了、Security Hub の新サービス化、Database Insights への移行、ディレクトリ URL のスタブ、改訂履歴のページの URL、MLA-C01 の英語ガイドの廃止を追記。意思決定ガイドに日本語版（機械翻訳）があることに訂正。「Black Belt 一覧ページの照合の注意」を新設。
 - 2026-10-17: リポジトリオーナーの追加の指示（「製品ページも使っていいが、AWS 公式の資料で、読み手にとって技術的なうまみのある資料にしたい。具体的に技術的な得られる学びがないなら含めない」）を、「ANS-C01 基準のリソースレビュー」節の判定 1 に大前提として追記（中身のあるプロダクトページは可。ハブ・ツールのトップ・検索結果・AWS 以外のサイトは載せない。試験の申し込みなど試験の情報は別扱い）。AIB-C01 の例外にも同じ具体性の条件を追記。CodeCommit の一般提供への復帰を受け、#150 / #151 で外した CodeCommit 前提の CI/CD 資料を DOP-C02 / DVA-C02 に戻した（撤回された元のブログ記事の代わりに、CodePipeline の CodeCommit チュートリアルなど公式ドキュメントを使用）。
 - 2026-10-17: 「新規顧客の受付を終了」したサービスの節に、Incident Manager の受付終了（2025-11-07）、SageMaker Role Manager の受付終了（2026-07-30）と、CodeCommit の一般提供への復帰（2025-11-24、受付終了の扱いを訂正）を追記。試験ガイドで名指しされている受付終了サービスの例外掲載の一覧（MLA-C01 の SageMaker 4 機能、CLF-C02 / AIF-C01 の Audit Manager を追加）を明記。続けて Amazon A2I の受付終了（2026-07-30）と例外掲載（AIF-C01 4.1）を追記し、「試験ガイドに名前が無い受付終了サービスの資料を新しく足さない」方針を追加（AIP-C01 3.3 の Audit Manager と AIB-C01 1.2 の Bedrock Agents を差し替え）。「既知の URL 移転パターン」表に、Lambda 開発者ガイドのページ題が「Lambda Event Functions」になったことと、意思決定ガイドが旧形式・新形式の両方で出ることを追記。
 - 2026-10-17: 「ANS-C01 基準のリソースレビュー（技術的な学び / recommend の判定基準）」節を新設（リポジトリオーナーの指示: ANS-C01 を基準に全試験のリソースと recommend を見直す。AIB-C01 は技術的な学びを重視しない）。ANS-C01 の実測プロファイル、残す / 外すの基準、密度の目安、recommend の基準、AIB の例外、書式、ネットワーク制限下での URL の確かめ方を記載。

@@ -19,19 +19,19 @@
 
 | 試験コード | データファイル | 最終棚卸し日 | 状態 | URL 数 | 修正 PR | 備考 |
 | --- | --- | --- | --- | --- | --- | --- |
-| AIB-C01 | `js/data/aib-c01.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 185 (150) | #143 | SageMaker Clarify のソフト 404 を後継ページへ。Clarify / Model Monitor は**新規顧客の受付終了**のため `recommend` を外し注記。Bedrock Evaluations とスコープ内サービス一覧を追加。Quick Suite → Quick に改称。保留: Skill Builder 2 件（ステップ 3 とステップ 5 が同一 URL） Bedrock Agents を後継の AgentCore へ差し替え。Clarify / Model Monitor は受付終了のため削除し Bedrock Guardrails を追加。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 54 → 108）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| AIF-C01 | `js/data/aif-c01.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 248 (203) | #144 | 廃止済み Amazon Machine Learning のガイドを現行解説ページへ。AI/ML・SageMaker プロダクトページの再編に追随。保留: Skill Builder 3 件 Bedrock Agents を AgentCore へ、Model Monitor を SageMaker AI MLflow へ差し替え。Clarify は削除し責任ある AI レンズを追加。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 66 → 139）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| AIP-C01 | `js/data/aip-c01.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 329 (261) | #145 | 403 の PDF 試験ガイドをドキュメント版へ。Bedrock 5 ページの再編に追随。Black Belt の IAM フラグメントを実表記へ。404 の RAG ブログを削除。保留: 削除ブログの代替候補 3 件・`troubleshooting` → `monitoring` の妥当性・Skill Builder 2 件 Bedrock Agents を AgentCore へ、Amazon Q Business を後継の Amazon Quick へ差し替え。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 68 → 196）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| ANS-C01 | `js/data/ans-c01.js` | 2026-09-06 | 棚卸し済み / 保留あり | 276 (245) | #146 | リポジトリ最大のファイル。404 の Route 53 Resolver ブログを同ファイル内で生きている `/blogs/security/` 版へ。TGW ソリューションと意思決定ガイドの移転に追随。保留: Skill Builder 3 件 |
-| CLF-C02 | `js/data/clf-c02.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） | 288 (258) | #147 | **Migration Hub のプロダクトページが AWS Transform へ転送される誤誘導**を公式ドキュメントで是正。404 のコンピューティング意思決定ガイドを docs 側へ。Snow ファミリー → Snowball に改称 Migration Hub は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 110 → 157）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| DEA-C01 | `js/data/dea-c01.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 317 (274) | #149 | Black Belt のテキストフラグメント 3 件を実表記へ。Lake Formation の権限 / アクセス制御ページのソフト 404 を後継ページへ。保留: Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 71 → 179）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| DOP-C02 | `js/data/dop-c02.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 364 (315) | #150 | **撤回済みの CodeCommit CI/CD ブログ**（当時 CodeCommit は新規受付終了。2025-11-24 に一般提供へ復帰したため 2026-10-17 に訂正）を現行記事 + 公式チュートリアルへ。404 の DR ブログを `/blogs/architecture/` 版へ。保留: CI/CD ブログの選定・Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 90 → 191）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| DVA-C02 | `js/data/dva-c02.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 250 (230) | #151 | 撤回済み CodeCommit CI/CD ブログを差し替え（CodeCommit は 2025-11-24 に一般提供へ復帰。2026-10-17 に訂正）。ElastiCache `red-ug` → `dg` 統合、Lambda 2 ページのリネームに追随。保留: CI/CD ブログの選定・Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 93 → 147）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| MLA-C01 | `js/data/mla-c01.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 224 (210) | #152 | 403 の PDF 試験ガイドをドキュメント版へ。ML Lens が**単一ページ構成に再編**され `mlops.html` が消失したためレンズ本体へ。Black Belt の CodePipeline フラグメントを実表記へ。保留: 当該項目の表示名・PDF の閲覧可否・Skill Builder 2 件 受付終了の SageMaker 機能 6 項目（Ground Truth / Clarify ×3 / Debugger / Model Monitor）を削除し MLflow と CloudWatch モニタリングを追加。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 63 → 126）。タスクステートメントで名指しされている受付終了の SageMaker 機能（Ground Truth / Clarify / Debugger / Model Monitor / Role Manager）は、注記付き・recommend なしで掲載に戻した。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| SAA-C03 | `js/data/saa-c03.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 267 (244) | #153 | 404 のコンピューティング意思決定ガイドを docs 側へ。ElastiCache / DynamoDB / VPC エンドポイントのリネームに追随。保留: Skill Builder 3 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 63 → 159）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| SAP-C02 | `js/data/sap-c02.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 360 (292) | #154 | **Prescriptive Guidance 5 ガイド**の `welcome.html` 移動に追随（3 件は 404）。後継のないデータ転送ページを移行意思決定ガイドへ。保留: 当該差し替え先・Skill Builder 2 件 Migration Hub は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 117 → 209）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| SCS-C03 | `js/data/scs-c03.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 315 (299) | #155 | 13 試験で**最も不具合が少なかった**（修正 5 箇所）。Security Reference Architecture / インシデント対応ガイドのソフト 404 を是正。保留: Skill Builder が**SCS-C02 版**を指している点・Skill Builder 2 件 Audit Manager は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。インシデント対応ガイドは後継の AWS Security Incident Response ユーザーガイドへ差し替え。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 64 → 181）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
-| SOA-C03 | `js/data/soa-c03.js` | 2026-09-06 | 要対応（新 URL は HTTP 未確認） / 保留あり | 285 (281) | #156 | 削除済みの SSM 運用イベント自動化ブログを現行記事 + 公式ドキュメントへ。ElastiCache / VPC エンドポイントのリネームに追随。保留: Skill Builder が**SOA-C02 版**を指している点・差し替えブログの選定・Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 43 → 147）。新しい URL は HTTP 未確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）。 |
+| AIB-C01 | `js/data/aib-c01.js` | 2026-10-17 | 棚卸し済み / 保留あり | 182 (147) | #143 | SageMaker Clarify のソフト 404 を後継ページへ。Clarify / Model Monitor は**新規顧客の受付終了**のため `recommend` を外し注記。Bedrock Evaluations とスコープ内サービス一覧を追加。Quick Suite → Quick に改称。保留: Skill Builder 2 件（ステップ 3 とステップ 5 が同一 URL） Bedrock Agents を後継の AgentCore へ差し替え。Clarify / Model Monitor は受付終了のため削除し Bedrock Guardrails を追加。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 54 → 108）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| AIF-C01 | `js/data/aif-c01.js` | 2026-10-17 | 棚卸し済み / 保留あり | 276 (221) | #144 | 廃止済み Amazon Machine Learning のガイドを現行解説ページへ。AI/ML・SageMaker プロダクトページの再編に追随。保留: Skill Builder 3 件 Bedrock Agents を AgentCore へ、Model Monitor を SageMaker AI MLflow へ差し替え。Clarify は削除し責任ある AI レンズを追加。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 66 → 139）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| AIP-C01 | `js/data/aip-c01.js` | 2026-10-17 | 棚卸し済み / 保留あり | 329 (262) | #145 | 403 の PDF 試験ガイドをドキュメント版へ。Bedrock 5 ページの再編に追随。Black Belt の IAM フラグメントを実表記へ。404 の RAG ブログを削除。保留: 削除ブログの代替候補 3 件・`troubleshooting` → `monitoring` の妥当性・Skill Builder 2 件 Bedrock Agents を AgentCore へ、Amazon Q Business を後継の Amazon Quick へ差し替え。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 68 → 196）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| ANS-C01 | `js/data/ans-c01.js` | 2026-10-17 | 棚卸し済み / 保留あり | 274 (245) | #146 | リポジトリ最大のファイル。404 の Route 53 Resolver ブログを同ファイル内で生きている `/blogs/security/` 版へ。TGW ソリューションと意思決定ガイドの移転に追随。保留: Skill Builder 3 件 **2026-10-17**: オーナーの判断で、3.2 の重複ブログを削除し、3.3 の題名を URL の記事（ENA Express）に合わせ、タスクステートメントを公式 HTML 版ガイドの文言に揃えた（リソースはそのまま）。 |
+| CLF-C02 | `js/data/clf-c02.js` | 2026-10-17 | 棚卸し済み | 283 (257) | #147 | **Migration Hub のプロダクトページが AWS Transform へ転送される誤誘導**を公式ドキュメントで是正。404 のコンピューティング意思決定ガイドを docs 側へ。Snow ファミリー → Snowball に改称 Migration Hub は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 110 → 157）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| DEA-C01 | `js/data/dea-c01.js` | 2026-10-17 | 棚卸し済み / 保留あり | 323 (277) | #149 | Black Belt のテキストフラグメント 3 件を実表記へ。Lake Formation の権限 / アクセス制御ページのソフト 404 を後継ページへ。保留: Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 71 → 179）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| DOP-C02 | `js/data/dop-c02.js` | 2026-10-17 | 棚卸し済み / 保留あり | 369 (320) | #150 | **撤回済みの CodeCommit CI/CD ブログ**（当時 CodeCommit は新規受付終了。2025-11-24 に一般提供へ復帰したため 2026-10-17 に訂正）を現行記事 + 公式チュートリアルへ。404 の DR ブログを `/blogs/architecture/` 版へ。保留: CI/CD ブログの選定・Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 90 → 191）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| DVA-C02 | `js/data/dva-c02.js` | 2026-10-17 | 棚卸し済み / 保留あり | 272 (250) | #151 | 撤回済み CodeCommit CI/CD ブログを差し替え（CodeCommit は 2025-11-24 に一般提供へ復帰。2026-10-17 に訂正）。ElastiCache `red-ug` → `dg` 統合、Lambda 2 ページのリネームに追随。保留: CI/CD ブログの選定・Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 93 → 147）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| MLA-C01 | `js/data/mla-c01.js` | 2026-10-17 | 棚卸し済み / 保留あり | 224 (210) | #152 | 403 の PDF 試験ガイドをドキュメント版へ。ML Lens が**単一ページ構成に再編**され `mlops.html` が消失したためレンズ本体へ。Black Belt の CodePipeline フラグメントを実表記へ。保留: 当該項目の表示名・PDF の閲覧可否・Skill Builder 2 件 受付終了の SageMaker 機能 6 項目（Ground Truth / Clarify ×3 / Debugger / Model Monitor）を削除し MLflow と CloudWatch モニタリングを追加。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 63 → 126）。タスクステートメントで名指しされている受付終了の SageMaker 機能（Ground Truth / Clarify / Debugger / Model Monitor / Role Manager）は、注記付き・recommend なしで掲載に戻した。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| SAA-C03 | `js/data/saa-c03.js` | 2026-10-17 | 棚卸し済み / 保留あり | 273 (246) | #153 | 404 のコンピューティング意思決定ガイドを docs 側へ。ElastiCache / DynamoDB / VPC エンドポイントのリネームに追随。保留: Skill Builder 3 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 63 → 159）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| SAP-C02 | `js/data/sap-c02.js` | 2026-10-17 | 棚卸し済み / 保留あり | 360 (294) | #154 | **Prescriptive Guidance 5 ガイド**の `welcome.html` 移動に追随（3 件は 404）。後継のないデータ転送ページを移行意思決定ガイドへ。保留: 当該差し替え先・Skill Builder 2 件 Migration Hub は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 117 → 209）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| SCS-C03 | `js/data/scs-c03.js` | 2026-10-17 | 棚卸し済み / 保留あり | 320 (304) | #155 | 13 試験で**最も不具合が少なかった**（修正 5 箇所）。Security Reference Architecture / インシデント対応ガイドのソフト 404 を是正。保留: Skill Builder が**SCS-C02 版**を指している点・Skill Builder 2 件 Audit Manager は受付終了だが試験ガイドのスコープ内のため例外掲載（注記あり）。インシデント対応ガイドは後継の AWS Security Incident Response ユーザーガイドへ差し替え。 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 64 → 181）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
+| SOA-C03 | `js/data/soa-c03.js` | 2026-10-17 | 棚卸し済み / 保留あり | 301 (296) | #156 | 削除済みの SSM 運用イベント自動化ブログを現行記事 + 公式ドキュメントへ。ElastiCache / VPC エンドポイントのリネームに追随。保留: Skill Builder が**SOA-C02 版**を指している点・差し替えブログの選定・Skill Builder 2 件 **2026-10-17**: ANS-C01 基準でタスク別リソースを入れ替え（items 43 → 147）。2026-10-17 に HTTP の死活・題名・note の本文・タスクステートメントの文言（公式 HTML 版ガイド）を確認済み（[HTTP 確認と本文確認](#2026-10-17-http-確認と本文確認)）。 |
 
 > 各行の「保留: Skill Builder N 件」について: 2026-09-06 の第 2 次対応で、AWS 自身の sitemap（`https://skillbuilder.aws/sitemap.xml`）に載っている**試験対策ページの直リンク**を特定し、ANS-C01 / DEA-C01 / DOP-C02 / DVA-C02 / SAA-C03 / SAP-C02 / SCS-C03 / SOA-C03 の 8 試験で検索 URL から差し替えました。残る保留は「公式練習問題集の個別コース URL」と「sitemap に試験対策ページが無い AIF-C01 / AIP-C01 / MLA-C01」です。詳細と要人間対応の範囲は [Skill Builder のコース URL 失効](../action-required/skillbuilder-course-urls.md) を参照してください。
 
@@ -40,7 +40,7 @@
 - 依頼: リポジトリオーナーが全リソースを確認した唯一の試験である ANS-C01 を基準に、ほかの 12 試験のタスク別リソースと `recommend` を見直す。観点は「タスクステートメントに関連する技術的な学びがあるか」。AIB-C01 だけは技術的な学びより、ビジネスの意思決定に役立つかを重視する。判定基準は [AWS 公式リソース探索ノウハウ](aws-resource-discovery.md#ans-c01-基準のリソースレビュー技術的な学び--recommend-の判定基準) にまとめた。
 - ANS-C01 は、試験ガイドのリンク（PDF → HTML 版）以外は変えていない。
 - 進め方は 2 段階。第 1 弾で試験ごとに全タスクを見直し（入口ページとプロダクトページの差し替え、recommend の付け直し、受付終了サービスの扱い）、第 2 弾で、資料の無い箇条書きを検索で補った。
-- **制約**: 作業環境から AWS のドメインへ HTTP でアクセスできなかった。新しい URL は WebSearch の結果に出たものだけを使っており、HTTP の死活は確認していない。そのため上の台帳では 12 試験の状態を「要対応」にしている。確認の手順と対象は [要対応ファイル](../action-required/exam-resource-review-2026-10-verification.md) を参照。
+- **制約（解消済み）**: 見直しの作業環境からは AWS のドメインへ HTTP でアクセスできず、新しい URL は WebSearch の結果だけを根拠にしていた。同日、ネットワークが使える環境で全件を確認した（下の「HTTP 確認と本文確認」）。
 
 | 試験 | items | recommend | 1 タスクの件数（中央値 / 最小 / 最大） | ブログ | 新規 URL（HTTP 未検証） |
 | --- | --- | --- | --- | --- | --- |
@@ -98,10 +98,44 @@
    - 差し替えた: `calculator.aws`（AIB-C01 2.2 / CLF-C02 4.2）→ Pricing Calculator ユーザーガイドの「AWS Pricing Calculator とは」、AWS re:Post のトップ（CLF-C02 4.3）→ ナレッジセンター「AWS のテクニカルサポートを受ける」、`strandsagents.com`（AIP-C01 2.1 / 2.5）→ Prescriptive Guidance「Strands Agents」と ML Blog のマルチエージェントの記事。
    - 足した: CLF-C02 1.1 に AWS の用語解説「クラウドコンピューティングとは」と、Cloud Value Framework のビジネスの俊敏性の記事。
    - 残した（中身のあるプロダクトページ）: FSx の選び方、Bedrock / EC2 の料金とデータ転送料金、`aws.amazon.com/compare/` の比較、`aws.amazon.com/what-is/` の用語解説、責任共有モデル、サポートプランの比較、リージョンとアベイラビリティーゾーン。AIB-C01 の Amazon Quick・責任ある AI・SageMaker の ML ガバナンス・Executive Insights はビジネスの具体的な学びとして残した。
-3. **試験ガイドの改訂をタスクステートメントに反映した**（詳細と要照合の項目は [issue-190 の要対応ファイル](../action-required/issue-190-exam-guide-web-verification.md)）。改訂履歴のページが見つかった AIF-C01（v1.1、2026-04-30）・DVA-C02（v2.1、2024-12-12。知識とスキルを 1 つのスキルのリストに統合）・SOA-C03（v1.1、2026-06-01）を反映し、DEA-C01（v1.1）は反映済み、SCS-C03 は v1.0 のみと確認した。文言は検索結果の要約から復元し、変更した項目の日本語は訳なので、公式の試験ガイドとの照合が必要。
+3. **試験ガイドの改訂をタスクステートメントに反映した**（公式の文言との照合結果は下の「HTTP 確認と本文確認」）。改訂履歴のページが見つかった AIF-C01（v1.1、2026-04-30）・DVA-C02（v2.1、2024-12-12。知識とスキルを 1 つのスキルのリストに統合）・SOA-C03（v1.1、2026-06-01）を反映し、DEA-C01（v1.1）は反映済み、SCS-C03 は v1.0 のみと確認した。文言は検索結果の要約から復元していたが、同日、公式 HTML 版ガイドの日英の文言に全試験で置き換えた（下の「HTTP 確認と本文確認」）。
    - 新しい項目に資料を足した: AIF-C01（トークンベースの料金・AI エージェント・AgentCore Memory・LLM-as-a-judge・ビジネス目標との整合のメトリクス・AgentCore Identity・ガードレールとコンテキストグラウンディングチェック・モデル蒸留・Strands Agents・AgentCore）、DVA-C02（Amazon Q Developer・サーキットブレーカー・OpenSearch Service・Verified Permissions・DynamoDB のきめ細かなアクセスコントロール・CloudWatch Logs Insights）、SOA-C03（Bedrock のモニタリング・AWS DevOps Agent・AWS Security Agent・コンフォーマンスパック）。
    - 試験ガイドから消えた例に対応する資料を外した: AIF-C01 2.3 の PartyRock と Bedrock Data Automation の記事。Amazon Q Developer は 2.3 から 1.3 へ移した。
    - 2 回目の対応後のタスク別リソースは全 13 試験で 2,103 件。
+
+
+### HTTP 確認と本文確認（2026-10-17、ネットワークが使える環境）
+
+見直しの PR（#246）で確認できていなかった点を、ネットワークが使える環境で確認して直した。
+
+- **HTTP の死活**: `node scripts/check-resource-links.mjs --concurrency 10 --fragments` で全 1,994 URL を確認した。
+  - 確認時点の問題は broken 5 / soft-404 23 / redirect 12 で、fragment-miss は 0。
+  - 直した後は broken / soft-404 / redirect / fragment-miss がすべて 0（locale-redirect は地域による `/jp/` への転送で問題なし）。
+  - ディレクトリ形式の URL はすべて中身の無いスタブだったので、1 ページ目の実体ページへ直リンクにした。
+- **タスクステートメントの文言**: 全 13 試験で、公式 HTML 版ガイド（ドメインページの日英）と `title` / `jpTitle` / `description` / `descriptionEn` を機械的に突き合わせ、公式の文言に置き換えた。
+  - 英語はほとんどの試験で、日本語からの訳か PDF 時代の書き方（「Target Knowledge:」「e.g.」）だった。日本語の差は、サービス名の展開や旧訳などが中心。
+  - 公式の日本語はすべての項目にあり、自前の訳は使っていない（AIP-C01 で新しく足した `knowledgeEn` のキーワードだけは自前の英訳）。
+  - 置き換えた後の差分は 0。ただし DEA-C01 は公式の日本語の誤記（「AWSGlue」など）を直して載せている。SCS-C03 5.1.1 の公式英文の誤記（"when connecting to connect to resources"）は、オーナーの判断で公式どおり残した。
+  - MLA-C01 の英語の HTML 版は、MLA-C02 への切り替えで廃止され 404 だった。英語はまだ公開されている C01 の PDF の文言を使い、試験ガイドの `urlEn` も PDF にした。
+  - AIF-C01 の改訂履歴のページ（v1.1）は 1.3.4 に Amazon Q、4.2.2 に SageMaker Clarify を挙げているが、ドメインページには無い。オーナーの判断で、ドメインページに従った。
+  - DVA-C02 の 4 タスクの日本語の見出しは、PR #195 で「本文に揃える」として変えていたものが、実際には公式と違っていたので、公式に戻した（例: 4.2「オブザーバビリティのためのコードの考案」は公式の表記）。
+  - ANS-C01 は、オーナーの判断でタスクステートメントだけ公式に揃えた（リソースはそのまま）。
+- **本文を読まずに書いていた note**: 要対応ファイルに挙げていた項目は、すべて本文を読んで直した。主な訂正は次のとおり。
+  - DEA-C01 の Firehose のアクセス制御（IP の許可の書き方）
+  - CLF-C02 の RDS の責任分担（本文に無かった「クエリのチューニング」を削除）
+  - AIF-C01 の LLM-as-a-judge と AgentCore Identity の note
+  - DevOps Blog「Streamline your GitHub journey with AWS CodePipeline and AWS DevOps Agent」は、主題が AWS DevOps Agent による失敗の原因調査だったので、DVA-C02 では 3.4 から 4.1（デプロイ失敗のトラブルシューティング）へ移した。日本語版は無いので英語の URL だけにした（DVA / DOP / SOA）。
+- **Black Belt**: 一覧ページの表（日付のセルは題名の前にある）を解析し、全試験の資料の日付・Archived・PDF / YouTube の有無・テキストフラグメントの飛び先を照合した。
+  - Lambda Part1 の日付は 2019/04（Archived）。SOA-C03 の 2019/10 と DVA-C02 の 2018/02（Lambda@Edge の日付）はどちらも誤り。
+  - サービス名だけのフラグメントは、同名・前方一致の別の回に当たることがある（例: 「Amazon Bedrock」→ AgentCore runtime Dive Deep、「AWS DataSync」→ 2021/03 の Archived の回、「Amazon GuardDuty」→ Malware Protection for S3、「AWS Control Tower」→ 機能紹介編）。正式名か `日付-,題名,-PDF` の形で特定できるようにした。
+  - Archived になっている資料の表記を揃え、Archived の資料からは `recommend` を外した。QuickSight は、オーナーの判断で「アクションにつながるビジュアルベストプラクティス」（2022/12、Archived）にした（SAA-C03 3.5 / DEA-C01 3.2）。
+- **オーナーの判断（2026-10-17）**: Security Hub は新しい AWS Security Hub のページに統一した（`what-is-securityhub-v2.html` など。CSPM の話をするブログは「Security Hub CSPM」と注記して残した）。SOA-C03 は CloudWatch Database Insights を主にし、Performance Insights は移行の注記付きで `recommend` なし。AWS User Notifications は `recommend` なしで残した。
+- **資料の無かった新しい項目を埋めた**: AIF-C01 のコンテキストエンジニアリング（2.1）・Kiro・Amazon Quick（2.3）、DVA-C02 の Amazon Q Developer によるテスト生成（3.3.6）・ヘルスチェックとレディネスプローブ（4.2.8）、SOA-C03 の Kiro（1.2.1）・Amazon S3 Files（1.3.4）。
+- **CodeCommit の元のブログ記事**（Complete CI/CD with AWS CodeCommit…）は、2026-10-17 も `/products/developer-tools/` へ転送されており、再公開されていない。
+- **確認後の規模**: タスク別リソースは全 13 試験で 2,118 件、`recommend` は 495 件（23%）。各試験 1 タスク 1〜3 件。
+- **残した事項（低優先度）**:
+  - 同じ URL に試験ごとに違う日本語の題名が付いているものが 125 件ある（多くは表記ゆれ）。
+  - `aws.amazon.com/jp/blogs/...` の URL の中には、日本語版が無く英語のページを返すものがある（リンク切れではない）。
 
 
 ## カバレッジ台帳（タスクステートメント単位）
@@ -173,7 +207,7 @@
 
 ドメイン内訳（ユニーク URL 基準、2026-10-17）: `docs.aws.amazon.com` 1,318 / `aws.amazon.com` 598 / `skillbuilder.aws` 30 / `repost.aws` 27 / `www.aws.training` 2 / `calculator.aws` 1 / `www.wellarchitectedlabs.com` 1 / 非 AWS 3（`www.youtube.com` 2 = 検索結果ページ、`strandsagents.com` 1 = AWS 製 OSS の公式サイト）。試験ガイドを HTML 版へ差し替えたため `d1.awsstatic.com` の PDF は 0 件になった。
 
-> サイトのアピール文に使う場合の推奨表現（2026-09-06 の検証済みの値）: 「**AWS 公式ドキュメント約 650 本**（日本語 / 英語のペアを 1 本として集計、13 試験・リソース項目 1,084 件）」。2026-10-17 の値（ユニーク文書 1,168）は、見直しで追加した URL の HTTP 確認（[要対応](../action-required/exam-resource-review-2026-10-verification.md)）が済んでから使うこと。「ユニーク URL」は ja/en を別カウントした数、「ユニークページ」はページ単位（Black Belt 一覧の個別資料を 1 ページに集約）なので、用途に応じて指標を選ぶこと。
+> サイトのアピール文に使う場合の推奨表現（2026-09-06 の検証済みの値）: 「**AWS 公式ドキュメント約 650 本**（日本語 / 英語のペアを 1 本として集計、13 試験・リソース項目 1,084 件）」。2026-10-17 の値（ユニーク文書 1,168。HTTP 確認後に数件増減）は、同日に全 URL の HTTP 確認を済ませたので使ってよい。「ユニーク URL」は ja/en を別カウントした数、「ユニークページ」はページ単位（Black Belt 一覧の個別資料を 1 ページに集約）なので、用途に応じて指標を選ぶこと。
 
 ## 共通定義の注記
 
@@ -209,6 +243,7 @@
 
 ## 更新履歴
 
+- 2026-10-17: 同日 3 回目の対応（ネットワークが使える環境で PR #246 の未確認事項を確認）を「HTTP 確認と本文確認」節に記録。12 試験の台帳の状態を「要対応（新 URL は HTTP 未確認）」から「棚卸し済み」に戻し、最終棚卸し日と URL 数を更新。ANS-C01 行にオーナーの判断による修正を追記。
 - 2026-10-17: 同日 2 回目の対応（オーナーの指示: CodeCommit 前提の資料を戻す・試験ガイドの更新を反映する・具体的な学びの無い資料は含めない）を「追加対応」節に記録し、カバレッジ台帳を再集計（items 2,103）。
 - 2026-10-17: 「2026-10-17 ANS-C01 基準の見直し」節を新設（試験別の before/after、主な変更、残っている穴）。カバレッジ台帳とリソース規模の統計を再集計（items 979 → 2,079、薄いタスク 16 → 0、単一種別 15 → 1。ユニーク文書 656 → 1,168）。見直しでリソースを入れ替えた 12 試験の台帳の状態を「要対応（新 URL は HTTP 未確認）」にし、URL 数を更新。DOP-C02 / DVA-C02 行の「CodeCommit は新規受付終了」を訂正（2025-11-24 に一般提供へ復帰）。HTTP 確認は `docs/action-required/exam-resource-review-2026-10-verification.md` に切り出した。
 - 2026-09-06: 初のネットワーク接続下での全件棚卸しを実施し、**全 13 試験を「未棚卸し」から「棚卸し済み」へ更新**。台帳に URL 数・修正 PR・保留事項の列を追加し、`common-steps.js` の検証結果（問題なし・変更不要）と全体サマリ（`broken` 15 / `soft-404` 24 / `redirect` 67 / `fragment-miss` 5 / `forbidden` 4）、横断的な要注意事項を追記。Skill Builder のコース URL 失効は `docs/action-required/skillbuilder-course-urls.md` に切り出した。
