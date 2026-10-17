@@ -394,7 +394,9 @@
     "startQuiz": "クイズを開始する",
     "stateWaiting": "待機中",
     "stateGenerating": "生成中",
-    "stateComplete": "完了"
+    "stateComplete": "完了",
+    "stateJudging": "品質評価中（Solver / Judge）",
+    "stateFixing": "指摘のあった問題を修正中"
   },
   "errors": {
     "cannotGenerate": "エラー: 問題を生成できませんでした。もう一度お試しください。",
