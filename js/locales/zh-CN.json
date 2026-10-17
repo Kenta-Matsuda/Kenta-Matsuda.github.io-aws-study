@@ -611,5 +611,20 @@
     "report": "报告翻译问题",
     "settingsNote": "日语和英语以外的语言（界面文本和学习内容）均由 AI 机器翻译。如发现错误，请通过反馈表单报告。",
     "feedbackPrefix": "[翻译问题] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} 即将更新为 {{successor}}",
+      "superseded": "{{exam}} 已被 {{successor}} 取代",
+      "retiring": "{{exam}} 即将停考",
+      "retired": "{{exam}} 已停考"
+    },
+    "badge": {
+      "updating": "即将更新",
+      "superseded": "旧版",
+      "retiring": "即将停考",
+      "retired": "已停考"
+    },
+    "sources": "来源（AWS 官方）："
   }
 }

@@ -611,5 +611,20 @@
     "report": "Übersetzungsfehler melden",
     "settingsNote": "Andere Sprachen als Japanisch und Englisch (UI-Texte und Lerninhalte) werden von KI maschinell übersetzt. Bitte melden Sie Fehler über das Feedback-Formular.",
     "feedbackPrefix": "[Übersetzungsfehler] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} wird auf {{successor}} aktualisiert",
+      "superseded": "{{exam}} wurde durch {{successor}} ersetzt",
+      "retiring": "{{exam}} wird eingestellt",
+      "retired": "{{exam}} wurde eingestellt"
+    },
+    "badge": {
+      "updating": "Wird aktualisiert",
+      "superseded": "Alte Version",
+      "retiring": "Wird eingestellt",
+      "retired": "Eingestellt"
+    },
+    "sources": "Quellen (AWS):"
   }
 }

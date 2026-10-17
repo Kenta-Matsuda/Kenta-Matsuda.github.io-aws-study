@@ -611,5 +611,20 @@
     "report": "번역 문제 신고",
     "settingsNote": "일본어와 영어 이외의 언어(UI 텍스트 및 학습 콘텐츠)는 AI가 기계 번역했습니다. 오류는 피드백 양식으로 알려 주세요.",
     "feedbackPrefix": "[번역 문제] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}}이(가) {{successor}}(으)로 개정될 예정입니다",
+      "superseded": "{{exam}}이(가) {{successor}}(으)로 대체되었습니다",
+      "retiring": "{{exam}} 폐지 예정 안내",
+      "retired": "{{exam}}이(가) 폐지되었습니다"
+    },
+    "badge": {
+      "updating": "개정 예정",
+      "superseded": "구버전",
+      "retiring": "폐지 예정",
+      "retired": "폐지"
+    },
+    "sources": "출처(AWS 공식):"
   }
 }

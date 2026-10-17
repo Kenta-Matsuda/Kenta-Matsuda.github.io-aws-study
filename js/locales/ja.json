@@ -611,5 +611,20 @@
     "report": "翻訳の問題を報告",
     "settingsNote": "日本語・英語以外の表示（画面の文言と学習コンテンツ）は AI による機械翻訳です。誤りはフィードバックからお知らせください。",
     "feedbackPrefix": "[翻訳の問題] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{successor}} への改定のお知らせ",
+      "superseded": "{{successor}} へ改定されました",
+      "retiring": "{{exam}} 廃止のお知らせ",
+      "retired": "{{exam}} は廃止されました"
+    },
+    "badge": {
+      "updating": "改定予定",
+      "superseded": "旧版",
+      "retiring": "廃止予定",
+      "retired": "廃止"
+    },
+    "sources": "出典（AWS 公式）:"
   }
 }

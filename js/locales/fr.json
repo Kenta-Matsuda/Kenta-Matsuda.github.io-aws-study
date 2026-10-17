@@ -611,5 +611,20 @@
     "report": "Signaler un problème de traduction",
     "settingsNote": "Les langues autres que le japonais et l'anglais (textes de l'interface et contenu d'étude) sont traduites automatiquement par IA. Veuillez signaler les erreurs via le formulaire d'avis.",
     "feedbackPrefix": "[Problème de traduction] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} va être remplacé par {{successor}}",
+      "superseded": "{{exam}} a été remplacé par {{successor}}",
+      "retiring": "{{exam}} va être retiré",
+      "retired": "{{exam}} a été retiré"
+    },
+    "badge": {
+      "updating": "Mise à jour",
+      "superseded": "Ancienne version",
+      "retiring": "Retrait prévu",
+      "retired": "Retiré"
+    },
+    "sources": "Sources (AWS) :"
   }
 }

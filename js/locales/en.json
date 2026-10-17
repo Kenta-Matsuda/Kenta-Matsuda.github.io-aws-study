@@ -611,5 +611,20 @@
     "report": "Report a translation issue",
     "settingsNote": "Languages other than Japanese and English (UI text and study content) are machine-translated by AI. Please report mistakes through the feedback form.",
     "feedbackPrefix": "[Translation issue] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} is being updated to {{successor}}",
+      "superseded": "{{exam}} has been replaced by {{successor}}",
+      "retiring": "{{exam}} is being retired",
+      "retired": "{{exam}} has been retired"
+    },
+    "badge": {
+      "updating": "Updating",
+      "superseded": "Old version",
+      "retiring": "Retiring",
+      "retired": "Retired"
+    },
+    "sources": "Sources (AWS):"
   }
 }
