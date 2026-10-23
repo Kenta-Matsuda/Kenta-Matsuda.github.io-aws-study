@@ -35,14 +35,15 @@ test.describe('card data files', () => {
     }
   });
 
-  test('SAA-C03 case cards are valid and cover every task; the unit count is still below 1.5× and reported as such', () => {
+  test('SAA-C03 case cards are valid, cover every task and meet the 1.5× unit requirement', () => {
     expect(validateCards(CARDS_SAA_C03, { taskIds: taskIds(SAA_C03) })).toEqual([]);
     const report = coverageReport(CARDS_SAA_C03, { questionCount: 65, taskIds: taskIds(SAA_C03) });
     expect(report.byKind.case).toBe(report.units);
-    // #241 added cards for the previously uncovered tasks 3.1–3.3, 3.5, 4.2–4.4.
-    expect(report.units).toBeGreaterThanOrEqual(60);
+    // #241 added cards for the previously uncovered tasks 3.1–3.3, 3.5, 4.2–4.4; the
+    // 2026-10-19 top-up brought the inventory to the 65 × 1.5 requirement.
+    expect(report.units).toBeGreaterThanOrEqual(report.required);
     expect(report.uncoveredTasks).toEqual([]);
-    expect(report.sufficient).toBe(report.units >= report.required);
+    expect(report.sufficient).toBe(true);
     // Every decision has rejected alternatives (distractor material).
     for (const card of CARDS_SAA_C03.cards) for (const d of card.decisions) expect(d.rejected.length).toBeGreaterThan(0);
   });
