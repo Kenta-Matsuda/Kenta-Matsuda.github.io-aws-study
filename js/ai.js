@@ -8,7 +8,7 @@
 
 import { callGemini, callGeminiStream, getPreferredGemini3Model } from './gemini.js';
 import { callOpenAi, callOpenAiStream } from './openai.js';
-import { callGeminiBatch, pollGeminiBatch } from './geminiBatch.js';
+import { callGeminiBatch, pollGeminiBatch, submitGeminiBatch } from './geminiBatch.js';
 import { getAiProvider, getApiKey, getOpenAiApiKey } from './storage.js';
 
 /**
@@ -139,6 +139,22 @@ export async function callAiBatch({
   });
   if (!result) return null;
   return { ...result, model };
+}
+
+/**
+ * Create a batch job without waiting for it (Gemini 3 only). The caller
+ * persists the returned name and polls it with resumeAiBatch — the stages of
+ * the exam job chain (js/examBatchChain.js) are run this way.
+ *
+ * @param {{ requests: Array<{userPrompt:string,systemPrompt:string}>, displayName?: string, model?: string }} opts
+ * @returns {Promise<{ name: string, model: string } | null>} null when not eligible
+ */
+export async function submitAiBatch({ requests, displayName, model: preferred }) {
+  if (resolveProvider() !== 'gemini') return null;
+  const model = preferred || getPreferredGemini3Model();
+  if (!model) return null;
+  const name = await submitGeminiBatch({ model, requests, displayName });
+  return { name, model };
 }
 
 /**

@@ -36,6 +36,7 @@ const APP_SHELL = [
   './js/data/cards/aib-c01.js',
   './js/data/cards/saa-c03.js',
   './js/data/exam-lifecycle.js',
+  './js/examBatchChain.js',
   './js/examGenerator.js',
   './js/examJudge.js',
   './js/examLifecycle.js',

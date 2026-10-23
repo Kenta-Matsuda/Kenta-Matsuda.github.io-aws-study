@@ -382,7 +382,9 @@
     "startQuiz": "Start Quiz",
     "stateWaiting": "Waiting",
     "stateGenerating": "Generating",
-    "stateComplete": "Complete"
+    "stateComplete": "Complete",
+    "stateJudging": "Quality review (Solver / Judge)",
+    "stateFixing": "Revising flagged questions"
   },
   "errors": {
     "cannotGenerate": "Error: Could not generate questions. Please try again.",

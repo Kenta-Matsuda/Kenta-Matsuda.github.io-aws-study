@@ -66,7 +66,19 @@ issue の指摘どおり、**LLM が要らない工程はコードで決定的�
 - 想定コマンド: `cd infra/feedback && sam build && sam deploy`（既存スタック `aws-study-feedback` の更新。`template.yaml` の変更は不要）、`node scripts/export-learning-events.mjs`。
 - 補足: クライアント側（`js/learningEvents.js`、PR 7）は実装済み。`FEEDBACK_API_URL` が設定されている本番では、Lambda がデプロイされるまで `/events` は 404 を返し、イベントはブラウザ内に保留される（最大 5,000 件）。デプロイ後の訪問で自動送信される。
 
+⚠️ 要人間対応: 人間の採点と実 API キーが必要（Judge の較正・実 API ベースライン計測、#241）
+- 必要な操作内容: (1) 実キーで素材を生成し、`scripts/judge-calibration.mjs` で抽出した約 30 問を人間が採点して Judge との一致度を出し、合格閾値（`PASS_MIN_AXIS` / `PASS_MIN_TOTAL`）を決める。(2) `scripts/eval-exam-pipeline.mjs` を実キーで AIB / SAA の 65 問について実行し、結果を設計書 §8.6 の表に記録する。いずれもエージェントは API キーを持たないため実施していない（結果を捏造しない）。
+- 対象: `js/examJudge.js`（閾値）、`docs/design/exam-generation-pipeline.md` §8.5 / §8.6（手順と記録先）。AWS 操作は不要。
+- 想定コマンド（詳細は設計書 §8.5）:
+  - `GEMINI_API_KEY=... node scripts/eval-exam-pipeline.mjs --exam aib-c01 --count 20 --out C:/Users/Public/asn-calib/aib.json`（saa-c03 も同様）
+  - `node scripts/judge-calibration.mjs sample --from C:/Users/Public/asn-calib/aib.json,C:/Users/Public/asn-calib/saa.json --n 30 --seed 1 --out C:/Users/Public/asn-calib/calib`
+  - （Judge のスコアが無い問題があれば）`GEMINI_API_KEY=... node scripts/judge-calibration.mjs judge --dir C:/Users/Public/asn-calib/calib`
+  - `items.md` を読んで `human-scores.csv` に記入 → `node scripts/judge-calibration.mjs agree --dir C:/Users/Public/asn-calib/calib`
+  - `GEMINI_API_KEY=... node scripts/eval-exam-pipeline.mjs --exam aib-c01 --count 65 --mode mock --out C:/Users/Public/asn-calib/baseline-aib.json`（saa-c03 も同様）
+- 補足: 追加したカード（AIB 101 セル / SAA 19 ケース・68 判断ポイント）は出典ページの存在とタイトルを確認済みだが、内容は人間レビューが必要（設計書 §4「機械生成したカードを未レビューでマージしない」）。
+
 ## 更新履歴
 
 - 2026-10-11: 初版（現状監査と設計案。#225）
 - 2026-10-12: プロダクト判断確定を反映。設計は `docs/design/exam-generation-pipeline.md` へ移管し、残りの要人間対応を集計バックエンド（`/events`）と Amazon Quick に絞った
+- 2026-10-17: #241 で Batch 経路の査読連鎖（PR 6b）・カード追加・Judge 較正ツールを実装。残りの要人間対応（較正の採点・実 API 計測・カードの内容レビュー）を追記
