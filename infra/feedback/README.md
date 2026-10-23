@@ -72,6 +72,16 @@ Lambda Function URL（API Gateway は使わない）── CORS / Origin を Git
    ```
 
    なお SSM は `aws` / `ssm` で始まる名前（`/aws-xxx/...` のような先頭階層も含む）を予約しているため使えません。
+
+   **既存スタックを更新するときの注意**: `sam deploy` は `--parameter-overrides` で渡さなかったパラメータに**前回の値**を使います（テンプレートの既定値には戻りません）。過去に `GithubTokenParam` を別の名前で上書きしてデプロイしていると、トークンを正しい名前で保存しても Lambda はその名前を読めず（IAM も旧名前にしか許可が無い）、ログに `github_token_unavailable AccessDeniedException <旧パラメータ名>` が出て issue は作られません。その場合は名前を明示して再デプロイします。
+
+   ```powershell
+   sam deploy --stack-name aws-study-feedback --region ap-northeast-1 `
+     --resolve-s3 --capabilities CAPABILITY_IAM `
+     --parameter-overrides GithubTokenParam=/study-navigator/feedback/github-token
+   ```
+
+   現在の値は `aws cloudformation describe-stacks --stack-name aws-study-feedback --query "Stacks[0].Parameters"` で確認できます。テンプレートは `aws` / `ssm` で始まる値を `AllowedPattern` で拒否するので、旧値が残ったままの更新はデプロイ時にエラーになります。
    Git Bash で実行する場合は `/` 始まりの引数がパス変換されるので `MSYS_NO_PATHCONV=1` を付けてください。
 
 4. `js/config.js` の `FEEDBACK_API_URL` に手順 1 の URL を設定して公開すると、フィードバックの「送信」がこのバックエンドに届き、Good / Bad 投票も送られるようになります。空文字にするとフォームは「現在送信できません」と表示し、「テキストをコピー」だけを案内します（ページ遷移や GitHub の画面は開きません）。
