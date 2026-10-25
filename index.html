@@ -3,6 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google tag (gtag.js) — production host only, so local dev and Playwright runs don't count as visits -->
+    <script>
+        if (location.hostname === 'kenta-matsuda.github.io') {
+            const gaScript = document.createElement('script');
+            gaScript.async = true;
+            gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-HGYPRYH7Q1';
+            document.head.appendChild(gaScript);
+            window.dataLayer = window.dataLayer || [];
+            window.gtag = function () { dataLayer.push(arguments); };
+            gtag('js', new Date());
+            gtag('config', 'G-HGYPRYH7Q1');
+        }
+    </script>
     <title>AWS Study Navigator | AWS認定 合格ナビゲーター - 全13資格対応 学習支援アプリ</title>
 
     <!-- SEO Meta Tags -->
