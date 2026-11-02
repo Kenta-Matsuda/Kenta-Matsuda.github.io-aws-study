@@ -1465,7 +1465,6 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       console.warn('[batch] job chain failed:', err);
       batchInProgress = false;
       await markBatchSetFailed(session);
-      const isJa = getLocale() === 'ja';
       if (err?.code === 'no-questions') {
         setBatchToastState('error', t('batch.parseFailed'));
       } else if (resumed) {
@@ -1473,7 +1472,7 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       } else {
         setBatchToastState('error', `${t('batch.batchFailed', { msg: err?.message || '' })}`);
       }
-      notifyBrowser(isJa ? '生成に失敗しました' : t('batch.failed'), t('batch.batchFailedBody'));
+      notifyBrowser(t('batch.failed'), t('batch.batchFailedBody'));
       return;
     }
     batchInProgress = false;
