@@ -17,6 +17,10 @@ Parameters:
     Type: String
     # SSM reserves names starting with "aws"/"ssm" (also as the first path segment).
     Default: /study-navigator/feedback/github-token
+    # Fail the deploy instead of silently keeping a stale override such as /aws-study/...
+    # (sam deploy reuses the previous value of parameters that are not overridden).
+    AllowedPattern: ^/(?![aA][wW][sS]|[sS][sS][mM])[A-Za-z0-9_.\-/]+$
+    ConstraintDescription: must be an SSM path that does not start with "aws" or "ssm" (reserved by SSM).
     Description: >
       SSM SecureString holding a fine-grained GitHub PAT (this repo only, Issues: read & write).
       Create it by hand; until it exists feedback is stored in DynamoDB only.

@@ -146,3 +146,82 @@ test.describe('batch job resume (#225)', () => {
     await expect.poll(async () => (await readSets(page))[0], { timeout: 10000 }).toMatchObject({ status: 'failed', jobName: null });
   });
 });
+
+test.describe('background job chain with quality evaluation (#241, PR 6b)', () => {
+  test('writer → solver/judge jobs: a reload during judging resumes the SAME judging job and the set ends judged', async ({ page }) => {
+    await page.addInitScript((state) => {
+      localStorage.setItem('gemini_api_key', 'test-key-not-used');
+      localStorage.setItem('ai_provider', 'gemini');
+      localStorage.setItem('asn_locale', 'ja');
+      localStorage.setItem('asn_study_state_v1', JSON.stringify(state));
+      localStorage.removeItem('gemini_batch_unavailable');
+      localStorage.removeItem('asn_pipeline_judge'); // default: judging on for a Gemini mock exam
+      window.__ASN_BATCH_POLL_MS__ = 150;
+      if (!sessionStorage.getItem('asn_test_idb_cleared')) {
+        indexedDB.deleteDatabase('asn-exam-sets');
+        sessionStorage.setItem('asn_test_idb_cleared', '1');
+      }
+    }, STATE);
+
+    const jobs = []; // { name, prompts }
+    const flags = { judgeDone: false, judgePolls: 0 };
+    await page.route('**/v1beta/models/*:generateContent*', (route) => route.fulfill({ json: { candidates: [{ content: { parts: [{ text: '[]' }] } }] } }));
+    await page.route('**/v1beta/models/*:batchGenerateContent*', async (route) => {
+      const body = route.request().postDataJSON();
+      const prompts = body.batch.inputConfig.requests.requests.map((r) => r.request.contents.map((c) => c.parts.map((p) => p.text).join('\n')).join('\n'));
+      const name = `batches/chain-${jobs.length + 1}`;
+      jobs.push({ name, prompts });
+      await route.fulfill({ json: { name, metadata: { '@type': BATCH_TYPE, name, state: 'BATCH_STATE_PENDING' } } });
+    });
+    await page.route('**/v1beta/batches/chain-*', async (route) => {
+      const name = route.request().url().match(/(batches\/chain-\d+)/)[1];
+      const job = jobs.find((j) => j.name === name);
+      const isJudging = job.prompts[0].includes('[Solver]');
+      if (isJudging) flags.judgePolls += 1;
+      if (isJudging && !flags.judgeDone) {
+        await route.fulfill({ json: { name, metadata: { '@type': BATCH_TYPE, name, state: 'BATCH_STATE_RUNNING', batchStats: { requestCount: job.prompts.length } } } });
+        return;
+      }
+      const inlinedResponses = job.prompts.map((p, i) => {
+        let text = quizJson(i);
+        if (p.includes('[Solver]')) text = JSON.stringify({ answer: 'A', confidence: 5 });
+        else if (p.includes('[Judge]')) text = JSON.stringify({ accuracy: 5, uniqueness: 4, distractors: 4, fit: 4, cues: 4, verdict: 'pass', issues: [], fix: '' });
+        return { metadata: { key: `request-${i}` }, response: { candidates: [{ content: { parts: [{ text }] } }] } };
+      });
+      await route.fulfill({ json: { name, done: true, metadata: { '@type': BATCH_TYPE, name, state: 'BATCH_STATE_SUCCEEDED', batchStats: { requestCount: job.prompts.length, successfulRequestCount: job.prompts.length } }, response: { output: { inlinedResponses: { inlinedResponses } } } } });
+    });
+    page.on('dialog', (d) => d.accept());
+
+    await page.goto('/#saa');
+    await page.waitForSelector('#siteTitle');
+    await page.click('#mainStudyCtaBtn');
+    await page.click('.quiz-mode-card[data-quiz-mode="mock"]');
+    await page.click('#quizModeStartBtn');
+
+    // The writer job finished; the chain submitted the solver + judge job and saved its name.
+    await expect.poll(async () => (await readSets(page))[0], { timeout: 15000 }).toMatchObject({ status: 'judging', stage: 'judging', jobName: 'batches/chain-2', n: TOTAL });
+    expect(jobs.map((j) => j.prompts.length)).toEqual([TOTAL, TOTAL * 2]);
+    await expect(page.locator('#batchProgressStatus')).toContainText('品質評価中');
+
+    // Close/reopen the app while the judging job is still running on the provider side.
+    const pollsBefore = flags.judgePolls;
+    await page.reload();
+    await page.waitForSelector('#siteTitle');
+    await expect.poll(() => flags.judgePolls, { timeout: 10000 }).toBeGreaterThan(pollsBefore);
+    expect(jobs).toHaveLength(2); // resumed, not resubmitted
+    expect((await readSets(page))[0]).toMatchObject({ status: 'judging', jobName: 'batches/chain-2' });
+
+    flags.judgeDone = true;
+    await expect(page.locator('#batchProgressStartBtn')).toBeVisible({ timeout: 15000 });
+    await expect.poll(async () => (await readSets(page))[0], { timeout: 10000 }).toMatchObject({ status: 'ready', stage: 'ready', n: TOTAL, jobName: null });
+    expect(jobs).toHaveLength(2); // every item passed: no editor job
+    const judged = await page.evaluate(async () => {
+      const m = await import('/js/examSets.js');
+      const set = (await m.listExamSets())[0];
+      return { outcomes: [...new Set(set.questions.map((q) => q.judge?.outcome))], score: set.questions[0].judge?.score, metrics: set.metrics };
+    });
+    expect(judged.outcomes).toEqual(['pass']);
+    expect(judged.score).toBe(21);
+    expect(judged.metrics).toMatchObject({ requested: TOTAL, generated: TOTAL, judged: TOTAL, passed: TOTAL, background: true, judgeDegraded: false });
+  });
+});

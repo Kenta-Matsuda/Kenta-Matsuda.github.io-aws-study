@@ -232,6 +232,7 @@ node scripts/analyze-resource-coverage.mjs --md test-results/coverage.md
 5. 追加した候補 URL は、書き込む前に `scripts/check-resource-links.mjs --urls "<候補>" --all` で 200 かつリダイレクトなしを確認する（推測で書き込まない）。
 6. 作業後に再度 `analyze-resource-coverage.mjs` を実行し、**before / after の `median` / `thin` / `singleKind` を PR 本文に載せる**。
 7. 3 件に届かなかったタスクは、**未達であることと調査済みの候補を PR 本文に明記**して次回に引き継ぐ（黙って放置しない）。
+8. **取捨選択と `recommend` は ANS-C01 基準で判断する。** ANS-C01（`js/data/ans-c01.js`）はリポジトリオーナーが全リソースを確認した手本で、他試験はこれに合わせる（2026-10-17 のオーナー指示）。判定基準（タスクに関連する技術的な学びがあるか / 1 タスク 5〜10 件 / recommend は 1 タスク 1〜3 件・全体 2〜3 割 / AIB-C01 はビジネス判断の学びで判定 / 書式）は `docs/wiki/aws-resource-discovery.md` の「ANS-C01 基準のリソースレビュー」節にある。ANS-C01 自体は、リンク切れなどの明確な不具合がない限り書き換えない。
 
 ## 主要機能 1c: カード採掘（問題生成パイプラインの「何を問うか」をデータ化する）
 

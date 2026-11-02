@@ -14,6 +14,14 @@
  * `misconceptions` are anti-patterns the text warns about or that follow from
  * it, written to serve as distractors.
  *
+ * Additional framework maps (issue #241, verified against the live pages on
+ * 2026-10-17): the Generative AI Security Scoping Matrix (scopes 1–5 ×
+ * security disciplines), the AWS responsible AI core dimensions, and the
+ * lifecycles of the Well-Architected Machine Learning Lens and Generative AI
+ * Lens. Their `stage` is the same editorial journey mapping as above, except
+ * the scoping matrix, whose second axis is the matrix's own security
+ * disciplines.
+ *
  * Human review required before relying on these for published questions.
  */
 
@@ -56,6 +64,23 @@ export const CARDS_AIB_C01 = {
         cell('journey-scale', 'Journey', 'Scale', 'Scale フェーズ',
           '本番のパイロットを拡大し、広く持続的な価値を得る。スケールは技術的拡張だけでなく、事業全体と顧客への到達範囲の拡大を意味し、活動を顧客価値へ変換する。1 サイクルで全部をやろうとせず、反復と段階的改善で進める。',
           ['スケール＝インフラの増強であり組織面は関係ない', '1 回のサイクルで全領域へ一斉展開すべき'], ['4.4']),
+
+        // ── Journey: AI cloud transformation value chain (outcomes ← 4 transformation domains ← foundational capabilities) ──
+        cell('journey-value-chain-outcomes', 'Journey', 'Envision', '変革のバリューチェーン: 4 つのビジネス成果',
+          'AI は新しい能力をもたらし、組織はそれで具体的なビジネス成果を目指す。CAF-AI が挙げる成果は、ビジネスリスクの低減（例: 生産ラインの破損・不良部品の検出）、ESG パフォーマンスの向上（例: 環境保護コンプライアンス報告の自動要約とフラグ付け）、新規・既存収益の拡大（例: 製品・サービス推薦のパーソナライズ）、業務効率の向上（例: 出張経費の領収書を社内の予約コードへ分類・対応付け）。成果を生めるかは AI を採用する能力（4 つの変革ドメインと基盤能力）にかかっている。',
+          ['AI の成果は業務効率化（コスト削減）だけで測る', 'AI 能力を導入すれば変革ドメインの整備なしに成果が出る'], ['2.1', '2.2']),
+        cell('journey-domain-technology', 'Journey', 'Align', '変革ドメイン: Technology',
+          '技術ドメインは、AI の技術的能力を確立し、その利用と採用を可能にすることに焦点を当てる。CAF-AI のバリューチェーンでは、技術・プロセス・組織・製品の 4 ドメイン（少なくとも）で変革する必要があり、各ドメインの変革は 6 つのパースペクティブの基盤能力に依存する。',
+          ['技術ドメインさえ整えれば AI 変革は完了する', '技術基盤は個々のユースケースごとにばらばらに整備すればよい'], ['4.1', '4.2']),
+        cell('journey-domain-process', 'Journey', 'Launch', '変革ドメイン: Process',
+          'プロセスドメインは、AI の力でビジネス運営をデジタル化・自動化・最適化し、革新することに焦点を当てる。AWS CAF の説明では、新しいデータ・分析基盤で実用的な洞察を得たり、ML で顧客サービス、従業員の生産性と意思決定、需要予測、不正検知・防止、産業オペレーションなどを改善することで、業務効率を上げつつ運用コストを下げ、従業員・顧客体験を改善できる。',
+          ['プロセス変革は既存業務をそのまま自動化することに限られる', '業務改善の効果は運用コストではなく IT コストだけで測る'], ['1.2', '2.2']),
+        cell('journey-domain-organization', 'Journey', 'Align', '変革ドメイン: Organization',
+          '組織ドメインは、ビジネスとテクノロジーのチームが AI を原動力として顧客価値を生み戦略的意図を満たすために、どう協調するか（オペレーティングモデル）を再構想する。AWS CAF は、チームを製品とバリューストリームの周りに編成し、アジャイル手法で迅速に反復することで、より俊敏で顧客中心になれるとする。',
+          ['組織構造は変えずに AI ツールを配布すれば十分', 'AI 施策は IT 部門の中だけで編成し事業側は関与しない'], ['4.3', '4.1']),
+        cell('journey-domain-product', 'Journey', 'Envision', '変革ドメイン: Product',
+          '製品ドメインは、AI の能力を活かした新しい価値提案（製品・サービス）と収益モデルを生み出してビジネスモデルを再構想する。新しい顧客への到達や新しい市場セグメントへの参入を可能にしうる。成果から逆算し、期待するビジネス成果を時間軸で定義し、必要な変革と、それを可能にする基盤能力を計画する。',
+          ['AI による製品変革は既存製品へのチャットボット追加に限られる', '新しい収益モデルは技術選定が終わってから考えればよい'], ['2.3', '2.1']),
 
         // ── Business perspective ──
         cell('biz-strategy-northstar', 'Business', 'Envision', 'Strategy Management: 顧客中心の北極星と実行可能な戦略',
@@ -233,6 +258,191 @@ export const CARDS_AIB_C01 = {
         cell('ops-performance-capacity', 'Operations', 'Scale', 'Performance and Capacity: 変化するワークロード特性への適応',
           'AI は従来ソフトと異なる開発サイクルと性能・ワークロード特性を持つ。初期は探索・実験・訓練が支配的で、強力なマシン、専用ハードウェア、メモリ効率の良いアーキテクチャを散発的に必要とするため、クラウドの動的対応力を活かす。時間とともに訓練と前処理が一貫・予測可能になり、開発と本番の線を明確に保ちつつ両者を素早く往復できることが革新速度を左右する。モデル成果物とデータはフォールバック用に保持し、展開後は推論をレイテンシやスループットなどの非機能要件とコストに最適化し、性能・容量を監視する。',
           ['AI ワークロードは一定なので固定容量で計画すればよい', '開発中と本番のワークロード特性は同じである'], ['4.2', '4.4']),
+      ],
+    },
+
+    // ── Generative AI Security Scoping Matrix (AWS Security Blog, 2023-10-19) ──
+    // perspective = the five scopes (least → greatest ownership), stage = the
+    // five security disciplines the matrix lists for each scope.
+    {
+      id: 'aib-fw-genai-scoping-matrix',
+      kind: 'framework',
+      framework: '生成 AI セキュリティスコーピングマトリックス',
+      source: {
+        title: 'Securing generative AI: An introduction to the Generative AI Security Scoping Matrix',
+        url: 'https://aws.amazon.com/blogs/security/securing-generative-ai-an-introduction-to-the-generative-ai-security-scoping-matrix/',
+        urlJa: 'https://aws.amazon.com/jp/blogs/news/securing-generative-ai-an-introduction-to-the-generative-ai-security-scoping-matrix/',
+        publishedAt: '2023-10-19',
+        verifiedAt: '2026-10-17',
+      },
+      axes: {
+        perspective: ['Scope 1 Consumer app', 'Scope 2 Enterprise app', 'Scope 3 Pre-trained models', 'Scope 4 Fine-tuned models', 'Scope 5 Self-trained models', 'Scopes 1–2', 'Scopes 3–5', 'All scopes'],
+        stage: ['Governance and compliance', 'Legal and privacy', 'Risk management', 'Controls', 'Resilience'],
+      },
+      cells: [
+        cell('matrix-start-existing-practices', 'All scopes', 'Governance and compliance', '出発点: 生成 AI も既存のセキュリティ実践を継承し、まずスコープを決める',
+          '生成 AI ワークロードは本質的には別種のデータ駆動ワークロードであり、ID とアクセス管理、データ保護、プライバシーとコンプライアンス、アプリケーションセキュリティ、脅威モデリングといった中核の規律がそのまま重要。そのうえで生成 AI 固有のリスクを理解する。最初の一歩は、ユースケースが所有度の最も低いスコープ 1 から最も高いスコープ 5 のどれに当たるかを決めること。',
+          ['生成 AI にはまったく新しいセキュリティ規律が必要で既存の実践は役に立たない', 'スコープに関係なく同じ統制を一律に適用すればよい'], ['3.2', '3.3']),
+        cell('matrix-scope1-consumer', 'Scope 1 Consumer app', 'Governance and compliance', 'スコープ 1（コンシューマーアプリ）: 利用規約とデータ種別の方針',
+          '無償または有償の公開サードパーティ生成 AI サービスを利用する。学習データやモデルを所有も閲覧もできず、変更もできない。利用規約・ライセンス・データ主権などの法的開示に特に注意し、リスク許容度に応じて利用してよいデータ種別・分類を方針で定める（例: スコープ 1 アプリでは PII・機密・専有データの利用を禁止する）。',
+          ['無料の公開チャットサービスなら社外秘データを入力しても問題ない', 'スコープ 1 ではモデルを自社データで調整できる'], ['3.2', '1.2']),
+        cell('matrix-scope2-enterprise', 'Scope 2 Enterprise app', 'Legal and privacy', 'スコープ 2（エンタープライズアプリ）: ベンダーとの契約関係',
+          '生成 AI 機能が組み込まれたサードパーティのエンタープライズアプリを使い、組織とベンダーの間にビジネス関係がある。スコープ 1 と同様に利用規約・ライセンス・データ主権に注意し、法務・調達部門と密に連携してデータ管理要件がどう適用されるかを評価する。既存の強固なデータガバナンス戦略は生成 AI ワークロードへ拡張できる。',
+          ['契約済みの SaaS なら AI 機能のデータ取り扱いを確認する必要はない', 'スコープ 2 では自社が基盤モデルを選んで微調整する'], ['3.2', '1.2']),
+        cell('matrix-scope3-pretrained-rag', 'Scope 3 Pre-trained models', 'Governance and compliance', 'スコープ 3（事前学習済みモデル）: 自社アプリと RAG によるデータの扱い',
+          '既存のサードパーティ基盤モデルを API で自社ワークロードに統合して独自アプリを作る。自社データを要約・相関・分析して新たな洞察を得たり反復作業を自動化したいなら、スコープ 1・2 ではなく 3〜5 が必要になる。RAG はプロンプトの一部として自社データを検索して文脈を補う方法で、微調整や学習でデータをモデル自体に埋め込む代わりになり、アプリ側で認可に基づくフィルタリングを実装できる。',
+          ['自社データを活用するには必ずモデルを微調整しなければならない', 'RAG で渡したデータはモデルの重みに恒久的に学習される'], ['1.3', '1.2', '3.3']),
+        cell('matrix-scope4-finetuned-classification', 'Scope 4 Fine-tuned models', 'Governance and compliance', 'スコープ 4（微調整モデル）: モデルは学習データの最高分類を引き継ぐ',
+          '既存の基盤モデルを自社固有データで微調整し、ワークロードに特化した新しいモデルを作る。スコープ 4・5 では、微調整・学習に使ったデータのうち最も機微な分類レベルでモデル自体を分類する。PII で微調整すればモデルは PII を含み、現時点では認可に基づいてモデル出力を簡単にフィルタリングする仕組みがないため、権限のないデータを利用者が引き出せる可能性がある。',
+          ['微調整後のモデルは元データと切り離されるので低い分類で扱ってよい', 'モデル出力は利用者の権限に応じて自動的にフィルタリングされる'], ['3.3', '3.2']),
+        cell('matrix-scope5-selftrained', 'Scope 5 Self-trained models', 'Legal and privacy', 'スコープ 5（自己学習モデル）: すべてを所有し、自ら利用規約を用意する',
+          '自社が所有・取得したデータで生成 AI モデルをゼロから構築・学習し、モデルのあらゆる側面を所有する。法務面では、スコープ 1〜4 で必要だったサービス提供者の EULA・利用規約の確認に代わり、自社モデルを外部に使わせる場合は法務チームが自前の利用規約を用意する。',
+          ['自己学習モデルなら外部向けの契約条件は不要', 'スコープ 5 でもモデル提供者の利用規約に従えば足りる'], ['3.2', '1.2']),
+        cell('matrix-legal-dual-terms', 'Scopes 3–5', 'Legal and privacy', 'スコープ 3・4: サービス提供者とモデル提供者の両方の条件を確認する',
+          'スコープ 1〜4 では、サービス提供者の EULA、利用規約、その他サービス利用に必要な契約を理解する。さらにスコープ 3・4 では、サービス自体の利用条件に加えて、そのサービス内で使うモデルについてモデル提供者が定める利用条件の両方を検証する。',
+          ['マネージドサービスの利用規約さえ確認すれば各モデルの条件は確認不要', '法的条件の確認は開発チームだけで判断できる'], ['3.2']),
+        cell('matrix-risk-third-party', 'Scopes 1–2', 'Risk management', 'スコープ 1・2 のリスク管理: 提供者のリスクと自社の責任',
+          'リスクの特定にはリスク評価と脅威モデリングが代表的な手段。スコープ 1・2 では、サードパーティ提供者のサービスに起因しうるリスクと、提供者が責任を持つリスクをどう軽減・管理しているかを評価する。同時に、そのサービスの利用者としての自社のリスク管理責任を理解する。LLM との自由形式の対話は、見た目が普通のアプリでも追加の精査とガードレールを要する。',
+          ['SaaS を使うならリスク管理の責任はすべて提供者にある', 'AI 機能付きアプリは通常のアプリと同じ審査で十分'], ['3.3', '3.2']),
+        cell('matrix-risk-threat-modeling', 'Scopes 3–5', 'Risk management', 'スコープ 3〜5 のリスク管理: 脅威モデリングとプロンプトインジェクション',
+          'スコープ 3〜5 では脅威モデリングを実施する。LLM 固有の脅威の例はプロンプトインジェクション（巧妙に作られた入力で LLM に予期しない・望ましくない応答をさせる）で、特徴量の抽出、名誉毀損、内部システムへのアクセスなどに悪用されうる。MITRE と OWASP の手法でも最初に挙げられているが、SQL インジェクションなど従来のインジェクション攻撃の延長として既存の知見を活かせる。開発チームと深く連携して脅威をモデル化する。',
+          ['プロンプトインジェクションは既存のセキュリティ知見とは無関係のまったく新しい問題', '自社でモデルを使う場合も脅威モデリングは提供者に任せられる'], ['3.3']),
+        cell('matrix-controls-model-access', 'Scopes 3–5', 'Controls', '統制: モデルへのアクセス＝学習データ全体へのアクセス',
+          '推論時の基盤モデルは不変で、モデル自体は新しいデータを保存しない。データベースのような行・列レベルの細かな統制はモデル内部の埋め込みには適用できず、モデルに直接アクセスを与えることはそのモデルが学習した全データへのアクセスを与えることに等しい。IAM ポリシーで制限できるのは特定モデルの呼び出しまで。最小権限は、Amazon Cognito や IAM Identity Center で認証・認可するアプリ層や、利用者の権限に基づいて検索結果を絞る RAG の認可レイヤーで実現する。',
+          ['IAM ポリシーでモデル内の特定データへのアクセスだけを制限できる', '推論のたびにモデルは利用者の入力を学習して変化する'], ['3.3']),
+        cell('matrix-resilience', 'All scopes', 'Resilience', 'レジリエンス: 可用性・クォータ・マルチリージョン',
+          '可用性は CIA トライアドの一要素。スコープ 1・2 では提供者の可用性が自社の期待に合うか、基盤モデルや API が使えなくなった場合の影響、複雑なプロンプトが利用クォータや請求に与える影響を考慮する。Amazon Bedrock や SageMaker のマルチリージョン構成ではリージョンでの提供状況と機能の同等性を確認し、スコープ 4・5 では微調整・学習データのリージョン間での可用性も考慮する。SageMaker でのスコープ 5 の学習ではチェックポイントで進捗を保存する。',
+          ['マネージドな生成 AI サービスなら可用性設計は不要', 'どのリージョンでも同じモデルと機能が使える前提で設計してよい'], ['3.3', '4.2']),
+      ],
+    },
+
+    // ── AWS responsible AI core dimensions (aws.amazon.com/ai/responsible-ai) ──
+    // perspective = the core dimension; stage is an editorial mapping (as in CAF-AI).
+    {
+      id: 'aib-fw-responsible-ai',
+      kind: 'framework',
+      framework: 'AWS の責任ある AI の中核的な次元',
+      source: {
+        title: 'Responsible AI – Building AI Responsibly – AWS',
+        url: 'https://aws.amazon.com/ai/responsible-ai/',
+        urlJa: 'https://aws.amazon.com/jp/ai/responsible-ai/',
+        verifiedAt: '2026-10-17',
+      },
+      axes: {
+        perspective: ['Fairness', 'Explainability', 'Privacy and security', 'Safety', 'Controllability', 'Veracity and robustness', 'Governance', 'Transparency', 'Practice'],
+        stage: ['Envision', 'Align', 'Launch', 'Scale'],
+      },
+      cells: [
+        cell('rai-fairness', 'Fairness', 'Align', '公平性: さまざまなステークホルダー集団への影響を考慮する',
+          'AWS は公平性を「異なるステークホルダー集団への影響を考慮すること」と定義する。バイアスはデータの不均衡や、集団間でのモデル性能の差として現れる。Amazon SageMaker Clarify は、データ準備時、学習後、展開済みモデルで特定の属性を調べて潜在的なバイアスを検出する。',
+          ['学習データから属性列を削除すればバイアスは生じない', 'バイアスの確認は学習前に一度行えば十分'], ['3.1']),
+        cell('rai-explainability', 'Explainability', 'Launch', '説明可能性: システムの出力を理解し評価する',
+          '説明可能性は「システムの出力を理解し評価すること」。モデルの挙動を理解することで、より正確なモデルとより良い意思決定につながる。SageMaker Clarify はモデル挙動の可視性を高め、ステークホルダーへの透明性の提供、判断する人間への情報提供、モデルが意図どおりに動いているかの追跡を助ける。',
+          ['精度が高いモデルなら説明は不要', '説明可能性は開発者のデバッグのためだけの性質'], ['3.1', '1.1']),
+        cell('rai-privacy-security', 'Privacy and security', 'Align', 'プライバシーとセキュリティ: データとモデルの適切な取得・利用・保護',
+          'プライバシーとセキュリティは「データとモデルを適切に取得し、利用し、保護すること」。データだけでなくモデルも保護対象に含まれる。Amazon Bedrock Guardrails は機微情報のマスキング（redact）を含む構成可能な保護策を提供する。',
+          ['保護すべきなのはデータだけでモデル自体は対象外', '取得方法が適法でなくても保護していれば問題ない'], ['3.1', '3.3']),
+        cell('rai-safety', 'Safety', 'Launch', '安全性: 有害な出力と悪用を防ぐ',
+          '安全性は「有害なシステム出力と悪用を防ぐこと」。Amazon Bedrock Guardrails はアプリ要件と責任ある AI ポリシーに合わせた保護策を実装し、有害なテキスト・画像の検出とフィルタリング、機微情報のマスキング、ハルシネーションの検出を行う。Bedrock 内のモデルにもセルフホストのモデルにも使え、全アプリで一貫した安全・プライバシー統制を適用できる。',
+          ['基盤モデル提供者が安全対策済みなので利用側のガードレールは不要', 'ガードレールは Bedrock で提供されるモデルにしか適用できない'], ['3.1', '3.3']),
+        cell('rai-controllability', 'Controllability', 'Scale', '制御可能性: AI システムの挙動を監視し誘導する仕組み',
+          '制御可能性は「AI システムの挙動を監視し、誘導（steer）する仕組みを持つこと」。展開済みモデルの品質を保つには監視が重要で、Amazon SageMaker Model Monitor は不正確な予測を自動検出してアラートする。Amazon SageMaker Ground Truth で ML ライフサイクル全体に人間のフィードバックを適用し、精度と関連性を改善する（Human-in-the-loop）。',
+          ['一度展開した AI システムは自律的に正しく振る舞い続ける', '人間のフィードバックは学習前のラベル付けにしか使えない'], ['3.1', '3.3']),
+        cell('rai-veracity-robustness', 'Veracity and robustness', 'Launch', '真実性と堅牢性: 予期しない・敵対的な入力でも正しい出力を得る',
+          '真実性と堅牢性は「予期しない入力や敵対的な入力があっても正しいシステム出力を達成すること」。Amazon Bedrock のモデル評価では、精度、堅牢性、有害性（toxicity）などのカスタム指標でユースケースに最適な基盤モデルを評価・比較・選択でき、SageMaker Clarify や fmeval も使える。',
+          ['通常の入力でテストに合格すれば敵対的入力への対策は不要', 'モデル選定はベンチマークの総合順位だけで決めてよい'], ['3.1', '3.3', '1.3']),
+        cell('rai-governance', 'Governance', 'Align', 'ガバナンス: 提供者と導入者を含む AI サプライチェーンにベストプラクティスを組み込む',
+          'ガバナンスは「提供者（provider）と導入者（deployer）を含む AI サプライチェーンにベストプラクティスを組み込むこと」。SageMaker の ML ガバナンス機能は ML プロジェクトの統制と可視性を高め、モデル情報を取得・共有し、バイアスなどのモデル挙動を一か所で把握できる。AWS は ISO/IEC 42001 などの標準や、G7 広島 AI プロセスの行動規範などの取り組みにも関与している。',
+          ['ガバナンスは自社開発モデルにだけ必要で調達したモデルは対象外', 'ガバナンスは文書化の作業でありツールや仕組みは不要'], ['3.2', '3.1']),
+        cell('rai-transparency', 'Transparency', 'Envision', '透明性: ステークホルダーが AI システムとの関わりを判断できるようにする',
+          '透明性は「ステークホルダーが AI システムとの関わり方について情報に基づいた選択をできるようにすること」。AWS AI Service Cards は、AWS の AI サービスとモデルについて、想定ユースケースと制限、責任ある AI の設計上の選択、性能最適化のベストプラクティスを一か所で示す透明性のためのリソース。',
+          ['透明性とはモデルのソースコードや重みを公開すること', 'AI を使っていることを利用者に知らせる必要はない'], ['3.1', '3.2']),
+        cell('rai-design-choices', 'Practice', 'Envision', '実践: 次元はすべての AI システムの性質であり、ユースケースごとに意図的に設計する',
+          'これらの中核的な次元は、すべての AI システムに内在する技術的な性質であり、自社のユースケースに応じて意図的な設計上の選択を行うことが課題となる。AWS は教育・科学・顧客を重視する人中心のアプローチで、エンドツーエンドの AI ライフサイクル全体に責任ある AI を組み込むとし、初日から責任ある AI の実践で構築することを勧める。設計・開発・運用にわたる指針として AWS Well-Architected Responsible AI Lens がある。次元の定義は AI 技術の進化に合わせて評価・更新される。',
+          ['責任ある AI の次元は特定の高リスク用途にだけ当てはまる', '責任ある AI は展開後の監査で対応すればよい'], ['3.1', '2.1']),
+      ],
+    },
+
+    // ── AWS Well-Architected Machine Learning Lens: ML lifecycle phases ──
+    {
+      id: 'aib-fw-ml-lens-lifecycle',
+      kind: 'framework',
+      framework: 'AWS Well-Architected Machine Learning Lens（ML ライフサイクル）',
+      source: {
+        title: 'Machine Learning Lens – AWS Well-Architected Framework: Well-Architected machine learning lifecycle',
+        url: 'https://docs.aws.amazon.com/wellarchitected/latest/machine-learning-lens/well-architected-machine-learning-lifecycle.html',
+        urlJa: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/machine-learning-lens/well-architected-machine-learning-lifecycle.html',
+        verifiedAt: '2026-10-17',
+      },
+      axes: {
+        perspective: ['Business goal identification', 'ML problem framing', 'Data processing', 'Model development', 'Deployment', 'Monitoring'],
+        stage: ['Envision', 'Align', 'Launch', 'Scale'],
+      },
+      cells: [
+        cell('ml-lc-business-goal', 'Business goal identification', 'Envision', 'ビジネス目標の特定: ライフサイクルで最も重要なフェーズ',
+          'ML ライフサイクル（ビジネス目標の特定 → ML 問題の定式化 → データ処理 → モデル開発 → デプロイ → モニタリング）は反復的で、フェーズ間にフィードバックループがある。最も重要なのはビジネス目標の特定で、解くべき問題と得られるビジネス価値を明確にし、具体的な目標と成功基準で価値を測れるようにする。そもそも ML が適切な手段かを判断し、十分な量の関連性の高い高品質なデータが利用可能かを確認し、関係者を最初から巻き込む。',
+          ['ML の導入自体を目標とし、解く問題は後から探す', 'データの有無はモデル開発に入ってから確認すればよい'], ['2.1', '4.1']),
+        cell('ml-lc-problem-framing', 'ML problem framing', 'Align', 'ML 問題の定式化: 技術指標とビジネス成果の関係を定義する',
+          'ビジネス課題を ML 問題（何を観測し何を予測するか＝ラベル／目的変数）として定式化する。観測可能で定量的な性能指標（例: 精度）を定め、技術指標とビジネス成果（例: 売上）の関係を定義してビジネス側の合意を得る。単純なビジネスルールの方が優れている問題や、ML を適用できるだけのデータがない問題もあるため、ML が正しい手段かを評価する。解釈しやすい単純なモデルから始める。',
+          ['ビジネス課題はすべて ML で解くのが最善', '最初から最も複雑なモデルを採用すべき'], ['1.2', '2.2', '1.1']),
+        cell('ml-lc-data-processing', 'Data processing', 'Align', 'データ処理: 収集・前処理・特徴量エンジニアリング',
+          '正確なモデルの学習にはデータを使える形に変換するデータ処理が必要で、データ収集とデータ準備（前処理と特徴量エンジニアリング）からなる。データはシステムの目標（入力と出力の関係）を定義し、アルゴリズムを学習させ、データドリフトに対する性能測定のためのベースラインになる。探索的データ分析で品質を検証し、学習データに適用したのと同じ処理手順を推論リクエストにも適用する。',
+          ['データ処理は学習時だけで、推論時の入力は加工せずそのまま渡す', 'データ量が多ければ品質の検証は不要'], ['4.2', '1.1']),
+        cell('ml-lc-model-development', 'Model development', 'Launch', 'モデル開発: 構築・学習・チューニング・評価',
+          'モデル開発はモデルの構築、学習、チューニング、評価からなる。モデル構築には、ビルド・学習・ステージングと本番へのリリースを自動化する CI/CD パイプラインの作成も含まれる。',
+          ['モデル開発は学習の実行だけで、評価やパイプラインは別工程', 'リリースは手作業の方が安全なので自動化しない'], ['1.1', '4.4']),
+        cell('ml-lc-deployment', 'Deployment', 'Launch', 'デプロイ: ガバナンスと段階的なリリース戦略',
+          '学習・チューニング・評価・検証の済んだモデルを本番に展開し推論を行う。ガバナンスプロセスを使い、自動化と手動または自動の品質ゲートを組み合わせて変更を検証する。ブルー／グリーン、カナリア（小さな利用者グループへ先行展開）、A/B テスト（トラフィックを新旧モデルに分け、より長期間・大きな集団で比較）、シャドー（同じ入力を新旧両方に流す）などの戦略でダウンタイムとリスクを減らす。',
+          ['新しいモデルは全利用者に一斉に切り替えるのが最も効率的', 'カナリアと A/B テストは同じもので使い分けは不要'], ['4.4']),
+        cell('ml-lc-monitoring', 'Monitoring', 'Scale', 'モニタリング: ドリフト検出と再学習パイプライン',
+          'モデル監視はデータを取得して学習データと比較し、ルールで問題を検出してアラートを送る。これを定期的、イベント起点、または人の介入で繰り返す。検出する問題はデータ品質、モデル品質、バイアスドリフト、特徴量寄与のドリフト。データドリフトは学習時からのデータ分布の大きな変化、コンセプトドリフトは目的変数の性質の変化で、性能劣化を招く。違反を検出したらモデル更新パイプラインで再学習する。',
+          ['本番で精度が下がらない限り監視は不要', 'ドリフトは入力データの変化だけを指し、目的変数の変化は含まない'], ['4.4', '3.3']),
+      ],
+    },
+
+    // ── AWS Well-Architected Generative AI Lens: lifecycle and selected best practices ──
+    {
+      id: 'aib-fw-genai-lens',
+      kind: 'framework',
+      framework: 'AWS Well-Architected Generative AI Lens（生成 AI ライフサイクル）',
+      source: {
+        title: 'Generative AI Lens – AWS Well-Architected Framework',
+        url: 'https://docs.aws.amazon.com/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+        urlJa: 'https://docs.aws.amazon.com/ja_jp/wellarchitected/latest/generative-ai-lens/generative-ai-lens.html',
+        verifiedAt: '2026-10-17',
+      },
+      axes: {
+        perspective: ['Scoping', 'Model selection', 'Model customization', 'Development and integration', 'Deployment', 'Continuous improvement'],
+        stage: ['Envision', 'Align', 'Launch', 'Scale'],
+      },
+      cells: [
+        cell('genai-lc-scoping', 'Scoping', 'Envision', 'スコーピング: 生成 AI が課題に適しているかを判断する',
+          'スコーピングではビジネス課題の理解を優先し、目標・要件・ユースケースを明確にして、影響が大きく実現可能な用途を特定し、関係者を揃え、成功の測り方を決める。主眼は生成 AI がその課題の解決に適しているかの判断で、投資のリスクとコストを考える。既製モデルで足りるかカスタマイズが要るか、単一モデルか複数モデルの編成かを自問し、プロンプト長・データアーキテクチャ・モデル選択・エージェント編成などのコスト要因、技術的・組織的実現性、リスクプロファイル、データの可用性と品質を評価し、ユースケースごとにセキュリティスコーピングマトリックスを作る。',
+          ['生成 AI はあらゆる課題に適しているので適合性の判断は不要', 'コストはモデルの料金表だけで見積もれる'], ['2.1', '4.1']),
+        cell('genai-lc-model-selection', 'Model selection', 'Align', 'モデル選択: 要件に基づく評価とモデルカタログ',
+          '要件とユースケースに基づいてモデルを評価する。モダリティ、サイズ、精度、学習データ、料金、コンテキストウィンドウ、推論レイテンシ、既存インフラとの互換性を考慮し、ホスティング事業者のデータ利用ポリシーを理解する。ワークロードによりバッチ推論、リアルタイム推論、その組み合わせが適する。モデルルーティングで複数の選択肢を用意し、モデルカタログで新モデルを素早く導入する。RAG を使うならベクトルデータベースの選定と可用性要件も考える。',
+          ['最も大きなモデルを選べばどのユースケースでも最適', 'モデル選定ではデータ利用ポリシーは考慮しなくてよい'], ['1.2', '1.3']),
+        cell('genai-lc-customization', 'Model customization', 'Launch', 'モデルのカスタマイズ: 汎用モデルをアプリの目的に合わせる',
+          '事前学習済みモデルを、プロンプトエンジニアリング、RAG、エージェント、ファインチューニング、継続事前学習、モデル蒸留、人間のフィードバックによるアライメントなどの手法でユースケースに合わせる。手法は組み合わせて使え、プロセスは反復的で、文脈の中で正確かつ倫理的に動くかを継続的に評価する。プロンプトのテンプレート管理を行い、人間のフィードバックで挙動を倫理・品質基準に合わせ、バイアスや望ましくない出力を先回りして軽減する。',
+          ['カスタマイズとはファインチューニングのことだけを指す', 'カスタマイズは一度実施すれば再評価は不要'], ['1.3']),
+        cell('genai-lc-when-to-customize', 'Model customization', 'Align', 'いつカスタマイズするか: 最も軽い手法から段階的に',
+          '最もリソースを使わないプロンプトエンジニアリングから始め、必要に応じて高度な手法へ進む。次に RAG で外部知識を検索させ、コアモデルを再学習せずに特定ドメインに応答を合わせる。継続事前学習やファインチューニングは、性能改善が必要な特定タスクがあり、関連するラベル付きデータがあり、医療・法律などドメイン固有の言語の理解が必要な場合に選ぶ。カスタム基盤モデルの構築（通常最も高コスト）は、既存モデルが要件を満たさず、大量の専有データがあり、アーキテクチャと学習を完全に制御する必要がある場合に限る。Amazon Bedrock はマネージドな RAG（Knowledge Bases）、エージェント、ファインチューニング、継続事前学習を提供する。',
+          ['精度を上げるにはまずファインチューニングから始めるべき', '差別化には常に独自の基盤モデルをゼロから構築すべき'], ['1.3', '2.1']),
+        cell('genai-lc-development-integration', 'Development and integration', 'Launch', '開発と統合: モデルを実用アプリにつなぐ',
+          '選んだモデルを既存のアプリやシステムに統合し、本番利用できるようにする。会話型インターフェース、プロンプトカタログ、エージェント、ナレッジベースを組み込み、組織のデータベースやデータパイプラインに接続する。ハルシネーションなど生成 AI 特有のリスクを減らすガードレールなどのセキュリティと責任ある AI の実践を実装し、推論を最適化し、API と使いやすい UI を用意する。良い UI とシームレスな統合は利用者の採用を大きく高める。',
+          ['モデルの性能が高ければ UI や統合の作り込みは採用に影響しない', 'ガードレールは本番運用で問題が起きてから追加すればよい'], ['1.3', '4.2']),
+        cell('genai-lc-deployment', 'Deployment', 'Scale', 'デプロイ: 統制された展開と IaC',
+          '生成 AI ソリューションを統制された方法で本番に展開し、実際のデータと利用パターンに耐えるようスケールさせる。必要に応じて CI/CD パイプラインを実装し、稼働時間と回復性を保つ。AWS CDK、AWS CloudFormation、Terraform などによる IaC、バージョン管理、自動化パイプラインを使い、インフラ構成の文書化とバージョン管理で迅速なロールバックを可能にする。セキュリティとプライバシー要件への準拠を検証する。',
+          ['生成 AI アプリはプロンプトを変えるだけなので変更管理は不要', 'ロールバックは手作業で再構築すれば十分'], ['4.4']),
+        cell('genai-lc-continuous-improvement', 'Continuous improvement', 'Scale', '継続的改善: 指標と利用者フィードバックで反復する',
+          '展開済みモデルの性能を監視し、利用者のフィードバックを集め、精度・品質・関連性を高めるよう反復的に調整する。精度、有害性（toxicity）、一貫性（coherence）などの指標を追跡し、出力の品質と有用性について利用者から意見を集めてバイアスや調整が必要な領域を特定する。チームの継続的な教育に投資し、生成 AI の進歩を追い、AI 戦略を定期的に見直す。',
+          ['生成 AI アプリは一度リリースすれば改善サイクルは不要', '品質評価は開発時のテストデータだけで十分'], ['2.2', '4.4']),
+        cell('genai-ops-user-feedback', 'Continuous improvement', 'Launch', '利用者フィードバックの収集と監視（GENOPS01-BP02）',
+          'モデル性能の評価を利用者からの直接のフィードバックで補い、継続的なフィードバックループで性能と満足度を高める。基盤モデルは本質的に非決定的で失敗の現実的な可能性があるため、フィードバックを定期的に見直すことで主観的な性能評価の逸脱を先回りして把握でき、正解データ（ground truth）がなくても性能劣化をその場で検出できるようになる。',
+          ['正解データがなければ生成 AI の性能劣化は検出できない', '利用者フィードバックは UI 改善にしか使えない'], ['2.2', '3.3']),
+        cell('genai-sec-excessive-agency', 'Development and integration', 'Scale', '過剰な権限（excessive agency）への対策（GENSEC05-BP01）',
+          'エージェントは生成 AI の推論でプロセスを自動化し外部機能を呼び出す。エージェントが問題の解決策として範囲外の広い行動を取ると判断してしまうリスクを excessive agency と呼び、悪意ではなく自動化の意図しない結果として起きる。基盤モデルへの要求やエージェントワークフローに権限境界を設け、必要なシステム・ガードレール・データソースにだけアクセスを与える。Amazon Bedrock のエージェントの実行ロールや Flows のサービスロールは最小権限で設計し、プロンプトエンジニアとセキュリティエンジニアのロールも分離する。',
+          ['エージェントには業務を止めないよう広い権限を与えるべき', 'excessive agency は悪意ある攻撃者がいなければ起きない'], ['3.3', '3.2']),
       ],
     },
   ],

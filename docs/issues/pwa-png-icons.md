@@ -72,3 +72,7 @@ PNG エントリ（`192x192` / `512x512` の `any`、および `512x512` の `ma
 - [ ] `index.html` が存在しない `./assets/og/favicon.ico` を参照せず、
       `apple-touch-icon` が実在の PNG を指す。
 - [ ] `sw.js` の `CACHE_VERSION` が `v3` に更新され、新しい PNG が `APP_SHELL` に含まれる。
+
+## 追記（#247）
+
+アイコンを「ファセット加工したコンパス星（ナビゲーターの北極星）」1 モチーフにリデザインした。マスターは `assets/icon.svg` / `assets/icon-maskable.svg` の 2 枚で、PNG は `node scripts/generate-icons.mjs`（Playwright の Chromium で SVG をラスタライズ）で再生成する。上記の手書きラスタライザは廃止した。

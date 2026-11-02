@@ -2,6 +2,8 @@
 
 GitHub アカウント無しのフィードバック送信（#162）と、Good / Bad 投票の集約（#167）を受け持つ最小構成のサーバレススタックです。
 
+フィードバックは 1 回の「送信」で **DynamoDB への保存と GitHub issue の作成を両方** 行います（#247）。ブラウザは GitHub を開かず、issue 作成は Lambda がバックグラウンドで行います。GitHub API は最大 5 秒で打ち切り、失敗しても DynamoDB には必ず保存されます。
+
 ```
 ブラウザ（GitHub Pages）
    │ POST /feedback, POST /votes, POST /events（text/plain の JSON = CORS プリフライト無し）
@@ -46,23 +48,43 @@ Lambda Function URL（API Gateway は使わない）── CORS / Origin を Git
 
    出力 `FunctionUrl` を控えます。
 
-2. GitHub の **fine-grained personal access token** を作成
-   - Repository access: *Only select repositories* → このリポジトリだけ
-   - Permissions: *Issues: Read and write*（それ以外は不要）
+2. GitHub の **fine-grained personal access token** を作成（GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens）
+   - Resource owner: リポジトリの所有者（`Kenta-Matsuda`）
+   - Repository access: *Only select repositories* → `Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study` だけ
+   - Permissions: Repository permissions の *Issues: Read and write*（Metadata: Read は自動で付く。それ以外は不要）
    - 有効期限を設定し、失効前に更新する
 
-3. トークンを SSM に保存（**自分のターミナルで**実行し、チャット等に貼らない）
+3. トークンを SSM に **SecureString** で保存（**自分のターミナルで**実行し、チャット等に貼らない）
 
    ```powershell
    aws ssm put-parameter --region ap-northeast-1 --type SecureString `
      --name /study-navigator/feedback/github-token --value <TOKEN>
+   # 更新（ローテーション）時は --overwrite を付ける
    ```
 
-   トークンが無い間も送信は受け付け、DynamoDB にだけ保存されます（issue は作られない）。
+   パラメータ名はテンプレートの `GithubTokenParam`（既定 `/study-navigator/feedback/github-token`）と一致させます。Lambda はトークンをコンテナ内でキャッシュしますが、GitHub が 401 を返すと次の送信で SSM を読み直します。再デプロイは不要です。
+
+   トークンが無い間も送信は受け付け、DynamoDB にだけ保存されます（issue は作られず、ログに `github_issue_skipped no_token` が出ます）。設定できたかは、アプリから 1 件送ってリポジトリに `feedback` / `from-app` ラベルの issue ができるか、または次で確認できます（値は表示しない）。
+
+   ```powershell
+   aws ssm describe-parameters --region ap-northeast-1 `
+     --parameter-filters "Key=Name,Values=/study-navigator/feedback/github-token"
+   ```
+
    なお SSM は `aws` / `ssm` で始まる名前（`/aws-xxx/...` のような先頭階層も含む）を予約しているため使えません。
+
+   **既存スタックを更新するときの注意**: `sam deploy` は `--parameter-overrides` で渡さなかったパラメータに**前回の値**を使います（テンプレートの既定値には戻りません）。過去に `GithubTokenParam` を別の名前で上書きしてデプロイしていると、トークンを正しい名前で保存しても Lambda はその名前を読めず（IAM も旧名前にしか許可が無い）、ログに `github_token_unavailable AccessDeniedException <旧パラメータ名>` が出て issue は作られません。その場合は名前を明示して再デプロイします。
+
+   ```powershell
+   sam deploy --stack-name aws-study-feedback --region ap-northeast-1 `
+     --resolve-s3 --capabilities CAPABILITY_IAM `
+     --parameter-overrides GithubTokenParam=/study-navigator/feedback/github-token
+   ```
+
+   現在の値は `aws cloudformation describe-stacks --stack-name aws-study-feedback --query "Stacks[0].Parameters"` で確認できます。テンプレートは `aws` / `ssm` で始まる値を `AllowedPattern` で拒否するので、旧値が残ったままの更新はデプロイ時にエラーになります。
    Git Bash で実行する場合は `/` 始まりの引数がパス変換されるので `MSYS_NO_PATHCONV=1` を付けてください。
 
-4. `js/config.js` の `FEEDBACK_API_URL` に手順 1 の URL を設定して公開すると、フィードバックの「送信」がアカウント不要の直接送信に切り替わり、Good / Bad 投票も送られるようになります。空文字に戻せば従来の挙動です。
+4. `js/config.js` の `FEEDBACK_API_URL` に手順 1 の URL を設定して公開すると、フィードバックの「送信」がこのバックエンドに届き、Good / Bad 投票も送られるようになります。空文字にするとフォームは「現在送信できません」と表示し、「テキストをコピー」だけを案内します（ページ遷移や GitHub の画面は開きません）。
 
 5. 動作確認
 
@@ -75,7 +97,7 @@ Lambda Function URL（API Gateway は使わない）── CORS / Origin を Git
 - **停止**: `sam deploy ... --parameter-overrides AcceptSubmissions=false`
 - **集計**: `node scripts/export-feedback.mjs` で `feedback-export/` に CSV（自由記述 / 投票イベント / 対象ごとの Good・Bad 集計）を書き出します。問題単位の学習イベント（`POST /events`、issue #225 §9: 生成・回答・セット完了。問題文は含まず ID のみ）は `node scripts/export-learning-events.mjs` で `learning-events.csv` と `unit-summary.csv`（試験 × 出題単位ごとの回答数・正答率）を書き出します。表計算ソフトや Amazon Quick（後述）にそのまま渡せます。
 - **データ保持**: フィードバックは約 400 日、投票は約 800 日で TTL により自動削除。IP は生値を保存せず、スタック固有のソルト付きハッシュのみ保持します。
-- **ログ**: `/aws/lambda/<関数名>`（14 日保持）。GitHub 投稿失敗は `github_issue_failed` で出力されます。
+- **ログ**: `/aws/lambda/<関数名>`（14 日保持）。GitHub 投稿失敗は `github_issue_failed`（HTTP エラー）/ `github_issue_error`（タイムアウト等）、トークン未設定は `github_issue_skipped` で出力されます。
 
 ## BI（Amazon Quick）について
 
