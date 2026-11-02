@@ -5,6 +5,7 @@ import { CARDS_AIB_C01 } from '../js/data/cards/aib-c01.js';
 import { CARDS_SAA_C03 } from '../js/data/cards/saa-c03.js';
 import { AIB_C01 } from '../js/data/aib-c01.js';
 import { SAA_C03 } from '../js/data/saa-c03.js';
+import { EXAM_MOCK_CONFIG } from '../js/quiz.js';
 
 /**
  * Cards (issue #225, design §4): pre-prepared units the pipeline tests —
@@ -35,17 +36,38 @@ test.describe('card data files', () => {
     }
   });
 
-  test('SAA-C03 case cards are valid; coverage is partial and reported as such', () => {
+  test('SAA-C03 case cards are valid, cover every task and meet the 1.5× unit requirement', () => {
     expect(validateCards(CARDS_SAA_C03, { taskIds: taskIds(SAA_C03) })).toEqual([]);
     const report = coverageReport(CARDS_SAA_C03, { questionCount: 65, taskIds: taskIds(SAA_C03) });
     expect(report.byKind.case).toBe(report.units);
-    expect(report.units).toBeGreaterThanOrEqual(15);
-    expect(report.sufficient).toBe(false);
-    expect(report.uncoveredTasks.length).toBeGreaterThan(0);
-    expect(report.tasksCovered).toBeGreaterThanOrEqual(4);
+    // #241 added cards for the previously uncovered tasks 3.1–3.3, 3.5, 4.2–4.4; the
+    // 2026-10-19 top-up brought the inventory to the 65 × 1.5 requirement.
+    expect(report.units).toBeGreaterThanOrEqual(report.required);
+    expect(report.uncoveredTasks).toEqual([]);
+    expect(report.sufficient).toBe(true);
     // Every decision has rejected alternatives (distractor material).
     for (const card of CARDS_SAA_C03.cards) for (const d of card.decisions) expect(d.rejected.length).toBeGreaterThan(0);
   });
+
+  // Every other exam got its own card file (#225, rolled out to all exams):
+  // case cards for architecture exams, concept + framework for CLF / AIF.
+  const OTHER_EXAMS = ['aif-c01', 'aip-c01', 'ans-c01', 'clf-c02', 'dea-c01', 'dop-c02', 'dva-c02', 'mla-c01', 'sap-c02', 'scs-c03', 'soa-c03'];
+  for (const examId of OTHER_EXAMS) {
+    test(`${examId} cards are valid and cover every task with enough units`, async () => {
+      const cardData = Object.values(await import(`../js/data/cards/${examId}.js`))[0];
+      const exam = Object.values(await import(`../js/data/${examId}.js`))[0];
+      expect(cardData.examId).toBe(examId);
+      expect(validateCards(cardData, { taskIds: taskIds(exam) })).toEqual([]);
+      const report = coverageReport(cardData, { questionCount: EXAM_MOCK_CONFIG[examId].questionCount, taskIds: taskIds(exam) });
+      expect(report.uncoveredTasks).toEqual([]);
+      expect(report.sufficient).toBe(true);
+      // Distractor material is present for every unit.
+      for (const u of listUnits(cardData)) {
+        if (u.kind === 'case') expect(u.detail.rejected.length).toBeGreaterThan(0);
+        if (u.kind === 'concept') expect(u.detail.confusables?.length || 0).toBeGreaterThanOrEqual(2);
+      }
+    });
+  }
 
   test('validateCards reports schema problems', () => {
     const problems = validateCards({ cards: [
@@ -94,7 +116,8 @@ test.describe('units in the pipeline', () => {
   });
 
   test('tasks without units fall back to task-statement items (partial SAA inventory)', () => {
-    const unitsByTask = indexUnitsByTask(listUnits(CARDS_SAA_C03));
+    // SAA now covers every task (#241); drop domain 4's units to keep testing the fallback.
+    const unitsByTask = indexUnitsByTask(listUnits(CARDS_SAA_C03).filter((u) => !u.tasks.some((t) => String(t).startsWith('4.'))));
     const bp = buildExamBlueprint({ exam: SAA_C03, count: 65, unitsByTask, rng: () => 0.17 });
     const withUnit = bp.filter((s) => s.unit);
     const without = bp.filter((s) => !s.unit);

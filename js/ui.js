@@ -1,4 +1,4 @@
-import { callAi, callAiStream, callAiBatch, resumeAiBatch, getActiveProvider, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
+import { callAi, callAiStream, submitAiBatch, resumeAiBatch, getActiveProvider, getActiveProviderLabel, isAiBatchEligible, markAiBatchUnavailable } from './ai.js';
 import { EXAM_ID_TO_HASH, EXAM_CATEGORIES } from './exams.js';
 import { COMMON_STEPS, COMMON_STEP_TITLES } from './data/common-steps.js';
 import { applyResourceGroupDefaults } from './data/common-defaults.js';
@@ -90,7 +90,8 @@ import {
   buildSlotPromptSuffix,
   correctChoiceText,
 } from './examPipeline.js';
-import { listUnits, indexUnitsByTask } from './cards.js';
+import { listUnits, indexUnitsByTask, renderUnitForPrompt } from './cards.js';
+import { runBatchChain, isResumableChain } from './examBatchChain.js';
 import { getExamLifecycleNotice } from './examLifecycle.js';
 import { generateExamQuestions } from './examGenerator.js';
 import {
@@ -99,6 +100,7 @@ import {
   appendExamSetQuestion,
   finalizeExamSet,
   updateExamSet,
+  replaceExamSetQuestions,
   listExamSets,
   deleteExamSet,
   markInterruptedExamSets,
@@ -420,7 +422,11 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     } catch (err) {
       console.warn('[examSets] append failed:', err);
     }
-    // Learning event (#225 §9): ids only, no question text.
+    recordGeneratedQuestionEvent(session, question);
+  }
+
+  // Learning event (#225 §9): ids only, no question text.
+  function recordGeneratedQuestionEvent(session, question) {
     recordLearningEvent({
       type: 'question_generated', examId: session.examId, mode: session.mode, setId: session.setId,
       questionId: question.id, domainId: question.domainId, taskId: question.taskId, unitId: question.unitId,
@@ -1406,12 +1412,27 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     }
   }
 
-  function showBatchProgress(total) {
-    return ({ state, done, total: t, failed }) => {
-      const denom = t || total;
+  // Toast label for the evaluation stages of the background job chain (PR 6b).
+  function batchChainStageLabel(stage) {
+    const isJa = getLocale() === 'ja';
+    if (stage === 'judging') return isJa ? '品質評価中（Solver / Judge）' : t('batch.stateJudging');
+    if (stage === 'fixing') return isJa ? '指摘のあった問題を修正中' : t('batch.stateFixing');
+    return '';
+  }
+
+  function showBatchProgress(total, stage = 'writing') {
+    return ({ state, done, total: n, failed }) => {
+      const denom = n || total;
+      const isJa = getLocale() === 'ja';
+      const stageLabel = batchChainStageLabel(stage);
+      if (stageLabel) {
+        // Evaluation jobs count requests, not questions.
+        setBatchToastState('running', `${stageLabel}… ${done} / ${denom}` + (failed ? (isJa ? `（失敗 ${failed}）` : ` (failed: ${failed})`) : ''));
+        return;
+      }
       setBatchToastState(
         'running',
-        getLocale() === 'ja'
+        isJa
           ? `${batchStateLabel(state)}… ${done} / ${denom} 問` + (failed ? `（失敗 ${failed}）` : '')
           : `${batchStateLabel(state)}… ${done} / ${denom}` + (failed ? ` (failed: ${failed})` : '')
       );
@@ -1425,13 +1446,14 @@ export function initApp({ exams, getExamById, defaultExamId }) {
     } catch (err) { console.warn('[examSets] mark failed:', err); }
   }
 
-  // Boot-time resume (#225 design §6.1): a mock batch whose job name was saved
-  // before the page was closed keeps running on the provider side; pick it up.
+  // Boot-time resume (#225 design §6.1, PR 6b): a background mock set keeps
+  // running on the provider side while the page is closed — a live writer /
+  // judging / fixing job, or a chain between two stages. Pick it up where it is.
   async function resumePendingBatchSets() {
     let pending = [];
     try {
       pending = (await listExamSets({ status: [SET_STATUS.GENERATING, SET_STATUS.PLANNING, SET_STATUS.JUDGING] }))
-        .filter((set) => set.pipeline?.jobName);
+        .filter((set) => isResumableChain(set.pipeline));
     } catch { return; }
     const set = pending[0];
     if (!set) return;
@@ -1449,67 +1471,83 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       taskContext: '',
       isDashboardQuiz: true,
     };
-    const total = set.requested || session.questionCount;
 
-    batchInProgress = true;
     setBatchToastState('running', getLocale() === 'ja' ? '前回のバッチ生成を再開しています…' : t('batch.resuming'));
-    let result = null;
+    await runBatchChainForSession({ session, request, pipeline: set.pipeline, questions: set.questions || [], resumed: true });
+  }
+
+  // Drive the job chain (writing → judging → fixing → ready, js/examBatchChain.js)
+  // for one background set. Each stage boundary and job name is saved on the set,
+  // so closing the tab at any point loses nothing: resumePendingBatchSets continues.
+  async function runBatchChainForSession({ session, request, pipeline, questions = [], resumed = false }) {
+    batchInProgress = true;
+    let model = pipeline.model || null;
+    let out = null;
     try {
-      result = await resumeAiBatch({
-        jobName: set.pipeline.jobName,
-        total,
-        model: set.pipeline.model,
-        onProgress: showBatchProgress(total),
+      out = await runBatchChain({
+        state: { ...pipeline, questions },
+        // Sets created before PR 6b carry no `judge` flag: keep their old behaviour.
+        judge: Boolean(pipeline.judge),
+        deps: {
+          submit: async ({ requests, displayName }) => {
+            const job = await submitAiBatch({ requests, displayName: `mock-${request.examId}-${displayName}`, model });
+            if (!job) throw new Error('Batch API is not available for the current provider / model');
+            model = job.model;
+            return job;
+          },
+          poll: async ({ name, total, stage }) => {
+            const res = await resumeAiBatch({ jobName: name, total, model, onProgress: showBatchProgress(total, stage) });
+            if (!res) throw new Error('Batch API is not available for the current provider / model');
+            return res;
+          },
+          save: async ({ pipeline: p, questions: qs }) => {
+            if (!session.setId) return null;
+            if (qs) await replaceExamSetQuestions(session.setId, qs);
+            const patch = { pipeline: p };
+            if (p.stage === 'judging' || p.stage === 'fixing') patch.status = SET_STATUS.JUDGING;
+            return updateExamSet(session.setId, patch);
+          },
+          onStage: (stage) => {
+            const label = batchChainStageLabel(stage);
+            if (label) setBatchToastState('running', `${label}…`);
+          },
+        },
       });
     } catch (err) {
-      console.warn('[batch] resume failed:', err);
+      console.warn('[batch] job chain failed:', err);
       batchInProgress = false;
       await markBatchSetFailed(session);
-      setBatchToastState('error', `${getLocale() === 'ja' ? 'バッチ生成の再開に失敗しました' : t('batch.failed')}: ${err?.message || ''}`);
+      const isJa = getLocale() === 'ja';
+      if (err?.code === 'no-questions') {
+        setBatchToastState('error', isJa ? '生成された問題を解析できませんでした' : t('batch.failed'));
+      } else if (resumed) {
+        setBatchToastState('error', `${isJa ? 'バッチ生成の再開に失敗しました' : t('batch.failed')}: ${err?.message || ''}`);
+      } else {
+        setBatchToastState('error', `${isJa ? 'バッチAPIでの生成に失敗しました' : t('batch.failed')}: ${err?.message || ''}`);
+      }
+      notifyBrowser(isJa ? '生成に失敗しました' : t('batch.failed'), isJa ? '本番模擬試験のバッチ生成でエラーが発生しました' : t('batch.failed'));
       return;
     }
     batchInProgress = false;
-    if (!result || !Array.isArray(result.texts)) {
-      await markBatchSetFailed(session);
-      setBatchToastState('error', getLocale() === 'ja' ? 'バッチAPIから結果を取得できませんでした' : t('batch.failed'));
-      return;
-    }
-    await completeBatchSet({ session, request, result, slots: set.pipeline.slots || [] });
+    if (out.metrics.judgeDegraded) console.warn('[batch] quality evaluation job failed; offering questions unjudged');
+    console.info('[pipeline] background metrics', out.metrics);
+    await completeBatchSet({ session, request, questions: out.questions, metrics: out.metrics, model });
   }
 
-  // Shared tail of the batch flow (live and resumed): parse, persist, offer to start.
-  async function completeBatchSet({ session, request, result, slots }) {
-    const generated = [];
-    for (let i = 0; i < result.texts.length; i++) {
-      const text = result.texts[i];
-      if (!text) continue;
-      const parsed = parseQuizResponse(text);
-      if (parsed) {
-        parsed.domainId = slots[i]?.domainId ?? null;
-        parsed.taskId = slots[i]?.taskId ?? null;
-        parsed.unitId = slots[i]?.unitId ?? null;
-        parsed.explanation = appendMissingResourceRefs(parsed.explanation, slots[i]?.resources || []);
-        generated.push(parsed);
-      }
-    }
-    if (generated.length === 0) {
-      await markBatchSetFailed(session);
-      setBatchToastState('error', '生成された問題を解析できませんでした');
-      notifyBrowser('生成に失敗しました', '本番模擬試験のレスポンスを解析できませんでした');
-      return;
-    }
-
+  // Shared tail of the batch flow (live and resumed): the chain has already
+  // stored the final questions on the set; finalize it and offer to start.
+  async function completeBatchSet({ session, request, questions, metrics, model }) {
+    const generated = questions;
     session.questions = generated;
     session.questionCount = generated.length;
-    for (let i = 0; i < generated.length; i++) await persistSessionQuestion(session, i, generated[i]);
-    try { await updateExamSet(session.setId, { pipeline: { jobName: null } }); } catch { /* ignore */ }
-    await finalizeSessionSet(session, { requested: result.texts.length });
+    generated.forEach((q) => recordGeneratedQuestionEvent(session, q));
+    await finalizeSessionSet(session, metrics);
     pendingBatchSession = session;
     pendingBatchRequest = request;
 
-    const requested = result.texts.length;
+    const requested = metrics.requested || generated.length;
     const isPartial = generated.length < requested;
-    const modelLabel = result.model || 'gemini-3';
+    const modelLabel = model || 'gemini-3';
     const isJa = getLocale() === 'ja';
     const modelSuffix = isJa ? `（モデル: ${modelLabel}）` : ` (model: ${modelLabel})`;
     const readyMessage = isPartial
@@ -1581,34 +1619,44 @@ export function initApp({ exams, getExamById, defaultExamId }) {
         + buildSlotPromptSuffix({ slot, plan: planRows[i], banned: bannedConceptsFor({ planRows, generated: [], index: i, pinned: Boolean(planRows[i]) }) })
         + buildAnswerPositionHint(slot.answerLetter);
       batchRequests.push({ userPrompt, systemPrompt });
+      const resources = slotResources[i].map((r) => ({ title: r.title, url: r.url }));
       slots.push({
         domainId: slot.domain?.id ?? null,
         taskId: slot.task?.id ?? null,
         unitId: slot.unit?.id || slot.item || null,
-        resources: slotResources[i].map((r) => ({ title: r.title, url: r.url })),
+        resources,
+        // For the judging / fixing jobs of the chain (PR 6b), which may run on a
+        // later visit: everything the judge and editor need, as plain data.
+        answerLetter: slot.answerLetter || null,
+        level: getExamLevel(request.examId),
+        design: `${slot.item || ''}${slot.type ? ` / ${slot.type[getLocale() === 'en' ? 'en' : 'ja']}` : ''}`,
+        material: [slot.unit ? renderUnitForPrompt(slot.unit, { locale: getLocale() }) : '', buildResourceGroundingHint(slotResources[i]).trim()].filter(Boolean).join('\n\n'),
+        allowedUrls: resources.map((r) => r.url).concat(slot.unit?.card?.source?.url ? [slot.unit.card.source.url] : []),
       });
     }
+    const judgeInBatch = isJudgeEnabled('mock');
     if (session.setId) {
       try {
-        await updateExamSet(session.setId, { blueprint: compactBlueprint(blueprint), plan: planRows, pipeline: { stage: 'writing', slots } });
+        await updateExamSet(session.setId, { blueprint: compactBlueprint(blueprint), plan: planRows, pipeline: { stage: 'writing', slots, chain: true, judge: judgeInBatch } });
       } catch { /* ignore */ }
     }
 
-    let result = null;
+    let job = null;
     try {
-      result = await callAiBatch({
-        requests: batchRequests,
-        displayName: `mock-${request.examId}-${Date.now()}`,
-        onRequireApiKey: () => openSettingsModal(els),
-        // Save the job name immediately: from here on, closing the tab no
-        // longer loses the generation (resumePendingBatchSets picks it up).
-        onCreated: ({ name, model }) => {
-          if (!session.setId) return;
-          updateExamSet(session.setId, { pipeline: { jobName: name, model, submittedAt: new Date().toISOString() } })
-            .catch((err) => console.warn('[examSets] save job name failed:', err));
-        },
-        onProgress: showBatchProgress(total),
-      });
+      if (!getApiKey()) {
+        batchInProgress = false;
+        hideBatchToast();
+        openSettingsModal(els);
+        return;
+      }
+      job = await submitAiBatch({ requests: batchRequests, displayName: `mock-${request.examId}-${Date.now()}` });
+      if (!job) throw new Error('Batch API is not available for the current provider / model');
+      // Save the job name immediately: from here on, closing the tab no
+      // longer loses the generation (resumePendingBatchSets picks it up).
+      if (session.setId) {
+        await updateExamSet(session.setId, { pipeline: { jobName: job.name, model: job.model, submittedAt: new Date().toISOString() } })
+          .catch((err) => console.warn('[examSets] save job name failed:', err));
+      }
     } catch (err) {
       // eslint-disable-next-line no-console
       console.warn('[batch] failed:', err);
@@ -1647,15 +1695,12 @@ export function initApp({ exams, getExamById, defaultExamId }) {
       return;
     }
 
-    batchInProgress = false;
-
-    if (!result || !Array.isArray(result.texts)) {
-      await markBatchSetFailed(session);
-      setBatchToastState('error', 'バッチAPIから結果を取得できませんでした');
-      return;
-    }
-
-    await completeBatchSet({ session, request, result, slots });
+    setBatchToastState('running', getLocale() === 'ja' ? `待機中… 0 / ${total} 問` : `${t('batch.stateWaiting')}… 0 / ${total}`);
+    await runBatchChainForSession({
+      session,
+      request,
+      pipeline: { stage: 'writing', slots, chain: true, judge: judgeInBatch, jobName: job.name, model: job.model },
+    });
   }
 
 
@@ -2570,7 +2615,6 @@ function getElements() {
     feedbackImageTrigger: document.getElementById('feedbackImageTrigger'),
     feedbackImagePreview: document.getElementById('feedbackImagePreview'),
     feedbackCopyBtn: document.getElementById('feedbackCopyBtn'),
-    feedbackGithubBtn: document.getElementById('feedbackGithubBtn'),
     feedbackWebsite: document.getElementById('feedbackWebsite'),
     // Feedback nudge (issue #100)
     feedbackNudge: document.getElementById('feedbackNudge'),
@@ -3094,22 +3138,6 @@ function buildTweetIntentUrl({ text, url }) {
   const params = new URLSearchParams();
   params.set('text', String(text || '').slice(0, 800));
   if (url) params.set('url', String(url));
-  return `${base}?${params.toString()}`;
-}
-
-// Build GitHub's tokenless prefilled new-issue URL. URLSearchParams url-encodes
-// the values, so title/body/labels are safely escaped. `labels` may be an array
-// or comma-separated string; empty entries are dropped.
-function buildGitHubIssueUrl({ title, body, labels }) {
-  const base = 'https://github.com/Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study/issues/new';
-  const params = new URLSearchParams();
-  params.set('title', String(title || ''));
-  params.set('body', String(body || ''));
-  const labelList = Array.isArray(labels)
-    ? labels
-    : String(labels || '').split(',');
-  const cleaned = labelList.map((l) => String(l || '').trim()).filter(Boolean);
-  if (cleaned.length) params.set('labels', cleaned.join(','));
   return `${base}?${params.toString()}`;
 }
 
@@ -3706,15 +3734,11 @@ function maybeFireStudyReminder(els) {
   showStreakNudge(els, body);
 
   // Local OS notification (best effort, feature-detected).
-  // NOTE: we intentionally reference the SVG icon here. Some platforms ignore
-  // SVG notification icons (falling back to a default glyph), but the raster
-  // PNG app icons only exist on the #97 branch and are not present on this
-  // branch, so pointing at a PNG now would be a dead asset reference. Once #97
-  // merges to main, switch this to a raster PNG (e.g. assets/icon-192.png).
+  // Raster PNG: some platforms ignore SVG notification icons.
   try {
     if (typeof Notification === 'undefined') return;
     if (Notification.permission === 'granted') {
-      new Notification(title, { body, icon: 'assets/icon.svg' });
+      new Notification(title, { body, icon: 'assets/icon-192.png' });
     }
   } catch { /* ignore: notifications are optional */ }
 }
@@ -5233,48 +5257,10 @@ let feedbackOpenedAt = 0;
 // Guards against double submission while a direct-send request is in flight.
 let feedbackSending = false;
 
-// #162: when the feedback backend is deployed (FEEDBACK_API_URL set), the
-// primary button sends directly without a GitHub account, and the GitHub
-// prefilled-issue flow moves to a secondary "Post on GitHub" button (useful for
-// image attachments). Swapping the data-i18n keys keeps later locale switches
-// consistent because translateStaticElements() re-reads them.
-const FEEDBACK_DIRECT_I18N = {
-  'feedbackModal.description': 'feedbackModal.directDescription',
-  'feedbackModal.noAccountLead': 'feedbackModal.directLead',
-  'feedbackModal.noAccountNote': 'feedbackModal.directNote',
-  'feedbackModal.imageHelp': 'feedbackModal.directImageHelp',
-  'feedbackModal.submitToIssue': 'feedbackModal.sendDirect',
-};
-
-function applyFeedbackDirectMode(els) {
-  if (!isFeedbackApiEnabled()) return;
-  Object.entries(FEEDBACK_DIRECT_I18N).forEach(([from, to]) => {
-    els.feedbackModal.querySelectorAll(`[data-i18n="${from}"]`).forEach((el) => {
-      el.setAttribute('data-i18n', to);
-      el.textContent = t(to);
-    });
-  });
-  // Font Awesome may already have swapped the <i> for an <svg>; replace either.
-  const icon = els.feedbackSubmitBtn?.querySelector('i, svg');
-  if (icon) {
-    const sendIcon = document.createElement('i');
-    sendIcon.className = 'fas fa-paper-plane';
-    icon.replaceWith(sendIcon);
-  }
-  els.feedbackCopyBtn?.classList.add('hidden');
-  els.feedbackGithubBtn?.classList.remove('hidden');
-}
-
 function wireFeedbackHandlers({ els }) {
   if (!els.feedbackBtn || !els.feedbackModal) return;
 
-  applyFeedbackDirectMode(els);
-
   els.feedbackBtn.addEventListener('click', () => openFeedbackModal(els));
-
-  els.feedbackGithubBtn?.addEventListener('click', () => {
-    submitFeedbackViaGithub(els);
-  });
 
   els.feedbackTextarea?.addEventListener('input', () => {
     updateFeedbackCharCount(els);
@@ -5284,8 +5270,8 @@ function wireFeedbackHandlers({ els }) {
     submitFeedback(els);
   });
 
-  // #101: copy-only path so users WITHOUT a GitHub account can still send
-  // feedback (they copy the composed text and share it however they like).
+  // Fallback shown only when sending fails or the backend is unavailable, so
+  // the draft can still be kept and shared another way (#101 / #247).
   els.feedbackCopyBtn?.addEventListener('click', () => {
     copyFeedbackText(els);
   });
@@ -5299,8 +5285,8 @@ function wireFeedbackHandlers({ els }) {
     }
   });
 
-  // Image attach affordances (#81). Files are kept in memory only for preview;
-  // they are never uploaded (static site, no backend / AWS out of bounds).
+  // Image attach affordances (#81). Images are re-encoded on-device and sent
+  // with the feedback to the backend (#162).
   els.feedbackImageTrigger?.addEventListener('click', () => {
     els.feedbackImageInput?.click();
   });
@@ -5405,6 +5391,7 @@ function openFeedbackModal(els) {
   if (els.feedbackTextarea) els.feedbackTextarea.value = '';
   if (els.feedbackCategorySelect) els.feedbackCategorySelect.value = 'general';
   els.feedbackMessage?.classList?.add('hidden');
+  els.feedbackCopyBtn?.classList.add('hidden');
   if (els.feedbackWebsite) els.feedbackWebsite.value = '';
   feedbackOpenedAt = Date.now();
   // Start every session with a clean image list (revokes any stale URLs).
@@ -5422,38 +5409,20 @@ function updateFeedbackCharCount(els) {
   els.feedbackCharCount.classList.toggle('text-gray-400', len <= FEEDBACK_MAX_LENGTH * 0.95);
 }
 
-// Compose the issue title/body from the user's feedback text + category.
-// Shared by the GitHub-issue submit path and the account-free copy path (#101)
-// so both produce identical, correctly-escaped content.
-function composeFeedbackIssue({ text, category }) {
+// Compose the plain-text copy of the draft (category + text) for the copy
+// fallback. The category is interpolated before the user-controlled text so a
+// literal `{{...}}` inside the feedback is never re-scanned by t().
+function composeFeedbackCopyText({ text, category }) {
   const feedbackText = String(text).slice(0, FEEDBACK_MAX_LENGTH);
   const categoryLabel = t(`feedbackModal.categories.${feedbackCategoryI18nKey(category)}`);
-  const issueTitle = t('feedbackModal.issueTitle', { category: categoryLabel });
-  // Interpolate the user-controlled `text` LAST (category first) so that any
-  // literal `{{...}}` sequence inside the user's feedback is never re-scanned
-  // by a subsequent replacement pass. t() substitutes params in object-key
-  // order, so key order here is load-bearing.
-  let issueBody = t('feedbackModal.issueBody', { category: categoryLabel, text: feedbackText });
-  // When images are attached (#81), append a marker line so the user knows
-  // where to paste them in the opened GitHub issue. The bytes are never
-  // uploaded — GitHub's tokenless prefilled URL cannot carry attachments, so
-  // GitHub itself auto-uploads images when the user pastes/drops them.
-  if (feedbackImages.length > 0) {
-    issueBody += `\n\n${t('feedbackModal.issueImageMarker', { count: feedbackImages.length })}`;
-  }
-  return { issueBody, categoryLabel, issueTitle };
+  return t('feedbackModal.copyBody', { category: categoryLabel, text: feedbackText });
 }
 
-// #101: account-free path. Copy the composed feedback text to the clipboard so
-// a user who does not have (or does not want to use) a GitHub account can send
-// it by any channel they prefer, without ever opening the GitHub issue screen.
+// Copy the composed draft to the clipboard (fallback when sending fails).
 function copyFeedbackText(els) {
   const draft = readFeedbackDraft(els);
   if (!draft) return;
-  const { text, category } = draft;
-
-  const { issueBody } = composeFeedbackIssue({ text, category });
-  copyTextToClipboard(issueBody)
+  copyTextToClipboard(composeFeedbackCopyText(draft))
     .then((ok) => {
       showInlineMessage(
         els.feedbackMessage,
@@ -5483,49 +5452,20 @@ function readFeedbackDraft(els) {
   return { text, category };
 }
 
-function submitFeedback(els) {
-  if (isFeedbackApiEnabled()) {
-    submitFeedbackDirect(els);
-  } else {
-    submitFeedbackViaGithub(els);
-  }
-}
-
-function submitFeedbackViaGithub(els) {
-  const draft = readFeedbackDraft(els);
-  if (!draft) return;
-  const { text, category } = draft;
-
-  // Compose a prefilled GitHub Issue and open it in a new tab on this explicit
-  // user click (static site => no token => tokenless prefilled URL pattern,
-  // same as the X/tweet share). Never auto-popup.
-  const { issueBody, categoryLabel, issueTitle } = composeFeedbackIssue({ text, category });
-  const hasImages = feedbackImages.length > 0;
-  const labels = ['feedback', categoryToIssueLabel(category)].filter(Boolean);
-  const issueUrl = buildGitHubIssueUrl({ title: issueTitle, body: issueBody, labels });
-
-  // #79: the prefilled issue URL already carries the composed body, so the
-  // primary hand-off is the opened GitHub page below. We also copy the body to
-  // the clipboard as a backup so the user can re-paste it if GitHub truncates
-  // an over-long prefilled URL. Best-effort: a copy failure must never block
-  // opening the issue. Fire-and-forget so the window.open below stays inside
-  // the user-gesture call stack and popup blockers don't trip.
-  copyTextToClipboard(issueBody).catch(() => {});
-
-  window.open(issueUrl, '_blank', 'noopener,noreferrer');
-
-  const sentKey = hasImages ? 'feedbackModal.sentWithImages' : 'feedbackModal.sent';
-  showInlineMessage(els.feedbackMessage, t(sentKey), 'text-teal-600');
-  finishFeedbackSubmission(els, 1500);
-}
-
-// #162: send straight to the feedback backend — no GitHub account needed. The
-// backend files the GitHub issue on the user's behalf and returns its URL.
-async function submitFeedbackDirect(els) {
+// #162 / #247: one submit always goes to the feedback backend, which stores the
+// feedback in DynamoDB and files the GitHub issue itself. Nothing opens a new
+// window or leaves the page; without a configured backend we show an error and
+// offer the copy fallback instead.
+async function submitFeedback(els) {
   if (feedbackSending) return;
   const draft = readFeedbackDraft(els);
   if (!draft) return;
   const { text, category } = draft;
+
+  if (!isFeedbackApiEnabled()) {
+    showFeedbackSendError(els, 'disabled');
+    return;
+  }
 
   feedbackSending = true;
   if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = true;
@@ -5554,29 +5494,26 @@ async function submitFeedbackDirect(els) {
   if (els.feedbackSubmitBtn) els.feedbackSubmitBtn.disabled = false;
 
   if (!result.ok) {
-    const key = result.error === 'rate_limited' ? 'feedbackModal.sendRateLimited' : 'feedbackModal.sendFailed';
-    showInlineMessage(els.feedbackMessage, t(key), 'text-red-600');
-    // Offer the account-free copy path as a fallback when sending failed.
-    els.feedbackCopyBtn?.classList.remove('hidden');
+    showFeedbackSendError(els, result.error);
     return;
   }
 
   showInlineMessage(
     els.feedbackMessage,
-    t(skippedImages > 0 ? 'feedbackModal.sentDirectImagesSkipped' : 'feedbackModal.sentDirect', { count: skippedImages }),
+    t(skippedImages > 0 ? 'feedbackModal.sentImagesSkipped' : 'feedbackModal.sent', { count: skippedImages }),
     'text-teal-600',
   );
-  if (result.issueUrl && /^https:\/\/github\.com\//.test(result.issueUrl) && els.feedbackMessage) {
-    const link = document.createElement('a');
-    link.href = result.issueUrl;
-    link.target = '_blank';
-    link.rel = 'noopener noreferrer';
-    link.className = 'underline font-medium ml-1';
-    link.textContent = t('feedbackModal.viewIssue');
-    els.feedbackMessage.appendChild(link);
-  }
-  // Keep the modal open a little longer so the issue link can be clicked.
-  finishFeedbackSubmission(els, result.issueUrl ? 4000 : 2000);
+  finishFeedbackSubmission(els, 2000);
+}
+
+// Show why sending failed and reveal the copy fallback. The draft is kept so
+// the user can retry or copy it.
+function showFeedbackSendError(els, error) {
+  let key = 'feedbackModal.sendFailed';
+  if (error === 'rate_limited') key = 'feedbackModal.sendRateLimited';
+  else if (error === 'disabled' || error === 'paused') key = 'feedbackModal.unavailable';
+  showInlineMessage(els.feedbackMessage, t(key), 'text-red-600');
+  els.feedbackCopyBtn?.classList.remove('hidden');
 }
 
 // Shared tail of a successful submission: reset the draft, award the daily XP
@@ -5616,7 +5553,7 @@ function finishFeedbackSubmission(els, closeDelayMs) {
   setTimeout(() => {
     closeModal(els.feedbackModal);
     els.feedbackMessage?.classList?.add('hidden');
-    if (isFeedbackApiEnabled()) els.feedbackCopyBtn?.classList.add('hidden');
+    els.feedbackCopyBtn?.classList.add('hidden');
   }, closeDelayMs);
 }
 
@@ -5633,20 +5570,6 @@ function feedbackCategoryI18nKey(category) {
     other: 'other',
   };
   return map[String(category || '')] || 'general';
-}
-
-// Map a feedback category to an extra GitHub Issue label. Bug reports use `bug`,
-// feature requests use `enhancement`; everything else has no extra label (the
-// `feedback` label is always applied by the caller).
-function categoryToIssueLabel(category) {
-  switch (String(category || '')) {
-    case 'bug_report':
-      return 'bug';
-    case 'feature_request':
-      return 'enhancement';
-    default:
-      return '';
-  }
 }
 
 // --- Modals + AI actions ---

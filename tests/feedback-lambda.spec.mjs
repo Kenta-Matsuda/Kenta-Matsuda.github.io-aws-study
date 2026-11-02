@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import {
   buildIssue,
   createHandler,
+  GITHUB_TIMEOUT_MS,
   sanitizeForIssue,
   validateVotes,
 } from '../infra/feedback/src/index.mjs';
@@ -115,6 +116,61 @@ test.describe('feedback Lambda (#162 / #167)', () => {
     expect(res.statusCode).toBe(201);
     expect(ddb.puts).toHaveLength(1);
     expect(ddb.puts[0].issue_number).toBeUndefined();
+  });
+
+  test('issue footer is neutral (#247)', () => {
+    const issue = buildIssue({ category: 'general', text: 'hello', lang: 'ja', appVersion: 'v13', page: '#/x' });
+    expect(issue.body).toContain('AWS Study Navigator のフィードバックフォームから送信されました。');
+    expect(issue.body).not.toMatch(/代理投稿|GitHub アカウント無し/);
+    expect(issue.body).toContain('<sub>lang: ja / version: v13 / page: #/x</sub>');
+  });
+
+  test('attempts the GitHub issue on every submission (#247)', async () => {
+    const ddb = makeDdb();
+    const fetchImpl = makeFetch();
+    const handler = createHandler({ ddb, fetchImpl, getGithubToken: async () => 'tok', env: makeEnv() });
+    await handler(post('/feedback', { ...validFeedback, category: 'general' }));
+    await handler(post('/feedback', { ...validFeedback, category: 'other' }, { ip: '198.51.100.9' }));
+    expect(fetchImpl.calls).toHaveLength(2);
+    expect(ddb.puts).toHaveLength(2);
+    expect(ddb.puts.every((p) => p.issue_number?.N === '42')).toBe(true);
+  });
+
+  test('gives up on a slow GitHub API and still stores the feedback quickly', async () => {
+    const ddb = makeDdb();
+    let aborted = false;
+    // Never resolves on its own; only the handler's AbortController ends it.
+    const fetchImpl = (_url, init) => new Promise((_resolve, reject) => {
+      init.signal.addEventListener('abort', () => {
+        aborted = true;
+        reject(Object.assign(new Error('aborted'), { name: 'AbortError' }));
+      });
+    });
+    const handler = createHandler({ ddb, fetchImpl, getGithubToken: async () => 'tok', env: makeEnv() });
+    const started = Date.now();
+    const res = await handler(post('/feedback', validFeedback));
+    const elapsed = Date.now() - started;
+    expect(aborted).toBe(true);
+    expect(elapsed).toBeLessThan(GITHUB_TIMEOUT_MS + 2000);
+    expect(res.statusCode).toBe(201);
+    expect(JSON.parse(res.body).issueUrl).toBeNull();
+    expect(ddb.puts).toHaveLength(1);
+    expect(ddb.puts[0].issue_number).toBeUndefined();
+  });
+
+  test('drops the cached token when GitHub answers 401', async () => {
+    let invalidated = 0;
+    const fetchImpl = async () => ({ ok: false, status: 401, text: async () => 'bad creds' });
+    const handler = createHandler({
+      ddb: makeDdb(),
+      fetchImpl,
+      getGithubToken: async () => 'old',
+      invalidateGithubToken: () => { invalidated += 1; },
+      env: makeEnv(),
+    });
+    const res = await handler(post('/feedback', validFeedback));
+    expect(res.statusCode).toBe(201);
+    expect(invalidated).toBe(1);
   });
 
   test('rejects bots, empty, oversized and link-spam submissions', async () => {

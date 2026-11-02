@@ -1,11 +1,11 @@
 # 要人間対応チェックリスト
 
-- 最終更新日: 2026-10-11
+- 最終更新日: 2026-10-17
 - 対象範囲: `docs/action-required/` にある人間側の要対応事項（AWS 操作など、エージェントが実行できない作業）を、リポジトリ上で俯瞰できるチェックリストにしたもの
 - 生成元: `scripts/list-action-required.mjs`（各ファイルの冒頭ステータス行・タイトル・種別・関連 issue を機械的に抽出）。`node scripts/list-action-required.mjs --write` で再生成できます。手で編集せず、元ファイルを直してから再生成してください。
 - 出典/参照: issue #184 / `docs/action-required/README.md`
 
-未対応: 14 件 / 完了: 0 件 / 合計: 14 件
+未対応: 13 件 / 完了: 0 件 / 合計: 13 件
 
 ## 未対応（要対応）
 
@@ -17,7 +17,6 @@
 - [ ] [GitHub アカウント無しで issue を登録できるようにする（Lambda 経由の投稿プロキシ）](issue-162-account-free-issue-submission.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ / GitHub App の資格情報管理） — 関連: #162（本件） / #101 #100（クライアント側で下げられる摩擦は対応済み: [フィードバックのハードルを下げる](../issues/feedback-nudge-and-account-free.md)） / #166（画像添付の自動化も同じ経路に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
 - [ ] [NotebookLM 向け学習パックと学習分析 API（保存 / 他 SaaS 連携）](issue-165-notebooklm-pack-and-apis.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / 検索基盤 / API 提供）。一部要素はクライアント側で個別提供可能。 — 関連: #165 / PR #180（関連 #117 #167）
 - [ ] [Good / Bad フィードバックを DynamoDB に集約し BI で可視化する](issue-167-feedback-analytics-dynamodb.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンド / AWS インフラ / データ保持方針） — 関連: #167（本件） / #162（同じ API 基盤に載る） / [バックエンド実装計画（アンブレラ）](issue-117-backend-implementation-plan.md)
-- [ ] [試験ガイドの PDF → Web ページ移行に伴うタスクステートメント全試験再検証](issue-190-exam-guide-web-verification.md) — 🔴 未対応（要対応） / 種別: 手動確認（ネットワーク越しの AWS 試験ガイド Web ページ参照が必要） — 関連: #190 / PR #195
 - [ ] [AWS 公式ドキュメントが対応する全言語へのサイト対応（多言語化）](issue-197-multilanguage-support.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / 翻訳ソース・品質基準の決定 / 翻訳コンテンツのオーナーシップ） — 関連: #197
 - [ ] [推奨リソースに基づく模擬試験の生成（エージェント型パイプラインの検討）](issue-225-resource-grounded-exam-generation.md) — 🔴 未対応（要対応） / 種別: 要人間対応（プロダクト判断 / LLM トークンコスト・プロバイダ方針の決定。AWS 操作は現段階では不要） — 関連: #225（関連 #109 #138 #124 / `mcp-grounding-llm-judge.md` / `issue-138-ai-chat-exam-grounding.md`）
 - [ ] [AWS ドキュメント MCP サーバによる問題生成の grounding と LLM as a judge による検証](mcp-grounding-llm-judge.md) — 🔴 未対応（要対応） / 種別: 要人間対応（バックエンドプロキシ / LLM パイプライン） — 関連: #109
@@ -30,4 +29,4 @@
 
 ## 更新履歴
 
-- 2026-10-11: `scripts/list-action-required.mjs` により生成 / 更新。
+- 2026-10-17: `scripts/list-action-required.mjs` により生成 / 更新。

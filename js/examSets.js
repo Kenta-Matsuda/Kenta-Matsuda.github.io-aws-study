@@ -202,6 +202,21 @@ export async function appendExamSetQuestion(setId, question) {
 }
 
 /**
+ * Replace all questions of a set (the background job chain rewrites them at each
+ * stage: judged, edited, rejected ones dropped). Existing ids are kept.
+ * @returns {Promise<ExamSet|null>}
+ */
+export async function replaceExamSetQuestions(setId, questions) {
+  const b = await backend();
+  const set = await b.get(SETS, setId);
+  if (!set) return null;
+  set.questions = (questions || []).map((q, i) => normalizeQuestion(q, i));
+  set.updatedAt = nowIso();
+  await b.put(SETS, set);
+  return set;
+}
+
+/**
  * Shallow-merge a patch (status / pipeline / metrics / title …).
  * `pipeline` and `metrics` are merged one level deep.
  * @returns {Promise<ExamSet|null>}
@@ -259,16 +274,24 @@ export async function deleteExamSet(setId) {
   await b.delete(SETS, setId);
 }
 
+// Mirrors isResumableChain in js/examBatchChain.js (kept import-free here): a
+// live provider job, or a chained background set between / after its jobs.
+function isResumablePipeline(pipeline) {
+  if (!pipeline) return false;
+  if (pipeline.jobName) return true;
+  return Boolean(pipeline.chain) && ['judging', 'fixing', 'ready'].includes(pipeline.stage);
+}
+
 /**
  * Boot-time cleanup: a set still marked in-progress after a reload was
- * interrupted (no pipeline runs across page loads yet). Sets that carry a
- * provider-side job name are left alone for the resume logic (design §6.1).
+ * interrupted. Sets that carry a provider-side job name, or a background job
+ * chain between stages, are left alone for the resume logic (design §6.1).
  * @returns {Promise<ExamSet[]>} the sets whose status changed
  */
 export async function markInterruptedExamSets() {
   const changed = [];
   for (const set of await listExamSets()) {
-    if (!IN_PROGRESS.has(set.status) || set.pipeline?.jobName) continue;
+    if (!IN_PROGRESS.has(set.status) || isResumablePipeline(set.pipeline)) continue;
     changed.push(await updateExamSet(set.id, { status: finishedStatusFor(set), pipeline: { stage: 'interrupted' } }));
   }
   return changed;
