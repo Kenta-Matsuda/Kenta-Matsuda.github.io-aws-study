@@ -89,6 +89,14 @@ test.describe('examLifecycle – announced schedule (2026-10-16)', () => {
     expect(ja.sources.some((s) => s.url.startsWith('https://aws.amazon.com/jp/'))).toBe(true);
     expect(en.sources.every((s) => !s.url.includes('/jp/') && !s.url.includes('/ja_jp/'))).toBe(true);
   });
+
+  test('AI-translated locales (e.g. ko) fall back to the English message, not Japanese (#197)', () => {
+    const now = at(2026, 10, 16);
+    const ko = getExamLifecycleNotice('sap-c02', { now, locale: 'ko' });
+    const en = getExamLifecycleNotice('sap-c02', { now, locale: 'en' });
+    expect(ko.message).toBe(en.message);
+    expect(ko.sources).toEqual(en.sources);
+  });
 });
 
 test.describe('exam-lifecycle.js – data integrity', () => {

@@ -37,7 +37,7 @@ import {
   decideVerdict,
   summarizeJudging,
 } from './examJudge.js';
-import { getLocale } from './i18n.js';
+import { usesJapanesePrompt } from './localeContent.js';
 
 const MAX_WRITER_ATTEMPTS = 3;
 const PARSE_RETRY_HINT = '\n\n【重要】前回の応答は解析できませんでした。有効なJSONオブジェクトのみを返してください（コードフェンスや説明文は不要です）。/ The previous response could not be parsed. Return only a single valid JSON object (no code fences or prose).';
@@ -163,8 +163,8 @@ export async function generateExamQuestions({
     parsed.unitId = slot.unit?.id || slot.item || null;
 
     // Stage 3/4: quality evaluation.
-    const material = [slot.unit ? renderUnitForPrompt(slot.unit, { locale: getLocale() }) : '', buildResourceGroundingHint(resources).trim()].filter(Boolean).join('\n\n');
-    const design = `${slot.item || ''}${slot.type ? ` / ${slot.type[getLocale() === 'en' ? 'en' : 'ja']}` : ''}`;
+    const material = [slot.unit ? renderUnitForPrompt(slot.unit, { locale: usesJapanesePrompt() ? 'ja' : 'en' }) : '', buildResourceGroundingHint(resources).trim()].filter(Boolean).join('\n\n');
+    const design = `${slot.item || ''}${slot.type ? ` / ${slot.type[usesJapanesePrompt() ? 'ja' : 'en']}` : ''}`;
     const allowedUrls = resources.map((r) => r.url).concat(slot.unit?.card?.source?.url ? [slot.unit.card.source.url] : []);
     const flags = runDeterministicChecks(parsed, { expectedLetter: slot.answerLetter, allowedUrls });
     let judgeResult = null;

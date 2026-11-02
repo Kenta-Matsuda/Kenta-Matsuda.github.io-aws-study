@@ -6,7 +6,7 @@ import { test, expect } from '@playwright/test';
  * These tests assert that generalizing js/i18n.js from a hardcoded ja/en pair
  * to a locale-agnostic engine did NOT change any observable ja/en behavior:
  *   - the site defaults to English strings,
- *   - switching to Japanese via #langSwitch renders Japanese strings,
+ *   - switching to Japanese via the #langSelect menu renders Japanese strings,
  *   - the chosen locale persists across a reload.
  *
  * They mirror tests/routing-lang.spec.mjs and run in CI against a real browser.
@@ -48,7 +48,7 @@ test.describe('i18n core (N-locale generalization, ja/en regression)', () => {
     // Switch to Japanese via the language switcher.
     await page.click('#settingsBtn');
     await page.waitForTimeout(300);
-    await page.click('#langSwitch button[data-lang="ja"]');
+    await page.selectOption('#langSelect', 'ja');
     await page.waitForTimeout(500);
     await page.click('[data-close-modal="settingsModal"]');
     await page.waitForTimeout(300);
@@ -81,7 +81,7 @@ test.describe('i18n core (N-locale generalization, ja/en regression)', () => {
 
     await page.click('#settingsBtn');
     await page.waitForTimeout(300);
-    await page.click('#langSwitch button[data-lang="en"]');
+    await page.selectOption('#langSelect', 'en');
     await page.waitForTimeout(500);
     await page.click('[data-close-modal="settingsModal"]');
     await page.waitForTimeout(300);

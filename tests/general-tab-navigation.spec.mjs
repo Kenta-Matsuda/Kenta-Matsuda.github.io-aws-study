@@ -34,7 +34,7 @@ test.describe('exam-wide ("ラーニングパス") tab navigation (#163)', () =>
     // English label too.
     await page.click('#settingsBtn');
     await page.waitForTimeout(300);
-    await page.click('#langSwitch button[data-lang="en"]');
+    await page.selectOption('#langSelect', 'en');
     await page.waitForTimeout(600);
     await page.click('[data-close-modal="settingsModal"]');
     await expect(page.locator('#domainTabs button[data-domain-tab="all"]')).toHaveText('Learning Path');

@@ -29,7 +29,7 @@
  * Pure module: no DOM / network / storage. `rng` is injectable for tests.
  */
 
-import { getLocale } from './i18n.js';
+import { usesJapanesePrompt } from './localeContent.js';
 import { assignTaskTargets, assignAnswerLetters } from './quiz.js';
 import { renderUnitForPrompt } from './cards.js';
 
@@ -86,8 +86,11 @@ function shuffle(arr, rng) {
   return a;
 }
 
+// English scaffolding for every locale except Japanese (issue #197). The
+// writer's system prompt (js/quiz.js) carries the output-language directive,
+// so planner rows / slot hints stay in English for those locales.
 function isEn() {
-  return getLocale() === 'en';
+  return !usesJapanesePrompt();
 }
 
 /**

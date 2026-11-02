@@ -28,7 +28,7 @@ test.describe('API settings help links survive i18n (#161)', () => {
   }
 
   async function switchLocale(page, lang) {
-    await page.click(`#langSwitch button[data-lang="${lang}"]`);
+    await page.selectOption('#langSelect', lang);
     await page.waitForTimeout(500);
   }
 

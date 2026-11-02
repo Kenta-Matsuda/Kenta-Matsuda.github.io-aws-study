@@ -1,4 +1,5 @@
 import { getMilestoneStatus, getNewlyUnlockedMilestones, getMilestoneTitle } from './milestones.js';
+import { t, formatDate } from './i18n.js';
 import {
   computeMissionState,
   recordMissionMetric,
@@ -38,14 +39,14 @@ export function saveApiKeyFromInput({ inputEl, messageEl, onSuccess }) {
   const key = (inputEl.value || '').trim();
 
   if (!key) {
-    showMessage(messageEl, 'APIキーを入力してください。', 'text-red-500');
+    showMessage(messageEl, t('storage.apiKeyEmpty'), 'text-red-500');
     return;
   }
 
   localStorage.setItem(API_KEY_STORAGE_KEY, key);
   // Reset "batch unavailable" cache since the new key may be on a higher tier.
   try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
-  showMessage(messageEl, 'APIキーを保存しました。', 'text-green-500');
+  showMessage(messageEl, t('storage.apiKeySaved'), 'text-green-500');
   onSuccess?.();
 }
 
@@ -53,7 +54,7 @@ export function clearApiKey({ inputEl, messageEl }) {
   localStorage.removeItem(API_KEY_STORAGE_KEY);
   try { localStorage.removeItem('gemini_batch_unavailable'); } catch { /* ignore */ }
   inputEl.value = '';
-  showMessage(messageEl, 'APIキーを削除しました。', 'text-gray-500');
+  showMessage(messageEl, t('storage.apiKeyDeleted'), 'text-gray-500');
 }
 
 // --- OpenAI API Key ---
@@ -66,19 +67,19 @@ export function saveOpenAiApiKey({ inputEl, messageEl, onSuccess }) {
   const key = (inputEl.value || '').trim();
 
   if (!key) {
-    showMessage(messageEl, 'OpenAI APIキーを入力してください。', 'text-red-500');
+    showMessage(messageEl, t('storage.openaiKeyEmpty'), 'text-red-500');
     return;
   }
 
   localStorage.setItem(OPENAI_KEY_STORAGE_KEY, key);
-  showMessage(messageEl, 'OpenAI APIキーを保存しました。', 'text-green-500');
+  showMessage(messageEl, t('storage.openaiKeySaved'), 'text-green-500');
   onSuccess?.();
 }
 
 export function clearOpenAiApiKey({ inputEl, messageEl }) {
   localStorage.removeItem(OPENAI_KEY_STORAGE_KEY);
   inputEl.value = '';
-  showMessage(messageEl, 'OpenAI APIキーを削除しました。', 'text-gray-500');
+  showMessage(messageEl, t('storage.openaiKeyDeleted'), 'text-gray-500');
 }
 
 // --- AI Provider preference ---
@@ -585,11 +586,11 @@ export function exportQuizHistory(examId) {
   if (reviewable.length === 0) return '';
 
   const lines = [];
-  lines.push('# AWS認定試験 学習履歴\n');
-  lines.push(`エクスポート日時: ${new Date().toLocaleString('ja-JP')}`);
-  if (examId) lines.push(`試験: ${examId}`);
+  lines.push(`# ${t('historyExport.title')}\n`);
+  lines.push(t('historyExport.exportedAt', { date: formatDate(new Date()) }));
+  if (examId) lines.push(t('historyExport.exam', { exam: examId }));
   const correctCount = reviewable.filter(h => h.isCorrect).length;
-  lines.push(`総問題数: ${reviewable.length} / 正答数: ${correctCount} / 正答率: ${reviewable.length > 0 ? Math.round(correctCount / reviewable.length * 100) : 0}%\n`);
+  lines.push(`${t('historyExport.totals', { total: reviewable.length, correct: correctCount, pct: reviewable.length > 0 ? Math.round(correctCount / reviewable.length * 100) : 0 })}\n`);
 
   // Group by sessionId (legacy entries without sessionId: group by date)
   const sessions = new Map();
@@ -604,17 +605,17 @@ export function exportQuizHistory(examId) {
     sessionNum++;
     const sorted = [...questions].sort((a, b) => (a.answeredAt || '').localeCompare(b.answeredAt || ''));
     const first = sorted[0];
-    const MODE_LABELS = { single: '模擬問題', quick5: '5問連続', speed: 'スピードラン', mock: '本番模擬試験' };
-    const modeLabel = MODE_LABELS[first.mode] || first.mode || '模擬問題';
-    const dateStr = first.answeredAt ? new Date(first.answeredAt).toLocaleString('ja-JP') : '';
+    const modeKey = ['single', 'quick5', 'speed', 'mock'].includes(first.mode) ? first.mode : 'single';
+    const modeLabel = (first.mode && modeKey !== first.mode) ? first.mode : t(`historyExport.modes.${modeKey}`);
+    const dateStr = first.answeredAt ? formatDate(first.answeredAt) : '';
     const correct = sorted.filter(q => q.isCorrect).length;
 
     lines.push('---\n');
-    lines.push(`## セッション ${sessionNum}: ${modeLabel} (${dateStr})`);
-    lines.push(`結果: ${correct}/${sorted.length} 正解\n`);
+    lines.push(`## ${t('historyExport.session', { n: sessionNum, mode: modeLabel, date: dateStr })}`);
+    lines.push(`${t('historyExport.result', { correct, total: sorted.length })}\n`);
 
     sorted.forEach((q, qi) => {
-      lines.push(`### 問題 ${qi + 1}`);
+      lines.push(`### ${t('historyExport.question', { n: qi + 1 })}`);
       lines.push(q.question);
       if (Array.isArray(q.choices)) {
         q.choices.forEach((c, ci) => {
@@ -622,11 +623,11 @@ export function exportQuizHistory(examId) {
           lines.push(`${letter}. ${c}`);
         });
       }
-      const userLetter = q.userAnswer != null ? String.fromCharCode(65 + q.userAnswer) : '未回答';
+      const userLetter = q.userAnswer != null ? String.fromCharCode(65 + q.userAnswer) : t('quizHistory.unanswered');
       const correctLetter = q.correctIndex != null ? String.fromCharCode(65 + q.correctIndex) : '?';
-      lines.push(`\nあなたの回答: ${userLetter} / 正解: ${correctLetter} / ${q.isCorrect ? '✅ 正解' : '❌ 不正解'}`);
-      if (q.elapsedMs != null) lines.push(`所要時間: ${Math.round(q.elapsedMs / 1000)}秒`);
-      if (q.explanation) lines.push(`\n解説: ${q.explanation}`);
+      lines.push(`\n${t('historyExport.answerLine', { user: userLetter, correct: correctLetter, verdict: q.isCorrect ? t('historyExport.verdictCorrect') : t('historyExport.verdictIncorrect') })}`);
+      if (q.elapsedMs != null) lines.push(t('historyExport.elapsed', { s: Math.round(q.elapsedMs / 1000) }));
+      if (q.explanation) lines.push(`\n${t('historyExport.explanation', { text: q.explanation })}`);
       lines.push('');
     });
   }

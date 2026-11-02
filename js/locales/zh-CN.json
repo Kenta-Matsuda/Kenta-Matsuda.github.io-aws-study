@@ -1,0 +1,630 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "取消",
+    "close": "关闭",
+    "start": "开始",
+    "copy": "复制",
+    "copied": "已复制",
+    "copyFailed": "复制失败",
+    "good": "好评",
+    "bad": "差评",
+    "helpful": "有帮助",
+    "notHelpful": "没有帮助 / 需要改进",
+    "retry": "重试",
+    "next": "下一步",
+    "prev": "上一步",
+    "back": "返回",
+    "all": "全部",
+    "error": "错误",
+    "export": "导出",
+    "exportMarkdown": "导出为 Markdown",
+    "exportCsv": "导出为 CSV",
+    "send": "发送",
+    "loading": "加载中...",
+    "anonymous": "匿名",
+    "delete": "删除"
+  },
+  "studyPack": {
+    "resourceLinksMd": "资源链接（Markdown）",
+    "resourceLinksCsv": "资源链接（CSV）",
+    "studyRouteMd": "学习路线（Markdown）",
+    "glossaryCsv": "资源术语表（CSV）"
+  },
+  "header": {
+    "subtitle": "基于考试指南的学习资源导航",
+    "switchExam": "切换考试",
+    "examLabel": "考试",
+    "themeToggle": "切换主题",
+    "apiKeySettings": "API 密钥设置",
+    "selectExam": "选择考试",
+    "langToggle": "语言"
+  },
+  "sidebar": {
+    "title": "选择考试",
+    "beginnerGuide": "首次参加 AWS 认证"
+  },
+  "dashboard": {
+    "title": "学习仪表板",
+    "dailyHighlight": "今日亮点",
+    "domainRatio": "各领域出题比例",
+    "feedback": "发送反馈",
+    "defaultGreeting": "一起积累学习进度吧。",
+    "changeUsername": "更改用户名",
+    "tweetBtn": "发布到 X",
+    "mainCta": {
+      "start": "开始今天的学习",
+      "resume": "继续今天的学习"
+    },
+    "searchCta": "跨所有考试搜索学习资源",
+    "bookPromo": {
+      "onSale": "热销中",
+      "title": "AWS 认证",
+      "subtitle": "全认证攻略书（日文版）",
+      "description": "AWS 全认证通关经验浓缩成一本书！（日文）"
+    },
+    "quizCarousel": {
+      "title": "测验挑战",
+      "subtitle": "检验你在所有领域的能力",
+      "startBtn": "开始挑战",
+      "reviewBtn": "回顾已做题目",
+      "dailyChallengeBtn": "每日挑战",
+      "dailyChallengeBadge": "无需 API 密钥",
+      "dailyChallengeHint": "无需 API 密钥即可答题 · 每天 5 题，无需设置",
+      "offlineExamBtn": "模拟考试（无需 API 密钥）",
+      "offlineExamBadge": "无需 API 密钥",
+      "offlineExamHint": "基于内置题库的完整正式格式考试（最多 65 道计时题目）· 无需 API 密钥"
+    },
+    "xpCarousel": {
+      "totalXp": "总 XP",
+      "weekXp": "最近 7 天",
+      "recent": "最近"
+    },
+    "streak": {
+      "title": "连续学习",
+      "days": "天连续",
+      "keepGoing": "今天继续学习，延长你的连续记录！",
+      "weekAchieved": "太棒了！已连续学习 1 周 🎉",
+      "ongoing": "已连续 {{count}} 天！继续加油 💪",
+      "todayActive": "今天学得很棒！",
+      "atRisk": "今天学习一下，保持连续记录！",
+      "startNew": "今天开始新的连续学习吧！",
+      "milestoneToast": "🔥 已达成连续 {{days}} 天！继续保持！",
+      "milestoneToastTitle": "达成连续学习里程碑！",
+      "reminderTitle": "AWS Study Navigator",
+      "reminderBody": "你的 {{count}} 天连续记录即将中断。今天学习一下来保持吧！",
+      "reminderUnsupported": "此浏览器不支持通知，因此提醒仅在应用打开时显示。",
+      "reminderOff": "提醒已关闭。",
+      "reminderOn": "提醒已开启（已允许通知）。",
+      "reminderInApp": "提醒已开启（未获得通知权限，将在应用内提醒你）。",
+      "reminderDenied": "通知已被阻止。请在浏览器设置中允许通知以接收提醒（我们仍会在应用内提醒你）。"
+    },
+    "milestone": {
+      "title": "称号",
+      "nextTitle": "下一个称号：",
+      "remaining": "还需：",
+      "zeroXp": "0 XP"
+    },
+    "skillRadar": {
+      "title": "各领域能力",
+      "placeholder": "完成测验后即可查看能力图",
+      "accuracyLabel": "正确率（%）",
+      "tooltip": "正确率：{{pct}}%（已答 {{count}} 题）"
+    },
+    "missions": {
+      "title": "任务",
+      "badge": "无需 API 密钥",
+      "subtitle": "完成任务以获得 XP",
+      "toastTitle": "任务完成！"
+    },
+    "examDate": {
+      "titleShort": "考试日期",
+      "title": "{{exam}} 考试日期",
+      "empty": "登记计划考试日期，即可查看倒计时和鼓励信息。",
+      "inputLabel": "计划考试日期",
+      "save": "保存",
+      "clear": "清除",
+      "markPassed": "我通过了！🎉",
+      "daysShort": "还剩 {{days}} 天",
+      "todayShort": "今天",
+      "pastShort": "已结束",
+      "passedStatus": "恭喜通过考试！🎉",
+      "passToastTitle": "恭喜！",
+      "passToast": "🏆 恭喜你通过 {{exam}}！你的努力得到了回报。",
+      "stage": {
+        "far": "距离考试还有 {{days}} 天。从容地打好扎实基础吧。",
+        "soon": "距离考试还有 {{days}} 天。是时候开始最后的复习了！",
+        "imminent": "只剩 {{days}} 天了！最后检查一遍薄弱环节吧 🔥",
+        "today": "今天是考试日。保持冷静，全力以赴！💪",
+        "past": "考试日期已过。请记录考试结果或设置新的日期。"
+      }
+    },
+    "bootError": "页面数据加载失败。请重新加载页面。如果在本地打开，需要通过本地服务器访问。",
+    "slideLabel": "第 {{n}} 张幻灯片"
+  },
+  "quiz": {
+    "modeSelect": "选择测验模式",
+    "quick5": {
+      "label": "5 道题",
+      "description": "连续 5 道题。打出连击可获得更多 XP！"
+    },
+    "speed": {
+      "label": "极速挑战",
+      "description": "10 道快问快答题，每题 30 秒！",
+      "timeNote": "⏰ 每题 30 秒"
+    },
+    "mock": {
+      "label": "模拟考试",
+      "description": "题量、时间限制和难度与正式考试相当。解析附有 AWS 文档引用。",
+      "formatNote": "📋 各认证的正式考试格式"
+    },
+    "single": {
+      "label": "单题"
+    },
+    "generating": "正在生成题目...",
+    "generatingProgress": "正在生成题目...（已接收 {{chars}} 个字符）",
+    "generateFailed": "无法生成题目：AI 返回的内容格式不符合预期。请重试。",
+    "generatingSubtext": "所有题目生成后测验将自动开始",
+    "thinking": "Gemini 正在思考...",
+    "combo": "连击",
+    "complete": "测验完成！",
+    "correct": "正确",
+    "incorrect": "错误",
+    "questionCount": "题数",
+    "accuracy": "正确率",
+    "earnedXp": "获得 XP",
+    "maxCombo": "最大连击",
+    "elapsed": "用时",
+    "explanationList": "解析",
+    "nextQuestion": "下一题",
+    "sourcesLabel": "来源（AWS 官方文档）",
+    "correctFeedback": "正确！{{combo}}",
+    "incorrectFeedback": "错误 — 正确答案是 {{letter}}",
+    "summaryExcellent": "太棒了！",
+    "summaryGood": "做得好！",
+    "summaryOkay": "还不错！",
+    "summaryReview": "一起复习吧！",
+    "summarySubtitle": "{{label}} — 已完成 {{total}} 道题",
+    "timerOvertime": "超时",
+    "generateBtn": "生成测验",
+    "explainBtn": "讲解",
+    "smartReview": "智能复习",
+    "smartReviewDesc": "根据薄弱领域和以往错题自动生成。高效克服弱项！",
+    "smartReviewEmpty": "暂无需要复习的题目。先做一次测验吧！",
+    "smartReviewTitle": "智能复习",
+    "smartReviewModalTitle": "智能复习（{{count}} 道题）",
+    "allDomainsTaskTitle": "{{code}} 所有领域",
+    "crossDomainQuizLabel": "{{code}}（{{label}}）跨领域测验",
+    "smartReviewCount": "📊 {{count}} 道题待复习",
+    "smartReviewNone": "📊 暂无需要复习的题目（先做一次测验吧！）",
+    "offlineExamTitle": "模拟考试（无需 API 密钥）",
+    "offlineExamModalTitle": "模拟考试（无需 API 密钥）：{{code}}（{{count}} 道题）",
+    "pregenProgress": "{{done}} / {{total}}",
+    "pipelinePlanning": "正在设计考试方案…",
+    "pipelineJudging": "正在审核… {{done}} / {{total}}",
+    "pipelineFixing": "正在修正… {{done}} / {{total}}",
+    "readyNotificationTitle": "题目已准备好！",
+    "readyNotificationBody": "{{count}} 道测验题已准备好，可以开始了",
+    "dailyChallengeTitle": "每日挑战",
+    "dailyChallengeModalTitle": "每日挑战（{{count}} 道题）",
+    "retryIncorrectTitle": "重做错题",
+    "retryIncorrectModalTitle": "重做错题（{{count}}）",
+    "reviewScheduled": "已加入复习计划",
+    "reviewScheduledCount": "已安排 {{count}} 道题在明天复习",
+    "quizTitlePrefix": "测验",
+    "readyNotificationPartial": "{{total}} 道测验题中已有 {{count}} 道准备好，可以开始了",
+    "viewResults": "查看结果",
+    "oneMore": "再来一组",
+    "recommendedResources": "推荐资源",
+    "scheduleReview": "明天复习错题"
+  },
+  "quizHistory": {
+    "title": "回顾已做题目",
+    "empty": "暂无答题记录。",
+    "emptyHint": "做一次测验后，题目和答案会记录在这里。",
+    "reviewModeLabels": {
+      "single": "测验",
+      "quick5": "5 道题",
+      "speed": "极速挑战",
+      "mock": "模拟考试"
+    },
+    "unanswered": "未作答",
+    "yourAnswer": "你的答案：",
+    "correctAnswer": "正确答案：",
+    "retryWrong": "重做错题（{{count}}）",
+    "correct": "正确",
+    "elapsedSec": "{{s}} 秒",
+    "elapsedMinSec": "{{m}} 分 {{s}} 秒",
+    "sessionScore": "答对 {{correct}}/{{total}}"
+  },
+  "settings": {
+    "title": "设置",
+    "language": "语言",
+    "theme": "主题",
+    "themeLight": "浅色",
+    "themeDark": "深色",
+    "themeSystem": "跟随系统",
+    "reminderLabel": "学习提醒",
+    "reminderToggle": "提醒我保持连续学习",
+    "reminderNote": "这是应用打开时显示的本地提醒。应用关闭时的推送通知需要服务器支持，本静态网站无法提供。",
+    "aiProvider": "AI 提供商",
+    "gemini": "Gemini",
+    "openai": "OpenAI",
+    "providerNote": "通常请使用 Gemini（免费）。如果你未满 18 岁（13–17 岁），请使用 OpenAI（需监护人同意，付费）。",
+    "geminiApiKey": "Google Gemini API 密钥",
+    "openaiApiKey": "OpenAI API 密钥",
+    "geminiKeyHelp": "如果还没有密钥，可以从 {{link}} 免费获取（仅限 18 岁及以上）。",
+    "openaiKeyHelp": "从 {{link}} 获取密钥。",
+    "openaiWarning": "注意：OpenAI API 是付费服务（按使用量计费）。详情请参阅定价。",
+    "openaiWarningLabel": "注意：",
+    "openaiWarningText": "OpenAI API 是付费服务（按使用量计费）。未满 18 岁的用户必须在监护人同意和监督下使用。",
+    "openaiWarningLinkText": "OpenAI 使用条款",
+    "keyPrivacy": "API 密钥仅保存在浏览器的本地存储中，绝不会发送到外部服务器。",
+    "resetData": "重置数据",
+    "resetConfirm": "这将重置此设备上保存的所有学习数据（XP、测验记录、API 密钥等）。是否继续？"
+  },
+  "userModal": {
+    "title": "注册用户名",
+    "description": "请注册用户名以保存学习进度。该名称将显示在仪表板和分享的帖子中。",
+    "placeholder": "例如：matsu",
+    "note": "之后可随时更改。",
+    "label": "用户名",
+    "validationEmpty": "请输入用户名。",
+    "validationLength": "用户名不能超过 30 个字符。"
+  },
+  "feedbackModal": {
+    "title": "反馈",
+    "description": "欢迎分享你对改进本应用的意见和需求。提交后，会在新标签页中打开已预先填好反馈内容的 GitHub Issue 页面（文本也会复制到剪贴板作为备份）。",
+    "categories": {
+      "general": "一般",
+      "resources": "添加学习资源（BlackBelt、官方文档等）",
+      "feature": "功能请求",
+      "bug": "错误报告",
+      "aiQuality": "AI 质量",
+      "ui": "界面 / 易用性",
+      "other": "其他"
+    },
+    "contentLabel": "反馈内容",
+    "contentPlaceholder": "请在 1000 字以内描述你希望的改进或功能。",
+    "imageLabel": "图片（可选）",
+    "imageAdd": "添加图片（点击，或粘贴 / 拖放到此处）",
+    "imageHelp": "附加的图片无法通过预填的 GitHub 表单发送。Issue 页面打开后，请将图片直接粘贴到 Issue 正文中上传。",
+    "imageRemove": "移除图片",
+    "noAccountLead": "发布到 GitHub 需要登录",
+    "noAccountNote": "点击“提交”会打开 GitHub 的预填 Issue 页面，需要登录 GitHub 账号才能发布。如果你没有或不想使用 GitHub 账号，请点击下方的“复制文本”，然后用任意方式发送（例如发给开发者）。无需登录也可以浏览已有的反馈。",
+    "browseIssues": "浏览已有 Issue（查看无需登录）",
+    "copyText": "复制文本",
+    "copied": "反馈内容已复制到剪贴板。请用任意方式发送。",
+    "copyFailed": "复制失败。请手动选择并复制文本。",
+    "submitToIssue": "作为 GitHub Issue 提交",
+    "issueTitle": "[反馈] {{category}}",
+    "issueBody": "**类别：** {{category}}\n\n{{text}}\n\n---\n来自 AWS Study Navigator 应用的反馈表单。",
+    "issueImageMarker": "<!-- 请在此处粘贴你的 {{count}} 张图片 -->",
+    "sent": "Issue 页面已在新标签页中打开。请确认后提交。",
+    "sentWithImages": "Issue 页面已在新标签页中打开。请将图片粘贴到 Issue 正文中，然后提交。",
+    "validationEmpty": "请输入反馈内容。",
+    "validationLength": "请控制在 1000 字以内。",
+    "directDescription": "欢迎分享你对改进本应用的意见和需求。点击“发送”即可直接送达开发者，无需 GitHub 账号（将作为公开的 GitHub Issue 记录）。",
+    "directLead": "无需账号",
+    "directNote": "提交内容将作为公开的 GitHub Issue 发布（附加的图片也会公开）。请确保其中不含个人信息或 API 密钥。如需使用自己的 GitHub 账号发布，请使用“在 GitHub 上发布”。",
+    "directImageHelp": "最多 3 张图片会随反馈一起发送（会先在你的设备上缩小尺寸，并移除位置等元数据）。",
+    "sendDirect": "发送",
+    "postOnGithub": "在 GitHub 上发布",
+    "sending": "发送中…",
+    "sentDirect": "已发送。感谢你的反馈！",
+    "sentDirectImagesSkipped": "已发送（有 {{count}} 张图片未能附上）。感谢你的反馈！",
+    "viewIssue": "查看已提交的 Issue",
+    "sendFailed": "发送失败。请稍后重试，或使用“在 GitHub 上发布”或“复制文本”。",
+    "sendRateLimited": "短时间内提交次数过多。请等待约 10 分钟后再试。"
+  },
+  "feedbackNudge": {
+    "title": "能花点时间给个反馈吗？",
+    "body": "你的反馈将帮助改进这个有 4,000 多人使用的服务。哪怕一句话也非常欢迎。",
+    "open": "提供反馈",
+    "dismiss": "稍后"
+  },
+  "chat": {
+    "title": "AI 导师",
+    "greeting": "你好！关于 AWS 学习的问题都可以问我。我会回答与所选考试相关的问题 💡",
+    "suggestions": {
+      "keyPoints": "考试要点",
+      "keyPointsQuery": "这门考试的要点是什么？",
+      "frequentServices": "高频服务",
+      "frequentServicesQuery": "告诉我常考的服务",
+      "studyTips": "学习建议",
+      "studyTipsQuery": "给我一些学习建议"
+    },
+    "inputPlaceholder": "输入问题...",
+    "fabTitle": "向 AI 导师提问",
+    "noResponse": "无法生成回答。",
+    "thinking": "思考中...",
+    "clear": "清除对话"
+  },
+  "milestones": {
+    "beginner": "初学者",
+    "rookie": "新手",
+    "architect": "见习架构师",
+    "solution_architect": "解决方案架构师",
+    "senior_architect": "高级架构师",
+    "specialist": "AWS 专家",
+    "master": "AWS 大师",
+    "king": "AWS 王者",
+    "sage": "AWS 贤者",
+    "unlocked": "解锁新称号！",
+    "toastText": "已解锁“{{title}}”（{{xp}} XP）"
+  },
+  "xpActions": {
+    "link": "访问链接",
+    "explain": "AI 讲解",
+    "quiz": "AI 测验",
+    "mission": "完成任务",
+    "xp": "XP",
+    "noHistory": "暂无 XP 记录",
+    "firstBonus": "首次 +{{bonus}}"
+  },
+  "missions": {
+    "period": {
+      "daily": "每日",
+      "weekly": "每周",
+      "monthly": "每月"
+    },
+    "metric": {
+      "quiz": "答题数",
+      "correct": "答对数",
+      "link": "资源访问数",
+      "xp": "获得 XP"
+    },
+    "reward": "+{{xp}} XP",
+    "toast": "已完成“{{mission}}”（+{{xp}} XP）",
+    "items": {
+      "daily_quiz_3": "回答 3 道测验题",
+      "daily_correct_1": "答对 1 道测验题",
+      "daily_link_1": "打开 1 个学习资源",
+      "weekly_quiz_20": "本周回答 20 道测验题",
+      "weekly_correct_10": "本周答对 10 道测验题",
+      "monthly_xp_500": "本月获得 500 XP"
+    }
+  },
+  "greeting": {
+    "morning": "早上好。",
+    "afternoon": "下午好。",
+    "evening": "晚上好。",
+    "night": "深夜还在学习？别太累了。",
+    "motivations": [
+      "很高兴今天见到你。",
+      "坚持就是力量。",
+      "按自己的节奏来。",
+      "哪怕一点进步也很有意义。",
+      "坚持下来，真棒！",
+      "这一定会有回报的。",
+      "今天学一样新东西吧。",
+      "一步一步积累知识。",
+      "你一定可以的！",
+      "继续前进，你一定能做到。"
+    ],
+    "withName": "{{name}}，{{greeting}}",
+    "you": "你"
+  },
+  "days": {
+    "mon": "周一",
+    "tue": "周二",
+    "wed": "周三",
+    "thu": "周四",
+    "fri": "周五",
+    "sat": "周六",
+    "sun": "周日"
+  },
+  "tweet": {
+    "template": "{{name}} 的 AWS 学习记录（正在备考 {{code}}）\n称号：{{title}}\n总 XP：{{total}}（本周 +{{week}}）",
+    "scoreTemplate": "{{name}} 在 {{code}} 模拟考试中取得了 {{accuracy}}% 的成绩（答对 {{correct}}/{{total}}）！🎉",
+    "hashtag": "#AWS #AWSStudyNavigator",
+    "cta": "用免费的“AWS Study Navigator”高效学习吧！",
+    "shareScore": "在 X 上分享此成绩"
+  },
+  "batch": {
+    "alreadyInProgress": "已有批量生成正在进行中。请等待其完成。",
+    "confirmStart": "将使用 Gemini Batch API 生成模拟考试。\n\n这可能需要几分钟到几十分钟。你可以关闭此标签页或浏览器，下次打开应用时会自动获取结果。\n\n是否继续？",
+    "ready": "模拟考试已准备好！",
+    "failed": "生成失败",
+    "generating": "正在生成模拟考试",
+    "requesting": "正在向 Batch API 发送请求…",
+    "warning": "ℹ️ 这可能需要几分钟到几十分钟。你可以关闭此标签页或浏览器，下次打开应用时会自动获取结果。",
+    "resuming": "正在恢复上次的批量生成…",
+    "startQuiz": "开始测验",
+    "stateWaiting": "等待中",
+    "stateGenerating": "生成中",
+    "stateComplete": "已完成",
+    "stateRunning": "运行中",
+    "progress": "{{state}}… {{done}} / {{total}}",
+    "progressFailed": "（失败：{{failed}}）",
+    "resumeFailed": "生成失败",
+    "noResults": "生成失败",
+    "modelSuffix": "（模型：{{model}}）",
+    "questionsReady": "已准备好 {{count}} 道题",
+    "requestingProgress": "正在向 Batch API 发送请求…（0 / {{total}}）",
+    "parseFailed": "无法解析生成的题目",
+    "parseFailedBody": "无法解析模拟考试的响应",
+    "fallbackFailed": "普通模式下生成也失败了：{{msg}}",
+    "batchFailed": "使用 Batch API 生成失败：{{msg}}",
+    "batchFailedBody": "批量生成模拟考试时出错",
+    "confirmClose": "批量生成正在进行中。关闭后生成会继续运行，但此通知将被隐藏。\n仍要关闭吗？",
+    "errors": {
+      "createFailed": "创建批处理失败：{{status}}",
+      "noJobName": "无法获取批处理作业的资源名称。",
+      "noApiKey": "尚未设置 API 密钥。",
+      "noBatchName": "未提供批处理作业名称。",
+      "cancelled": "批处理已取消。",
+      "statusFailed": "获取批处理状态失败：{{status}}",
+      "endedWith": "批处理以 {{state}} 状态结束。"
+    }
+  },
+  "errors": {
+    "cannotGenerate": "错误：无法生成题目。请重试。",
+    "partialGenerate": "已生成 {{total}} 道题中的 {{count}} 道。",
+    "noResponse": "无法生成回答。",
+    "invalidApiKey": "API 密钥无效或权限不足。请检查设置。",
+    "rateLimited": "服务器繁忙（429）。请稍后重试。",
+    "generic": "发生错误：{{msg}}",
+    "networkInterrupted": "连接已中断。这通常发生在生成过程中网络发生变化（例如在 Wi-Fi 和移动数据之间切换）或信号中断时。请检查网络连接后重试。",
+    "offline": "你似乎处于离线状态。请重新连接网络后重试。",
+    "aborted": "请求已取消。请重试。",
+    "streamingUnsupported": "当前环境不支持流式传输。",
+    "chartLoadFailed": "无法加载图表库（Chart.js）。",
+    "examDataNotFound": "该考试的数据尚未登记。",
+    "domainTaskNotFound": "未找到该领域的任务。",
+    "stepsNotFound": "该考试的学习步骤尚未登记。",
+    "partialGenerateStarting": "{{partial}} 将使用已生成的题目开始测验。",
+    "unknown": "未知错误"
+  },
+  "storage": {
+    "apiKeyEmpty": "请输入 API 密钥。",
+    "apiKeySaved": "API 密钥已保存。",
+    "apiKeyDeleted": "API 密钥已删除。",
+    "openaiKeyEmpty": "请输入 OpenAI API 密钥。",
+    "openaiKeySaved": "OpenAI API 密钥已保存。",
+    "openaiKeyDeleted": "OpenAI API 密钥已删除。"
+  },
+  "roadmap": {
+    "title": "学习路线图",
+    "description": "请按从上到下的顺序完成 {{code}} 考试的学习步骤。",
+    "examWide": "学习路径",
+    "domainShortcutsTitle": "前往领域",
+    "domainShortcutsHint": "各领域的详细资源位于领域标签页中。请选择你想学习的领域。",
+    "aiQuizShortcutTitle": "用本站的 AI 题目检验能力",
+    "aiQuizShortcutHint": "除官方练习题集外，你还可以用 AI 生成的覆盖所有领域的题目进行自测。",
+    "aiQuizShortcutBtn": "开始 AI 题目",
+    "commonTitle": "通用学习资源",
+    "commonDescription": "所有 AWS 认证考试通用的学习步骤和资源。",
+    "taskStatement": "任务说明 {{id}}",
+    "taskStatementToggle": "任务说明",
+    "knowledge": "所需知识与技能",
+    "keyPoints": "要点",
+    "recommend": "推荐",
+    "level": "技术级别"
+  },
+  "learningStatus": {
+    "selected": "已选择",
+    "progress": "进度：",
+    "accuracy": "正确率：",
+    "nextAction": "下一步"
+  },
+  "aiDisclaimer": "注意：AI 生成的结果不一定准确（可能包含错误）。做重要决定时，请以 AWS 官方文档等一手资料为准进行核实。",
+  "search": {
+    "title": "搜索资源",
+    "heading": "跨资源搜索",
+    "description": "跨所有考试列出的学习资源进行搜索。可以限定为单个考试，也可以按关键词搜索全部考试。",
+    "examFilterLabel": "考试",
+    "allExams": "所有考试",
+    "placeholder": "例如：QuickSight、S3、安全",
+    "keywordButton": "搜索",
+    "aiButton": "AI 搜索",
+    "resultsCount": "{{count}} 条结果",
+    "noResults": "未找到匹配的资源。请尝试其他关键词。",
+    "emptyQuery": "请输入关键词进行搜索。",
+    "aiSearching": "正在询问 AI...",
+    "aiAnswerHeading": "AI 推荐",
+    "aiNeedsKey": "AI 搜索需要 API 密钥。请打开设置添加。下方显示关键词搜索结果。",
+    "aiError": "AI 搜索失败。下方显示关键词搜索结果。",
+    "recommendBadge": "推荐"
+  },
+  "footer": {
+    "copyright": "© 2024 AWS Study Navigator. Powered by Gemini / OpenAI."
+  },
+  "examSets": {
+    "metrics": {
+      "judge": "审核通过 {{passed}}/{{judged}}",
+      "cluster": "答案最大重合 {{n}}"
+    },
+    "title": "题目集",
+    "open": "题目集",
+    "hint": "题目一生成就会保存，因此生成中途中断的题目集也可以开始作答。",
+    "empty": "暂无已保存的题目集。",
+    "emptyHint": "生成测验后会显示在这里。",
+    "start": "开始",
+    "retry": "重试",
+    "confirmDelete": "要删除此题目集及其作答记录吗？",
+    "progress": "{{done}} / {{requested}} 道题",
+    "attempts": "作答 {{count}} 次",
+    "status": {
+      "planning": "规划中",
+      "generating": "生成中",
+      "judging": "审核中",
+      "ready": "已就绪",
+      "partial": "部分完成",
+      "failed": "失败"
+    }
+  },
+  "beginner": {
+    "title": "首次参加 AWS 认证",
+    "subtitle": "AWS 认证的基本信息和通用学习资源"
+  },
+  "nextAction": {
+    "start": "开始备考 {{code}} 吧",
+    "onARoll": "状态正佳！试试新的领域",
+    "focusWeak": "专攻薄弱领域：“{{name}}”",
+    "startToday": "开始今天的学习吧！",
+    "aim20": "以 20 道题为目标打好基础",
+    "deepen": "加深对“{{name}}”的理解",
+    "allDomains": "挑战所有领域"
+  },
+  "highlight": {
+    "streak7": "已连续学习 {{days}} 天！你的坚持正在铺就成功之路。",
+    "streak3": "已连续 {{days}} 天！你正在稳步提升能力。",
+    "bestDomain": "“{{name}}”的正确率达到 {{pct}}% — 理解得很好！",
+    "worstDomain": "重点攻克“{{name}}”可以提高通过率。就差一点了！",
+    "accuracy80": "总体正确率 {{pct}}%！已进入及格区间。要有信心！",
+    "accuracy60": "正确率已达到 {{pct}}%。离及格线只差一步！",
+    "total100": "已回答 {{count}} 道题！这些练习会增强你的考试信心。",
+    "total50": "已完成 {{count}} 道题。知识正在稳步积累。",
+    "xp500": "已获得 {{xp}} XP！你作为学习者的成长已体现在数字上。",
+    "activeToday": "感谢你今天前来学习。一步一个脚印，继续前进！",
+    "default": "用今天的学习投资未来的自己。积小步，成大果。"
+  },
+  "ai": {
+    "explainTitle": "讲解"
+  },
+  "historyExport": {
+    "title": "AWS 认证学习记录",
+    "exportedAt": "导出时间：{{date}}",
+    "exam": "考试：{{exam}}",
+    "totals": "题数：{{total}} / 答对：{{correct}} / 正确率：{{pct}}%",
+    "modes": {
+      "single": "测验",
+      "quick5": "5 道题",
+      "speed": "极速挑战",
+      "mock": "模拟考试"
+    },
+    "session": "第 {{n}} 次：{{mode}}（{{date}}）",
+    "result": "结果：答对 {{correct}}/{{total}}",
+    "question": "第 {{n}} 题",
+    "answerLine": "你的答案：{{user}} / 正确答案：{{correct}} / {{verdict}}",
+    "verdictCorrect": "✅ 正确",
+    "verdictIncorrect": "❌ 错误",
+    "elapsed": "用时：{{s}} 秒",
+    "explanation": "解析：{{text}}"
+  },
+  "pwa": {
+    "install": "添加应用"
+  },
+  "i18nNotice": {
+    "machineTranslated": "此语言由 AI 翻译，可能存在错误。",
+    "report": "报告翻译问题",
+    "settingsNote": "日语和英语以外的语言（界面文本和学习内容）均由 AI 机器翻译。如发现错误，请通过反馈表单报告。",
+    "feedbackPrefix": "[翻译问题] "
+  },
+  "examLifecycle": {
+    "title": {
+      "updating": "{{exam}} 即将更新为 {{successor}}",
+      "superseded": "{{exam}} 已被 {{successor}} 取代",
+      "retiring": "{{exam}} 即将停考",
+      "retired": "{{exam}} 已停考"
+    },
+    "badge": {
+      "updating": "即将更新",
+      "superseded": "旧版",
+      "retiring": "即将停考",
+      "retired": "已停考"
+    },
+    "sources": "来源（AWS 官方）："
+  }
+}

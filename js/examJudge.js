@@ -19,7 +19,7 @@
  * Pure module: no DOM / network / storage.
  */
 
-import { getLocale } from './i18n.js';
+import { usesJapanesePrompt, outputLanguageDirective } from './localeContent.js';
 import { correctChoiceText } from './examPipeline.js';
 
 export const JUDGE_MARKER = '[Judge]';
@@ -33,8 +33,11 @@ export const PASS_MIN_TOTAL = 18; // 5 axes × 3.6 average
 /** Flags that make an item unusable as-is regardless of the judge. */
 export const HARD_FLAGS = new Set(['choice-count', 'duplicate-choices', 'all-of-the-above', 'missing-question']);
 
+// English scaffolding for every locale except Japanese (issue #197); the
+// editor additionally gets the output-language directive since it rewrites
+// learner-facing text.
 function isEn() {
-  return getLocale() === 'en';
+  return !usesJapanesePrompt();
 }
 
 function stripLabel(s) {
@@ -151,7 +154,7 @@ export function buildEditorPrompt({ question, issues = [], fix = '', material = 
   const issueLines = issues.map((x) => `- ${x}`).join('\n');
   if (isEn()) {
     return {
-      systemPrompt: 'You repair AWS certification exam items. Return ONLY one JSON object with the same contract: {"question","choices":["A. …","B. …","C. …","D. …"],"correct":"A|B|C|D","explanation"}. Keep the correct answer at the same letter unless an issue says the key is wrong. Do not change what the item tests.',
+      systemPrompt: 'You repair AWS certification exam items. Return ONLY one JSON object with the same contract: {"question","choices":["A. …","B. …","C. …","D. …"],"correct":"A|B|C|D","explanation"}. Keep the correct answer at the same letter unless an issue says the key is wrong. Do not change what the item tests.' + outputLanguageDirective(),
       userPrompt: `${EDITOR_MARKER}\n${material ? `[Reference material]\n${material}\n\n` : ''}[Issues]\n${issueLines}${fix ? `\n[Suggested fix] ${fix}` : ''}\n\n[Item]\n${payload}`,
     };
   }

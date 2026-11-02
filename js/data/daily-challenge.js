@@ -14,6 +14,8 @@
  * すべての問題は ja / en 両方を完全収録しています（en の欠落なし）。
  */
 
+import { localizedField } from '../localeContent.js';
+
 export const DAILY_CHALLENGE_QUESTIONS = [
   {
     question: 'AWSの「リージョン」と「アベイラビリティーゾーン(AZ)」の関係として正しいものはどれですか？',
@@ -521,16 +523,16 @@ function mulberry32(seed) {
  * プールの問題を指定 locale のレンダラー形状へ正規化する。
  * en フィールドが欠落している場合は ja フィールドにフォールバックする。
  * @param {object} q
- * @param {'ja'|'en'} locale
+ * @param {string} locale
  * @returns {{ question: string, choices: string[], correctIndex: number, explanation: string }}
  */
 function localizeQuestion(q, locale) {
-  const useEn = locale === 'en';
+  // ja: 日本語 / en: 英語 / その他: コンテンツ・オーバーレイ翻訳 → 英語（js/localeContent.js）
   return {
-    question: (useEn && q.questionEn) ? q.questionEn : q.question,
-    choices: (useEn && Array.isArray(q.choicesEn)) ? q.choicesEn.slice() : q.choices.slice(),
+    question: localizedField(q, 'question', locale),
+    choices: (localizedField(q, 'choices', locale) || []).slice(),
     correctIndex: q.correctIndex,
-    explanation: (useEn && q.explanationEn) ? q.explanationEn : q.explanation,
+    explanation: localizedField(q, 'explanation', locale),
   };
 }
 
@@ -543,7 +545,7 @@ function localizeQuestion(q, locale) {
  *
  * @param {number} [count=5] 返す問題数（プールサイズ上限でクランプ）
  * @param {Date} [date=new Date()] 基準となる日付
- * @param {'ja'|'en'} [locale='ja'] 出力ロケール
+ * @param {string} [locale='ja'] 出力ロケール
  * @returns {Array<{ question: string, choices: string[], correctIndex: number, explanation: string }>}
  */
 export function getDailyChallengeQuestions(count = 5, date = new Date(), locale = 'ja') {
