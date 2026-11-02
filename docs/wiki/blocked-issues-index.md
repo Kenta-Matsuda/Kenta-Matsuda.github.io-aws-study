@@ -1,8 +1,8 @@
 # 恒久ブロック中の issue 索引（人間 / AWS 対応待ち）
 
-- 最終更新日: 2026-09-12
+- 最終更新日: 2026-11-03
 - 対象範囲: 構造的に人間 / AWS 対応が必要で、クライアントサイドでは前進できないため毎回の棚卸しで再トリアージ不要な open issue の一覧
-- 出典/参照: `.kiro/agents/github-issue-resolver.md`（対応保留マーカーの運用 / 手順 3）/ `docs/wiki/issue-resolution-playbook.md`（A-15）/ `docs/wiki/efficiency-log.md` / `docs/action-required/` / issue #32 #162 #167
+- 出典/参照: `.kiro/agents/github-issue-resolver.md`（対応保留マーカーの運用 / 手順 3）/ `docs/wiki/issue-resolution-playbook.md`（A-15）/ `docs/wiki/efficiency-log.md` / `docs/action-required/` / issue #32 #162 #167 #240 #241
 
 > このページは、**人間しか実施できない対応（多くは AWS バックエンドのプロビジョニング）が本質的に必要で、以降クライアントサイドでは前進できない open issue** を 1 か所にまとめた**恒久的な索引**です。毎回の棚卸しで同じ issue を「ゼロから読み直して『AWS バックエンドが必要 → スキップ』と再導出する」無駄を無くすために置いています。スキーマ（メタデータ + 更新履歴）は [README](README.md) を参照してください。
 
@@ -43,6 +43,22 @@
 - **記録日**: 2026-09-12（`agent:skipped` 済み）
 - **2026-10-11 更新**: 収集パイプライン（投票 → Lambda → DynamoDB）と CSV エクスポート（`scripts/export-feedback.mjs`）を #162 と同じスタックで実装済み。残る人間対応はデプロイのみ。Amazon Quick は Free プランに BI ダッシュボードが含まれないため、常設 BI は保留。
 
+### #240 — Good/Bad 集約の残作業: /events の再デプロイ確認と Amazon Quick 連携 (#167 から分割)
+
+- **ブロック種別**: 要人間対応（AWS 操作 + プロダクト判断）
+- **なぜブロックか**: `POST /events`（問題単位の学習イベント、#239 で実装済み）が本番の Function URL で受け付けられるかを確認するには最新 main でのスタック再デプロイが必要。Amazon Quick 連携は $40/ユーザー/月 + $250/月（Enterprise）かかるため費用対効果の判断が先決。
+- **解消に必要な人間 / AWS 対応**: (1) `infra/feedback/` スタックを最新 main で再デプロイし、`/events` が本番で稼働することを確認。(2) Amazon QuickSight を常設するかどうかのプロダクト判断。
+- **成果物 / 引き継ぎ**: `infra/feedback/README.md`（デプロイ手順）/ [フィードバック分析（DynamoDB）](../action-required/issue-167-feedback-analytics-dynamodb.md)
+- **記録日**: 2026-11-03（初回記録）
+
+### #241 — 問題生成パイプラインの残作業: Batch 化した品質評価・カード追加・Judge 較正・実 API 計測 (#225 から分割)
+
+- **ブロック種別**: 要人間対応（実 API キー + 人間採点 + 追加カードの内容レビュー）
+- **なぜブロックか**: 残作業（Judge 較正・実 API でのベースライン計測）はいずれも `GEMINI_API_KEY` が必要で、エージェントは API キーを保持していない。Batch 連鎖の実機確認も実キーが必要。追加カード（AIB / SAA）は機械生成コンテンツを人間がレビューしてからでないと品質保証できない。
+- **解消に必要な人間 / AWS 対応**: (1) 実キーで素材生成→`judge-calibration.mjs sample`→人間採点→`agree`→閾値決定（`PASS_MIN_AXIS` / `PASS_MIN_TOTAL`）。(2) `eval-exam-pipeline.mjs` を実キーで実行しベースライン記録。(3) 追加カード（AIB 4 カード・SAA 15 カード）の人間レビュー。
+- **成果物 / 引き継ぎ**: [問題生成パイプライン設計](../action-required/issue-225-resource-grounded-exam-generation.md)（§8.5 較正手順・§8.6 ベースライン記録表）
+- **記録日**: 2026-11-03（初回記録。PR #249 でエージェント可能な部分はすべて実装済み）
+
 ## メンテナンス方法
 
 - 新たに「クライアントサイドで前進できず、人間 / AWS 対応が本質的に必要」と確定した issue が出たら、`agent:skipped` マーカーを付けたうえで**本索引にも 1 エントリ追記**する（issue 番号 + タイトル / ブロック種別 / なぜブロックか / 解消に必要な人間・AWS 対応 / `docs/action-required/` 成果物へのポインタ / 記録日）。
@@ -51,5 +67,6 @@
 
 ## 更新履歴
 
+- 2026-11-03: #240 / #241 を追記。#240（/events 再デプロイ・Amazon Quick 連携）は AWS 操作待ち、#241（Judge 較正・実 API 計測・Batch 実機確認）は実 API キー待ち。
 - 2026-10-11: #162 / #167 のコード実装（`infra/feedback/`）を反映。両 issue の残作業はデプロイ等の人間対応のみになった。
 - 2026-09-12: 初版作成。人間 / AWS 対応待ちで恒久ブロック中の open issue（#32 グローバルリーダーボード / #162 アカウント不要 issue 投稿 / #167 フィードバック分析）を、毎回の再トリアージ重複を避けるための恒久索引としてシードした。既存の `agent:skipped` マーカー機構（GitHub ラベル + 判断コメント）と `scripts/issue-triage.mjs` の `SKIP` / `RECHECK` 判定を置き換えず補完する位置づけを明記（出典: `.kiro/agents/github-issue-resolver.md` / `docs/wiki/issue-resolution-playbook.md` A-15 / `docs/action-required/`）。
