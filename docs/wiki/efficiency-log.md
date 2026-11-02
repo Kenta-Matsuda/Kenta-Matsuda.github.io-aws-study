@@ -1,7 +1,7 @@
 # 効率化・自己拡張ログ
 
 
-- 最終更新日: 2026-09-25
+- 最終更新日: 2026-11-02
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
 - 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs` / `scripts/list-open-prs.mjs`
 
@@ -395,6 +395,7 @@
 
 ## 更新履歴
 
+- 2026-11-02: PR #242・#243 のコンフリクト解消。feat/global-leaderboard-32（#242）は sw.js（CACHE_VERSION v13 → v14）と infra/feedback/README.md（手順 4 にランキング URL 説明・データ保持節にランキング TTL / ログ詳細を統合）。feat/i18n-aws-docs-locales-197（#243）は sw.js（同）、js/locales/en.json / ja.json（バッチ API エラーキーと stateJudging / stateFixing キーを両方保持）、js/ui.js（main の runBatchChain パイプライン構造を採用しつつ branch の locale t() キー呼び出しを統合）、docs/action-required/CHECKLIST.md / README.md（#197 完了ステータス維持・削除済み #190 参照を除去）。両 PR とも mergeable_state: dirty → blocked に変わりマージ可能になった。
 - 2026-09-25: chore PR 乱立問題（A-16）の恒久対策エントリを追記。ACTIONABLE=0 の実行のたびに新規 chore PR を量産するループに陥った根本原因と対策（プロンプトへの「chore PR 乱立防止」節追加・#218/#219 クローズ・playbook への A-16 追記）を記録。権限緩和は無し。
 - 2026-09-17: トリアージに**今回の着手可否サマリ（`ACTIONABLE=N`）**を追加。純関数 `computeActionability(results, prAudit)` を新設・エクスポートし（着手対象 = issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE` + PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`、`OPEN_PR` / `SKIP` / `PR_OK` は除外）、`renderMarkdown` に要約ブロック・`--json` に `actionability` フィールドを追加（既存 verdict ロジックと `results` / `openPrAudit` の形は不変・読み取り専用も維持）。純ロジック spec `tests/issue-triage-actionability.spec.mjs` を追加（実装を壊すと落ちることを確認）。あわせて今回の landscape（OPEN_PR 5 件・SKIP 3 件・オープン PR 監査 10 件すべて PR_OK＝`ACTIONABLE=0`）と、目視集計を単一判定へ置換した効率化を記録。権限緩和は無し。
 - 2026-09-15: 完成済みオープン PR のレビュー / マージ滞留を可視化する `scripts/list-open-prs.mjs`（読み取り専用）と機械生成索引 `docs/wiki/open-prs-review-queue.md` を制度化。根本原因は「完成済みだが `mergeable_state: blocked` で滞留する open PR を一覧で俯瞰できる恒久成果物が無かった」こと。ツールキット表・プロンプトの主要機能 3 / 検証節・README / `docs/index.md` の索引も同 PR で更新。既存の `blocked-issues-index.md`（issue の索引）とは別物で重複しない。権限緩和・既存制約の削除は無し（スクリプトの読み取り専用も維持）。
