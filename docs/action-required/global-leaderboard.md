@@ -6,6 +6,33 @@
 - 関連: #32
 - 補足: 本ファイルに記載する AWS リソース・コマンドは、**AWS 権限を持つ人間が検討・実行するための提案**です。エージェントは AWS 操作（`aws` / `sam` / `cdk` / `terraform` など）を一切実行しません。
 
+## 実装状況（2026-10-13 更新）
+
+**クライアントとバックエンドのコードは実装済み**です（PR: Refs #32）。残りは**既存のフィードバック用スタックへの再デプロイ（人間対応）だけ**です。以下の「症状」以降は実装前に書いた分析・設計案で、実際の実装は次の方針になりました（当初案の API Gateway / Cognito / 専用テーブルは使っていません）。
+
+### 実装した構成
+
+- **バックエンド**: 新しいスタックは作らず、デプロイ済みの `infra/feedback/`（Lambda Function URL + DynamoDB 単一テーブル + TTL + IP ハッシュのレート制限 + 停止スイッチ）にルートを追加しました。コードは `infra/feedback/src/leaderboard.mjs`、詳細は [`infra/feedback/README.md`](../../infra/feedback/README.md) の「グローバル XP ランキング」。
+  - `POST /leaderboard/xp` `{ token, name, xp, batchId }` … 日 / 週 / 月 / 累計の 4 バケットに **1 回の TransactWriteItems** で加算（重複排除マーカー + 1 日上限カウンタも同じトランザクション）。
+  - `GET /leaderboard?period=daily|weekly|monthly|all&limit=50&me=<公開ID>` … 上位 N 件と本人の順位。Lambda 内で 30 秒キャッシュ。
+  - `POST /leaderboard/leave` `{ token }` … 参加をやめたときに現在 / 直前の期間バケットから本人を削除。
+- **キー設計**: `pk = lb#daily#2026-10-13` / `lb#weekly#2026-W42` / `lb#monthly#2026-10` / `lb#all`、`sk = 公開 ID`。日 / 週 / 月は期間終了 + 2 / 7 / 31 日で TTL 削除、累計は TTL なし。
+- **期間の境界は UTC**（毎日 0:00 UTC = 日本時間 9:00 に切り替え、週は ISO 8601 の月曜始まり）。どのバケットに入るかはサーバ時刻で決め、クライアント時刻は使いません。グローバルに 1 つの境界を共有するため UTC を選び、画面には次のリセット時刻を利用者のローカル時刻で表示します。
+- **参加はオプトイン**（設定 → 「ランキングに参加する」。ランキング画面にも同じトグル）。既定はオフで、閲覧は誰でも可能。表示名は既存のユーザー名（`profile.name`）。アカウントは無く、ブラウザが生成した匿名のランダム token（128 bit）で識別し、サーバには `sha256("lb|" + token)` 先頭 20 桁の公開 ID だけを保存します。オフにすると送信を止め、未送信分を破棄し、token を破棄（再参加時は新しい匿名 ID）したうえで削除リクエストを送ります（オフライン時は次回オンライン時に再送）。
+- **XP 送信**: `js/storage.js` の `addXp()` が XP 付与ごとに通知（`onXpAwarded`、ミッション報酬も含む）→ `js/leaderboard.js` が端末内でまとめ、最大約 2 分に 1 回とページ非表示時に送信。バッチは `batchId` を付けて保存してから送るので、応答が失われて再送しても二重加算されません。5xx / 429 / ネットワーク失敗は指数バックオフで再送、4xx は破棄。**参加前に獲得した XP は集計しません**（検証できない大量 XP の持ち込みを防ぐため）。
+- **UI**: ダッシュボードの XP スライドの「ランキングを見る」→ 期間タブ（今日 / 今週 / 今月 / 累計）、上位 50 件、自分の行のハイライトと順位、バックエンド未設定時・取得失敗時の表示（再試行ボタン）。`js/leaderboardUi.js`。
+- **不正対策と限界**: 1 リクエスト最大 1,000 XP、1 人 1 日最大 5,000 XP（超過分は切り捨て）、IP 単位 1 分 20 回、表示名の制御文字・不可視文字の除去と 30 文字制限、Origin 制限、停止スイッチ（書き込みのみ停止。閲覧と退出は継続）。ただし静的サイトのため、token を作り直せば別人として参加でき、XP が実際の学習によるものかも検証できません。ランキングは目安であり、完全な不正防止はしていません。不適切な名前や水増しは DynamoDB コンソールから該当アイテムを削除して対処します。
+- **コスト**: XP 送信 1 回 ≒ 12 WRU。参加者 300 人規模で月 $1 未満の見込み（README に試算）。下の「DynamoDB 月額コスト試算」は 1 イベント = 1 回書き込みで見積もった実装前の机上試算で、実装ではクライアント側のまとめ送信で書き込み回数を減らしています。
+- **テスト**: `tests/leaderboard-lambda.spec.mjs`（期間キー・ISO 週・検証・順位付け・冪等性・1 日上限・キャッシュ・退出・停止スイッチ・レート制限）、`tests/leaderboard.spec.mjs`（オプトイン、参加中だけ送信、再送の冪等性、モックしたバックエンドでの表示、未設定時の表示）。
+
+### 残っている人間対応
+
+1. `infra/feedback` で `sam build` → `sam deploy`（既存スタック `aws-study-feedback` の更新。Lambda コードと IAM 権限〔Query / GetItem / DeleteItem / ConditionCheckItem〕が追加されるだけで、テーブルの作り直しはありません）。初回デプロイで `--parameter-overrides`（`BudgetEmail` など）を指定していた場合は、同じ値を付けて実行してください（省略するとテンプレートの既定値に戻ります。`samconfig.toml` に保存済みなら不要）。
+2. デプロイ後の確認: `curl.exe -H "Origin: https://kenta-matsuda.github.io" "https://<FunctionUrl>/leaderboard?period=weekly"` が `{"ok":true,...}` を返すこと。
+3. （任意）運用開始後、不適切な表示名の監視方針・参加者規模に応じた読み出し方式（GSI など）の見直し。
+
+`FEEDBACK_API_URL` は既に設定済みのため、デプロイ前に公開された場合でもランキング画面は「読み込めませんでした」表示になるだけで、他の機能には影響しません。
+
 ## 症状
 
 issue #32 が求める「毎日 / 毎週 / 毎月 / 累積のグローバル XP ランキング」を、現状のコードベースでは実装できません。
@@ -325,40 +352,20 @@ issue #32 のメンテナコメント「**実際に DB として DynamoDB を使
 ### ⚠️ 要人間対応: AWS操作が必要
 
 - **必要な操作内容:**
-  - グローバルリーダーボード用のバックエンド（Write API / データストア / Read API）を設計・構築する。
-  - DynamoDB テーブル（期間バケット設計 + TTL）、Lambda（Write / Read ハンドラ）、API Gateway（CORS を GitHub Pages オリジンに限定）を作成する。
-  - 必要に応じて Cognito による匿名 / 軽量認証、WAF / スロットリングによる不正投稿対策を追加する。
-  - DynamoDB 想定コストの机上試算は本ファイル「DynamoDB 月額コスト試算」に記載済み（issue #32 コメント対応）。単価・無料枠・前提値（MAU / XP 更新頻度 / ランキング参照頻度）は概算のため、公式の AWS Pricing Calculator で人間が確定値を再確認すること。
-  - 構築後、クライアント（`js/storage.js` ほか）に XP 送信経路とランキング表示 UI を追加する改修を、別 issue / PR として起票する。
+  - 実装済みのランキング機能（`infra/feedback/src/leaderboard.mjs` と IAM ポリシーの追加）を、既存のフィードバック用スタックに再デプロイする。
+  - デプロイ後、`GET /leaderboard` の応答を確認する。
+  - （任意）運用開始後に表示名のモデレーション方針と、参加者数に応じた読み出し方式（GSI / 定期集計）を見直す。
 - **対象リソース:**
-  - Amazon DynamoDB（ランキング集計テーブル）
-  - AWS Lambda（Write / Read API ハンドラ）
-  - Amazon API Gateway（HTTP API エンドポイント）
-  - Amazon Cognito（任意 / ユーザー識別）
-  - AWS WAF・API スロットリング（任意 / 不正対策）
-  - AWS SAM または AWS CDK（IaC / スタック管理）
+  - 既存スタック `aws-study-feedback`（AWS Lambda / Lambda Function URL / Amazon DynamoDB テーブル / IAM ロール）
 - **想定コマンド:**（人間が内容を確認・調整のうえ実行する提案。エージェントは実行しない）
 
-  ```bash
-  # ここに記載するコマンドはエージェントが実行するものではなく、
-  # AWS 権限を持つ人間が内容を精査・調整したうえで実行する「提案」です。
-
-  # 例: DynamoDB テーブル作成（期間バケットをキーに設計）
-  aws dynamodb create-table \
-    --table-name aws-study-leaderboard \
-    --attribute-definitions AttributeName=pk,AttributeType=S AttributeName=sk,AttributeType=S \
-    --key-schema AttributeName=pk,KeyType=HASH AttributeName=sk,KeyType=RANGE \
-    --billing-mode PAY_PER_REQUEST
-
-  # 例: 日次 / 週次 / 月次バケットの自動失効に TTL を設定
-  aws dynamodb update-time-to-live \
-    --table-name aws-study-leaderboard \
-    --time-to-live-specification "Enabled=true, AttributeName=expiresAt"
-
-  # 例: SAM / CDK でスタックとして構築する場合（テンプレート作成後）
-  sam build && sam deploy --guided
-  # または
-  cdk deploy
+  ```powershell
+  cd infra/feedback
+  sam build
+  sam deploy --stack-name aws-study-feedback --region ap-northeast-1 `
+    --resolve-s3 --capabilities CAPABILITY_IAM `
+    --parameter-overrides BudgetEmail=<初回と同じ通知先メール>
+  curl.exe -H "Origin: https://kenta-matsuda.github.io" "https://<FunctionUrl>/leaderboard?period=weekly"
   ```
 
-  > これらのコマンドはあくまで方向性を示す例です。実際のテーブル設計・IAM 権限・CORS 設定・コスト方針は人間が決定してください。
+  > 停止したい場合は `--parameter-overrides AcceptSubmissions=false` で再デプロイすると XP の書き込みだけが止まります（閲覧・退出は継続）。

@@ -326,6 +326,28 @@ function sumWeekBuckets(week) {
   return week.buckets.reduce((acc, v) => acc + Number(v || 0), 0);
 }
 
+// Observers of every XP award (e.g. the opt-in global leaderboard, issue #32,
+// which forwards the applied amount to the backend). Kept as a listener list so
+// this module does not depend on network code.
+const xpAwardListeners = new Set();
+
+/**
+ * Subscribe to applied XP awards.
+ * @param {(award: { amount: number, reason: string }) => void} fn
+ * @returns {() => void} unsubscribe
+ */
+export function onXpAwarded(fn) {
+  if (typeof fn !== 'function') return () => {};
+  xpAwardListeners.add(fn);
+  return () => xpAwardListeners.delete(fn);
+}
+
+function notifyXpAwarded(award) {
+  for (const fn of xpAwardListeners) {
+    try { fn(award); } catch (err) { console.warn('[storage] xp listener failed:', err); }
+  }
+}
+
 export function addXp({ examId, amount, reason, url } = {}) {
   const xp = Math.max(0, Math.floor(Number(amount || 0)));
   if (!xp) return { applied: false, amountApplied: 0, bonusApplied: 0, unlocked: [], summary: getXpSummary() };
@@ -400,6 +422,7 @@ export function addXp({ examId, amount, reason, url } = {}) {
   }
 
   saveStudyState(state);
+  notifyXpAwarded({ amount: applied, reason: String(reason || '') });
   return {
     applied: true,
     amountApplied: applied,
