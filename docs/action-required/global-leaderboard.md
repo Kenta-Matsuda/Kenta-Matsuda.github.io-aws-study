@@ -1,10 +1,20 @@
 # グローバルリーダーボード（毎日 / 毎週 / 毎月 / 累積の XP ランキング）
 
-🔴 未対応（要対応）
+🟡 対応中（PR #242 レビュー待ち）
 
 - 種別: 要人間対応（バックエンド / AWS インフラ）
 - 関連: #32
 - 補足: 本ファイルに記載する AWS リソース・コマンドは、**AWS 権限を持つ人間が検討・実行するための提案**です。エージェントは AWS 操作（`aws` / `sam` / `cdk` / `terraform` など）を一切実行しません。
+
+## 実装状況
+
+コードは実装済みです（PR #242 `feat/global-leaderboard-32` でレビュー待ち）。以下が含まれます:
+
+- **クライアント実装**: `js/leaderboard.js`（XP 送信・ランキング取得ロジック）、`js/leaderboardUi.js`（ランキング表示 UI）
+- **バックエンドルート追加**: `infra/feedback/src/leaderboard.mjs`（Lambda ハンドラ: Write/Read エンドポイント）
+- **テスト**: `tests/leaderboard.spec.mjs`（クライアント統合テスト）、`tests/leaderboard-lambda.spec.mjs`（Lambda ユニットテスト）
+
+残りの作業は **SAM デプロイ（要人間対応）** のみです。PR #242 がマージされた後、AWS 権限を持つ人間が `sam build && sam deploy` を実行して DynamoDB テーブル・Lambda・API Gateway を本番環境に反映してください。
 
 ## 症状
 
