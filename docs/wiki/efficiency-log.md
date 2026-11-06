@@ -1,7 +1,7 @@
 # 効率化・自己拡張ログ
 
 
-- 最終更新日: 2026-09-25
+- 最終更新日: 2026-11-06
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
 - 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs` / `scripts/list-open-prs.mjs`
 
@@ -393,8 +393,22 @@
 - **想定リスク**: 権限緩和・既存制約の削除は無し。ACTIONABLE=0 時の chore PR 禁止という制約の追加のみ。
 - **状態**: 実装済み（本 PR: `chore/prevent-duplicate-chore-prs`）。
 
+### 2026-11-06: issue #240 / #241 に agent:skipped マーカーを付与、open-prs-review-queue.md を更新
+
+- **日付**: 2026-11-06
+- **今回の landscape**: open issue 4 件（ACTIONABLE=3: TRIAGE 3 件）。#197 は PR #243（feat/i18n-aws-docs-locales-197、オープン）が実装をカバー、#240 / #241 は AWS 操作・実 API キー必須の残作業のみ残っている。#32 は SKIP 継続（再コメント禁止）。
+- **実施したこと**:
+  1. issue #240 に agent:skipped ラベルとコメントを付与（残作業: SAM 再デプロイ / QuickSight 連携）
+  2. issue #241 に agent:skipped ラベルとコメントを付与（残作業: 実 API キーが必要な Judge 較正・ベースライン計測・Batch 実機確認、人間レビュー要のカード確認）
+  3. issue #197 に現状整理コメントを追加（PR #243 がマージされれば実質完了）
+  4. docs/wiki/open-prs-review-queue.md を再生成（`env -u NODE_OPTIONS node scripts/list-open-prs.mjs --write`）
+  5. docs/action-required/CHECKLIST.md を再生成（`env -u NODE_OPTIONS node scripts/list-action-required.mjs --write`）
+- **次回以降の注意**: issue #240 / #241 は SKIP 判定済みになる。スキップコメント再投稿禁止（A-15）。PR #243 がマージされたら issue #197 をクローズする。
+- **想定リスク**: 権限緩和・既存制約の削除は無し。ラベル付与と docs 更新のみ。
+
 ## 更新履歴
 
+- 2026-11-06: issue #240 / #241 に agent:skipped マーカーを付与（残作業: AWS 操作 / 実 API キー必須）。issue #197 に現状整理コメント追加（PR #243 マージ待ち）。docs/wiki/open-prs-review-queue.md と docs/action-required/CHECKLIST.md を再生成。権限緩和は無し。
 - 2026-09-25: chore PR 乱立問題（A-16）の恒久対策エントリを追記。ACTIONABLE=0 の実行のたびに新規 chore PR を量産するループに陥った根本原因と対策（プロンプトへの「chore PR 乱立防止」節追加・#218/#219 クローズ・playbook への A-16 追記）を記録。権限緩和は無し。
 - 2026-09-17: トリアージに**今回の着手可否サマリ（`ACTIONABLE=N`）**を追加。純関数 `computeActionability(results, prAudit)` を新設・エクスポートし（着手対象 = issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE` + PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`、`OPEN_PR` / `SKIP` / `PR_OK` は除外）、`renderMarkdown` に要約ブロック・`--json` に `actionability` フィールドを追加（既存 verdict ロジックと `results` / `openPrAudit` の形は不変・読み取り専用も維持）。純ロジック spec `tests/issue-triage-actionability.spec.mjs` を追加（実装を壊すと落ちることを確認）。あわせて今回の landscape（OPEN_PR 5 件・SKIP 3 件・オープン PR 監査 10 件すべて PR_OK＝`ACTIONABLE=0`）と、目視集計を単一判定へ置換した効率化を記録。権限緩和は無し。
 - 2026-09-15: 完成済みオープン PR のレビュー / マージ滞留を可視化する `scripts/list-open-prs.mjs`（読み取り専用）と機械生成索引 `docs/wiki/open-prs-review-queue.md` を制度化。根本原因は「完成済みだが `mergeable_state: blocked` で滞留する open PR を一覧で俯瞰できる恒久成果物が無かった」こと。ツールキット表・プロンプトの主要機能 3 / 検証節・README / `docs/index.md` の索引も同 PR で更新。既存の `blocked-issues-index.md`（issue の索引）とは別物で重複しない。権限緩和・既存制約の削除は無し（スクリプトの読み取り専用も維持）。
