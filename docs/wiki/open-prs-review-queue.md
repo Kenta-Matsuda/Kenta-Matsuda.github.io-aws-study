@@ -1,6 +1,6 @@
 # レビュー待ちオープン PR キュー
 
-- 最終更新日: 2026-11-06
+- 最終更新日: 2026-11-07
 - 対象範囲: `Kenta-Matsuda/Kenta-Matsuda.github.io-aws-study` のすべてのオープン PR を、マージ可能状態（`mergeable_state`）と紐づく issue とともに一覧化したもの。とくに完成済みだがレビュー / マージ待ちで滞留している PR を俯瞰するための索引
 - 生成元: `scripts/list-open-prs.mjs`（`gh api` の GET のみで各オープン PR の `mergeable_state` を取得）。`node scripts/list-open-prs.mjs --write` で再生成できます。手で編集せず、スクリプトを実行して再生成してください。
 - 出典/参照: `.kiro/agents/github-issue-resolver.md` / `scripts/list-open-prs.mjs` / `docs/wiki/README.md`
@@ -16,7 +16,7 @@
 - `unstable` / `has_hooks`: チェック進行中 / 一部失敗、またはフックあり。
 - `unknown`（判定中）: GitHub が計算中（`mergeable` が `null`）。
 
-合計: 4 件 / 内訳: blocked=4
+合計: 5 件 / 内訳: blocked=5
 
 ## オープン PR 一覧
 
@@ -26,7 +26,8 @@
 | #243 | feat: AWS ドキュメント対応 9 言語を追加し、AI 生成コンテンツを選択言語で出力する（#197 フェーズ 1） | `feat/i18n-aws-docs-locales-197` → `main` | `blocked`（レビュー・チェック待ち） | （紐づく issue なし） |
 | #266 | docs: action-required ステータスを実装済みPRに合わせて更新 (#32 / #197) | `docs/update-action-required-status` → `main` | `blocked`（レビュー・チェック待ち） | （紐づく issue なし） |
 | #267 | docs: action-required ステータスを実装済み状態に更新 (#167 / #225) | `docs/update-action-required-225-167` → `main` | `blocked`（レビュー・チェック待ち） | #167 |
+| #268 | chore: 2026-11 バッチ振り返り—open PR キュー更新・efficiency-log 追記 | `chore/issue-triage-2026-11` → `main` | `blocked`（レビュー・チェック待ち） | #197 #240 #241 |
 
 ## 更新履歴
 
-- 2026-11-06: `scripts/list-open-prs.mjs` により生成 / 更新。
+- 2026-11-07: `scripts/list-open-prs.mjs` により生成 / 更新。

@@ -1,7 +1,7 @@
 # 効率化・自己拡張ログ
 
 
-- 最終更新日: 2026-11-06
+- 最終更新日: 2026-11-07
 - 対象範囲: 作業の効率化・低コスト化（繰り返し作業のスクリプト化によるトークン削減）の検討ログと、自己拡張（プロンプト・skill の改善）提案ログ
 - 出典/参照: issue #69 #184 / `.kiro/agents/exam-content-maintainer.md` / `.kiro/agents/github-issue-resolver.md` / `scripts/issue-triage.mjs` / `scripts/check-resource-links.mjs` / `scripts/list-aws-doc-pages.mjs` / `scripts/list-action-required.mjs` / `scripts/list-open-prs.mjs`
 
@@ -393,6 +393,16 @@
 - **想定リスク**: 権限緩和・既存制約の削除は無し。ACTIONABLE=0 時の chore PR 禁止という制約の追加のみ。
 - **状態**: 実装済み（本 PR: `chore/prevent-duplicate-chore-prs`）。
 
+### 2026-11-07: open-prs-review-queue.md を 5 件（PR #268 自身を含む）に更新し、今回バッチの retrospective を記録
+
+- **日付**: 2026-11-07
+- **今回の landscape**: open issue（真の Issue）は 4 件（#241 / #240 / #197 / #32）。うち #241 / #240 は SKIP 済み（AWS 操作 / 実 API キー必須）。#197 は PR #243（feat/i18n-aws-docs-locales-197）・#32 は PR #242（feat/global-leaderboard-32）でそれぞれ対応中（マージ待ち）。コード追加・変更で前進できる新規 issue は 0 件（`ACTIONABLE=0`）。
+- **今回の作業**: `docs/wiki/open-prs-review-queue.md` を `scripts/list-open-prs.mjs --write` で再生成（前回の chore/issue-triage-2026-11 ブランチ上の内容が 4 件だったが、PR #268 自身がオープンになったことで 5 件に更新）。
+- **retrospective（なぜ真の open issue がゼロだったか）**:
+  - GitHub の `issues?state=open` API は PR も返す（`pull_request` フィールドが null でないものが PR）。本バッチでは 9 件「取得」したが内訳は Issue 4 件・PR 5 件だった。`scripts/issue-triage.mjs` は `select(.pull_request == null)` でフィルタしているが、本バッチでは同スクリプトを使わず直接 API を呼んだため PR が混入して一覧が見かけ上 9 件に膨らんだ。結果として調査コストが増え、「真の issue は 4 件」という結論到達までに余分なターンを消費した。
+  - 対策: 手動で `issues?state=open` を呼ぶ際は `select(.pull_request == null)` フィルタを必ず付けるか、`scripts/issue-triage.mjs` を使う。playbook の 232 行目にすでに `select(.pull_request == null)` の記載があるが、バッチの実行フローに組み込まれていないため見落とされやすい。次回以降は issue 一覧取得の第一手順として `scripts/issue-triage.mjs` を実行し、その出力を起点にすること（生 API は補完用）。
+- **想定リスク**: 権限緩和・既存制約の削除は無し。docs 更新のみ。
+
 ### 2026-11-06: issue #240 / #241 に agent:skipped マーカーを付与、open-prs-review-queue.md を更新
 
 - **日付**: 2026-11-06
@@ -408,6 +418,7 @@
 
 ## 更新履歴
 
+- 2026-11-07: open-prs-review-queue.md を 5 件（PR #268 自身を含む）に再生成。今回バッチの retrospective を追記（`issues?state=open` に PR が混入し真の issue 4 件の把握に余分なターンを要した経緯と、`scripts/issue-triage.mjs` を第一手順とするルールの再確認）。権限緩和は無し。
 - 2026-11-06: issue #240 / #241 に agent:skipped マーカーを付与（残作業: AWS 操作 / 実 API キー必須）。issue #197 に現状整理コメント追加（PR #243 マージ待ち）。docs/wiki/open-prs-review-queue.md と docs/action-required/CHECKLIST.md を再生成。権限緩和は無し。
 - 2026-09-25: chore PR 乱立問題（A-16）の恒久対策エントリを追記。ACTIONABLE=0 の実行のたびに新規 chore PR を量産するループに陥った根本原因と対策（プロンプトへの「chore PR 乱立防止」節追加・#218/#219 クローズ・playbook への A-16 追記）を記録。権限緩和は無し。
 - 2026-09-17: トリアージに**今回の着手可否サマリ（`ACTIONABLE=N`）**を追加。純関数 `computeActionability(results, prAudit)` を新設・エクスポートし（着手対象 = issue 側 `PR_FOLLOWUP` / `RECHECK` / `TRIAGE` + PR 監査側 `PR_CONFLICT` / `PR_FOLLOWUP` / `PR_BEHIND` / `PR_UNKNOWN`、`OPEN_PR` / `SKIP` / `PR_OK` は除外）、`renderMarkdown` に要約ブロック・`--json` に `actionability` フィールドを追加（既存 verdict ロジックと `results` / `openPrAudit` の形は不変・読み取り専用も維持）。純ロジック spec `tests/issue-triage-actionability.spec.mjs` を追加（実装を壊すと落ちることを確認）。あわせて今回の landscape（OPEN_PR 5 件・SKIP 3 件・オープン PR 監査 10 件すべて PR_OK＝`ACTIONABLE=0`）と、目視集計を単一判定へ置換した効率化を記録。権限緩和は無し。
